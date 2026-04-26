@@ -374,7 +374,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           chrome.storage.local.set({ _resizeImageUrl: cropped }, () => {
             chrome.windows.create({
               url: 'resize.html',
-              type: 'popup', width: 900, height: 720, focused: true,
+              type: 'popup', width: 1600, height: 1040, focused: true,
             });
           });
         });
@@ -762,8 +762,8 @@ function openCustomResizeWindow(imageUrl) {
     chrome.windows.create({
       url: 'resize.html',
       type: 'popup',
-      width: 900,
-      height: 720,
+      width: 1600,
+      height: 1040,
       focused: true,
     });
   });

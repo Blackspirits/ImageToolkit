@@ -1,11 +1,20 @@
 # 🖼️ ImageToolkit
 
+<p align="center">
+  <img src="icons/icon128.png" alt="ImageToolkit logo" width="128" height="128">
+</p>
+
 > **The browser extension to save, convert, resize, inspect, and optimize images — 100% local, zero tracking.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square&labelColor=313244)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-green?style=flat-square&labelColor=313244)](https://developer.chrome.com/docs/extensions/mv3/)
 
 ---
+
+
+## 🎨 Brand
+
+ImageToolkit uses an original blue-purple image/export/toolmark designed for the project. The mark combines an image frame, an export arrow, and a brush/tool cue to represent image discovery, editing, resizing, conversion, and export. The toolbar icon variant uses a tighter zoom and rounded-square treatment so it remains legible at very small sizes.
 
 ## ✨ Features
 

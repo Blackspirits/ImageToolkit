@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     cropper = new Cropper(cropImg, {
       viewMode: 1,
       dragMode: 'crop',
-      autoCropArea: 0.8,
+      autoCropArea: 0.68,
       responsive: true,
       restore: false,
       guides: true,

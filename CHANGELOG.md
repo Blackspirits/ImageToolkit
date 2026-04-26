@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+
+## [2.3.3] - 2026-04-26
+
+### Changed
+
+- Refined the toolbar icon with a more zoomed-in app-style variant for better visibility at small sizes.
+- Increased the rounded-corner treatment of the icon assets for a more modern browser-toolbar look.
+- Kept the crop/resize UI improvements from v2.3.2 unchanged.
+
+## [2.3.2] - 2026-04-26
+
+### Changed
+
+- Enlarged the custom crop/resize window again to provide a noticeably larger workspace and reduce the need for scrolling.
+- Increased the visible workspace margins around the cropper and tuned the initial crop size so controls are no longer glued to the edges.
+- Hid unnecessary horizontal overflow in the editor and improved sidebar fitting.
+- Refined transform buttons so the rotate icon is no longer clipped.
+- Regenerated the extension icon set with a tighter zoom so the mark is clearer at small browser-toolbar sizes.
+
+## [2.3.1] - 2026-04-26
+
+### Changed
+
+- Enlarged the custom crop/resize window for a larger image workspace and better control visibility.
+- Added extra workspace padding around the cropper so resize/rotate handles are no longer clipped or glued to the window edge.
+- Restored the previous ImageToolkit brush/logo concept and regenerated the icon set with a larger, more visible app-style mark.
+- Updated extension version to 2.3.1.
+
+## [2.3.0] - 2026-04-26
+
+### Added
+
+- Added the new original ImageToolkit logo and refreshed extension icon set.
+- Added source logo assets for GitHub, releases, and Chrome Web Store preparation.
+
+### Changed
+
+- Updated extension version to 2.3.0.
+- Updated README branding section.
+- Updated MIT license copyright year to 2026.
+
 ## [2.2.0] - 2026-04-26
 
 ### Added
