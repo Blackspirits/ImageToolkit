@@ -1,0 +1,488 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Guardar, Converter e Redimensionar Imagens",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Clica com o botão direito em qualquer imagem para guardar como PNG, JPG, WebP ou AVIF. Percorre as imagens da página, transfere em lote, redimensiona e copia para a área de transferência. 100% local, sem rastreio.",
+    "description": "Extension description for the store"
+  },
+  "cmdQuickSave": {
+    "message": "Guardar rápido no formato predefinido",
+    "description": "Keyboard shortcut description"
+  },
+  "menuParent": {
+    "message": "Guardar imagem como..."
+  },
+  "menuSaveAs": {
+    "message": "Guardar como $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Copiar para a área de transferência"
+  },
+  "menuResize1080": {
+    "message": "Guardar redimensionada (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Redimensionar..."
+  },
+  "popupSubtitle": {
+    "message": "Converter · Transferir · Redimensionar · Otimizar"
+  },
+  "tabImages": {
+    "message": "Imagens"
+  },
+  "tabSettings": {
+    "message": "Definições"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Colar URL da imagem aqui..."
+  },
+  "convertAndSave": {
+    "message": "Converter e Guardar"
+  },
+  "copyClipboard": {
+    "message": "Copiar"
+  },
+  "formatAdvisor": {
+    "message": "Assistente de formato"
+  },
+  "analyzing": {
+    "message": "A analisar imagem..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 A imagem tem transparência → PNG ou WebP recomendado"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Mais pequeno: {format} ({size})"
+  },
+  "scanning": {
+    "message": "A procurar..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ imagens",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "filterAll": {
+    "message": "Todos os tipos"
+  },
+  "filterOther": {
+    "message": "Outros"
+  },
+  "noImagesFound": {
+    "message": "Nenhuma imagem encontrada"
+  },
+  "tryAgain": {
+    "message": "Tentar novamente"
+  },
+  "selected": {
+    "message": "selecionadas"
+  },
+  "download": {
+    "message": "Transferir"
+  },
+  "originalFormat": {
+    "message": "Original"
+  },
+  "resize": {
+    "message": "Redimensionar"
+  },
+  "processing": {
+    "message": "A processar"
+  },
+  "preparingZip": {
+    "message": "A preparar ZIP..."
+  },
+  "creatingZip": {
+    "message": "A criar ZIP..."
+  },
+  "settingsTitle": {
+    "message": "Preferências"
+  },
+  "settingQuality": {
+    "message": "Qualidade predefinida"
+  },
+  "settingDefaultFormat": {
+    "message": "Formato predefinido"
+  },
+  "settingResizeBehavior": {
+    "message": "Comportamento do redimensionamento"
+  },
+  "settingCrop": {
+    "message": "Recorte Central"
+  },
+  "settingFit": {
+    "message": "Ajustar (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Perguntar onde guardar"
+  },
+  "settingShowNotif": {
+    "message": "Mostrar notificação ao guardar"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "themeAuto": {
+    "message": "Automático (Sistema)"
+  },
+  "themeLight": {
+    "message": "Claro"
+  },
+  "themeDark": {
+    "message": "Escuro"
+  },
+  "localProcessing": {
+    "message": "Processamento 100% local"
+  },
+  "noTracking": {
+    "message": "Nada é enviado para fora. Sem início de sessão. Sem rastreio."
+  },
+  "smaller": {
+    "message": "mais pequeno"
+  },
+  "notifSavedAs": {
+    "message": "Guardado como $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Imagem copiada para a área de transferência!"
+  },
+  "customResizeTitle": {
+    "message": "Recortar e redimensionar"
+  },
+  "formatLabel": {
+    "message": "Formato"
+  },
+  "saveImage": {
+    "message": "Guardar imagem"
+  },
+  "loadingImageInfo": {
+    "message": "A carregar informações da imagem..."
+  },
+  "errorNoImage": {
+    "message": "Nenhuma imagem encontrada"
+  },
+  "errorSaveFailed": {
+    "message": "Falha ao guardar"
+  },
+  "errorCopyFailed": {
+    "message": "Falha ao copiar"
+  },
+  "errorOnSaving": {
+    "message": "Erro ao guardar imagem"
+  },
+  "settingOpenSidePanel": {
+    "message": "Abrir como painel lateral"
+  },
+  "sortPixels": {
+    "message": "Tamanho em pixéis"
+  },
+  "sortPosition": {
+    "message": "Posição"
+  },
+  "filterWide": {
+    "message": "Largo"
+  },
+  "filterTall": {
+    "message": "Alto"
+  },
+  "filterSquare": {
+    "message": "Quadrado"
+  },
+  "filterByUrl": {
+    "message": "Filtrar por URL ou nome..."
+  },
+  "titleToggleTheme": {
+    "message": "Alternar tema"
+  },
+  "titleRefresh": {
+    "message": "Atualizar"
+  },
+  "titleSelectAll": {
+    "message": "Selecionar tudo"
+  },
+  "titleHideDupes": {
+    "message": "Esconder duplicadas"
+  },
+  "titleToggleLayout": {
+    "message": "Alternar layout"
+  },
+  "resizeAndSave": {
+    "message": "Redimensionar e guardar"
+  },
+  "placeholderWidth": {
+    "message": "L"
+  },
+  "placeholderHeight": {
+    "message": "A"
+  },
+  "titleOpenTab": {
+    "message": "Abrir num novo separador"
+  },
+  "titleDownloadAs": {
+    "message": "Transferir como..."
+  },
+  "labelType": {
+    "message": "Tipo:"
+  },
+  "labelSize": {
+    "message": "Tamanho:"
+  },
+  "labelLayout": {
+    "message": "Proporção:"
+  },
+  "labelDomain": {
+    "message": "Domínio:"
+  },
+  "donate": {
+    "message": "Doar"
+  },
+  "bgPreview": {
+    "message": "Pré-visualizar Fundo"
+  },
+  "bgTransparent": {
+    "message": "Transparente"
+  },
+  "cropArea": {
+    "message": "Área de Recorte"
+  },
+  "outputSize": {
+    "message": "Tamanho Final"
+  },
+  "presets": {
+    "message": "Predefinições"
+  },
+  "presetFree": {
+    "message": "Livre"
+  },
+  "applyDimensions": {
+    "message": "Aplicar"
+  },
+  "resetCrop": {
+    "message": "Repor"
+  },
+  "tabTools": {
+    "message": "Ferramentas"
+  },
+  "dropOrPaste": {
+    "message": "Arrasta uma imagem para aqui ou cola um URL abaixo"
+  },
+  "convertTitle": {
+    "message": "Converter"
+  },
+  "resizeTitle": {
+    "message": "Redimensionar"
+  },
+  "openCropTool": {
+    "message": "Abrir ferramenta de recorte"
+  },
+  "lockRatio": {
+    "message": "Manter proporção"
+  },
+  "titleCapture": {
+    "message": "Capturar área"
+  },
+  "titleKofi": {
+    "message": "Apoiar no Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Branco"
+  },
+  "bgGray": {
+    "message": "Cinza"
+  },
+  "bgBlack": {
+    "message": "Preto"
+  },
+  "titleLockRatio": {
+    "message": "Bloquear proporção"
+  },
+  "titleSearchSimilar": {
+    "message": "Pesquisar semelhante (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Atraso na captura"
+  },
+  "downloadOptions": {
+    "message": "Opções de Transferência"
+  },
+  "settingSubfolder": {
+    "message": "Subpasta"
+  },
+  "settingSubfolderHint": {
+    "message": "ex: imagens/"
+  },
+  "settingFilename": {
+    "message": "Nome do ficheiro"
+  },
+  "fnOriginal": {
+    "message": "Nome original"
+  },
+  "fnSystem": {
+    "message": "Nome do sistema"
+  },
+  "fnCustom": {
+    "message": "Prefixo personalizado"
+  },
+  "settingPrefix": {
+    "message": "Prefixo"
+  },
+  "settingConvertOnDl": {
+    "message": "Converter ao transferir"
+  },
+  "settingNone": {
+    "message": "Nenhum"
+  },
+  "settingZipDefault": {
+    "message": "ZIP por predefinição"
+  },
+  "newImagesDetected": {
+    "message": "novas imagens encontradas"
+  },
+  "rescan": {
+    "message": "Atualizar"
+  },
+  "settingLanguage": {
+    "message": "Idioma"
+  },
+  "filterAny": {
+    "message": "Todos"
+  },
+  "filterSmallLabel": {
+    "message": "Pequeno (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Médio (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Grande (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Extra Grande (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Pelo menos…"
+  },
+  "saveSizeSelection": {
+    "message": "Guardar seleção de tamanho"
+  },
+  "notifSaved": {
+    "message": "Guardado"
+  },
+  "presetAspectRatio": {
+    "message": "Proporção"
+  },
+  "presetCommon": {
+    "message": "Tamanhos Comuns"
+  },
+  "presetSocial": {
+    "message": "Redes Sociais"
+  },
+  "pOriginal": {
+    "message": "Original"
+  },
+  "pCustom": {
+    "message": "Manual"
+  },
+  "pPost": {
+    "message": "Post"
+  },
+  "pStory": {
+    "message": "Story"
+  },
+  "pCover": {
+    "message": "Capa"
+  },
+  "pThumb": {
+    "message": "Miniatura"
+  },
+  "pHeader": {
+    "message": "Header"
+  },
+  "pBanner": {
+    "message": "Banner"
+  },
+  "pPin": {
+    "message": "Pin"
+  },
+  "pPoster": {
+    "message": "Cartaz"
+  },
+  "pBackdrop": {
+    "message": "Fundo"
+  },
+  "pStill": {
+    "message": "Cena"
+  },
+  "pProfile": {
+    "message": "Perfil"
+  },
+  "pBg": {
+    "message": "Fundo"
+  },
+  "pEpHd": {
+    "message": "Ep HD"
+  },
+  "pEpSd": {
+    "message": "Ep SD"
+  },
+  "pActor": {
+    "message": "Ator"
+  },
+  "pIcon": {
+    "message": "Ícone"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Aplica-se apenas ao transferir no formato Original"
+  },
+  "settingSubfolderNote": {
+    "message": "Funciona melhor com 'Pedir localização' desativado"
+  },
+  "pTransform": {
+    "message": "Transformar"
+  },
+  "pRotate": {
+    "message": "Rodar"
+  },
+  "pHorizontal": {
+    "message": "Horizontal"
+  },
+  "pVertical": {
+    "message": "Vertical"
+  },
+  "pRotateLeft": {
+    "message": "Rodar para a esquerda"
+  },
+  "pFlipH": {
+    "message": "Inverter horizontalmente"
+  },
+  "pFlipV": {
+    "message": "Inverter verticalmente"
+  },
+  "captureHint": {
+    "message": "Desenhe um retângulo para capturar · ESC para cancelar"
+  }
+}

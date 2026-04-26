@@ -1,0 +1,487 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Lưu, Chuyển đổi và Thay đổi kích thước ảnh",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Nhấp chuột phải vào bất kỳ hình ảnh nào để lưu dưới dạng PNG, JPG, WebP hoặc AVIF. Duyệt hình ảnh trang, tải hàng loạt, thay đổi kích thước, sao chép. 100% cục bộ, không theo dõi."
+  },
+  "cmdQuickSave": {
+    "message": "Lưu nhanh ở định dạng mặc định"
+  },
+  "menuParent": {
+    "message": "Lưu ảnh dưới dạng..."
+  },
+  "menuSaveAs": {
+    "message": "Lưu dưới dạng $FORMAT$",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Sao chép vào clipboard"
+  },
+  "menuResize1080": {
+    "message": "Lưu đã thay đổi kích thước (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Thay đổi kích thước..."
+  },
+  "popupSubtitle": {
+    "message": "Chuyển đổi · Tải xuống · Thay đổi kích thước · Tối ưu"
+  },
+  "tabSettings": {
+    "message": "Cài đặt"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Dán URL ảnh vào đây..."
+  },
+  "convertAndSave": {
+    "message": "Chuyển đổi và lưu"
+  },
+  "copyClipboard": {
+    "message": "Sao chép"
+  },
+  "formatAdvisor": {
+    "message": "Tư vấn định dạng"
+  },
+  "analyzing": {
+    "message": "Đang phân tích ảnh..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 Ảnh có độ trong suốt → Khuyến nghị PNG hoặc WebP"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Nhỏ nhất: {format} ({size})"
+  },
+  "scanning": {
+    "message": "Đang tìm..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ hình ảnh",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "Đang xử lý"
+  },
+  "preparingZip": {
+    "message": "Đang chuẩn bị ZIP..."
+  },
+  "creatingZip": {
+    "message": "Đang tạo ZIP..."
+  },
+  "settingsTitle": {
+    "message": "Cài đặt"
+  },
+  "settingQuality": {
+    "message": "Chất lượng mặc định"
+  },
+  "settingDefaultFormat": {
+    "message": "Định dạng mặc định"
+  },
+  "settingResizeBehavior": {
+    "message": "Hành vi thay đổi kích thước"
+  },
+  "settingCrop": {
+    "message": "Cắt giữa"
+  },
+  "settingFit": {
+    "message": "Vừa (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Hỏi vị trí lưu"
+  },
+  "settingShowNotif": {
+    "message": "Hiển thị thông báo"
+  },
+  "settingTheme": {
+    "message": "Giao diện"
+  },
+  "themeAuto": {
+    "message": "Tự động (Hệ thống)"
+  },
+  "themeLight": {
+    "message": "Sáng"
+  },
+  "themeDark": {
+    "message": "Tối"
+  },
+  "localProcessing": {
+    "message": "100% xử lý cục bộ"
+  },
+  "noTracking": {
+    "message": "Không gửi dữ liệu. Không đăng nhập. Không theo dõi."
+  },
+  "smaller": {
+    "message": "nhỏ hơn"
+  },
+  "notifSavedAs": {
+    "message": "Đã lưu dưới dạng $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Đã sao chép ảnh vào clipboard!"
+  },
+  "customResizeTitle": {
+    "message": "Điều chỉnh ảnh"
+  },
+  "formatLabel": {
+    "message": "Định dạng"
+  },
+  "saveImage": {
+    "message": "Lưu ảnh"
+  },
+  "loadingImageInfo": {
+    "message": "Đang tải thông tin ảnh..."
+  },
+  "errorNoImage": {
+    "message": "Không tìm thấy ảnh"
+  },
+  "errorSaveFailed": {
+    "message": "Lưu thất bại"
+  },
+  "errorCopyFailed": {
+    "message": "Sao chép thất bại"
+  },
+  "errorOnSaving": {
+    "message": "Lỗi khi lưu ảnh"
+  },
+  "tabImages": {
+    "message": "Hình ảnh"
+  },
+  "filterAll": {
+    "message": "Tất cả loại"
+  },
+  "filterOther": {
+    "message": "Khác"
+  },
+  "noImagesFound": {
+    "message": "Không tìm thấy ảnh"
+  },
+  "tryAgain": {
+    "message": "Thử lại"
+  },
+  "selected": {
+    "message": "đã chọn"
+  },
+  "download": {
+    "message": "Tải xuống"
+  },
+  "originalFormat": {
+    "message": "Gốc"
+  },
+  "resize": {
+    "message": "Thay đổi kích thước"
+  },
+  "settingOpenSidePanel": {
+    "message": "Mở dạng bảng bên"
+  },
+  "sortPixels": {
+    "message": "Kích thước pixel"
+  },
+  "sortPosition": {
+    "message": "Vị trí"
+  },
+  "filterWide": {
+    "message": "Rộng"
+  },
+  "filterTall": {
+    "message": "Cao"
+  },
+  "filterSquare": {
+    "message": "Vuông"
+  },
+  "filterByUrl": {
+    "message": "Lọc theo URL hoặc tên..."
+  },
+  "titleToggleTheme": {
+    "message": "Chuyển đổi giao diện"
+  },
+  "titleRefresh": {
+    "message": "Làm mới"
+  },
+  "titleSelectAll": {
+    "message": "Chọn tất cả"
+  },
+  "titleHideDupes": {
+    "message": "Ẩn trùng lặp"
+  },
+  "titleToggleLayout": {
+    "message": "Đổi bố cục"
+  },
+  "resizeAndSave": {
+    "message": "Thay đổi kích thước và lưu"
+  },
+  "placeholderWidth": {
+    "message": "R"
+  },
+  "placeholderHeight": {
+    "message": "C"
+  },
+  "titleOpenTab": {
+    "message": "Mở trong tab mới"
+  },
+  "titleDownloadAs": {
+    "message": "Tải xuống dưới dạng..."
+  },
+  "donate": {
+    "message": "Ủng hộ"
+  },
+  "labelType": {
+    "message": "Loại:"
+  },
+  "labelSize": {
+    "message": "Kích thước:"
+  },
+  "labelLayout": {
+    "message": "Bố cục:"
+  },
+  "labelDomain": {
+    "message": "Tên miền:"
+  },
+  "bgPreview": {
+    "message": "Xem trước nền"
+  },
+  "bgTransparent": {
+    "message": "Trong suốt"
+  },
+  "cropArea": {
+    "message": "Vùng cắt"
+  },
+  "outputSize": {
+    "message": "Kích thước đầu ra"
+  },
+  "presets": {
+    "message": "Cài sẵn"
+  },
+  "presetFree": {
+    "message": "Tự do"
+  },
+  "applyDimensions": {
+    "message": "Áp dụng"
+  },
+  "resetCrop": {
+    "message": "Đặt lại"
+  },
+  "tabTools": {
+    "message": "Công cụ"
+  },
+  "dropOrPaste": {
+    "message": "Kéo thả ảnh vào đây hoặc dán URL bên dưới"
+  },
+  "convertTitle": {
+    "message": "Chuyển đổi"
+  },
+  "resizeTitle": {
+    "message": "Thay đổi kích thước"
+  },
+  "openCropTool": {
+    "message": "Mở công cụ cắt"
+  },
+  "lockRatio": {
+    "message": "Khóa tỷ lệ"
+  },
+  "titleCapture": {
+    "message": "Chụp vùng"
+  },
+  "titleKofi": {
+    "message": "Ủng hộ trên Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Trắng"
+  },
+  "bgGray": {
+    "message": "Xám"
+  },
+  "bgBlack": {
+    "message": "Đen"
+  },
+  "titleLockRatio": {
+    "message": "Khóa tỷ lệ"
+  },
+  "titleSearchSimilar": {
+    "message": "Tìm ảnh tương tự (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Độ trễ chụp"
+  },
+  "downloadOptions": {
+    "message": "Tùy chọn tải xuống"
+  },
+  "settingSubfolder": {
+    "message": "Thư mục con"
+  },
+  "settingSubfolderHint": {
+    "message": "vd: images/"
+  },
+  "settingFilename": {
+    "message": "Tên tệp"
+  },
+  "fnOriginal": {
+    "message": "Tên gốc"
+  },
+  "fnSystem": {
+    "message": "Tên hệ thống"
+  },
+  "fnCustom": {
+    "message": "Tiền tố tùy chỉnh"
+  },
+  "settingPrefix": {
+    "message": "Tiền tố"
+  },
+  "settingConvertOnDl": {
+    "message": "Chuyển đổi khi tải"
+  },
+  "settingNone": {
+    "message": "Không"
+  },
+  "settingZipDefault": {
+    "message": "ZIP mặc định"
+  },
+  "newImagesDetected": {
+    "message": "ảnh mới được tìm thấy"
+  },
+  "rescan": {
+    "message": "Làm mới"
+  },
+  "settingLanguage": {
+    "message": "Ngôn ngữ"
+  },
+  "filterAny": {
+    "message": "Tất cả"
+  },
+  "filterSmallLabel": {
+    "message": "Nhỏ (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Vừa (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Lớn (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Rất lớn (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Ít nhất…"
+  },
+  "saveSizeSelection": {
+    "message": "Lưu lựa chọn kích thước"
+  },
+  "notifSaved": {
+    "message": "Đã lưu"
+  },
+  "presetAspectRatio": {
+    "message": "Tỷ lệ khung hình"
+  },
+  "presetCommon": {
+    "message": "Kích thước phổ biến"
+  },
+  "presetSocial": {
+    "message": "Mạng xã hội"
+  },
+  "pOriginal": {
+    "message": "Gốc"
+  },
+  "pCustom": {
+    "message": "Tùy chỉnh"
+  },
+  "pPost": {
+    "message": "Bài đăng"
+  },
+  "pStory": {
+    "message": "Story"
+  },
+  "pCover": {
+    "message": "Bìa"
+  },
+  "pThumb": {
+    "message": "Nhỏ"
+  },
+  "pHeader": {
+    "message": "Header"
+  },
+  "pBanner": {
+    "message": "Banner"
+  },
+  "pPin": {
+    "message": "Pin"
+  },
+  "pPoster": {
+    "message": "Poster"
+  },
+  "pBackdrop": {
+    "message": "Nền"
+  },
+  "pStill": {
+    "message": "Still"
+  },
+  "pProfile": {
+    "message": "Hồ sơ"
+  },
+  "pBg": {
+    "message": "Nền"
+  },
+  "pEpHd": {
+    "message": "Tập HD"
+  },
+  "pEpSd": {
+    "message": "Tập SD"
+  },
+  "pActor": {
+    "message": "Diễn viên"
+  },
+  "pIcon": {
+    "message": "Biểu tượng"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Chỉ áp dụng khi tải xuống ở định dạng Gốc"
+  },
+  "settingSubfolderNote": {
+    "message": "Hoạt động tốt nhất khi tắt 'Hỏi vị trí lưu'"
+  },
+  "pTransform": {
+    "message": "Biến đổi"
+  },
+  "pRotate": {
+    "message": "Xoay"
+  },
+  "pHorizontal": {
+    "message": "Ngang"
+  },
+  "pVertical": {
+    "message": "Dọc"
+  },
+  "pRotateLeft": {
+    "message": "Xoay trái"
+  },
+  "pFlipH": {
+    "message": "Lật ngang"
+  },
+  "pFlipV": {
+    "message": "Lật dọc"
+  },
+  "captureHint": {
+    "message": "Vẽ hình chữ nhật để chụp · ESC để hủy"
+  }
+}

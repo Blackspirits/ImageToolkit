@@ -1,0 +1,487 @@
+{
+  "extName": {
+    "message": "ImageToolkit – 画像の保存・変換・リサイズ",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "画像を右クリックしてPNG、JPG、WebP、AVIFで保存。ページ画像の閲覧、一括ダウンロード、リサイズ、クリップボードにコピー。100%ローカル処理。"
+  },
+  "cmdQuickSave": {
+    "message": "デフォルト形式でクイック保存"
+  },
+  "menuParent": {
+    "message": "画像を保存..."
+  },
+  "menuSaveAs": {
+    "message": "$FORMAT$として保存",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "クリップボードにコピー"
+  },
+  "menuResize1080": {
+    "message": "リサイズして保存 (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "リサイズ..."
+  },
+  "popupSubtitle": {
+    "message": "変換 · ダウンロード · リサイズ · 最適化"
+  },
+  "tabSettings": {
+    "message": "設定"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "画像URLをここに貼り付け..."
+  },
+  "convertAndSave": {
+    "message": "変換して保存"
+  },
+  "copyClipboard": {
+    "message": "コピー"
+  },
+  "formatAdvisor": {
+    "message": "フォーマットアドバイザー"
+  },
+  "analyzing": {
+    "message": "画像を分析中..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 透過画像です → PNGまたはWebP推奨"
+  },
+  "advisorSmallest": {
+    "message": "🔍 最小: {format} ({size})"
+  },
+  "scanning": {
+    "message": "検索中..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$件の画像",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "処理中"
+  },
+  "preparingZip": {
+    "message": "ZIP準備中..."
+  },
+  "creatingZip": {
+    "message": "ZIP作成中..."
+  },
+  "settingsTitle": {
+    "message": "設定"
+  },
+  "settingQuality": {
+    "message": "デフォルト品質"
+  },
+  "settingDefaultFormat": {
+    "message": "デフォルト形式"
+  },
+  "settingResizeBehavior": {
+    "message": "リサイズ動作"
+  },
+  "settingCrop": {
+    "message": "中央クロップ"
+  },
+  "settingFit": {
+    "message": "フィット (レターボックス)"
+  },
+  "settingSaveAs": {
+    "message": "保存場所を確認"
+  },
+  "settingShowNotif": {
+    "message": "通知を表示"
+  },
+  "settingTheme": {
+    "message": "テーマ"
+  },
+  "themeAuto": {
+    "message": "自動 (システム)"
+  },
+  "themeLight": {
+    "message": "ライト"
+  },
+  "themeDark": {
+    "message": "ダーク"
+  },
+  "localProcessing": {
+    "message": "100%ローカル処理"
+  },
+  "noTracking": {
+    "message": "データ送信なし。ログインなし。追跡なし。"
+  },
+  "smaller": {
+    "message": "より小さい"
+  },
+  "notifSavedAs": {
+    "message": "$FORMAT$として保存しました",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "画像をクリップボードにコピーしました!"
+  },
+  "customResizeTitle": {
+    "message": "画像を調整"
+  },
+  "formatLabel": {
+    "message": "形式"
+  },
+  "saveImage": {
+    "message": "画像を保存"
+  },
+  "loadingImageInfo": {
+    "message": "画像情報を読み込み中..."
+  },
+  "errorNoImage": {
+    "message": "画像が見つかりません"
+  },
+  "errorSaveFailed": {
+    "message": "保存失敗"
+  },
+  "errorCopyFailed": {
+    "message": "コピー失敗"
+  },
+  "errorOnSaving": {
+    "message": "保存エラー"
+  },
+  "tabImages": {
+    "message": "画像"
+  },
+  "filterAll": {
+    "message": "すべての種類"
+  },
+  "filterOther": {
+    "message": "その他"
+  },
+  "noImagesFound": {
+    "message": "画像が見つかりません"
+  },
+  "tryAgain": {
+    "message": "再試行"
+  },
+  "selected": {
+    "message": "選択済み"
+  },
+  "download": {
+    "message": "ダウンロード"
+  },
+  "originalFormat": {
+    "message": "オリジナル"
+  },
+  "resize": {
+    "message": "リサイズ"
+  },
+  "settingOpenSidePanel": {
+    "message": "サイドパネルで開く"
+  },
+  "sortPixels": {
+    "message": "ピクセルサイズ"
+  },
+  "sortPosition": {
+    "message": "ページ位置"
+  },
+  "filterWide": {
+    "message": "横長"
+  },
+  "filterTall": {
+    "message": "縦長"
+  },
+  "filterSquare": {
+    "message": "正方形"
+  },
+  "filterByUrl": {
+    "message": "URLまたはファイル名で絞り込み..."
+  },
+  "titleToggleTheme": {
+    "message": "テーマ切替"
+  },
+  "titleRefresh": {
+    "message": "更新"
+  },
+  "titleSelectAll": {
+    "message": "すべて選択"
+  },
+  "titleHideDupes": {
+    "message": "重複を非表示"
+  },
+  "titleToggleLayout": {
+    "message": "レイアウト切替"
+  },
+  "resizeAndSave": {
+    "message": "リサイズして保存"
+  },
+  "placeholderWidth": {
+    "message": "幅"
+  },
+  "placeholderHeight": {
+    "message": "高"
+  },
+  "titleOpenTab": {
+    "message": "新しいタブで開く"
+  },
+  "titleDownloadAs": {
+    "message": "形式を選んで保存..."
+  },
+  "donate": {
+    "message": "寄付する"
+  },
+  "labelType": {
+    "message": "種類:"
+  },
+  "labelSize": {
+    "message": "サイズ:"
+  },
+  "labelLayout": {
+    "message": "レイアウト:"
+  },
+  "labelDomain": {
+    "message": "ドメイン:"
+  },
+  "bgPreview": {
+    "message": "背景プレビュー"
+  },
+  "bgTransparent": {
+    "message": "透明"
+  },
+  "cropArea": {
+    "message": "切り抜き範囲"
+  },
+  "outputSize": {
+    "message": "出力サイズ"
+  },
+  "presets": {
+    "message": "プリセット"
+  },
+  "presetFree": {
+    "message": "フリー"
+  },
+  "applyDimensions": {
+    "message": "適用"
+  },
+  "resetCrop": {
+    "message": "リセット"
+  },
+  "tabTools": {
+    "message": "ツール"
+  },
+  "dropOrPaste": {
+    "message": "画像をここにドロップするか、下にURLを貼り付け"
+  },
+  "convertTitle": {
+    "message": "変換"
+  },
+  "resizeTitle": {
+    "message": "リサイズ"
+  },
+  "openCropTool": {
+    "message": "クロップツールを開く"
+  },
+  "lockRatio": {
+    "message": "比率をロック"
+  },
+  "titleCapture": {
+    "message": "範囲をキャプチャ"
+  },
+  "titleKofi": {
+    "message": "Ko-fiで応援"
+  },
+  "bgWhite": {
+    "message": "白"
+  },
+  "bgGray": {
+    "message": "灰色"
+  },
+  "bgBlack": {
+    "message": "黒"
+  },
+  "titleLockRatio": {
+    "message": "比率をロック"
+  },
+  "titleSearchSimilar": {
+    "message": "類似画像を検索 (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "キャプチャ遅延"
+  },
+  "downloadOptions": {
+    "message": "ダウンロードオプション"
+  },
+  "settingSubfolder": {
+    "message": "サブフォルダ"
+  },
+  "settingSubfolderHint": {
+    "message": "例: images/"
+  },
+  "settingFilename": {
+    "message": "ファイル名"
+  },
+  "fnOriginal": {
+    "message": "元の名前"
+  },
+  "fnSystem": {
+    "message": "システム名"
+  },
+  "fnCustom": {
+    "message": "カスタムプレフィックス"
+  },
+  "settingPrefix": {
+    "message": "プレフィックス"
+  },
+  "settingConvertOnDl": {
+    "message": "ダウンロード時に変換"
+  },
+  "settingNone": {
+    "message": "なし"
+  },
+  "settingZipDefault": {
+    "message": "ZIPをデフォルトに"
+  },
+  "newImagesDetected": {
+    "message": "新しい画像が見つかりました"
+  },
+  "rescan": {
+    "message": "更新"
+  },
+  "settingLanguage": {
+    "message": "言語"
+  },
+  "filterAny": {
+    "message": "すべて"
+  },
+  "filterSmallLabel": {
+    "message": "小 (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "中 (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "大 (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "特大 (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "最小…"
+  },
+  "saveSizeSelection": {
+    "message": "サイズ選択を保存"
+  },
+  "notifSaved": {
+    "message": "保存しました"
+  },
+  "presetAspectRatio": {
+    "message": "アスペクト比"
+  },
+  "presetCommon": {
+    "message": "一般的なサイズ"
+  },
+  "presetSocial": {
+    "message": "ソーシャルメディア"
+  },
+  "pOriginal": {
+    "message": "元画像"
+  },
+  "pCustom": {
+    "message": "カスタム"
+  },
+  "pPost": {
+    "message": "投稿"
+  },
+  "pStory": {
+    "message": "ストーリー"
+  },
+  "pCover": {
+    "message": "カバー"
+  },
+  "pThumb": {
+    "message": "サムネ"
+  },
+  "pHeader": {
+    "message": "ヘッダー"
+  },
+  "pBanner": {
+    "message": "バナー"
+  },
+  "pPin": {
+    "message": "ピン"
+  },
+  "pPoster": {
+    "message": "ポスター"
+  },
+  "pBackdrop": {
+    "message": "背景"
+  },
+  "pStill": {
+    "message": "スチル"
+  },
+  "pProfile": {
+    "message": "プロフ"
+  },
+  "pBg": {
+    "message": "背景"
+  },
+  "pEpHd": {
+    "message": "Ep HD"
+  },
+  "pEpSd": {
+    "message": "Ep SD"
+  },
+  "pActor": {
+    "message": "俳優"
+  },
+  "pIcon": {
+    "message": "アイコン"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "オリジナル形式でダウンロード時のみ適用"
+  },
+  "settingSubfolderNote": {
+    "message": "「保存場所を確認」を無効にすると最適に動作します"
+  },
+  "pTransform": {
+    "message": "変形"
+  },
+  "pRotate": {
+    "message": "回転"
+  },
+  "pHorizontal": {
+    "message": "水平"
+  },
+  "pVertical": {
+    "message": "垂直"
+  },
+  "pRotateLeft": {
+    "message": "左に回転"
+  },
+  "pFlipH": {
+    "message": "水平反転"
+  },
+  "pFlipV": {
+    "message": "垂直反転"
+  },
+  "captureHint": {
+    "message": "矩形を描いてキャプチャ · ESCでキャンセル"
+  }
+}

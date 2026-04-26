@@ -1,0 +1,487 @@
+{
+  "extName": {
+    "message": "ImageToolkit – 이미지 저장, 변환 및 크기 조정",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "이미지를 마우스 오른쪽 클릭하여 PNG, JPG, WebP, AVIF로 저장하세요. 페이지 이미지 탐색, 일괄 다운로드, 크기 조정, 클립보드 복사. 100% 로컬, 추적 없음."
+  },
+  "cmdQuickSave": {
+    "message": "기본 형식으로 빠른 저장"
+  },
+  "menuParent": {
+    "message": "이미지 저장..."
+  },
+  "menuSaveAs": {
+    "message": "$FORMAT$(으)로 저장",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "클립보드에 복사"
+  },
+  "menuResize1080": {
+    "message": "크기 조정 후 저장 (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "크기 조정..."
+  },
+  "popupSubtitle": {
+    "message": "변환 · 다운로드 · 크기 조정 · 최적화"
+  },
+  "tabSettings": {
+    "message": "설정"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "이미지 URL을 여기에 붙여넣기..."
+  },
+  "convertAndSave": {
+    "message": "변환 및 저장"
+  },
+  "copyClipboard": {
+    "message": "복사"
+  },
+  "formatAdvisor": {
+    "message": "형식 어드바이저"
+  },
+  "analyzing": {
+    "message": "이미지 분석 중..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 투명도가 있는 이미지 → PNG 또는 WebP 권장"
+  },
+  "advisorSmallest": {
+    "message": "🔍 최소: {format} ({size})"
+  },
+  "scanning": {
+    "message": "검색 중..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$개 이미지",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "처리 중"
+  },
+  "preparingZip": {
+    "message": "ZIP 준비 중..."
+  },
+  "creatingZip": {
+    "message": "ZIP 생성 중..."
+  },
+  "settingsTitle": {
+    "message": "설정"
+  },
+  "settingQuality": {
+    "message": "기본 품질"
+  },
+  "settingDefaultFormat": {
+    "message": "기본 형식"
+  },
+  "settingResizeBehavior": {
+    "message": "크기 조정 동작"
+  },
+  "settingCrop": {
+    "message": "중앙 자르기"
+  },
+  "settingFit": {
+    "message": "맞춤 (레터박스)"
+  },
+  "settingSaveAs": {
+    "message": "저장 위치 확인"
+  },
+  "settingShowNotif": {
+    "message": "알림 표시"
+  },
+  "settingTheme": {
+    "message": "테마"
+  },
+  "themeAuto": {
+    "message": "자동 (시스템)"
+  },
+  "themeLight": {
+    "message": "라이트"
+  },
+  "themeDark": {
+    "message": "다크"
+  },
+  "localProcessing": {
+    "message": "100% 로컬 처리"
+  },
+  "noTracking": {
+    "message": "데이터 전송 없음. 로그인 없음. 추적 없음."
+  },
+  "smaller": {
+    "message": "더 작은"
+  },
+  "notifSavedAs": {
+    "message": "$FORMAT$로 저장됨",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "이미지가 클립보드에 복사되었습니다!"
+  },
+  "customResizeTitle": {
+    "message": "이미지 조정"
+  },
+  "formatLabel": {
+    "message": "형식"
+  },
+  "saveImage": {
+    "message": "이미지 저장"
+  },
+  "loadingImageInfo": {
+    "message": "이미지 정보 로드 중..."
+  },
+  "errorNoImage": {
+    "message": "이미지를 찾을 수 없음"
+  },
+  "errorSaveFailed": {
+    "message": "저장 실패"
+  },
+  "errorCopyFailed": {
+    "message": "복사 실패"
+  },
+  "errorOnSaving": {
+    "message": "저장 중 오류"
+  },
+  "tabImages": {
+    "message": "이미지"
+  },
+  "filterAll": {
+    "message": "모든 유형"
+  },
+  "filterOther": {
+    "message": "기타"
+  },
+  "noImagesFound": {
+    "message": "이미지를 찾을 수 없음"
+  },
+  "tryAgain": {
+    "message": "다시 시도"
+  },
+  "selected": {
+    "message": "선택됨"
+  },
+  "download": {
+    "message": "다운로드"
+  },
+  "originalFormat": {
+    "message": "원본"
+  },
+  "resize": {
+    "message": "크기 조정"
+  },
+  "settingOpenSidePanel": {
+    "message": "사이드 패널로 열기"
+  },
+  "sortPixels": {
+    "message": "픽셀 크기"
+  },
+  "sortPosition": {
+    "message": "페이지 위치"
+  },
+  "filterWide": {
+    "message": "가로"
+  },
+  "filterTall": {
+    "message": "세로"
+  },
+  "filterSquare": {
+    "message": "정사각형"
+  },
+  "filterByUrl": {
+    "message": "URL 또는 파일명으로 필터..."
+  },
+  "titleToggleTheme": {
+    "message": "테마 전환"
+  },
+  "titleRefresh": {
+    "message": "새로고침"
+  },
+  "titleSelectAll": {
+    "message": "모두 선택"
+  },
+  "titleHideDupes": {
+    "message": "중복 숨기기"
+  },
+  "titleToggleLayout": {
+    "message": "레이아웃 전환"
+  },
+  "resizeAndSave": {
+    "message": "크기 조정 및 저장"
+  },
+  "placeholderWidth": {
+    "message": "너비"
+  },
+  "placeholderHeight": {
+    "message": "높이"
+  },
+  "titleOpenTab": {
+    "message": "새 탭에서 열기"
+  },
+  "titleDownloadAs": {
+    "message": "다른 형식으로 저장..."
+  },
+  "donate": {
+    "message": "기부"
+  },
+  "labelType": {
+    "message": "유형:"
+  },
+  "labelSize": {
+    "message": "크기:"
+  },
+  "labelLayout": {
+    "message": "레이아웃:"
+  },
+  "labelDomain": {
+    "message": "도메인:"
+  },
+  "bgPreview": {
+    "message": "배경 미리보기"
+  },
+  "bgTransparent": {
+    "message": "투명"
+  },
+  "cropArea": {
+    "message": "자르기 영역"
+  },
+  "outputSize": {
+    "message": "출력 크기"
+  },
+  "presets": {
+    "message": "프리셋"
+  },
+  "presetFree": {
+    "message": "자유"
+  },
+  "applyDimensions": {
+    "message": "적용"
+  },
+  "resetCrop": {
+    "message": "초기화"
+  },
+  "tabTools": {
+    "message": "도구"
+  },
+  "dropOrPaste": {
+    "message": "이미지를 여기에 놓거나 아래에 URL을 붙여넣기"
+  },
+  "convertTitle": {
+    "message": "변환"
+  },
+  "resizeTitle": {
+    "message": "크기 조정"
+  },
+  "openCropTool": {
+    "message": "자르기 도구 열기"
+  },
+  "lockRatio": {
+    "message": "비율 잠금"
+  },
+  "titleCapture": {
+    "message": "영역 캡처"
+  },
+  "titleKofi": {
+    "message": "Ko-fi에서 후원"
+  },
+  "bgWhite": {
+    "message": "흰색"
+  },
+  "bgGray": {
+    "message": "회색"
+  },
+  "bgBlack": {
+    "message": "검정"
+  },
+  "titleLockRatio": {
+    "message": "비율 잠금"
+  },
+  "titleSearchSimilar": {
+    "message": "유사 이미지 검색 (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "캡처 지연"
+  },
+  "downloadOptions": {
+    "message": "다운로드 옵션"
+  },
+  "settingSubfolder": {
+    "message": "하위 폴더"
+  },
+  "settingSubfolderHint": {
+    "message": "예: images/"
+  },
+  "settingFilename": {
+    "message": "파일 이름"
+  },
+  "fnOriginal": {
+    "message": "원본 이름"
+  },
+  "fnSystem": {
+    "message": "시스템 이름"
+  },
+  "fnCustom": {
+    "message": "사용자 접두사"
+  },
+  "settingPrefix": {
+    "message": "접두사"
+  },
+  "settingConvertOnDl": {
+    "message": "다운로드 시 변환"
+  },
+  "settingNone": {
+    "message": "없음"
+  },
+  "settingZipDefault": {
+    "message": "ZIP 기본값"
+  },
+  "newImagesDetected": {
+    "message": "새 이미지 발견"
+  },
+  "rescan": {
+    "message": "새로고침"
+  },
+  "settingLanguage": {
+    "message": "언어"
+  },
+  "filterAny": {
+    "message": "전체"
+  },
+  "filterSmallLabel": {
+    "message": "소 (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "중 (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "대 (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "초대형 (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "최소…"
+  },
+  "saveSizeSelection": {
+    "message": "크기 선택 저장"
+  },
+  "notifSaved": {
+    "message": "저장됨"
+  },
+  "presetAspectRatio": {
+    "message": "화면 비율"
+  },
+  "presetCommon": {
+    "message": "일반 크기"
+  },
+  "presetSocial": {
+    "message": "소셜 미디어"
+  },
+  "pOriginal": {
+    "message": "원본"
+  },
+  "pCustom": {
+    "message": "사용자"
+  },
+  "pPost": {
+    "message": "게시물"
+  },
+  "pStory": {
+    "message": "스토리"
+  },
+  "pCover": {
+    "message": "커버"
+  },
+  "pThumb": {
+    "message": "썸네일"
+  },
+  "pHeader": {
+    "message": "헤더"
+  },
+  "pBanner": {
+    "message": "배너"
+  },
+  "pPin": {
+    "message": "핀"
+  },
+  "pPoster": {
+    "message": "포스터"
+  },
+  "pBackdrop": {
+    "message": "배경"
+  },
+  "pStill": {
+    "message": "스틸"
+  },
+  "pProfile": {
+    "message": "프로필"
+  },
+  "pBg": {
+    "message": "배경"
+  },
+  "pEpHd": {
+    "message": "Ep HD"
+  },
+  "pEpSd": {
+    "message": "Ep SD"
+  },
+  "pActor": {
+    "message": "배우"
+  },
+  "pIcon": {
+    "message": "아이콘"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "원본 형식으로 다운로드할 때만 적용됩니다"
+  },
+  "settingSubfolderNote": {
+    "message": "'저장 위치 확인'을 비활성화하면 가장 잘 작동합니다"
+  },
+  "pTransform": {
+    "message": "변환"
+  },
+  "pRotate": {
+    "message": "회전"
+  },
+  "pHorizontal": {
+    "message": "수평"
+  },
+  "pVertical": {
+    "message": "수직"
+  },
+  "pRotateLeft": {
+    "message": "왼쪽으로 회전"
+  },
+  "pFlipH": {
+    "message": "수평 뒤집기"
+  },
+  "pFlipV": {
+    "message": "수직 뒤집기"
+  },
+  "captureHint": {
+    "message": "캡처할 영역을 드래그 · ESC로 취소"
+  }
+}

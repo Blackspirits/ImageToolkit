@@ -1,0 +1,489 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Guardar, Convertir y Redimensionar Imágenes",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Haz clic derecho en cualquier imagen para guardarla como PNG, JPG, WebP o AVIF. Explora imágenes de la página, descarga por lotes, redimensionar, copiar. 100 % local, sin seguimiento."
+  },
+  "cmdQuickSave": {
+    "message": "Guardar rápido en formato predeterminado"
+  },
+  "menuParent": {
+    "message": "Guardar imagen como...",
+    "description": "Parent context menu title"
+  },
+  "menuSaveAs": {
+    "message": "Guardar como $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Copiar al portapapeles",
+    "description": "Context menu copy"
+  },
+  "menuResize1080": {
+    "message": "Guardar redimensionada (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Redimensionar personalizado...",
+    "description": "Context menu custom resize"
+  },
+  "popupSubtitle": {
+    "message": "Convertir · Descargar · Redimensionar · Optimizar"
+  },
+  "tabSettings": {
+    "message": "Ajustes"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Pegar URL de la imagen aquí..."
+  },
+  "convertAndSave": {
+    "message": "Convertir y guardar"
+  },
+  "copyClipboard": {
+    "message": "Copiar"
+  },
+  "formatAdvisor": {
+    "message": "Asesor de formato"
+  },
+  "analyzing": {
+    "message": "Analizando imagen..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 La imagen tiene transparencia → PNG o WebP recomendado"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Más pequeño: {format} ({size})"
+  },
+  "scanning": {
+    "message": "Buscando..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ imágenes",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "Procesando"
+  },
+  "preparingZip": {
+    "message": "Preparando ZIP..."
+  },
+  "creatingZip": {
+    "message": "Creando ZIP..."
+  },
+  "settingsTitle": {
+    "message": "Preferencias"
+  },
+  "settingQuality": {
+    "message": "Calidad predeterminada"
+  },
+  "settingDefaultFormat": {
+    "message": "Formato predeterminado"
+  },
+  "settingResizeBehavior": {
+    "message": "Comportamiento de redimensionado"
+  },
+  "settingCrop": {
+    "message": "Recorte central"
+  },
+  "settingFit": {
+    "message": "Ajustar (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Preguntar ubicación"
+  },
+  "settingShowNotif": {
+    "message": "Mostrar notificación"
+  },
+  "settingTheme": {
+    "message": "Tema"
+  },
+  "themeAuto": {
+    "message": "Auto (Sistema)"
+  },
+  "themeLight": {
+    "message": "Claro"
+  },
+  "themeDark": {
+    "message": "Oscuro"
+  },
+  "localProcessing": {
+    "message": "100% procesamiento local"
+  },
+  "noTracking": {
+    "message": "Sin datos enviados. Sin inicio de sesión. Sin seguimiento."
+  },
+  "smaller": {
+    "message": "más pequeño"
+  },
+  "notifSavedAs": {
+    "message": "Guardado como $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Imagen copiada al portapapeles!"
+  },
+  "customResizeTitle": {
+    "message": "Redimensionar"
+  },
+  "formatLabel": {
+    "message": "Formato"
+  },
+  "saveImage": {
+    "message": "Guardar imagen"
+  },
+  "loadingImageInfo": {
+    "message": "Cargando información..."
+  },
+  "errorNoImage": {
+    "message": "Ninguna imagen encontrada"
+  },
+  "errorSaveFailed": {
+    "message": "Error al guardar"
+  },
+  "errorCopyFailed": {
+    "message": "Error al copiar"
+  },
+  "errorOnSaving": {
+    "message": "Error al guardar imagen"
+  },
+  "tabImages": {
+    "message": "Imágenes"
+  },
+  "filterAll": {
+    "message": "Todos los tipos"
+  },
+  "filterOther": {
+    "message": "Otros"
+  },
+  "noImagesFound": {
+    "message": "No se encontraron imágenes"
+  },
+  "tryAgain": {
+    "message": "Reintentar"
+  },
+  "selected": {
+    "message": "seleccionadas"
+  },
+  "download": {
+    "message": "Descargar"
+  },
+  "originalFormat": {
+    "message": "Original"
+  },
+  "resize": {
+    "message": "Redimensionar"
+  },
+  "settingOpenSidePanel": {
+    "message": "Abrir como panel lateral"
+  },
+  "sortPixels": {
+    "message": "Tamaño en píxeles"
+  },
+  "sortPosition": {
+    "message": "Posición"
+  },
+  "filterWide": {
+    "message": "Ancho"
+  },
+  "filterTall": {
+    "message": "Alto"
+  },
+  "filterSquare": {
+    "message": "Cuadrado"
+  },
+  "filterByUrl": {
+    "message": "Filtrar por URL o nombre..."
+  },
+  "titleToggleTheme": {
+    "message": "Cambiar tema"
+  },
+  "titleRefresh": {
+    "message": "Actualizar"
+  },
+  "titleSelectAll": {
+    "message": "Seleccionar todo"
+  },
+  "titleHideDupes": {
+    "message": "Ocultar duplicados"
+  },
+  "titleToggleLayout": {
+    "message": "Cambiar diseño"
+  },
+  "resizeAndSave": {
+    "message": "Redimensionar y guardar"
+  },
+  "placeholderWidth": {
+    "message": "An"
+  },
+  "placeholderHeight": {
+    "message": "Al"
+  },
+  "titleOpenTab": {
+    "message": "Abrir en pestaña nueva"
+  },
+  "titleDownloadAs": {
+    "message": "Descargar como..."
+  },
+  "donate": {
+    "message": "Donar"
+  },
+  "labelType": {
+    "message": "Tipo:"
+  },
+  "labelSize": {
+    "message": "Tamaño:"
+  },
+  "labelLayout": {
+    "message": "Diseño:"
+  },
+  "labelDomain": {
+    "message": "Dominio:"
+  },
+  "bgPreview": {
+    "message": "Vista previa del fondo"
+  },
+  "bgTransparent": {
+    "message": "Transparente"
+  },
+  "cropArea": {
+    "message": "Área de recorte"
+  },
+  "outputSize": {
+    "message": "Tamaño final"
+  },
+  "presets": {
+    "message": "Predefinidos"
+  },
+  "presetFree": {
+    "message": "Libre"
+  },
+  "applyDimensions": {
+    "message": "Aplicar"
+  },
+  "resetCrop": {
+    "message": "Restablecer"
+  },
+  "tabTools": {
+    "message": "Herramientas"
+  },
+  "dropOrPaste": {
+    "message": "Arrastra una imagen aquí o pega una URL abajo"
+  },
+  "convertTitle": {
+    "message": "Convertir"
+  },
+  "resizeTitle": {
+    "message": "Redimensionar"
+  },
+  "openCropTool": {
+    "message": "Abrir herramienta de recorte"
+  },
+  "lockRatio": {
+    "message": "Mantener proporción"
+  },
+  "titleCapture": {
+    "message": "Capturar área"
+  },
+  "titleKofi": {
+    "message": "Apoyar en Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Blanco"
+  },
+  "bgGray": {
+    "message": "Gris"
+  },
+  "bgBlack": {
+    "message": "Negro"
+  },
+  "titleLockRatio": {
+    "message": "Bloquear proporción"
+  },
+  "titleSearchSimilar": {
+    "message": "Buscar similar (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Retraso de captura"
+  },
+  "downloadOptions": {
+    "message": "Opciones de descarga"
+  },
+  "settingSubfolder": {
+    "message": "Subcarpeta"
+  },
+  "settingSubfolderHint": {
+    "message": "ej: imágenes/"
+  },
+  "settingFilename": {
+    "message": "Nombre del archivo"
+  },
+  "fnOriginal": {
+    "message": "Nombre original"
+  },
+  "fnSystem": {
+    "message": "Nombre del sistema"
+  },
+  "fnCustom": {
+    "message": "Prefijo personalizado"
+  },
+  "settingPrefix": {
+    "message": "Prefijo"
+  },
+  "settingConvertOnDl": {
+    "message": "Convertir al descargar"
+  },
+  "settingNone": {
+    "message": "Ninguno"
+  },
+  "settingZipDefault": {
+    "message": "ZIP por defecto"
+  },
+  "newImagesDetected": {
+    "message": "nuevas imágenes encontradas"
+  },
+  "rescan": {
+    "message": "Actualizar"
+  },
+  "settingLanguage": {
+    "message": "Idioma"
+  },
+  "filterAny": {
+    "message": "Todos"
+  },
+  "filterSmallLabel": {
+    "message": "Pequeño (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Mediano (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Grande (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Extra grande (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Al menos…"
+  },
+  "saveSizeSelection": {
+    "message": "Guardar selección de tamaño"
+  },
+  "notifSaved": {
+    "message": "Guardado"
+  },
+  "presetAspectRatio": {
+    "message": "Proporción"
+  },
+  "presetCommon": {
+    "message": "Tamaños comunes"
+  },
+  "presetSocial": {
+    "message": "Redes sociales"
+  },
+  "pOriginal": {
+    "message": "Original"
+  },
+  "pCustom": {
+    "message": "Manual"
+  },
+  "pPost": {
+    "message": "Post"
+  },
+  "pStory": {
+    "message": "Story"
+  },
+  "pCover": {
+    "message": "Portada"
+  },
+  "pThumb": {
+    "message": "Miniatura"
+  },
+  "pHeader": {
+    "message": "Header"
+  },
+  "pBanner": {
+    "message": "Banner"
+  },
+  "pPin": {
+    "message": "Pin"
+  },
+  "pPoster": {
+    "message": "Póster"
+  },
+  "pBackdrop": {
+    "message": "Fondo"
+  },
+  "pStill": {
+    "message": "Still"
+  },
+  "pProfile": {
+    "message": "Perfil"
+  },
+  "pBg": {
+    "message": "Fondo"
+  },
+  "pEpHd": {
+    "message": "Ep HD"
+  },
+  "pEpSd": {
+    "message": "Ep SD"
+  },
+  "pActor": {
+    "message": "Actor"
+  },
+  "pIcon": {
+    "message": "Icono"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Solo se aplica al descargar en formato Original"
+  },
+  "settingSubfolderNote": {
+    "message": "Funciona mejor con 'Pedir ubicación' desactivado"
+  },
+  "pTransform": {
+    "message": "Transformar"
+  },
+  "pRotate": {
+    "message": "Rotar"
+  },
+  "pHorizontal": {
+    "message": "Horizontal"
+  },
+  "pVertical": {
+    "message": "Vertical"
+  },
+  "pRotateLeft": {
+    "message": "Rotar a la izquierda"
+  },
+  "pFlipH": {
+    "message": "Voltear horizontalmente"
+  },
+  "pFlipV": {
+    "message": "Voltear verticalmente"
+  },
+  "captureHint": {
+    "message": "Dibuja un rectángulo para capturar · ESC para cancelar"
+  }
+}

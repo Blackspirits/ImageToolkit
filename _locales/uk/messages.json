@@ -1,0 +1,488 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Збереження, конвертація та зміна розміру зображень",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Натисніть правою кнопкою миші на зображення, щоб зберегти як PNG, JPG, WebP або AVIF. Перегляд зображень сторінки, пакетне завантаження, зміна розміру, копіювання. 100% локально, без відстеження."
+  },
+  "cmdQuickSave": {
+    "message": "Швидке збереження у форматі за замовчуванням"
+  },
+  "menuParent": {
+    "message": "Зберегти зображення як..."
+  },
+  "menuSaveAs": {
+    "message": "Зберегти як $FORMAT$",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Копіювати в буфер обміну"
+  },
+  "menuResize1080": {
+    "message": "Зберегти зі зміною розміру (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Змінити розмір..."
+  },
+  "popupSubtitle": {
+    "message": "Конвертація · Зміна розміру · Оптимізація",
+    "description": "Popup subtitle"
+  },
+  "tabSettings": {
+    "message": "Налаштування"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Вставте URL зображення..."
+  },
+  "convertAndSave": {
+    "message": "Конвертувати і зберегти"
+  },
+  "copyClipboard": {
+    "message": "Копіювати"
+  },
+  "formatAdvisor": {
+    "message": "Порадник форматів"
+  },
+  "analyzing": {
+    "message": "Аналіз зображення..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 Зображення з прозорістю → рекомендується PNG або WebP"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Найменший: {format} ({size})"
+  },
+  "scanning": {
+    "message": "Пошук..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ зображень",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "Обробка"
+  },
+  "preparingZip": {
+    "message": "Підготовка ZIP..."
+  },
+  "creatingZip": {
+    "message": "Створення ZIP..."
+  },
+  "settingsTitle": {
+    "message": "Налаштування"
+  },
+  "settingQuality": {
+    "message": "Якість за замовчуванням"
+  },
+  "settingDefaultFormat": {
+    "message": "Формат за замовчуванням"
+  },
+  "settingResizeBehavior": {
+    "message": "Поведінка при зміні розміру"
+  },
+  "settingCrop": {
+    "message": "Обрізка по центру"
+  },
+  "settingFit": {
+    "message": "Вписати (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Запитувати розташування"
+  },
+  "settingShowNotif": {
+    "message": "Показувати сповіщення"
+  },
+  "settingTheme": {
+    "message": "Theme"
+  },
+  "themeAuto": {
+    "message": "Авто (Система)"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "localProcessing": {
+    "message": "100% локальна обробка"
+  },
+  "noTracking": {
+    "message": "Жодних даних не надсилається. Без входу. Без відстеження."
+  },
+  "smaller": {
+    "message": "менший"
+  },
+  "notifSavedAs": {
+    "message": "Збережено як $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Зображення скопійовано в буфер обміну!"
+  },
+  "customResizeTitle": {
+    "message": "Налаштування зображення"
+  },
+  "formatLabel": {
+    "message": "Формат"
+  },
+  "saveImage": {
+    "message": "Зберегти зображення"
+  },
+  "loadingImageInfo": {
+    "message": "Завантаження інформації про зображення..."
+  },
+  "errorNoImage": {
+    "message": "Зображення не знайдено"
+  },
+  "errorSaveFailed": {
+    "message": "Помилка збереження"
+  },
+  "errorCopyFailed": {
+    "message": "Помилка копіювання"
+  },
+  "errorOnSaving": {
+    "message": "Помилка при збереженні"
+  },
+  "tabImages": {
+    "message": "Зображення"
+  },
+  "filterAll": {
+    "message": "Усі типи"
+  },
+  "filterOther": {
+    "message": "Інше"
+  },
+  "noImagesFound": {
+    "message": "Зображення не знайдено"
+  },
+  "tryAgain": {
+    "message": "Спробувати знову"
+  },
+  "selected": {
+    "message": "обрано"
+  },
+  "download": {
+    "message": "Завантажити"
+  },
+  "originalFormat": {
+    "message": "Оригінал"
+  },
+  "resize": {
+    "message": "Змінити розмір"
+  },
+  "settingOpenSidePanel": {
+    "message": "Відкрити як бічну панель"
+  },
+  "sortPixels": {
+    "message": "Розмір у пікселях"
+  },
+  "sortPosition": {
+    "message": "Позиція"
+  },
+  "filterWide": {
+    "message": "Широкі"
+  },
+  "filterTall": {
+    "message": "Високі"
+  },
+  "filterSquare": {
+    "message": "Квадратні"
+  },
+  "filterByUrl": {
+    "message": "Фільтр за URL або ім'ям..."
+  },
+  "titleToggleTheme": {
+    "message": "Змінити тему"
+  },
+  "titleRefresh": {
+    "message": "Оновити"
+  },
+  "titleSelectAll": {
+    "message": "Обрати все"
+  },
+  "titleHideDupes": {
+    "message": "Сховати дублікати"
+  },
+  "titleToggleLayout": {
+    "message": "Змінити макет"
+  },
+  "resizeAndSave": {
+    "message": "Змінити розмір і зберегти"
+  },
+  "placeholderWidth": {
+    "message": "Ш"
+  },
+  "placeholderHeight": {
+    "message": "В"
+  },
+  "titleOpenTab": {
+    "message": "Відкрити в новій вкладці"
+  },
+  "titleDownloadAs": {
+    "message": "Завантажити як..."
+  },
+  "donate": {
+    "message": "Підтримати"
+  },
+  "labelType": {
+    "message": "Тип:"
+  },
+  "labelSize": {
+    "message": "Розмір:"
+  },
+  "labelLayout": {
+    "message": "Макет:"
+  },
+  "labelDomain": {
+    "message": "Домен:"
+  },
+  "bgPreview": {
+    "message": "Попередній перегляд фону"
+  },
+  "bgTransparent": {
+    "message": "Прозорий"
+  },
+  "cropArea": {
+    "message": "Область обрізки"
+  },
+  "outputSize": {
+    "message": "Розмір виводу"
+  },
+  "presets": {
+    "message": "Пресети"
+  },
+  "presetFree": {
+    "message": "Вільний"
+  },
+  "applyDimensions": {
+    "message": "Застосувати"
+  },
+  "resetCrop": {
+    "message": "Скинути"
+  },
+  "tabTools": {
+    "message": "Інструменти"
+  },
+  "dropOrPaste": {
+    "message": "Перетягніть зображення сюди або вставте URL нижче"
+  },
+  "convertTitle": {
+    "message": "Конвертувати"
+  },
+  "resizeTitle": {
+    "message": "Змінити розмір"
+  },
+  "openCropTool": {
+    "message": "Відкрити інструмент обрізки"
+  },
+  "lockRatio": {
+    "message": "Зафіксувати"
+  },
+  "titleCapture": {
+    "message": "Захопити область"
+  },
+  "titleKofi": {
+    "message": "Підтримати на Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Білий"
+  },
+  "bgGray": {
+    "message": "Сірий"
+  },
+  "bgBlack": {
+    "message": "Чорний"
+  },
+  "titleLockRatio": {
+    "message": "Зафіксувати"
+  },
+  "titleSearchSimilar": {
+    "message": "Шукати схожі (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Затримка захоплення"
+  },
+  "downloadOptions": {
+    "message": "Параметри завантаження"
+  },
+  "settingSubfolder": {
+    "message": "Підпапка"
+  },
+  "settingSubfolderHint": {
+    "message": "напр: images/"
+  },
+  "settingFilename": {
+    "message": "Ім'я файлу"
+  },
+  "fnOriginal": {
+    "message": "Оригінальна назва"
+  },
+  "fnSystem": {
+    "message": "Системна назва"
+  },
+  "fnCustom": {
+    "message": "Свій префікс"
+  },
+  "settingPrefix": {
+    "message": "Префікс"
+  },
+  "settingConvertOnDl": {
+    "message": "Конвертувати при завантаженні"
+  },
+  "settingNone": {
+    "message": "Немає"
+  },
+  "settingZipDefault": {
+    "message": "ZIP за замовчуванням"
+  },
+  "newImagesDetected": {
+    "message": "нових зображень знайдено"
+  },
+  "rescan": {
+    "message": "Оновити"
+  },
+  "settingLanguage": {
+    "message": "Мова"
+  },
+  "filterAny": {
+    "message": "Усі"
+  },
+  "filterSmallLabel": {
+    "message": "Малий (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Середній (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Великий (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Дуже великий (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Щонайменше…"
+  },
+  "saveSizeSelection": {
+    "message": "Зберегти вибір розміру"
+  },
+  "notifSaved": {
+    "message": "Збережено"
+  },
+  "presetAspectRatio": {
+    "message": "Співвідношення сторін"
+  },
+  "presetCommon": {
+    "message": "Стандартні розміри"
+  },
+  "presetSocial": {
+    "message": "Соцмережі"
+  },
+  "pOriginal": {
+    "message": "Оригінал"
+  },
+  "pCustom": {
+    "message": "Вручну"
+  },
+  "pPost": {
+    "message": "Пост"
+  },
+  "pStory": {
+    "message": "Сторіс"
+  },
+  "pCover": {
+    "message": "Обкладинка"
+  },
+  "pThumb": {
+    "message": "Мініатюра"
+  },
+  "pHeader": {
+    "message": "Шапка"
+  },
+  "pBanner": {
+    "message": "Банер"
+  },
+  "pPin": {
+    "message": "Пін"
+  },
+  "pPoster": {
+    "message": "Постер"
+  },
+  "pBackdrop": {
+    "message": "Фон"
+  },
+  "pStill": {
+    "message": "Кадр"
+  },
+  "pProfile": {
+    "message": "Профіль"
+  },
+  "pBg": {
+    "message": "Фон"
+  },
+  "pEpHd": {
+    "message": "Еп HD"
+  },
+  "pEpSd": {
+    "message": "Еп SD"
+  },
+  "pActor": {
+    "message": "Актор"
+  },
+  "pIcon": {
+    "message": "Іконка"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Застосовується лише при завантаженні в оригінальному форматі"
+  },
+  "settingSubfolderNote": {
+    "message": "Краще працює з вимкненим 'Запитувати місце збереження'"
+  },
+  "pTransform": {
+    "message": "Перетворити"
+  },
+  "pRotate": {
+    "message": "Повернути"
+  },
+  "pHorizontal": {
+    "message": "По горизонт."
+  },
+  "pVertical": {
+    "message": "По вертик."
+  },
+  "pRotateLeft": {
+    "message": "Повернути ліворуч"
+  },
+  "pFlipH": {
+    "message": "Відобразити по горизонталі"
+  },
+  "pFlipV": {
+    "message": "Відобразити по вертикалі"
+  },
+  "captureHint": {
+    "message": "Намалюйте прямокутник для захоплення · ESC для скасування"
+  }
+}

@@ -1,0 +1,488 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Enregistrer, Convertir et Redimensionner les Images",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Clic droit sur une image pour l'enregistrer en PNG, JPG, WebP ou AVIF. Parcourez les images, téléchargement groupé, redimensionner, copier. 100 % local, sans pistage.",
+    "description": "Extension description for the store"
+  },
+  "cmdQuickSave": {
+    "message": "Enregistrer rapidement au format par défaut",
+    "description": "Keyboard shortcut description"
+  },
+  "menuParent": {
+    "message": "Enregistrer l'image sous..."
+  },
+  "menuSaveAs": {
+    "message": "Enregistrer en $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Copier dans le presse-papiers"
+  },
+  "menuResize1080": {
+    "message": "Enregistrer redimensionnée (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Redimensionner..."
+  },
+  "popupSubtitle": {
+    "message": "Convertir · Télécharger · Redimensionner · Optimiser"
+  },
+  "tabImages": {
+    "message": "Images"
+  },
+  "tabSettings": {
+    "message": "Paramètres"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Coller l'URL de l'image ici..."
+  },
+  "convertAndSave": {
+    "message": "Convertir et enregistrer"
+  },
+  "copyClipboard": {
+    "message": "Copier"
+  },
+  "formatAdvisor": {
+    "message": "Conseiller de format"
+  },
+  "analyzing": {
+    "message": "Analyse de l'image..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 L'image a de la transparence → PNG ou WebP recommandé"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Plus petit : {format} ({size})"
+  },
+  "scanning": {
+    "message": "Recherche..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ image(s) trouvée(s)",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "filterAll": {
+    "message": "Tous les types"
+  },
+  "filterOther": {
+    "message": "Autres"
+  },
+  "noImagesFound": {
+    "message": "Aucune image trouvée"
+  },
+  "tryAgain": {
+    "message": "Réessayer"
+  },
+  "selected": {
+    "message": "sélectionnées"
+  },
+  "download": {
+    "message": "Télécharger"
+  },
+  "originalFormat": {
+    "message": "Original"
+  },
+  "resize": {
+    "message": "Redimensionner"
+  },
+  "processing": {
+    "message": "Traitement"
+  },
+  "preparingZip": {
+    "message": "Préparation du ZIP..."
+  },
+  "creatingZip": {
+    "message": "Création du ZIP..."
+  },
+  "settingsTitle": {
+    "message": "Préférences"
+  },
+  "settingQuality": {
+    "message": "Qualité par défaut"
+  },
+  "settingDefaultFormat": {
+    "message": "Format par défaut"
+  },
+  "settingResizeBehavior": {
+    "message": "Comportement de redimensionnement"
+  },
+  "settingCrop": {
+    "message": "Recadrage central"
+  },
+  "settingFit": {
+    "message": "Ajuster (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Demander l'emplacement"
+  },
+  "settingShowNotif": {
+    "message": "Afficher la notification"
+  },
+  "settingTheme": {
+    "message": "Thème"
+  },
+  "themeAuto": {
+    "message": "Auto (Système)"
+  },
+  "themeLight": {
+    "message": "Clair"
+  },
+  "themeDark": {
+    "message": "Sombre"
+  },
+  "localProcessing": {
+    "message": "Traitement 100 % local"
+  },
+  "noTracking": {
+    "message": "Aucune donnée envoyée ailleurs. Pas de connexion. Aucun suivi."
+  },
+  "smaller": {
+    "message": "plus petit"
+  },
+  "notifSavedAs": {
+    "message": "Enregistré en $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Image copiée dans le presse-papiers !"
+  },
+  "customResizeTitle": {
+    "message": "Recadrer et redimensionner"
+  },
+  "formatLabel": {
+    "message": "Format"
+  },
+  "saveImage": {
+    "message": "Enregistrer l’image"
+  },
+  "loadingImageInfo": {
+    "message": "Chargement des infos de l'image..."
+  },
+  "errorNoImage": {
+    "message": "Aucune image trouvée"
+  },
+  "errorSaveFailed": {
+    "message": "Échec de l'enregistrement"
+  },
+  "errorCopyFailed": {
+    "message": "Échec de la copie"
+  },
+  "errorOnSaving": {
+    "message": "Erreur lors de l'enregistrement"
+  },
+  "settingOpenSidePanel": {
+    "message": "Ouvrir comme panneau latéral"
+  },
+  "sortPixels": {
+    "message": "Taille en pixels"
+  },
+  "sortPosition": {
+    "message": "Position"
+  },
+  "filterWide": {
+    "message": "Large"
+  },
+  "filterTall": {
+    "message": "Haut"
+  },
+  "filterSquare": {
+    "message": "Carré"
+  },
+  "filterByUrl": {
+    "message": "Filtrer par URL ou nom..."
+  },
+  "titleToggleTheme": {
+    "message": "Changer de thème"
+  },
+  "titleRefresh": {
+    "message": "Actualiser"
+  },
+  "titleSelectAll": {
+    "message": "Tout sélectionner"
+  },
+  "titleHideDupes": {
+    "message": "Masquer les doublons"
+  },
+  "titleToggleLayout": {
+    "message": "Changer la disposition"
+  },
+  "resizeAndSave": {
+    "message": "Redimensionner et enregistrer"
+  },
+  "placeholderWidth": {
+    "message": "L"
+  },
+  "placeholderHeight": {
+    "message": "H"
+  },
+  "titleOpenTab": {
+    "message": "Ouvrir dans un nouvel onglet"
+  },
+  "titleDownloadAs": {
+    "message": "Télécharger en..."
+  },
+  "labelType": {
+    "message": "Type :"
+  },
+  "labelSize": {
+    "message": "Taille :"
+  },
+  "labelLayout": {
+    "message": "Disposition :"
+  },
+  "labelDomain": {
+    "message": "Domaine :"
+  },
+  "donate": {
+    "message": "Faire un don"
+  },
+  "bgPreview": {
+    "message": "Aperçu du fond"
+  },
+  "bgTransparent": {
+    "message": "Transparent"
+  },
+  "cropArea": {
+    "message": "Zone de recadrage"
+  },
+  "outputSize": {
+    "message": "Taille finale"
+  },
+  "presets": {
+    "message": "Préréglages"
+  },
+  "presetFree": {
+    "message": "Libre"
+  },
+  "applyDimensions": {
+    "message": "Appliquer"
+  },
+  "resetCrop": {
+    "message": "Réinitialiser"
+  },
+  "tabTools": {
+    "message": "Outils"
+  },
+  "dropOrPaste": {
+    "message": "Glissez une image ici ou collez une URL ci-dessous"
+  },
+  "convertTitle": {
+    "message": "Convertir"
+  },
+  "resizeTitle": {
+    "message": "Redimensionner"
+  },
+  "openCropTool": {
+    "message": "Ouvrir l'outil de recadrage"
+  },
+  "lockRatio": {
+    "message": "Verrouiller ratio"
+  },
+  "titleCapture": {
+    "message": "Capturer une zone"
+  },
+  "titleKofi": {
+    "message": "Soutenir sur Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Blanc"
+  },
+  "bgGray": {
+    "message": "Gris"
+  },
+  "bgBlack": {
+    "message": "Noir"
+  },
+  "titleLockRatio": {
+    "message": "Verrouiller le ratio"
+  },
+  "titleSearchSimilar": {
+    "message": "Rechercher similaire (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Délai de capture"
+  },
+  "downloadOptions": {
+    "message": "Options de téléchargement"
+  },
+  "settingSubfolder": {
+    "message": "Sous-dossier"
+  },
+  "settingSubfolderHint": {
+    "message": "ex : images/"
+  },
+  "settingFilename": {
+    "message": "Nom du fichier"
+  },
+  "fnOriginal": {
+    "message": "Nom original"
+  },
+  "fnSystem": {
+    "message": "Nom système"
+  },
+  "fnCustom": {
+    "message": "Préfixe personnalisé"
+  },
+  "settingPrefix": {
+    "message": "Préfixe"
+  },
+  "settingConvertOnDl": {
+    "message": "Convertir au téléchargement"
+  },
+  "settingNone": {
+    "message": "Aucun"
+  },
+  "settingZipDefault": {
+    "message": "ZIP par défaut"
+  },
+  "newImagesDetected": {
+    "message": "nouvelles images trouvées"
+  },
+  "rescan": {
+    "message": "Rafraîchir"
+  },
+  "settingLanguage": {
+    "message": "Langue"
+  },
+  "filterAny": {
+    "message": "Tous"
+  },
+  "filterSmallLabel": {
+    "message": "Petit (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Moyen (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Grand (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Très grand (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Au moins…"
+  },
+  "saveSizeSelection": {
+    "message": "Enregistrer la sélection"
+  },
+  "notifSaved": {
+    "message": "Enregistré"
+  },
+  "presetAspectRatio": {
+    "message": "Format"
+  },
+  "presetCommon": {
+    "message": "Tailles courantes"
+  },
+  "presetSocial": {
+    "message": "Réseaux sociaux"
+  },
+  "pOriginal": {
+    "message": "Original"
+  },
+  "pCustom": {
+    "message": "Manuel"
+  },
+  "pPost": {
+    "message": "Post"
+  },
+  "pStory": {
+    "message": "Story"
+  },
+  "pCover": {
+    "message": "Couvert."
+  },
+  "pThumb": {
+    "message": "Vignette"
+  },
+  "pHeader": {
+    "message": "En-tête"
+  },
+  "pBanner": {
+    "message": "Bannière"
+  },
+  "pPin": {
+    "message": "Épingle"
+  },
+  "pPoster": {
+    "message": "Affiche"
+  },
+  "pBackdrop": {
+    "message": "Fond"
+  },
+  "pStill": {
+    "message": "Still"
+  },
+  "pProfile": {
+    "message": "Profil"
+  },
+  "pBg": {
+    "message": "Fond"
+  },
+  "pEpHd": {
+    "message": "Ép HD"
+  },
+  "pEpSd": {
+    "message": "Ép SD"
+  },
+  "pActor": {
+    "message": "Acteur"
+  },
+  "pIcon": {
+    "message": "Icône"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "S'applique uniquement lors du téléchargement au format Original"
+  },
+  "settingSubfolderNote": {
+    "message": "Fonctionne mieux avec 'Demander l'emplacement' désactivé"
+  },
+  "pTransform": {
+    "message": "Transformer"
+  },
+  "pRotate": {
+    "message": "Pivoter"
+  },
+  "pHorizontal": {
+    "message": "Horizontal"
+  },
+  "pVertical": {
+    "message": "Vertical"
+  },
+  "pRotateLeft": {
+    "message": "Pivoter à gauche"
+  },
+  "pFlipH": {
+    "message": "Retourner horizontalement"
+  },
+  "pFlipV": {
+    "message": "Retourner verticalement"
+  },
+  "captureHint": {
+    "message": "Dessinez un rectangle pour capturer · Échap pour annuler"
+  }
+}

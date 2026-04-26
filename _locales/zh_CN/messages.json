@@ -1,0 +1,487 @@
+{
+  "extName": {
+    "message": "ImageToolkit – 保存、转换和调整图片大小",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "右键点击任何图片以另存为PNG、JPG、WebP或AVIF。浏览页面图片、批量下载、调整大小、复制到剪贴板。100%本地处理，无追踪。"
+  },
+  "cmdQuickSave": {
+    "message": "以默认格式快速保存"
+  },
+  "menuParent": {
+    "message": "图片另存为..."
+  },
+  "menuSaveAs": {
+    "message": "另存为 $FORMAT$",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "复制到剪贴板"
+  },
+  "menuResize1080": {
+    "message": "保存缩放图片 (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "调整大小..."
+  },
+  "popupSubtitle": {
+    "message": "转换 · 下载 · 调整大小 · 优化"
+  },
+  "tabSettings": {
+    "message": "设置"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "在此粘贴图片URL..."
+  },
+  "convertAndSave": {
+    "message": "转换并保存"
+  },
+  "copyClipboard": {
+    "message": "复制"
+  },
+  "formatAdvisor": {
+    "message": "格式顾问"
+  },
+  "analyzing": {
+    "message": "分析图片中..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 图片含透明通道 → 推荐PNG或WebP"
+  },
+  "advisorSmallest": {
+    "message": "🔍 最小: {format} ({size})"
+  },
+  "scanning": {
+    "message": "扫描中..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "处理中"
+  },
+  "preparingZip": {
+    "message": "准备ZIP..."
+  },
+  "creatingZip": {
+    "message": "正在创建ZIP..."
+  },
+  "settingsTitle": {
+    "message": "偏好设置"
+  },
+  "settingQuality": {
+    "message": "默认质量"
+  },
+  "settingDefaultFormat": {
+    "message": "默认格式"
+  },
+  "settingResizeBehavior": {
+    "message": "缩放行为"
+  },
+  "settingCrop": {
+    "message": "居中裁剪"
+  },
+  "settingFit": {
+    "message": "适应 (信箱模式)"
+  },
+  "settingSaveAs": {
+    "message": "询问保存位置"
+  },
+  "settingShowNotif": {
+    "message": "显示通知"
+  },
+  "settingTheme": {
+    "message": "主题"
+  },
+  "themeAuto": {
+    "message": "自动 (系统)"
+  },
+  "themeLight": {
+    "message": "浅色"
+  },
+  "themeDark": {
+    "message": "深色"
+  },
+  "localProcessing": {
+    "message": "100% 本地处理"
+  },
+  "noTracking": {
+    "message": "不发送任何数据。无需登录。无追踪。"
+  },
+  "smaller": {
+    "message": "更小"
+  },
+  "notifSavedAs": {
+    "message": "已保存为 $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "图片已复制到剪贴板!"
+  },
+  "customResizeTitle": {
+    "message": "调整图片"
+  },
+  "formatLabel": {
+    "message": "格式"
+  },
+  "saveImage": {
+    "message": "保存图片"
+  },
+  "loadingImageInfo": {
+    "message": "加载图片信息..."
+  },
+  "errorNoImage": {
+    "message": "未找到图片"
+  },
+  "errorSaveFailed": {
+    "message": "保存失败"
+  },
+  "errorCopyFailed": {
+    "message": "复制失败"
+  },
+  "errorOnSaving": {
+    "message": "保存图片时出错"
+  },
+  "tabImages": {
+    "message": "图片"
+  },
+  "filterAll": {
+    "message": "所有类型"
+  },
+  "filterOther": {
+    "message": "其他"
+  },
+  "noImagesFound": {
+    "message": "未找到图片"
+  },
+  "tryAgain": {
+    "message": "重试"
+  },
+  "selected": {
+    "message": "已选"
+  },
+  "download": {
+    "message": "下载"
+  },
+  "originalFormat": {
+    "message": "原始格式"
+  },
+  "resize": {
+    "message": "调整大小"
+  },
+  "settingOpenSidePanel": {
+    "message": "以侧边栏打开"
+  },
+  "sortPixels": {
+    "message": "像素大小"
+  },
+  "sortPosition": {
+    "message": "页面位置"
+  },
+  "filterWide": {
+    "message": "宽"
+  },
+  "filterTall": {
+    "message": "高"
+  },
+  "filterSquare": {
+    "message": "正方形"
+  },
+  "filterByUrl": {
+    "message": "按URL或文件名筛选..."
+  },
+  "titleToggleTheme": {
+    "message": "切换主题"
+  },
+  "titleRefresh": {
+    "message": "刷新"
+  },
+  "titleSelectAll": {
+    "message": "全选"
+  },
+  "titleHideDupes": {
+    "message": "隐藏重复"
+  },
+  "titleToggleLayout": {
+    "message": "切换布局"
+  },
+  "resizeAndSave": {
+    "message": "调整大小并保存"
+  },
+  "placeholderWidth": {
+    "message": "宽"
+  },
+  "placeholderHeight": {
+    "message": "高"
+  },
+  "titleOpenTab": {
+    "message": "在新标签页中打开"
+  },
+  "titleDownloadAs": {
+    "message": "下载为..."
+  },
+  "donate": {
+    "message": "捐赠"
+  },
+  "labelType": {
+    "message": "类型："
+  },
+  "labelSize": {
+    "message": "大小："
+  },
+  "labelLayout": {
+    "message": "布局："
+  },
+  "labelDomain": {
+    "message": "域名："
+  },
+  "bgPreview": {
+    "message": "背景预览"
+  },
+  "bgTransparent": {
+    "message": "透明"
+  },
+  "cropArea": {
+    "message": "裁剪区域"
+  },
+  "outputSize": {
+    "message": "输出尺寸"
+  },
+  "presets": {
+    "message": "预设"
+  },
+  "presetFree": {
+    "message": "自由"
+  },
+  "applyDimensions": {
+    "message": "应用"
+  },
+  "resetCrop": {
+    "message": "重置"
+  },
+  "tabTools": {
+    "message": "工具"
+  },
+  "dropOrPaste": {
+    "message": "将图片拖放到这里或在下方粘贴URL"
+  },
+  "convertTitle": {
+    "message": "转换"
+  },
+  "resizeTitle": {
+    "message": "调整大小"
+  },
+  "openCropTool": {
+    "message": "打开裁剪工具"
+  },
+  "lockRatio": {
+    "message": "锁定比例"
+  },
+  "titleCapture": {
+    "message": "截取区域"
+  },
+  "titleKofi": {
+    "message": "在Ko-fi上支持"
+  },
+  "bgWhite": {
+    "message": "白色"
+  },
+  "bgGray": {
+    "message": "灰色"
+  },
+  "bgBlack": {
+    "message": "黑色"
+  },
+  "titleLockRatio": {
+    "message": "锁定比例"
+  },
+  "titleSearchSimilar": {
+    "message": "搜索相似图片 (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "截图延迟"
+  },
+  "downloadOptions": {
+    "message": "下载选项"
+  },
+  "settingSubfolder": {
+    "message": "子文件夹"
+  },
+  "settingSubfolderHint": {
+    "message": "例: images/"
+  },
+  "settingFilename": {
+    "message": "文件名"
+  },
+  "fnOriginal": {
+    "message": "原始名称"
+  },
+  "fnSystem": {
+    "message": "系统名称"
+  },
+  "fnCustom": {
+    "message": "自定义前缀"
+  },
+  "settingPrefix": {
+    "message": "前缀"
+  },
+  "settingConvertOnDl": {
+    "message": "下载时转换"
+  },
+  "settingNone": {
+    "message": "无"
+  },
+  "settingZipDefault": {
+    "message": "默认ZIP"
+  },
+  "newImagesDetected": {
+    "message": "发现新图片"
+  },
+  "rescan": {
+    "message": "刷新"
+  },
+  "settingLanguage": {
+    "message": "语言"
+  },
+  "filterAny": {
+    "message": "全部"
+  },
+  "filterSmallLabel": {
+    "message": "小 (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "中 (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "大 (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "超大 (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "至少…"
+  },
+  "saveSizeSelection": {
+    "message": "保存尺寸选择"
+  },
+  "notifSaved": {
+    "message": "已保存"
+  },
+  "presetAspectRatio": {
+    "message": "宽高比"
+  },
+  "presetCommon": {
+    "message": "常用尺寸"
+  },
+  "presetSocial": {
+    "message": "社交媒体"
+  },
+  "pOriginal": {
+    "message": "原始"
+  },
+  "pCustom": {
+    "message": "自定义"
+  },
+  "pPost": {
+    "message": "帖子"
+  },
+  "pStory": {
+    "message": "快拍"
+  },
+  "pCover": {
+    "message": "封面"
+  },
+  "pThumb": {
+    "message": "缩略图"
+  },
+  "pHeader": {
+    "message": "横幅"
+  },
+  "pBanner": {
+    "message": "横幅"
+  },
+  "pPin": {
+    "message": "图钉"
+  },
+  "pPoster": {
+    "message": "海报"
+  },
+  "pBackdrop": {
+    "message": "背景"
+  },
+  "pStill": {
+    "message": "剧照"
+  },
+  "pProfile": {
+    "message": "头像"
+  },
+  "pBg": {
+    "message": "背景"
+  },
+  "pEpHd": {
+    "message": "集 HD"
+  },
+  "pEpSd": {
+    "message": "集 SD"
+  },
+  "pActor": {
+    "message": "演员"
+  },
+  "pIcon": {
+    "message": "图标"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "仅在以原始格式下载时生效"
+  },
+  "settingSubfolderNote": {
+    "message": "关闭\"询问保存位置\"时效果最佳"
+  },
+  "pTransform": {
+    "message": "变换"
+  },
+  "pRotate": {
+    "message": "旋转"
+  },
+  "pHorizontal": {
+    "message": "水平"
+  },
+  "pVertical": {
+    "message": "垂直"
+  },
+  "pRotateLeft": {
+    "message": "向左旋转"
+  },
+  "pFlipH": {
+    "message": "水平翻转"
+  },
+  "pFlipV": {
+    "message": "垂直翻转"
+  },
+  "captureHint": {
+    "message": "绘制矩形以截取 · ESC 取消"
+  }
+}

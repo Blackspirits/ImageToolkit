@@ -1,0 +1,488 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Afbeeldingen opslaan, converteren en vergroten/verkleinen",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Klik met de rechtermuisknop op een afbeelding om op te slaan als PNG, JPG, WebP of AVIF. Blader door paginabeelden, batchdownload, formaat wijzigen, kopiëren. 100% lokaal, geen tracking."
+  },
+  "cmdQuickSave": {
+    "message": "Snel opslaan in standaardformaat"
+  },
+  "menuParent": {
+    "message": "Afbeelding opslaan als..."
+  },
+  "menuSaveAs": {
+    "message": "Opslaan als $FORMAT$",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Kopiëren naar klembord"
+  },
+  "menuResize1080": {
+    "message": "Verkleind opslaan (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Formaat wijzigen..."
+  },
+  "popupSubtitle": {
+    "message": "Converteren · Formaat wijzigen · Optimaliseren",
+    "description": "Popup subtitle"
+  },
+  "tabSettings": {
+    "message": "Instellingen"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Plak hier de afbeeldings-URL..."
+  },
+  "convertAndSave": {
+    "message": "Converteren en opslaan"
+  },
+  "copyClipboard": {
+    "message": "Kopiëren"
+  },
+  "formatAdvisor": {
+    "message": "Formaatadviseur"
+  },
+  "analyzing": {
+    "message": "Afbeelding analyseren..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 Afbeelding heeft transparantie → PNG of WebP aanbevolen"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Kleinste: {format} ({size})"
+  },
+  "scanning": {
+    "message": "Zoeken..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ afbeeldingen",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "Verwerken"
+  },
+  "preparingZip": {
+    "message": "ZIP voorbereiden..."
+  },
+  "creatingZip": {
+    "message": "ZIP maken..."
+  },
+  "settingsTitle": {
+    "message": "Voorkeuren"
+  },
+  "settingQuality": {
+    "message": "Standaard kwaliteit"
+  },
+  "settingDefaultFormat": {
+    "message": "Standaard formaat"
+  },
+  "settingResizeBehavior": {
+    "message": "Grootte wijzigen gedrag"
+  },
+  "settingCrop": {
+    "message": "Centraal bijsnijden"
+  },
+  "settingFit": {
+    "message": "Passend (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Opslaglocatie vragen"
+  },
+  "settingShowNotif": {
+    "message": "Melding tonen"
+  },
+  "settingTheme": {
+    "message": "Thema"
+  },
+  "themeAuto": {
+    "message": "Auto (Systeem)"
+  },
+  "themeLight": {
+    "message": "Licht"
+  },
+  "themeDark": {
+    "message": "Donker"
+  },
+  "localProcessing": {
+    "message": "100% lokale verwerking"
+  },
+  "noTracking": {
+    "message": "Geen data verzonden. Geen login. Geen tracking."
+  },
+  "smaller": {
+    "message": "kleiner"
+  },
+  "notifSavedAs": {
+    "message": "Opgeslagen als $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Afbeelding naar klembord gekopieerd!"
+  },
+  "customResizeTitle": {
+    "message": "Afbeelding aanpassen"
+  },
+  "formatLabel": {
+    "message": "Formaat"
+  },
+  "saveImage": {
+    "message": "Afbeelding opslaan"
+  },
+  "loadingImageInfo": {
+    "message": "Afbeeldingsinfo laden..."
+  },
+  "errorNoImage": {
+    "message": "Geen afbeelding gevonden"
+  },
+  "errorSaveFailed": {
+    "message": "Opslaan mislukt"
+  },
+  "errorCopyFailed": {
+    "message": "Kopiëren mislukt"
+  },
+  "errorOnSaving": {
+    "message": "Fout bij opslaan"
+  },
+  "tabImages": {
+    "message": "Afbeeldingen"
+  },
+  "filterAll": {
+    "message": "Alle types"
+  },
+  "filterOther": {
+    "message": "Overig"
+  },
+  "noImagesFound": {
+    "message": "Geen afbeeldingen gevonden"
+  },
+  "tryAgain": {
+    "message": "Opnieuw proberen"
+  },
+  "selected": {
+    "message": "geselecteerd"
+  },
+  "download": {
+    "message": "Downloaden"
+  },
+  "originalFormat": {
+    "message": "Origineel"
+  },
+  "resize": {
+    "message": "Formaat wijzigen"
+  },
+  "settingOpenSidePanel": {
+    "message": "Openen als zijpaneel"
+  },
+  "sortPixels": {
+    "message": "Pixelgrootte"
+  },
+  "sortPosition": {
+    "message": "Positie"
+  },
+  "filterWide": {
+    "message": "Breed"
+  },
+  "filterTall": {
+    "message": "Hoog"
+  },
+  "filterSquare": {
+    "message": "Vierkant"
+  },
+  "filterByUrl": {
+    "message": "Filteren op URL of naam..."
+  },
+  "titleToggleTheme": {
+    "message": "Thema wisselen"
+  },
+  "titleRefresh": {
+    "message": "Vernieuwen"
+  },
+  "titleSelectAll": {
+    "message": "Alles selecteren"
+  },
+  "titleHideDupes": {
+    "message": "Duplicaten verbergen"
+  },
+  "titleToggleLayout": {
+    "message": "Weergave wisselen"
+  },
+  "resizeAndSave": {
+    "message": "Formaat wijzigen en opslaan"
+  },
+  "placeholderWidth": {
+    "message": "B"
+  },
+  "placeholderHeight": {
+    "message": "H"
+  },
+  "titleOpenTab": {
+    "message": "Openen in nieuw tabblad"
+  },
+  "titleDownloadAs": {
+    "message": "Downloaden als..."
+  },
+  "donate": {
+    "message": "Doneren"
+  },
+  "labelType": {
+    "message": "Type:"
+  },
+  "labelSize": {
+    "message": "Grootte:"
+  },
+  "labelLayout": {
+    "message": "Indeling:"
+  },
+  "labelDomain": {
+    "message": "Domein:"
+  },
+  "bgPreview": {
+    "message": "Achtergrondvoorbeeld"
+  },
+  "bgTransparent": {
+    "message": "Transparant"
+  },
+  "cropArea": {
+    "message": "Bijsnijdgebied"
+  },
+  "outputSize": {
+    "message": "Uitvoergrootte"
+  },
+  "presets": {
+    "message": "Voorinstellingen"
+  },
+  "presetFree": {
+    "message": "Vrij"
+  },
+  "applyDimensions": {
+    "message": "Toepassen"
+  },
+  "resetCrop": {
+    "message": "Herstellen"
+  },
+  "tabTools": {
+    "message": "Hulpmiddelen"
+  },
+  "dropOrPaste": {
+    "message": "Sleep een afbeelding hierheen of plak een URL hieronder"
+  },
+  "convertTitle": {
+    "message": "Converteren"
+  },
+  "resizeTitle": {
+    "message": "Formaat wijzigen"
+  },
+  "openCropTool": {
+    "message": "Bijsnijdtool openen"
+  },
+  "lockRatio": {
+    "message": "Verhouding vastzetten"
+  },
+  "titleCapture": {
+    "message": "Gebied vastleggen"
+  },
+  "titleKofi": {
+    "message": "Steunen op Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Wit"
+  },
+  "bgGray": {
+    "message": "Grijs"
+  },
+  "bgBlack": {
+    "message": "Zwart"
+  },
+  "titleLockRatio": {
+    "message": "Verhouding vergrendelen"
+  },
+  "titleSearchSimilar": {
+    "message": "Vergelijkbaar zoeken (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Opnamevertraging"
+  },
+  "downloadOptions": {
+    "message": "Downloadopties"
+  },
+  "settingSubfolder": {
+    "message": "Submap"
+  },
+  "settingSubfolderHint": {
+    "message": "bijv. afbeeldingen/"
+  },
+  "settingFilename": {
+    "message": "Bestandsnaam"
+  },
+  "fnOriginal": {
+    "message": "Originele naam"
+  },
+  "fnSystem": {
+    "message": "Systeemnaam"
+  },
+  "fnCustom": {
+    "message": "Eigen voorvoegsel"
+  },
+  "settingPrefix": {
+    "message": "Voorvoegsel"
+  },
+  "settingConvertOnDl": {
+    "message": "Converteren bij downloaden"
+  },
+  "settingNone": {
+    "message": "Geen"
+  },
+  "settingZipDefault": {
+    "message": "ZIP standaard"
+  },
+  "newImagesDetected": {
+    "message": "nieuwe afbeeldingen gevonden"
+  },
+  "rescan": {
+    "message": "Vernieuwen"
+  },
+  "settingLanguage": {
+    "message": "Taal"
+  },
+  "filterAny": {
+    "message": "Alle"
+  },
+  "filterSmallLabel": {
+    "message": "Klein (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Middel (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Groot (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Extra groot (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Minstens…"
+  },
+  "saveSizeSelection": {
+    "message": "Maatselectie opslaan"
+  },
+  "notifSaved": {
+    "message": "Opgeslagen"
+  },
+  "presetAspectRatio": {
+    "message": "Beeldverhouding"
+  },
+  "presetCommon": {
+    "message": "Standaardformaten"
+  },
+  "presetSocial": {
+    "message": "Sociale media"
+  },
+  "pOriginal": {
+    "message": "Origineel"
+  },
+  "pCustom": {
+    "message": "Handmatig"
+  },
+  "pPost": {
+    "message": "Post"
+  },
+  "pStory": {
+    "message": "Story"
+  },
+  "pCover": {
+    "message": "Cover"
+  },
+  "pThumb": {
+    "message": "Thumb"
+  },
+  "pHeader": {
+    "message": "Header"
+  },
+  "pBanner": {
+    "message": "Banner"
+  },
+  "pPin": {
+    "message": "Pin"
+  },
+  "pPoster": {
+    "message": "Poster"
+  },
+  "pBackdrop": {
+    "message": "Achtergr."
+  },
+  "pStill": {
+    "message": "Still"
+  },
+  "pProfile": {
+    "message": "Profiel"
+  },
+  "pBg": {
+    "message": "Achtergr."
+  },
+  "pEpHd": {
+    "message": "Afl HD"
+  },
+  "pEpSd": {
+    "message": "Afl SD"
+  },
+  "pActor": {
+    "message": "Acteur"
+  },
+  "pIcon": {
+    "message": "Icoon"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Geldt alleen bij downloaden in Origineel formaat"
+  },
+  "settingSubfolderNote": {
+    "message": "Werkt het beste met 'Vraag opslaglocatie' uitgeschakeld"
+  },
+  "pTransform": {
+    "message": "Transformeren"
+  },
+  "pRotate": {
+    "message": "Draaien"
+  },
+  "pHorizontal": {
+    "message": "Horizontaal"
+  },
+  "pVertical": {
+    "message": "Verticaal"
+  },
+  "pRotateLeft": {
+    "message": "Links draaien"
+  },
+  "pFlipH": {
+    "message": "Horizontaal spiegelen"
+  },
+  "pFlipV": {
+    "message": "Verticaal spiegelen"
+  },
+  "captureHint": {
+    "message": "Teken een rechthoek om vast te leggen · ESC om te annuleren"
+  }
+}

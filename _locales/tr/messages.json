@@ -1,0 +1,488 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Görsel Kaydet, Dönüştür ve Yeniden Boyutlandır",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Herhangi bir görsele sağ tıklayarak PNG, JPG, WebP veya AVIF olarak kaydedin. Sayfa görsellerini inceleyin, toplu indirin, yeniden boyutlandırın, kopyalayın. 100% yerel, izleme yok."
+  },
+  "cmdQuickSave": {
+    "message": "Varsayılan formatta hızlı kaydet"
+  },
+  "menuParent": {
+    "message": "Resmi farklı kaydet..."
+  },
+  "menuSaveAs": {
+    "message": "$FORMAT$ olarak kaydet",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Panoya kopyala"
+  },
+  "menuResize1080": {
+    "message": "Boyutlandırılmış kaydet (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Boyutlandır..."
+  },
+  "popupSubtitle": {
+    "message": "Dönüştür · Boyutlandır · Optimize Et",
+    "description": "Popup subtitle"
+  },
+  "tabSettings": {
+    "message": "Ayarlar"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Resim URL'sini buraya yapıştırın..."
+  },
+  "convertAndSave": {
+    "message": "Dönüştür ve kaydet"
+  },
+  "copyClipboard": {
+    "message": "Kopyala"
+  },
+  "formatAdvisor": {
+    "message": "Format danışmanı"
+  },
+  "analyzing": {
+    "message": "Resim analiz ediliyor..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 Resim şeffaflık içeriyor → PNG veya WebP önerilir"
+  },
+  "advisorSmallest": {
+    "message": "🔍 En küçük: {format} ({size})"
+  },
+  "scanning": {
+    "message": "Aranıyor..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ görsel",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "İşleniyor"
+  },
+  "preparingZip": {
+    "message": "ZIP hazırlanıyor..."
+  },
+  "creatingZip": {
+    "message": "ZIP oluşturuluyor..."
+  },
+  "settingsTitle": {
+    "message": "Tercihler"
+  },
+  "settingQuality": {
+    "message": "Varsayılan kalite"
+  },
+  "settingDefaultFormat": {
+    "message": "Varsayılan format"
+  },
+  "settingResizeBehavior": {
+    "message": "Boyutlandırma davranışı"
+  },
+  "settingCrop": {
+    "message": "Merkez kırpma"
+  },
+  "settingFit": {
+    "message": "Sığdır (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Konum sor"
+  },
+  "settingShowNotif": {
+    "message": "Bildirim göster"
+  },
+  "settingTheme": {
+    "message": "Theme"
+  },
+  "themeAuto": {
+    "message": "Otomatik (Sistem)"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "localProcessing": {
+    "message": "100% yerel işleme"
+  },
+  "noTracking": {
+    "message": "Veri gönderilmez. Giriş yok. Takip yok."
+  },
+  "smaller": {
+    "message": "daha küçük"
+  },
+  "notifSavedAs": {
+    "message": "$FORMAT$ olarak kaydedildi",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Resim panoya kopyalandı!"
+  },
+  "customResizeTitle": {
+    "message": "Resmi ayarla"
+  },
+  "formatLabel": {
+    "message": "Format"
+  },
+  "saveImage": {
+    "message": "Resmi kaydet"
+  },
+  "loadingImageInfo": {
+    "message": "Resim bilgisi yükleniyor..."
+  },
+  "errorNoImage": {
+    "message": "Resim bulunamadı"
+  },
+  "errorSaveFailed": {
+    "message": "Kaydetme başarısız"
+  },
+  "errorCopyFailed": {
+    "message": "Kopyalama başarısız"
+  },
+  "errorOnSaving": {
+    "message": "Kaydetme hatası"
+  },
+  "tabImages": {
+    "message": "Görseller"
+  },
+  "filterAll": {
+    "message": "Tüm türler"
+  },
+  "filterOther": {
+    "message": "Diğer"
+  },
+  "noImagesFound": {
+    "message": "Resim bulunamadı"
+  },
+  "tryAgain": {
+    "message": "Tekrar dene"
+  },
+  "selected": {
+    "message": "seçili"
+  },
+  "download": {
+    "message": "İndir"
+  },
+  "originalFormat": {
+    "message": "Orijinal"
+  },
+  "resize": {
+    "message": "Boyutlandır"
+  },
+  "settingOpenSidePanel": {
+    "message": "Yan panel olarak aç"
+  },
+  "sortPixels": {
+    "message": "Piksel boyutu"
+  },
+  "sortPosition": {
+    "message": "Konum"
+  },
+  "filterWide": {
+    "message": "Geniş"
+  },
+  "filterTall": {
+    "message": "Uzun"
+  },
+  "filterSquare": {
+    "message": "Kare"
+  },
+  "filterByUrl": {
+    "message": "URL veya isme göre filtrele..."
+  },
+  "titleToggleTheme": {
+    "message": "Tema değiştir"
+  },
+  "titleRefresh": {
+    "message": "Yenile"
+  },
+  "titleSelectAll": {
+    "message": "Tümünü seç"
+  },
+  "titleHideDupes": {
+    "message": "Kopyaları gizle"
+  },
+  "titleToggleLayout": {
+    "message": "Düzeni değiştir"
+  },
+  "resizeAndSave": {
+    "message": "Boyutlandır ve kaydet"
+  },
+  "placeholderWidth": {
+    "message": "G"
+  },
+  "placeholderHeight": {
+    "message": "Y"
+  },
+  "titleOpenTab": {
+    "message": "Yeni sekmede aç"
+  },
+  "titleDownloadAs": {
+    "message": "Farklı kaydet..."
+  },
+  "donate": {
+    "message": "Bağış yap"
+  },
+  "labelType": {
+    "message": "Tür:"
+  },
+  "labelSize": {
+    "message": "Boyut:"
+  },
+  "labelLayout": {
+    "message": "Düzen:"
+  },
+  "labelDomain": {
+    "message": "Alan adı:"
+  },
+  "bgPreview": {
+    "message": "Arka plan önizleme"
+  },
+  "bgTransparent": {
+    "message": "Şeffaf"
+  },
+  "cropArea": {
+    "message": "Kırpma alanı"
+  },
+  "outputSize": {
+    "message": "Çıkış boyutu"
+  },
+  "presets": {
+    "message": "Hazır boyutlar"
+  },
+  "presetFree": {
+    "message": "Serbest"
+  },
+  "applyDimensions": {
+    "message": "Uygula"
+  },
+  "resetCrop": {
+    "message": "Sıfırla"
+  },
+  "tabTools": {
+    "message": "Araçlar"
+  },
+  "dropOrPaste": {
+    "message": "Buraya bir resim bırakın veya aşağıya URL yapıştırın"
+  },
+  "convertTitle": {
+    "message": "Dönüştür"
+  },
+  "resizeTitle": {
+    "message": "Boyutlandır"
+  },
+  "openCropTool": {
+    "message": "Kırpma aracını aç"
+  },
+  "lockRatio": {
+    "message": "Oranı kilitle"
+  },
+  "titleCapture": {
+    "message": "Alan yakala"
+  },
+  "titleKofi": {
+    "message": "Ko-fi'de destekle"
+  },
+  "bgWhite": {
+    "message": "Beyaz"
+  },
+  "bgGray": {
+    "message": "Gri"
+  },
+  "bgBlack": {
+    "message": "Siyah"
+  },
+  "titleLockRatio": {
+    "message": "Oranı kilitle"
+  },
+  "titleSearchSimilar": {
+    "message": "Benzerini ara (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Yakalama gecikmesi"
+  },
+  "downloadOptions": {
+    "message": "İndirme Seçenekleri"
+  },
+  "settingSubfolder": {
+    "message": "Alt klasör"
+  },
+  "settingSubfolderHint": {
+    "message": "ör: resimler/"
+  },
+  "settingFilename": {
+    "message": "Dosya adı"
+  },
+  "fnOriginal": {
+    "message": "Orijinal ad"
+  },
+  "fnSystem": {
+    "message": "Sistem adı"
+  },
+  "fnCustom": {
+    "message": "Özel ön ek"
+  },
+  "settingPrefix": {
+    "message": "Ön ek"
+  },
+  "settingConvertOnDl": {
+    "message": "İndirirken dönüştür"
+  },
+  "settingNone": {
+    "message": "Yok"
+  },
+  "settingZipDefault": {
+    "message": "ZIP varsayılan"
+  },
+  "newImagesDetected": {
+    "message": "yeni resim bulundu"
+  },
+  "rescan": {
+    "message": "Yenile"
+  },
+  "settingLanguage": {
+    "message": "Dil"
+  },
+  "filterAny": {
+    "message": "Hepsi"
+  },
+  "filterSmallLabel": {
+    "message": "Küçük (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Orta (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Büyük (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Çok büyük (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "En az…"
+  },
+  "saveSizeSelection": {
+    "message": "Boyut seçimini kaydet"
+  },
+  "notifSaved": {
+    "message": "Kaydedildi"
+  },
+  "presetAspectRatio": {
+    "message": "En Boy Oranı"
+  },
+  "presetCommon": {
+    "message": "Ortak Boyutlar"
+  },
+  "presetSocial": {
+    "message": "Sosyal Medya"
+  },
+  "pOriginal": {
+    "message": "Orijinal"
+  },
+  "pCustom": {
+    "message": "Manuel"
+  },
+  "pPost": {
+    "message": "Post"
+  },
+  "pStory": {
+    "message": "Story"
+  },
+  "pCover": {
+    "message": "Kapak"
+  },
+  "pThumb": {
+    "message": "Küçük"
+  },
+  "pHeader": {
+    "message": "Başlık"
+  },
+  "pBanner": {
+    "message": "Banner"
+  },
+  "pPin": {
+    "message": "Pin"
+  },
+  "pPoster": {
+    "message": "Poster"
+  },
+  "pBackdrop": {
+    "message": "Arka Plan"
+  },
+  "pStill": {
+    "message": "Still"
+  },
+  "pProfile": {
+    "message": "Profil"
+  },
+  "pBg": {
+    "message": "Arka Plan"
+  },
+  "pEpHd": {
+    "message": "Bl HD"
+  },
+  "pEpSd": {
+    "message": "Bl SD"
+  },
+  "pActor": {
+    "message": "Aktör"
+  },
+  "pIcon": {
+    "message": "Simge"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Yalnızca Orijinal formatta indirirken geçerlidir"
+  },
+  "settingSubfolderNote": {
+    "message": "'Kayıt konumunu sor' devre dışı bırakıldığında en iyi çalışır"
+  },
+  "pTransform": {
+    "message": "Dönüştür"
+  },
+  "pRotate": {
+    "message": "Döndür"
+  },
+  "pHorizontal": {
+    "message": "Yatay"
+  },
+  "pVertical": {
+    "message": "Dikey"
+  },
+  "pRotateLeft": {
+    "message": "Sola döndür"
+  },
+  "pFlipH": {
+    "message": "Yatay çevir"
+  },
+  "pFlipV": {
+    "message": "Dikey çevir"
+  },
+  "captureHint": {
+    "message": "Yakalamak için bir dikdörtgen çizin · İptal için ESC"
+  }
+}

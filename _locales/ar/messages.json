@@ -1,0 +1,487 @@
+{
+  "extName": {
+    "message": "ImageToolkit – حفظ وتحويل وتغيير حجم الصور",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "انقر بزر الماوس الأيمن على أي صورة لحفظها بصيغة PNG أو JPG أو WebP أو AVIF. تصفح صور الصفحة، تنزيل جماعي، تغيير الحجم، نسخ. 100% محلي، بدون تتبع."
+  },
+  "cmdQuickSave": {
+    "message": "حفظ سريع بالتنسيق الافتراضي"
+  },
+  "menuParent": {
+    "message": "حفظ الصورة بصيغة..."
+  },
+  "menuSaveAs": {
+    "message": "حفظ كـ $FORMAT$",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "نسخ إلى الحافظة"
+  },
+  "menuResize1080": {
+    "message": "حفظ بحجم معدل (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "تغيير الحجم..."
+  },
+  "popupSubtitle": {
+    "message": "تحويل · تنزيل · تغيير الحجم · تحسين"
+  },
+  "tabSettings": {
+    "message": "الإعدادات"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "الصق رابط الصورة هنا..."
+  },
+  "convertAndSave": {
+    "message": "تحويل وحفظ"
+  },
+  "copyClipboard": {
+    "message": "نسخ"
+  },
+  "formatAdvisor": {
+    "message": "مستشار التنسيق"
+  },
+  "analyzing": {
+    "message": "جاري تحليل الصورة..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 الصورة تحتوي على شفافية → PNG أو WebP موصى به"
+  },
+  "advisorSmallest": {
+    "message": "🔍 الأصغر: {format} ({size})"
+  },
+  "scanning": {
+    "message": "جاري البحث..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ صور",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "جاري المعالجة"
+  },
+  "preparingZip": {
+    "message": "جاري تحضير ZIP..."
+  },
+  "creatingZip": {
+    "message": "جاري إنشاء ZIP..."
+  },
+  "settingsTitle": {
+    "message": "التفضيلات"
+  },
+  "settingQuality": {
+    "message": "الجودة الافتراضية"
+  },
+  "settingDefaultFormat": {
+    "message": "التنسيق الافتراضي"
+  },
+  "settingResizeBehavior": {
+    "message": "سلوك تغيير الحجم"
+  },
+  "settingCrop": {
+    "message": "قص مركزي"
+  },
+  "settingFit": {
+    "message": "ملائمة (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "طلب موقع الحفظ"
+  },
+  "settingShowNotif": {
+    "message": "إظهار الإشعار"
+  },
+  "settingTheme": {
+    "message": "المظهر"
+  },
+  "themeAuto": {
+    "message": "تلقائي (النظام)"
+  },
+  "themeLight": {
+    "message": "فاتح"
+  },
+  "themeDark": {
+    "message": "داكن"
+  },
+  "localProcessing": {
+    "message": "100% معالجة محلية"
+  },
+  "noTracking": {
+    "message": "لا بيانات مرسلة. بدون تسجيل دخول. بدون تتبع."
+  },
+  "smaller": {
+    "message": "أصغر"
+  },
+  "notifSavedAs": {
+    "message": "تم الحفظ بصيغة $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "تم نسخ الصورة إلى الحافظة!"
+  },
+  "customResizeTitle": {
+    "message": "ضبط الصورة"
+  },
+  "formatLabel": {
+    "message": "التنسيق"
+  },
+  "saveImage": {
+    "message": "حفظ الصورة"
+  },
+  "loadingImageInfo": {
+    "message": "جاري تحميل معلومات الصورة..."
+  },
+  "errorNoImage": {
+    "message": "لم يتم العثور على صورة"
+  },
+  "errorSaveFailed": {
+    "message": "فشل الحفظ"
+  },
+  "errorCopyFailed": {
+    "message": "فشل النسخ"
+  },
+  "errorOnSaving": {
+    "message": "خطأ في حفظ الصورة"
+  },
+  "tabImages": {
+    "message": "الصور"
+  },
+  "filterAll": {
+    "message": "جميع الأنواع"
+  },
+  "filterOther": {
+    "message": "أخرى"
+  },
+  "noImagesFound": {
+    "message": "لم يتم العثور على صور"
+  },
+  "tryAgain": {
+    "message": "حاول مرة أخرى"
+  },
+  "selected": {
+    "message": "محددة"
+  },
+  "download": {
+    "message": "تنزيل"
+  },
+  "originalFormat": {
+    "message": "الأصلي"
+  },
+  "resize": {
+    "message": "تغيير الحجم"
+  },
+  "settingOpenSidePanel": {
+    "message": "فتح كلوحة جانبية"
+  },
+  "sortPixels": {
+    "message": "حجم البكسل"
+  },
+  "sortPosition": {
+    "message": "الموضع"
+  },
+  "filterWide": {
+    "message": "عريض"
+  },
+  "filterTall": {
+    "message": "طويل"
+  },
+  "filterSquare": {
+    "message": "مربع"
+  },
+  "filterByUrl": {
+    "message": "تصفية حسب URL أو الاسم..."
+  },
+  "titleToggleTheme": {
+    "message": "تبديل المظهر"
+  },
+  "titleRefresh": {
+    "message": "تحديث"
+  },
+  "titleSelectAll": {
+    "message": "تحديد الكل"
+  },
+  "titleHideDupes": {
+    "message": "إخفاء المكررة"
+  },
+  "titleToggleLayout": {
+    "message": "تبديل التخطيط"
+  },
+  "resizeAndSave": {
+    "message": "تغيير الحجم وحفظ"
+  },
+  "placeholderWidth": {
+    "message": "ع"
+  },
+  "placeholderHeight": {
+    "message": "ط"
+  },
+  "titleOpenTab": {
+    "message": "فتح في علامة تبويب جديدة"
+  },
+  "titleDownloadAs": {
+    "message": "تنزيل بصيغة..."
+  },
+  "donate": {
+    "message": "تبرع"
+  },
+  "labelType": {
+    "message": "النوع:"
+  },
+  "labelSize": {
+    "message": "الحجم:"
+  },
+  "labelLayout": {
+    "message": "التخطيط:"
+  },
+  "labelDomain": {
+    "message": "النطاق:"
+  },
+  "bgPreview": {
+    "message": "معاينة الخلفية"
+  },
+  "bgTransparent": {
+    "message": "شفاف"
+  },
+  "cropArea": {
+    "message": "منطقة القص"
+  },
+  "outputSize": {
+    "message": "الحجم النهائي"
+  },
+  "presets": {
+    "message": "إعدادات مسبقة"
+  },
+  "presetFree": {
+    "message": "حر"
+  },
+  "applyDimensions": {
+    "message": "تطبيق"
+  },
+  "resetCrop": {
+    "message": "إعادة تعيين"
+  },
+  "tabTools": {
+    "message": "أدوات"
+  },
+  "dropOrPaste": {
+    "message": "أسقط صورة هنا أو الصق رابطًا أدناه"
+  },
+  "convertTitle": {
+    "message": "تحويل"
+  },
+  "resizeTitle": {
+    "message": "تغيير الحجم"
+  },
+  "openCropTool": {
+    "message": "فتح أداة القص"
+  },
+  "lockRatio": {
+    "message": "قفل النسبة"
+  },
+  "titleCapture": {
+    "message": "التقاط منطقة"
+  },
+  "titleKofi": {
+    "message": "ادعم على Ko-fi"
+  },
+  "bgWhite": {
+    "message": "أبيض"
+  },
+  "bgGray": {
+    "message": "رمادي"
+  },
+  "bgBlack": {
+    "message": "أسود"
+  },
+  "titleLockRatio": {
+    "message": "قفل النسبة"
+  },
+  "titleSearchSimilar": {
+    "message": "بحث مشابه (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "تأخير الالتقاط"
+  },
+  "downloadOptions": {
+    "message": "خيارات التنزيل"
+  },
+  "settingSubfolder": {
+    "message": "مجلد فرعي"
+  },
+  "settingSubfolderHint": {
+    "message": "مثال: صور/"
+  },
+  "settingFilename": {
+    "message": "اسم الملف"
+  },
+  "fnOriginal": {
+    "message": "الاسم الأصلي"
+  },
+  "fnSystem": {
+    "message": "اسم النظام"
+  },
+  "fnCustom": {
+    "message": "بادئة مخصصة"
+  },
+  "settingPrefix": {
+    "message": "بادئة"
+  },
+  "settingConvertOnDl": {
+    "message": "تحويل عند التنزيل"
+  },
+  "settingNone": {
+    "message": "لا شيء"
+  },
+  "settingZipDefault": {
+    "message": "ZIP افتراضياً"
+  },
+  "newImagesDetected": {
+    "message": "صور جديدة تم العثور عليها"
+  },
+  "rescan": {
+    "message": "تحديث"
+  },
+  "settingLanguage": {
+    "message": "اللغة"
+  },
+  "filterAny": {
+    "message": "الكل"
+  },
+  "filterSmallLabel": {
+    "message": "صغير (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "متوسط (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "كبير (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "كبير جداً (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "على الأقل…"
+  },
+  "saveSizeSelection": {
+    "message": "حفظ اختيار الحجم"
+  },
+  "notifSaved": {
+    "message": "تم الحفظ"
+  },
+  "presetAspectRatio": {
+    "message": "نسبة العرض إلى الارتفاع"
+  },
+  "presetCommon": {
+    "message": "أحجام شائعة"
+  },
+  "presetSocial": {
+    "message": "وسائل التواصل"
+  },
+  "pOriginal": {
+    "message": "أصلي"
+  },
+  "pCustom": {
+    "message": "يدوي"
+  },
+  "pPost": {
+    "message": "منشور"
+  },
+  "pStory": {
+    "message": "قصة"
+  },
+  "pCover": {
+    "message": "غلاف"
+  },
+  "pThumb": {
+    "message": "مصغّرة"
+  },
+  "pHeader": {
+    "message": "رأسية"
+  },
+  "pBanner": {
+    "message": "شعار"
+  },
+  "pPin": {
+    "message": "دبوس"
+  },
+  "pPoster": {
+    "message": "ملصق"
+  },
+  "pBackdrop": {
+    "message": "خلفية"
+  },
+  "pStill": {
+    "message": "لقطة"
+  },
+  "pProfile": {
+    "message": "صورة"
+  },
+  "pBg": {
+    "message": "خلفية"
+  },
+  "pEpHd": {
+    "message": "حلقة HD"
+  },
+  "pEpSd": {
+    "message": "حلقة SD"
+  },
+  "pActor": {
+    "message": "ممثل"
+  },
+  "pIcon": {
+    "message": "أيقونة"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "ينطبق فقط عند التنزيل بالتنسيق الأصلي"
+  },
+  "settingSubfolderNote": {
+    "message": "يعمل بشكل أفضل مع تعطيل 'طلب موقع الحفظ'"
+  },
+  "pTransform": {
+    "message": "تحويل"
+  },
+  "pRotate": {
+    "message": "تدوير"
+  },
+  "pHorizontal": {
+    "message": "أفقي"
+  },
+  "pVertical": {
+    "message": "عمودي"
+  },
+  "pRotateLeft": {
+    "message": "تدوير لليسار"
+  },
+  "pFlipH": {
+    "message": "قلب أفقي"
+  },
+  "pFlipV": {
+    "message": "قلب عمودي"
+  },
+  "captureHint": {
+    "message": "ارسم مستطيلاً للالتقاط · ESC للإلغاء"
+  }
+}

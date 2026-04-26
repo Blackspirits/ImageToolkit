@@ -1,0 +1,488 @@
+{
+  "extName": {
+    "message": "ImageToolkit – Сохранение, конвертация и изменение размера изображений",
+    "description": "Extension name shown in browser"
+  },
+  "extShortName": {
+    "message": "ImageToolkit",
+    "description": "Short name"
+  },
+  "extDescription": {
+    "message": "Нажмите правой кнопкой мыши на изображение, чтобы сохранить как PNG, JPG, WebP или AVIF. Обзор изображений страницы, пакетная загрузка, изменение размера, копирование. 100% локально, без отслеживания."
+  },
+  "cmdQuickSave": {
+    "message": "Быстрое сохранение в формате по умолчанию"
+  },
+  "menuParent": {
+    "message": "Сохранить изображение как..."
+  },
+  "menuSaveAs": {
+    "message": "Сохранить как $FORMAT$",
+    "description": "Context menu save format",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "menuCopyClipboard": {
+    "message": "Копировать в буфер обмена"
+  },
+  "menuResize1080": {
+    "message": "Сохранить с изменением размера (1080px)"
+  },
+  "menuCustomResize": {
+    "message": "Изменить размер..."
+  },
+  "popupSubtitle": {
+    "message": "Конвертация · Изменение размера · Оптимизация",
+    "description": "Popup subtitle"
+  },
+  "tabSettings": {
+    "message": "Настройки"
+  },
+  "pasteUrlPlaceholder": {
+    "message": "Вставьте URL изображения..."
+  },
+  "convertAndSave": {
+    "message": "Конвертировать и сохранить"
+  },
+  "copyClipboard": {
+    "message": "Копировать"
+  },
+  "formatAdvisor": {
+    "message": "Советник по формату"
+  },
+  "analyzing": {
+    "message": "Анализ изображения..."
+  },
+  "advisorAlpha": {
+    "message": "🔍 Изображение с прозрачностью → рекомендуется PNG или WebP"
+  },
+  "advisorSmallest": {
+    "message": "🔍 Наименьший: {format} ({size})"
+  },
+  "scanning": {
+    "message": "Поиск..."
+  },
+  "imagesFound": {
+    "message": "$COUNT$ изображений",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1"
+      }
+    }
+  },
+  "processing": {
+    "message": "Обработка"
+  },
+  "preparingZip": {
+    "message": "Подготовка ZIP..."
+  },
+  "creatingZip": {
+    "message": "Создание ZIP..."
+  },
+  "settingsTitle": {
+    "message": "Настройки"
+  },
+  "settingQuality": {
+    "message": "Качество по умолчанию"
+  },
+  "settingDefaultFormat": {
+    "message": "Формат по умолчанию"
+  },
+  "settingResizeBehavior": {
+    "message": "Поведение при изменении размера"
+  },
+  "settingCrop": {
+    "message": "Обрезка по центру"
+  },
+  "settingFit": {
+    "message": "Вписать (Letterbox)"
+  },
+  "settingSaveAs": {
+    "message": "Спрашивать расположение"
+  },
+  "settingShowNotif": {
+    "message": "Показывать уведомление"
+  },
+  "settingTheme": {
+    "message": "Theme"
+  },
+  "themeAuto": {
+    "message": "Авто (Система)"
+  },
+  "themeLight": {
+    "message": "Light"
+  },
+  "themeDark": {
+    "message": "Dark"
+  },
+  "localProcessing": {
+    "message": "100% локальная обработка"
+  },
+  "noTracking": {
+    "message": "Данные не отправляются. Без входа. Без отслеживания."
+  },
+  "smaller": {
+    "message": "меньше"
+  },
+  "notifSavedAs": {
+    "message": "Сохранено как $FORMAT$",
+    "placeholders": {
+      "FORMAT": {
+        "content": "$1",
+        "example": "PNG"
+      }
+    }
+  },
+  "notifCopied": {
+    "message": "Изображение скопировано в буфер обмена!"
+  },
+  "customResizeTitle": {
+    "message": "Настройка изображения"
+  },
+  "formatLabel": {
+    "message": "Формат"
+  },
+  "saveImage": {
+    "message": "Сохранить изображение"
+  },
+  "loadingImageInfo": {
+    "message": "Загрузка информации об изображении..."
+  },
+  "errorNoImage": {
+    "message": "Изображение не найдено"
+  },
+  "errorSaveFailed": {
+    "message": "Ошибка сохранения"
+  },
+  "errorCopyFailed": {
+    "message": "Ошибка копирования"
+  },
+  "errorOnSaving": {
+    "message": "Ошибка при сохранении"
+  },
+  "tabImages": {
+    "message": "Картинки"
+  },
+  "filterAll": {
+    "message": "Все типы"
+  },
+  "filterOther": {
+    "message": "Другие"
+  },
+  "noImagesFound": {
+    "message": "Изображения не найдены"
+  },
+  "tryAgain": {
+    "message": "Повторить"
+  },
+  "selected": {
+    "message": "выбрано"
+  },
+  "download": {
+    "message": "Скачать"
+  },
+  "originalFormat": {
+    "message": "Оригинал"
+  },
+  "resize": {
+    "message": "Изменить размер"
+  },
+  "settingOpenSidePanel": {
+    "message": "Открыть как боковую панель"
+  },
+  "sortPixels": {
+    "message": "Размер в пикселях"
+  },
+  "sortPosition": {
+    "message": "Позиция"
+  },
+  "filterWide": {
+    "message": "Широкие"
+  },
+  "filterTall": {
+    "message": "Высокие"
+  },
+  "filterSquare": {
+    "message": "Квадратные"
+  },
+  "filterByUrl": {
+    "message": "Фильтр по URL или имени..."
+  },
+  "titleToggleTheme": {
+    "message": "Сменить тему"
+  },
+  "titleRefresh": {
+    "message": "Обновить"
+  },
+  "titleSelectAll": {
+    "message": "Выбрать всё"
+  },
+  "titleHideDupes": {
+    "message": "Скрыть дубликаты"
+  },
+  "titleToggleLayout": {
+    "message": "Сменить вид"
+  },
+  "resizeAndSave": {
+    "message": "Изменить и сохранить"
+  },
+  "placeholderWidth": {
+    "message": "Ш"
+  },
+  "placeholderHeight": {
+    "message": "В"
+  },
+  "titleOpenTab": {
+    "message": "Открыть в новой вкладке"
+  },
+  "titleDownloadAs": {
+    "message": "Скачать как..."
+  },
+  "donate": {
+    "message": "Пожертвовать"
+  },
+  "labelType": {
+    "message": "Тип:"
+  },
+  "labelSize": {
+    "message": "Размер:"
+  },
+  "labelLayout": {
+    "message": "Формат:"
+  },
+  "labelDomain": {
+    "message": "Домен:"
+  },
+  "bgPreview": {
+    "message": "Предпросмотр фона"
+  },
+  "bgTransparent": {
+    "message": "Прозрачный"
+  },
+  "cropArea": {
+    "message": "Область обрезки"
+  },
+  "outputSize": {
+    "message": "Размер вывода"
+  },
+  "presets": {
+    "message": "Предустановки"
+  },
+  "presetFree": {
+    "message": "Свободно"
+  },
+  "applyDimensions": {
+    "message": "Применить"
+  },
+  "resetCrop": {
+    "message": "Сбросить"
+  },
+  "tabTools": {
+    "message": "Инструменты"
+  },
+  "dropOrPaste": {
+    "message": "Перетащите изображение сюда или вставьте URL ниже"
+  },
+  "convertTitle": {
+    "message": "Конвертировать"
+  },
+  "resizeTitle": {
+    "message": "Изменить размер"
+  },
+  "openCropTool": {
+    "message": "Открыть инструмент обрезки"
+  },
+  "lockRatio": {
+    "message": "Зафиксировать"
+  },
+  "titleCapture": {
+    "message": "Захватить область"
+  },
+  "titleKofi": {
+    "message": "Поддержать на Ko-fi"
+  },
+  "bgWhite": {
+    "message": "Белый"
+  },
+  "bgGray": {
+    "message": "Серый"
+  },
+  "bgBlack": {
+    "message": "Чёрный"
+  },
+  "titleLockRatio": {
+    "message": "Зафиксировать"
+  },
+  "titleSearchSimilar": {
+    "message": "Найти похожие (Google Lens)"
+  },
+  "titleCaptureDelay": {
+    "message": "Задержка захвата"
+  },
+  "downloadOptions": {
+    "message": "Параметры загрузки"
+  },
+  "settingSubfolder": {
+    "message": "Подпапка"
+  },
+  "settingSubfolderHint": {
+    "message": "напр: images/"
+  },
+  "settingFilename": {
+    "message": "Имя файла"
+  },
+  "fnOriginal": {
+    "message": "Оригинальное имя"
+  },
+  "fnSystem": {
+    "message": "Системное имя"
+  },
+  "fnCustom": {
+    "message": "Свой префикс"
+  },
+  "settingPrefix": {
+    "message": "Префикс"
+  },
+  "settingConvertOnDl": {
+    "message": "Конвертировать при загрузке"
+  },
+  "settingNone": {
+    "message": "Нет"
+  },
+  "settingZipDefault": {
+    "message": "ZIP по умолчанию"
+  },
+  "newImagesDetected": {
+    "message": "новых изображений найдено"
+  },
+  "rescan": {
+    "message": "Обновить"
+  },
+  "settingLanguage": {
+    "message": "Язык"
+  },
+  "filterAny": {
+    "message": "Все"
+  },
+  "filterSmallLabel": {
+    "message": "Малый (< 200px)"
+  },
+  "filterMediumLabel": {
+    "message": "Средний (200–499px)"
+  },
+  "filterLargeLabel": {
+    "message": "Большой (500–1199px)"
+  },
+  "filterXLargeLabel": {
+    "message": "Очень большой (≥ 1200px)"
+  },
+  "filterAtLeast": {
+    "message": "Не менее…"
+  },
+  "saveSizeSelection": {
+    "message": "Сохранить выбор размера"
+  },
+  "notifSaved": {
+    "message": "Сохранено"
+  },
+  "presetAspectRatio": {
+    "message": "Соотношение сторон"
+  },
+  "presetCommon": {
+    "message": "Стандартные размеры"
+  },
+  "presetSocial": {
+    "message": "Соцсети"
+  },
+  "pOriginal": {
+    "message": "Оригинал"
+  },
+  "pCustom": {
+    "message": "Вручную"
+  },
+  "pPost": {
+    "message": "Пост"
+  },
+  "pStory": {
+    "message": "Сторис"
+  },
+  "pCover": {
+    "message": "Обложка"
+  },
+  "pThumb": {
+    "message": "Превью"
+  },
+  "pHeader": {
+    "message": "Шапка"
+  },
+  "pBanner": {
+    "message": "Баннер"
+  },
+  "pPin": {
+    "message": "Пин"
+  },
+  "pPoster": {
+    "message": "Постер"
+  },
+  "pBackdrop": {
+    "message": "Фон"
+  },
+  "pStill": {
+    "message": "Кадр"
+  },
+  "pProfile": {
+    "message": "Профиль"
+  },
+  "pBg": {
+    "message": "Фон"
+  },
+  "pEpHd": {
+    "message": "Эп HD"
+  },
+  "pEpSd": {
+    "message": "Эп SD"
+  },
+  "pActor": {
+    "message": "Актёр"
+  },
+  "pIcon": {
+    "message": "Иконка"
+  },
+  "pCinema": {
+    "message": "Cinemagraph"
+  },
+  "settingConvertOnDlHint": {
+    "message": "Применяется только при скачивании в исходном формате"
+  },
+  "settingSubfolderNote": {
+    "message": "Лучше работает с отключённым 'Запрашивать место сохранения'"
+  },
+  "pTransform": {
+    "message": "Преобразовать"
+  },
+  "pRotate": {
+    "message": "Повернуть"
+  },
+  "pHorizontal": {
+    "message": "По горизонт."
+  },
+  "pVertical": {
+    "message": "По вертик."
+  },
+  "pRotateLeft": {
+    "message": "Повернуть влево"
+  },
+  "pFlipH": {
+    "message": "Отразить по горизонтали"
+  },
+  "pFlipV": {
+    "message": "Отразить по вертикали"
+  },
+  "captureHint": {
+    "message": "Нарисуйте прямоугольник для захвата · ESC для отмены"
+  }
+}
