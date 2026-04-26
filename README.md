@@ -67,6 +67,10 @@ See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
 
 ---
 
+## 📦 Chrome Web Store bundle
+
+The Web Store upload ZIP is built as a minimal runtime bundle: repository metadata, development scripts and unused brand assets are excluded from the submission package.
+
 ## 🚀 Installation
 
 ### From Chrome Web Store

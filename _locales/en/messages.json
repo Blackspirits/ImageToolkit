@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Right-click any image to save as PNG, JPG, WebP or AVIF. Browse page images, batch download, resize, copy to clipboard. 100% local, no tracking.",
+    "message": "Save, convert (PNG/JPG/WebP/AVIF), resize and copy any image. 100% local, no tracking.",
     "description": "Extension description for the store"
   },
   "cmdQuickSave": {

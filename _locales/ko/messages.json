@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "이미지를 마우스 오른쪽 클릭하여 PNG, JPG, WebP, AVIF로 저장하세요. 페이지 이미지 탐색, 일괄 다운로드, 크기 조정, 클립보드 복사. 100% 로컬, 추적 없음."
+    "message": "이미지를 저장, 변환, 크기 조정, 복사하세요. 100% 로컬, 추적 없음."
   },
   "cmdQuickSave": {
     "message": "기본 형식으로 빠른 저장"

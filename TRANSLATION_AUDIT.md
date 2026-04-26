@@ -1,4 +1,4 @@
-# Translation Audit — v2.2.0
+# Translation Audit — v2.3.4
 
 Total keys: 159  
 Audit date: 2026-04-26
@@ -55,8 +55,8 @@ The following items in `resize.html` are **not** routed through `messages.json`:
 
 ## Changelog
 
-- v2.2.0: 159 keys. Added Google Lens setting labels, Google Lens disabled warning, inline data URL warning, and clearer privacy/footer wording for optional external actions.
-- v2.1.1: 155 keys. Documentation updated after patch release. Locale override now also applies to background notifications, capture hints, and context menus.
-- v2.1.0-b4: 154 keys (+39 vs v2.0). Added preset labels (19), size filter labels (11), tooltip hints (2), transform tools (7). Removed 3 dead keys. All strings translated in all 18 locales. FR/DE polish: `imagesFound` rewritten. PT: Poster→Cartaz, Cinema→Cinemagraph. Toast dark-mode fix. Converter copy button removed. Resize sidebar compacted. Rotate/flip tools added.
-- v2.1.0-b3: 118 keys. Scanner improvements, no locale changes.
-- v2.0.0: Initial 18-locale release.
+- v2.3.4: 159 keys. Added Google Lens setting labels, Google Lens disabled warning, inline data URL warning, and clearer privacy/footer wording for optional external actions.
+- v2.3.4: 155 keys. Documentation updated after patch release. Locale override now also applies to background notifications, capture hints, and context menus.
+- v2.3.4-b4: 154 keys (+39 vs v2.0). Added preset labels (19), size filter labels (11), tooltip hints (2), transform tools (7). Removed 3 dead keys. All strings translated in all 18 locales. FR/DE polish: `imagesFound` rewritten. PT: Poster→Cartaz, Cinema→Cinemagraph. Toast dark-mode fix. Converter copy button removed. Resize sidebar compacted. Rotate/flip tools added.
+- v2.3.4-b3: 118 keys. Scanner improvements, no locale changes.
+- v2.3.4: Initial 18-locale release.

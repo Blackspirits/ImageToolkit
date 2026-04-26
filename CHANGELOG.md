@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [2.3.4] - 2026-04-26
+
+### Changed
+- Shortened `extDescription` in all locales to stay within the Chrome manifest description limit.
+- Removed the redundant `tabs` permission to reduce install-time permission warnings.
+- Updated privacy documentation for `chrome.storage.sync`.
+- Prepared a cleaner Chrome Web Store runtime bundle excluding development files and unused brand assets.
+
 ## [2.3.3] - 2026-04-26
 
 ### Changed

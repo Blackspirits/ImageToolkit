@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Kliknij prawym przyciskiem myszy na obraz, aby zapisać jako PNG, JPG, WebP lub AVIF. Przeglądaj obrazy strony, pobieranie zbiorcze, zmiana rozmiaru, kopiowanie. 100% lokalnie, bez śledzenia."
+    "message": "Zapisuj, konwertuj, zmieniaj rozmiar i kopiuj obrazy. 100% lokalnie, bez śledzenia."
   },
   "cmdQuickSave": {
     "message": "Szybki zapis w domyślnym formacie"

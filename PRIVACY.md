@@ -42,7 +42,6 @@ ImageToolkit does not contact third-party services automatically for tracking or
 | `offscreen` | Runs Canvas API for image conversion |
 | `clipboardWrite` | Copies converted images or image URLs to your clipboard |
 | `activeTab` | Accesses current tab for batch image scanning |
-| `tabs` | Queries active tab from side panel context |
 | `scripting` | Injects image scanner into current page (on-demand only) |
 | `sidePanel` | Renders the extension UI as a docked side panel |
 | `<all_urls>` | Fetches and scans images on any website for conversion and downloading |
@@ -55,3 +54,7 @@ ImageToolkit does not contact third-party services automatically for tracking or
 ## Contact
 
 If you have questions about this privacy policy, please open an issue on the [GitHub repository](https://github.com/BlackSpirits/ImageToolkit).
+
+### Chrome sync storage
+
+User preferences are stored with `chrome.storage.sync`, which Chrome may synchronize across the user's signed-in browsers. ImageToolkit can only read and write its own extension settings and does not have access to the user's Google Account or Chrome sync data.

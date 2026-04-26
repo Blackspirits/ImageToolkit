@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Rechtsklick auf ein Bild, um es als PNG, JPG, WebP oder AVIF zu speichern. Seitenbilder durchsuchen, Stapeldownload, Größe ändern, kopieren. 100 % lokal, kein Tracking."
+    "message": "Bilder speichern, konvertieren, skalieren und kopieren. 100% lokal, ohne Tracking."
   },
   "cmdQuickSave": {
     "message": "Schnellspeichern im Standardformat"

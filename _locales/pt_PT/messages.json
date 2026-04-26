@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Clica com o botão direito em qualquer imagem para guardar como PNG, JPG, WebP ou AVIF. Percorre as imagens da página, transfere em lote, redimensiona e copia para a área de transferência. 100% local, sem rastreio.",
+    "message": "Guarda, converte (PNG/JPG/WebP/AVIF), redimensiona e copia imagens. 100% local, sem rastreio.",
     "description": "Extension description for the store"
   },
   "cmdQuickSave": {

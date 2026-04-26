@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "右鍵點擊任何圖片以另存為PNG、JPG、WebP或AVIF。瀏覽頁面圖片、批次下載、調整大小、複製到剪貼簿。100%本地處理，無追蹤。"
+    "message": "儲存、轉換、調整大小並複製圖片。100% 本機處理，無追蹤。"
   },
   "cmdQuickSave": {
     "message": "以預設格式快速儲存"

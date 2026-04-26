@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Clic droit sur une image pour l'enregistrer en PNG, JPG, WebP ou AVIF. Parcourez les images, téléchargement groupé, redimensionner, copier. 100 % local, sans pistage.",
+    "message": "Enregistrez, convertissez, redimensionnez et copiez des images. 100 % local, sans suivi.",
     "description": "Extension description for the store"
   },
   "cmdQuickSave": {

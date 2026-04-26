@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Klik met de rechtermuisknop op een afbeelding om op te slaan als PNG, JPG, WebP of AVIF. Blader door paginabeelden, batchdownload, formaat wijzigen, kopiëren. 100% lokaal, geen tracking."
+    "message": "Sla afbeeldingen op, converteer, wijzig formaat en kopieer ze. 100% lokaal, geen tracking."
   },
   "cmdQuickSave": {
     "message": "Snel opslaan in standaardformaat"

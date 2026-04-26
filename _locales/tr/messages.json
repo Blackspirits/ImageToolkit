@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Herhangi bir görsele sağ tıklayarak PNG, JPG, WebP veya AVIF olarak kaydedin. Sayfa görsellerini inceleyin, toplu indirin, yeniden boyutlandırın, kopyalayın. 100% yerel, izleme yok."
+    "message": "Görselleri kaydet, dönüştür, yeniden boyutlandır ve kopyala. %100 yerel, izleme yok."
   },
   "cmdQuickSave": {
     "message": "Varsayılan formatta hızlı kaydet"

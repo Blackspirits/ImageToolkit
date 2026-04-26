@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Haz clic derecho en cualquier imagen para guardarla como PNG, JPG, WebP o AVIF. Explora imágenes de la página, descarga por lotes, redimensionar, copiar. 100 % local, sin seguimiento."
+    "message": "Guarda, convierte, redimensiona y copia imágenes. 100% local, sin rastreo."
   },
   "cmdQuickSave": {
     "message": "Guardar rápido en formato predeterminado"

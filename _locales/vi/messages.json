@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "Nhấp chuột phải vào bất kỳ hình ảnh nào để lưu dưới dạng PNG, JPG, WebP hoặc AVIF. Duyệt hình ảnh trang, tải hàng loạt, thay đổi kích thước, sao chép. 100% cục bộ, không theo dõi."
+    "message": "Lưu, chuyển đổi, đổi kích thước và sao chép ảnh. 100% cục bộ, không theo dõi."
   },
   "cmdQuickSave": {
     "message": "Lưu nhanh ở định dạng mặc định"

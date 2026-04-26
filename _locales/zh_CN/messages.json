@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "右键点击任何图片以另存为PNG、JPG、WebP或AVIF。浏览页面图片、批量下载、调整大小、复制到剪贴板。100%本地处理，无追踪。"
+    "message": "保存、转换、调整大小并复制图片。100% 本地处理，无跟踪。"
   },
   "cmdQuickSave": {
     "message": "以默认格式快速保存"

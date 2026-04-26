@@ -8,7 +8,7 @@
     "description": "Short name"
   },
   "extDescription": {
-    "message": "画像を右クリックしてPNG、JPG、WebP、AVIFで保存。ページ画像の閲覧、一括ダウンロード、リサイズ、クリップボードにコピー。100%ローカル処理。"
+    "message": "画像を保存、変換、リサイズ、コピー。100%ローカル処理、追跡なし。"
   },
   "cmdQuickSave": {
     "message": "デフォルト形式でクイック保存"
