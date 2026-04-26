@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.1] - 2026-04-26
+
+### Fixed
+
+- Language override now applies to background notifications, capture hints, and context menu labels.
+- Context menus are rebuilt when the language setting changes.
+- Translation audit updated to the current 155-key locale packs.
+- Privacy and README wording now reflect user-triggered external actions such as Google Lens and Ko-fi.
+
+### Changed
+
+- Removed obsolete social preset context-menu code and the unused `enableSocialPresets` setting.
+- Merged the side-panel message handler into the main background message listener.
+- Limited remote size probing to 100 URLs per scan to reduce request spikes on image-heavy pages.
+- Improved subfolder filename sanitization to avoid unsafe path segments.
+- Highlight traversal no longer uses `querySelectorAll('*')` on the main document.
+
+### Removed
+
+- Removed unused `loadImageAsDataUrl()` helper from `resize.js`.
+
 ## [2.1.0] - 2026-03-24
 
 ### Added

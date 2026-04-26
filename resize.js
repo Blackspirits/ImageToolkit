@@ -423,16 +423,3 @@ function detectAlpha(img) {
   }
 }
 
-// ===== Fetch image as data URL via background (CORS bypass) =====
-function loadImageAsDataUrl(url) {
-  // If already a data URL, return as-is
-  if (url.startsWith('data:')) return Promise.resolve(url);
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage({ action: 'fetchAsDataUrl', imageUrl: url }, (r) => {
-      if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
-      if (r?.error) return reject(new Error(r.error));
-      if (r?.dataUrl) return resolve(r.dataUrl);
-      reject(new Error('No data'));
-    });
-  });
-}

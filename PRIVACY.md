@@ -1,10 +1,10 @@
 # Privacy Policy — ImageToolkit
 
-**Last updated:** 2025
+**Last updated:** 2026-04-26
 
 ## Summary
 
-ImageToolkit does **not** collect, store, transmit, or share any user data. Period.
+ImageToolkit does **not** collect, store, sell, or share personal data. Image processing runs locally in your browser.
 
 ## Data Collection
 
@@ -12,14 +12,24 @@ This extension collects **zero** data. Specifically:
 
 - **No personal information** is collected
 - **No browsing history** is accessed or stored
-- **No images are uploaded** to any server
+- **No images are uploaded** to ImageToolkit servers
 - **No analytics or telemetry** of any kind
-- **No cookies** are set or read
-- **No third-party services** are contacted
+- **No cookies** are set by ImageToolkit
+- **No remote scripts** are loaded
 
 ## Image Processing
 
-All image conversion, resizing, and optimization happens **entirely locally** in your browser using the Canvas API. Images are never sent to any external server.
+All image conversion, resizing, cropping, and optimization happens **entirely locally** in your browser using the Canvas API. Images are not sent to ImageToolkit servers.
+
+When you choose features that work with remote images, the extension may fetch those image URLs directly from your browser so it can inspect, convert, copy, resize, or download them. Some authenticated websites may receive your normal browser cookies for their own image URLs when this is required to access the image. ImageToolkit does not read, store, or transmit those cookies elsewhere.
+
+## Optional External Services
+
+ImageToolkit does not contact third-party services automatically for tracking or analytics. The following user-triggered actions may open or contact external services:
+
+- **Google Lens** — if you click the search-similar action, the image URL may be opened with Google Lens.
+- **Ko-fi** — if you click the support button, a Ko-fi page opens in a new tab.
+- **Remote image hosts/CDNs** — when scanning, probing, converting, copying, or downloading images from a page, your browser may request those image URLs directly from their original hosts.
 
 ## Permissions Explained
 
@@ -30,6 +40,7 @@ All image conversion, resizing, and optimization happens **entirely locally** in
 | `storage` | Saves your preferences (quality, format, theme) |
 | `notifications` | Shows save confirmation (can be disabled) |
 | `offscreen` | Runs Canvas API for image conversion |
+| `clipboardWrite` | Copies converted images or image URLs to your clipboard |
 | `activeTab` | Accesses current tab for batch image scanning |
 | `tabs` | Queries active tab from side panel context |
 | `scripting` | Injects image scanner into current page (on-demand only) |
@@ -39,6 +50,7 @@ All image conversion, resizing, and optimization happens **entirely locally** in
 ## Third-Party Libraries
 
 - **JSZip** (MIT License) — used locally for creating ZIP files during batch downloads. No network requests.
+- **Cropper.js** (MIT License) — used locally for the custom crop/resize interface. No network requests.
 
 ## Contact
 

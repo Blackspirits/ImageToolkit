@@ -316,17 +316,24 @@ function highlightImages(selectedUrls) {
     }
   });
 
-  // Also check shadow DOMs
-  document.querySelectorAll('*').forEach(el => {
-    if (el.shadowRoot) {
-      el.shadowRoot.querySelectorAll('img').forEach(img => {
-        const src = img.currentSrc || img.src;
-        if (selectedSet.has(src)) {
-          img.classList.add(HIGHLIGHT_CLASS);
-        } else {
-          img.classList.remove(HIGHLIGHT_CLASS);
-        }
-      });
-    }
+  // Also check shadow DOMs without querySelectorAll('*') on the main document
+  const root = document.body || document.documentElement;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null);
+  let node;
+  const shadowRoots = [];
+
+  while ((node = walker.nextNode())) {
+    if (node.shadowRoot) shadowRoots.push(node.shadowRoot);
+  }
+
+  shadowRoots.forEach((shadowRoot) => {
+    shadowRoot.querySelectorAll('img').forEach((img) => {
+      const src = img.currentSrc || img.src;
+      if (selectedSet.has(src)) {
+        img.classList.add(HIGHLIGHT_CLASS);
+      } else {
+        img.classList.remove(HIGHLIGHT_CLASS);
+      }
+    });
   });
 }

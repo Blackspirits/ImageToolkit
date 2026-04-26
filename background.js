@@ -6,7 +6,38 @@
 'use strict';
 
 // ---------- i18n Helper ----------
+let customMessages = null;
+let customLocale = 'auto';
+let customLocaleLoading = null;
+
+function formatCustomMessage(key, substitutions) {
+  const entry = customMessages?.[key];
+  if (!entry) return null;
+
+  let msg = entry.message || key;
+  const values = Array.isArray(substitutions) ? substitutions : (substitutions != null ? [substitutions] : []);
+
+  values.forEach((value, index) => {
+    const str = String(value);
+    const positional = index + 1;
+    msg = msg.replace(new RegExp(`\\$${positional}`, 'g'), str);
+
+    if (entry.placeholders) {
+      for (const [name, def] of Object.entries(entry.placeholders)) {
+        if (def.content === `$${positional}`) {
+          msg = msg.replace(new RegExp(`\\$${name.toUpperCase()}\\$`, 'gi'), str);
+        }
+      }
+    }
+  });
+
+  return msg;
+}
+
 const i18n = (key, substitutions) => {
+  const custom = formatCustomMessage(key, substitutions);
+  if (custom) return custom;
+
   try {
     return chrome.i18n.getMessage(key, substitutions) || key;
   } catch {
@@ -14,18 +45,43 @@ const i18n = (key, substitutions) => {
   }
 };
 
+async function loadCustomLocale(locale) {
+  const nextLocale = locale && locale !== 'auto' ? locale : 'auto';
+  if (nextLocale === customLocale && (nextLocale === 'auto' || customMessages)) return;
+
+  if (customLocaleLoading) await customLocaleLoading.catch(() => {});
+
+  customLocaleLoading = (async () => {
+    if (nextLocale === 'auto') {
+      customMessages = null;
+      customLocale = 'auto';
+      return;
+    }
+
+    try {
+      const resp = await fetch(chrome.runtime.getURL(`_locales/${nextLocale}/messages.json`));
+      customMessages = resp.ok ? await resp.json() : null;
+      customLocale = customMessages ? nextLocale : 'auto';
+    } catch {
+      customMessages = null;
+      customLocale = 'auto';
+    }
+  })();
+
+  try {
+    await customLocaleLoading;
+  } finally {
+    customLocaleLoading = null;
+  }
+}
+
+async function syncLocaleFromSettings(settings = null) {
+  const current = settings || await getSettings();
+  await loadCustomLocale(current.locale || 'auto');
+}
+
 // ---------- Constants ----------
 const FORMATS = ['png', 'jpg', 'webp', 'avif'];
-
-const SOCIAL_PRESETS = {
-  'instagram-post':  { label: 'Instagram Post',    w: 1080, h: 1080 },
-  'instagram-story': { label: 'Instagram Story',   w: 1080, h: 1920 },
-  'tiktok':          { label: 'TikTok 9:16',       w: 1080, h: 1920 },
-  'youtube-thumb':   { label: 'YouTube Thumbnail',  w: 1280, h: 720  },
-  'twitter-post':    { label: 'X/Twitter Post',    w: 1200, h: 675  },
-  'linkedin-banner': { label: 'LinkedIn Banner',   w: 1584, h: 396  },
-  'wallpaper-hd':    { label: 'Wallpaper 1920×1080', w: 1920, h: 1080 },
-};
 
 const DEFAULT_SETTINGS = {
   defaultQuality: 85,
@@ -34,79 +90,84 @@ const DEFAULT_SETTINGS = {
   jpgBackground: '#FFFFFF',
   resizeBehavior: 'crop',
   showNotification: true,
-  enableSocialPresets: true,
   theme: 'auto',
   openAsSidePanel: true,
 };
 
 // ---------- Context Menu Setup ----------
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.removeAll(() => {
-    // Parent menu
-    chrome.contextMenus.create({
-      id: 'imagetoolkit-parent',
-      title: i18n('menuParent'),
-      contexts: ['image'],
-    });
+async function buildContextMenus() {
+  await syncLocaleFromSettings();
 
-    // Format items
-    FORMATS.forEach((fmt) => {
-      chrome.contextMenus.create({
-        id: `save-as-${fmt}`,
-        title: i18n('menuSaveAs', [fmt.toUpperCase()]),
-        parentId: 'imagetoolkit-parent',
-        contexts: ['image'],
-      });
-    });
+  await new Promise((resolve) => chrome.contextMenus.removeAll(resolve));
 
-    // Separator
-    chrome.contextMenus.create({
-      id: 'sep-1',
-      type: 'separator',
-      parentId: 'imagetoolkit-parent',
-      contexts: ['image'],
-    });
+  // Parent menu
+  chrome.contextMenus.create({
+    id: 'imagetoolkit-parent',
+    title: i18n('menuParent'),
+    contexts: ['image'],
+  });
 
-    // Copy to clipboard
+  // Format items
+  FORMATS.forEach((fmt) => {
     chrome.contextMenus.create({
-      id: 'copy-to-clipboard',
-      title: i18n('menuCopyClipboard'),
-      parentId: 'imagetoolkit-parent',
-      contexts: ['image'],
-    });
-
-    // Separator
-    chrome.contextMenus.create({
-      id: 'sep-2',
-      type: 'separator',
-      parentId: 'imagetoolkit-parent',
-      contexts: ['image'],
-    });
-
-    // Resize presets
-    chrome.contextMenus.create({
-      id: 'resize-1080',
-      title: i18n('menuResize1080'),
-      parentId: 'imagetoolkit-parent',
-      contexts: ['image'],
-    });
-
-    chrome.contextMenus.create({
-      id: 'custom-resize',
-      title: i18n('menuCustomResize'),
+      id: `save-as-${fmt}`,
+      title: i18n('menuSaveAs', [fmt.toUpperCase()]),
       parentId: 'imagetoolkit-parent',
       contexts: ['image'],
     });
   });
 
-  // Initialize default settings and side panel behavior
-  chrome.storage.sync.get(['settings'], (result) => {
-    if (!result.settings) {
-      chrome.storage.sync.set({ settings: DEFAULT_SETTINGS });
-    }
-    applySidePanelBehavior(result.settings || DEFAULT_SETTINGS);
+  chrome.contextMenus.create({
+    id: 'sep-1',
+    type: 'separator',
+    parentId: 'imagetoolkit-parent',
+    contexts: ['image'],
   });
+
+  chrome.contextMenus.create({
+    id: 'copy-to-clipboard',
+    title: i18n('menuCopyClipboard'),
+    parentId: 'imagetoolkit-parent',
+    contexts: ['image'],
+  });
+
+  chrome.contextMenus.create({
+    id: 'sep-2',
+    type: 'separator',
+    parentId: 'imagetoolkit-parent',
+    contexts: ['image'],
+  });
+
+  chrome.contextMenus.create({
+    id: 'resize-1080',
+    title: i18n('menuResize1080'),
+    parentId: 'imagetoolkit-parent',
+    contexts: ['image'],
+  });
+
+  chrome.contextMenus.create({
+    id: 'custom-resize',
+    title: i18n('menuCustomResize'),
+    parentId: 'imagetoolkit-parent',
+    contexts: ['image'],
+  });
+}
+
+chrome.runtime.onInstalled.addListener(async () => {
+  const settings = await new Promise((resolve) => {
+    chrome.storage.sync.get(['settings'], (result) => {
+      if (!result.settings) chrome.storage.sync.set({ settings: DEFAULT_SETTINGS });
+      resolve(result.settings || DEFAULT_SETTINGS);
+    });
+  });
+
+  await syncLocaleFromSettings(settings);
+  await buildContextMenus();
+  applySidePanelBehavior(settings);
 });
+
+// Prime the custom locale when the service worker wakes up.
+syncLocaleFromSettings().catch(() => {});
 
 // ---------- Side Panel Behavior ----------
 function applySidePanelBehavior(settings) {
@@ -116,12 +177,26 @@ function applySidePanelBehavior(settings) {
 }
 
 // Listen for settings changes
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.settings?.newValue) applySidePanelBehavior(changes.settings.newValue);
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'sync' || !changes.settings?.newValue) return;
+
+  const next = changes.settings.newValue;
+  const prev = changes.settings.oldValue || {};
+  applySidePanelBehavior(next);
+
+  if ((prev.locale || 'auto') !== (next.locale || 'auto')) {
+    (async () => {
+      await syncLocaleFromSettings(next);
+      await buildContextMenus();
+    })().catch(() => {});
+  }
 });
 
 // ---------- Context Menu Click Handler ----------
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  const settings = await getSettings();
+  await syncLocaleFromSettings(settings);
+
   const imageUrl = info.srcUrl;
   if (!imageUrl) {
     notify(i18n('errorNoImage'));
@@ -140,7 +215,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
-  const settings = await getSettings();
   let instructions = {};
 
   if (info.menuItemId.startsWith('save-as-')) {
@@ -155,16 +229,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       quality: settings.defaultQuality / 100,
       resizeWidth: 1080,
     };
-  } else if (info.menuItemId.startsWith('social-')) {
-    const presetKey = info.menuItemId.replace('social-', '');
-    const preset = SOCIAL_PRESETS[presetKey];
-    if (!preset) return;
-    instructions = {
-      format: 'jpeg',
-      quality: settings.defaultQuality / 100,
-      cropWidth: preset.w,
-      cropHeight: preset.h,
-    };
   }
 
   await processAndSave(imageUrl, instructions, settings);
@@ -172,7 +236,17 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 // ---------- Message Handler ----------
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const { action } = message;
+  const { action } = message || {};
+
+  if (action === 'openSidePanel') {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (tab?.id) {
+        chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
+      }
+    });
+    sendResponse({ success: true });
+    return false;
+  }
 
   if (action === 'processAndSave') {
     processAndSave(message.imageUrl, message.instructions, null)
@@ -220,7 +294,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (action === 'downloadBlob') {
-    triggerDownload(message.dataUrl, message.filename, message.saveAs);
+    const url = typeof message.dataUrl === 'string' ? message.dataUrl : '';
+    const isAllowedUrl = url.startsWith('blob:') || /^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url);
+
+    if (!isAllowedUrl) {
+      sendResponse({ error: 'Unsupported download URL' });
+      return false;
+    }
+
+    const filename = sanitizeFilename(message.filename || 'download', true) || 'download';
+    triggerDownload(url, filename, message.saveAs);
     sendResponse({ success: true });
     return false;
   }
@@ -261,16 +344,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (!tab?.id) { sendResponse({ error: 'No tab' }); return; }
       // Resolve hint string respecting locale override
       const settings = await getSettings();
-      let hint = i18n('captureHint');
-      if (settings.locale && settings.locale !== 'auto') {
-        try {
-          const resp = await fetch(chrome.runtime.getURL(`_locales/${settings.locale}/messages.json`));
-          if (resp.ok) {
-            const msgs = await resp.json();
-            if (msgs.captureHint?.message) hint = msgs.captureHint.message;
-          }
-        } catch {}
-      }
+      await syncLocaleFromSettings(settings);
+      const hint = i18n('captureHint');
       // Inject hint variable, then capture script
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
@@ -494,7 +569,9 @@ async function processImage(imageUrl, instructions) {
 // ---------- Process and Save ----------
 async function processAndSave(imageUrl, instructions, settings) {
   try {
+    instructions = instructions || {};
     if (!settings) settings = await getSettings();
+    await syncLocaleFromSettings(settings);
     if (instructions.quality == null) {
       instructions.quality = settings.defaultQuality / 100;
     }
@@ -521,6 +598,7 @@ async function processAndSave(imageUrl, instructions, settings) {
 async function processAndCopy(imageUrl) {
   try {
     const settings = await getSettings();
+    await syncLocaleFromSettings(settings);
     const instructions = {
       format: 'png',
       quality: 1.0,
@@ -573,33 +651,32 @@ async function copyTextToClipboard(text) {
   });
 }
 
-// ---------- Side Panel Support ----------
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'openSidePanel') {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (tab) {
-        chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
-      }
-    });
-    sendResponse({ success: true });
-    return false;
-  }
-});
 
 // ---------- Filename Sanitization ----------
 function sanitizeFilename(input, allowSlash = false) {
   if (!input) return allowSlash ? '' : 'image';
-  const illegal = allowSlash ? /[\\?<>:*|"]/g : /[\/\\?<>:*|"]/g;
-  let name = input
-    .replace(illegal, '')
-    .replace(/[\x00-\x1f\x80-\x9f]/g, '')
-    .replace(/^\.+$/, 'image')
-    .replace(/^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$/i, 'image')
-    .replace(/[\s.]+$/g, '')
-    .trim();
-  if (!allowSlash && name.length > 60) name = name.substring(0, 60).replace(/[^a-zA-Z0-9]+$/i, '');
-  return name || (allowSlash ? '' : 'image');
+
+  const cleanSegment = (segment) => {
+    let name = String(segment)
+      .replace(/[\\/\?<>:*|"]/g, '')
+      .replace(/[\x00-\x1f\x80-\x9f]/g, '')
+      .replace(/^\.+$/, 'image')
+      .replace(/^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$/i, 'image')
+      .replace(/[\s.]+$/g, '')
+      .trim();
+    if (name.length > 60) name = name.substring(0, 60).replace(/[^a-zA-Z0-9]+$/i, '');
+    return name;
+  };
+
+  if (allowSlash) {
+    return String(input)
+      .split('/')
+      .map(cleanSegment)
+      .filter((segment) => segment && segment !== '.' && segment !== '..')
+      .join('/');
+  }
+
+  return cleanSegment(input) || 'image';
 }
 
 function buildFilename(imageUrl, instructions) {
@@ -746,7 +823,7 @@ async function probeImageTypes(urls) {
 
 async function probeImageSizes(urls) {
   const out = {};
-  await mapLimit(urls, 6, async (url) => {
+  await mapLimit(urls.slice(0, 100), 6, async (url) => {
     const size = await probeRemoteSize(url);
     if (size > 0) out[url] = size;
   });

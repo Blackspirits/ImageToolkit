@@ -1,31 +1,31 @@
-# Translation Audit — v2.1.0 (build 4)
-Total keys: 154
-Audit date: 2026-03-28
+# Translation Audit — v2.1.1
+Total keys: 155
+Audit date: 2026-04-26
 
 ## Coverage
 
-All 18 locale packs have 154/154 keys present (0 missing).
+All 18 locale packs have 155/155 keys present (0 missing).
 
 | Locale | Keys | Identical to EN | Breakdown |
 |--------|------|-----------------|-----------|
-| ar | 154 | 1 | 1 brand name |
-| de | 154 | 23 | 2 universal, 21 legitimate loanwords |
-| en | 154 | — | base locale |
-| es | 154 | 13 | 1 universal, 12 legitimate |
-| fr | 154 | 12 | 2 universal, 10 legitimate |
-| it | 154 | 13 | 1 universal, 12 legitimate |
-| ja | 154 | 3 | 1 universal, 2 legitimate |
-| ko | 154 | 3 | 1 universal, 2 legitimate |
-| nl | 154 | 13 | 2 universal, 11 legitimate |
-| pl | 154 | 9 | 1 universal, 8 legitimate |
-| pt_BR | 154 | 13 | 1 universal, 12 legitimate |
-| pt_PT | 154 | 13 | 1 universal, 12 legitimate |
-| ru | 154 | 4 | 1 universal, 3 legitimate |
-| tr | 154 | 11 | 1 universal, 10 legitimate |
-| uk | 154 | 4 | 1 universal, 3 legitimate |
-| vi | 154 | 8 | 1 universal, 7 legitimate |
-| zh_CN | 154 | 1 | 1 brand name |
-| zh_TW | 154 | 1 | 1 brand name |
+| ar | 155 | 2 | 1 brand name, 1 universal |
+| de | 155 | 24 | 2 universal, 22 legitimate loanwords |
+| en | 155 | — | base locale |
+| es | 155 | 15 | 1 universal, 14 legitimate |
+| fr | 155 | 14 | 2 universal, 12 legitimate |
+| it | 155 | 13 | 1 universal, 12 legitimate |
+| ja | 155 | 4 | 1 universal, 3 legitimate |
+| ko | 155 | 4 | 1 universal, 3 legitimate |
+| nl | 155 | 13 | 2 universal, 11 legitimate |
+| pl | 155 | 9 | 1 universal, 8 legitimate |
+| pt_BR | 155 | 13 | 1 universal, 12 legitimate |
+| pt_PT | 155 | 13 | 1 universal, 12 legitimate |
+| ru | 155 | 5 | 1 universal, 4 legitimate |
+| tr | 155 | 12 | 1 universal, 11 legitimate |
+| uk | 155 | 5 | 1 universal, 4 legitimate |
+| vi | 155 | 8 | 1 universal, 7 legitimate |
+| zh_CN | 155 | 2 | 1 brand name, 1 universal |
+| zh_TW | 155 | 2 | 1 brand name, 1 universal |
 
 ## Why "identical to EN" ≠ "untranslated"
 
@@ -54,6 +54,7 @@ The following items in `resize.html` are **not** routed through `messages.json`:
 
 ## Changelog
 
+- v2.1.1: 155 keys. Documentation updated after patch release. Locale override now also applies to background notifications, capture hints, and context menus.
 - v2.1.0-b4: 154 keys (+39 vs v2.0). Added preset labels (19), size filter labels (11), tooltip hints (2), transform tools (7). Removed 3 dead keys. All strings translated in all 18 locales. FR/DE polish: `imagesFound` rewritten. PT: Poster→Cartaz, Cinema→Cinemagraph. Toast dark-mode fix. Converter copy button removed. Resize sidebar compacted. Rotate/flip tools added.
 - v2.1.0-b3: 118 keys. Scanner improvements, no locale changes.
 - v2.0.0: Initial 18-locale release.

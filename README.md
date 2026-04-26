@@ -49,9 +49,9 @@ English, Português (PT), Português (BR), and Français are fully translated. 1
 ## 🔒 Privacy
 
 - **Zero data collection** — all processing happens locally in your browser
-- **No analytics, no tracking, no external API calls**
+- **No analytics, no tracking**
 - **No remote scripts** — everything is bundled
-- **`host_permissions: <all_urls>`** — required for scanning page images and fetching cross-origin images for conversion (standard for image downloader extensions)
+- **`host_permissions: <all_urls>`** — required for scanning page images and fetching cross-origin images for conversion. Optional user-triggered actions such as Google Lens may open external services.
 
 See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
 
@@ -79,7 +79,7 @@ ImageToolkit/
 ├── background.js        Service worker: menus, routing, downloads, type probing
 ├── offscreen.html/js    Canvas engine: conversion, resize, crop
 ├── content.js           Image scanner (injected on-demand, TreeWalker-based)
-├── popup.html/css/js    3-tab UI: Images, Convert, Settings
+├── popup.html/css/js    3-tab UI: Images, Tools, Settings
 ├── resize.html/css/js   Custom resize popup window
 ├── _locales/            18 language packs
 ├── icons/               Extension icons
@@ -94,9 +94,9 @@ ImageToolkit/
 - **Offscreen Document** for Canvas operations — no code injected into pages for conversion
 - **On-demand content script** — image scanner only injected when the user opens the popup or triggers a scan
 - **TreeWalker-based scanner** — single DOM pass collects `<img>` elements and shadow roots simultaneously, targeted CSS background scan (not `querySelectorAll('*')`)
-- **Type probing** — images with unrecognizable URL extensions are probed via HEAD request (with GET Range fallback) to detect real Content-Type
+- **Type probing** — images with unrecognizable URL extensions are probed via HEAD request (with GET Range fallback) to detect real Content-Type, with conservative limits to avoid excessive requests
 - **`host_permissions: <all_urls>`** — required for side panel to inject content scripts and fetch images from any page
-- **No React, no frameworks** — pure JS/CSS for minimal footprint (~100KB including JSZip)
+- **No React, no frameworks** — pure JS/CSS for minimal footprint (bundled JSZip and Cropper.js, no remote scripts)
 
 ---
 

@@ -358,7 +358,7 @@ function queueGridRefresh() {
 }
 
 async function probeFileSizes() {
-  const missing = allGrid.filter(i => !i.fileSize).map(i => i.src);
+  const missing = allGrid.filter(i => !i.fileSize).map(i => i.src).slice(0, 100);
   if (!missing.length) return;
   try {
     const m = await xmsg({ action: 'probeImageSizes', urls: missing });
@@ -677,7 +677,7 @@ function initSettings() {
     defaultQuality: parseInt(qr.value, 10), defaultFormat: df.value, resizeBehavior: rb.value,
     saveAs: sa.checked, showNotification: sn.checked, openAsSidePanel: sp.checked, theme: ts.value,
     locale: lg?.value || 'auto',
-    jpgBackground: '#FFFFFF', enableSocialPresets: true,
+    jpgBackground: '#FFFFFF',
     subfolder: sf?.value || '', filenamePattern: fn?.value || 'original',
     filenamePrefix: px?.value || 'img_', convertOnDl: cd?.value || 'none', zipDefault: zd?.checked || false,
   }});
