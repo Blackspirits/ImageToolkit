@@ -36,6 +36,7 @@ Select images from the grid and download them individually, convert to a differe
 - **Save As dialog** toggle
 - **Resize behavior**: Center Crop or Fit (Letterbox)
 - **Notification** toggle
+- **Optional Google Lens** external search toggle
 - **Dark/Light/Auto** theme
 
 ### ⌨️ Keyboard Shortcut
@@ -51,7 +52,7 @@ English, Português (PT), Português (BR), and Français are fully translated. 1
 - **Zero data collection** — all processing happens locally in your browser
 - **No analytics, no tracking**
 - **No remote scripts** — everything is bundled
-- **`host_permissions: <all_urls>`** — required for scanning page images and fetching cross-origin images for conversion. Optional user-triggered actions such as Google Lens may open external services.
+- **`host_permissions: <all_urls>`** — required for scanning page images and fetching cross-origin images for conversion. Optional user-triggered actions such as Google Lens may open external services only when enabled and clicked.
 
 See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
 

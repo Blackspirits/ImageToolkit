@@ -123,7 +123,7 @@
     "message": "100% локальна обробка"
   },
   "noTracking": {
-    "message": "Жодних даних не надсилається. Без входу. Без відстеження."
+    "message": "Без входу. Без відстеження. Зовнішні дії виконуються лише після натискання."
   },
   "smaller": {
     "message": "менший"
@@ -484,5 +484,17 @@
   },
   "captureHint": {
     "message": "Намалюйте прямокутник для захоплення · ESC для скасування"
+  },
+  "settingGoogleLens": {
+    "message": "Пошук Google Lens"
+  },
+  "settingGoogleLensHint": {
+    "message": "Дозволяє запускати пошук Google Lens за URL зображень"
+  },
+  "googleLensDisabled": {
+    "message": "Пошук Google Lens вимкнено в налаштуваннях"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens потрібен віддалений URL зображення"
   }
 }

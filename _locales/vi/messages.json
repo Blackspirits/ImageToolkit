@@ -122,7 +122,7 @@
     "message": "100% xử lý cục bộ"
   },
   "noTracking": {
-    "message": "Không gửi dữ liệu. Không đăng nhập. Không theo dõi."
+    "message": "Không đăng nhập. Không theo dõi. Tác vụ bên ngoài chỉ chạy khi bạn bấm vào."
   },
   "smaller": {
     "message": "nhỏ hơn"
@@ -483,5 +483,17 @@
   },
   "captureHint": {
     "message": "Vẽ hình chữ nhật để chụp · ESC để hủy"
+  },
+  "settingGoogleLens": {
+    "message": "Tìm kiếm Google Lens"
+  },
+  "settingGoogleLensHint": {
+    "message": "Cho phép tìm kiếm Google Lens do bạn kích hoạt cho URL hình ảnh"
+  },
+  "googleLensDisabled": {
+    "message": "Tìm kiếm Google Lens đã tắt trong Cài đặt"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens cần URL hình ảnh từ xa"
   }
 }

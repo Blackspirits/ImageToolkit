@@ -150,7 +150,7 @@
     "message": "100% Local Processing"
   },
   "noTracking": {
-    "message": "No data sent anywhere. No login. No tracking."
+    "message": "No login. No tracking. External actions only run when you click them."
   },
   "smaller": {
     "message": "smaller"
@@ -483,5 +483,17 @@
   },
   "captureHint": {
     "message": "Draw a rectangle to capture · ESC to cancel"
+  },
+  "settingGoogleLens": {
+    "message": "Google Lens search"
+  },
+  "settingGoogleLensHint": {
+    "message": "Allows user-triggered Google Lens searches for image URLs"
+  },
+  "googleLensDisabled": {
+    "message": "Google Lens search is disabled in Settings"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens needs a remote image URL"
   }
 }

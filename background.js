@@ -92,6 +92,7 @@ const DEFAULT_SETTINGS = {
   showNotification: true,
   theme: 'auto',
   openAsSidePanel: true,
+  enableGoogleLens: true,
 };
 
 // ---------- Context Menu Setup ----------
@@ -812,20 +813,51 @@ const MIME_TO_TYPE = {
   'image/vnd.microsoft.icon': 'ico',
 };
 
+const PROBE_TYPE_LIMIT = 30;
+const PROBE_SIZE_LIMIT = 100;
+const PROBE_CACHE_MAX = 500;
+const typeProbeCache = new Map();
+const sizeProbeCache = new Map();
+
+function rememberProbe(cache, url, value) {
+  if (!url || !value) return;
+  cache.set(url, value);
+  if (cache.size > PROBE_CACHE_MAX) {
+    const first = cache.keys().next().value;
+    cache.delete(first);
+  }
+}
+
 async function probeImageTypes(urls) {
   const out = {};
-  await mapLimit(urls.slice(0, 30), 6, async (url) => {
+  const uniqueUrls = [...new Set((urls || []).filter(Boolean))].slice(0, PROBE_TYPE_LIMIT);
+  await mapLimit(uniqueUrls, 6, async (url) => {
+    if (typeProbeCache.has(url)) {
+      out[url] = typeProbeCache.get(url);
+      return;
+    }
     const type = await probeType(url);
-    if (type) out[url] = type;
+    if (type) {
+      rememberProbe(typeProbeCache, url, type);
+      out[url] = type;
+    }
   });
   return out;
 }
 
 async function probeImageSizes(urls) {
   const out = {};
-  await mapLimit(urls.slice(0, 100), 6, async (url) => {
+  const uniqueUrls = [...new Set((urls || []).filter(Boolean))].slice(0, PROBE_SIZE_LIMIT);
+  await mapLimit(uniqueUrls, 6, async (url) => {
+    if (sizeProbeCache.has(url)) {
+      out[url] = sizeProbeCache.get(url);
+      return;
+    }
     const size = await probeRemoteSize(url);
-    if (size > 0) out[url] = size;
+    if (size > 0) {
+      rememberProbe(sizeProbeCache, url, size);
+      out[url] = size;
+    }
   });
   return out;
 }

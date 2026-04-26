@@ -122,7 +122,7 @@
     "message": "100%ローカル処理"
   },
   "noTracking": {
-    "message": "データ送信なし。ログインなし。追跡なし。"
+    "message": "ログイン不要。追跡なし。外部アクションはクリックした時だけ実行されます。"
   },
   "smaller": {
     "message": "より小さい"
@@ -483,5 +483,17 @@
   },
   "captureHint": {
     "message": "矩形を描いてキャプチャ · ESCでキャンセル"
+  },
+  "settingGoogleLens": {
+    "message": "Google Lens 検索"
+  },
+  "settingGoogleLensHint": {
+    "message": "画像 URL に対して、ユーザー操作による Google Lens 検索を許可します"
+  },
+  "googleLensDisabled": {
+    "message": "Google Lens 検索は設定で無効になっています"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens にはリモート画像 URL が必要です"
   }
 }

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] - 2026-04-26
+
+### Added
+
+- Added a user setting to enable or disable the Google Lens external search action.
+- Added a lightweight validation script for manifest, JavaScript syntax, and i18n key parity.
+
+### Changed
+
+- Remote type and size probes now use a small in-memory cache to reduce repeat network requests during a session.
+- Resize URL tool code is now easier to read and debug without changing behaviour.
+- Settings footer and privacy wording now make user-triggered external actions clearer.
+
+### Fixed
+
+- Google Lens action now shows localized warnings when disabled or when the image is an inline data URL.
+
 ## [2.1.1] - 2026-04-26
 
 ### Fixed

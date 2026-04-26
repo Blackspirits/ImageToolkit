@@ -123,7 +123,7 @@
     "message": "100% przetwarzanie lokalne"
   },
   "noTracking": {
-    "message": "Żadne dane nie są wysyłane. Bez logowania. Bez śledzenia."
+    "message": "Bez logowania. Bez śledzenia. Działania zewnętrzne uruchamiają się tylko po kliknięciu."
   },
   "smaller": {
     "message": "mniejszy"
@@ -484,5 +484,17 @@
   },
   "captureHint": {
     "message": "Narysuj prostokąt, aby przechwycić · ESC, aby anulować"
+  },
+  "settingGoogleLens": {
+    "message": "Wyszukiwanie Google Lens"
+  },
+  "settingGoogleLensHint": {
+    "message": "Pozwala na uruchamiane przez Ciebie wyszukiwania Google Lens dla adresów URL obrazów"
+  },
+  "googleLensDisabled": {
+    "message": "Wyszukiwanie Google Lens jest wyłączone w ustawieniach"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens wymaga zdalnego adresu URL obrazu"
   }
 }

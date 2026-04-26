@@ -150,7 +150,7 @@
     "message": "Processamento 100% local"
   },
   "noTracking": {
-    "message": "Nada é enviado para fora. Sem início de sessão. Sem rastreio."
+    "message": "Sem início de sessão. Sem rastreio. As ações externas só correm quando clicas nelas."
   },
   "smaller": {
     "message": "mais pequeno"
@@ -484,5 +484,17 @@
   },
   "captureHint": {
     "message": "Desenhe um retângulo para capturar · ESC para cancelar"
+  },
+  "settingGoogleLens": {
+    "message": "Pesquisa Google Lens"
+  },
+  "settingGoogleLensHint": {
+    "message": "Permite pesquisas no Google Lens iniciadas por ti para URLs de imagens"
+  },
+  "googleLensDisabled": {
+    "message": "A pesquisa Google Lens está desativada nas Definições"
+  },
+  "googleLensNeedsUrl": {
+    "message": "O Google Lens precisa de um URL de imagem remoto"
   }
 }

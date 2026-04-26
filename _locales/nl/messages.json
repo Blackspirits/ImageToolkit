@@ -123,7 +123,7 @@
     "message": "100% lokale verwerking"
   },
   "noTracking": {
-    "message": "Geen data verzonden. Geen login. Geen tracking."
+    "message": "Geen login. Geen tracking. Externe acties worden alleen uitgevoerd wanneer je erop klikt."
   },
   "smaller": {
     "message": "kleiner"
@@ -484,5 +484,17 @@
   },
   "captureHint": {
     "message": "Teken een rechthoek om vast te leggen · ESC om te annuleren"
+  },
+  "settingGoogleLens": {
+    "message": "Google Lens zoeken"
+  },
+  "settingGoogleLensHint": {
+    "message": "Staat door jou gestarte Google Lens-zoekopdrachten voor afbeeldings-URL’s toe"
+  },
+  "googleLensDisabled": {
+    "message": "Google Lens zoeken is uitgeschakeld in Instellingen"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens heeft een externe afbeeldings-URL nodig"
   }
 }

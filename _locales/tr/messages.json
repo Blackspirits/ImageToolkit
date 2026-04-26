@@ -123,7 +123,7 @@
     "message": "100% yerel işleme"
   },
   "noTracking": {
-    "message": "Veri gönderilmez. Giriş yok. Takip yok."
+    "message": "Giriş yok. Takip yok. Harici işlemler yalnızca tıkladığında çalışır."
   },
   "smaller": {
     "message": "daha küçük"
@@ -484,5 +484,17 @@
   },
   "captureHint": {
     "message": "Yakalamak için bir dikdörtgen çizin · İptal için ESC"
+  },
+  "settingGoogleLens": {
+    "message": "Google Lens araması"
+  },
+  "settingGoogleLensHint": {
+    "message": "Görsel URL’leri için senin başlattığın Google Lens aramalarına izin verir"
+  },
+  "googleLensDisabled": {
+    "message": "Google Lens araması Ayarlar’da devre dışı"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens için uzak bir görsel URL’si gerekir"
   }
 }

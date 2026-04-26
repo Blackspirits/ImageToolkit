@@ -122,7 +122,7 @@
     "message": "100% 本地處理"
   },
   "noTracking": {
-    "message": "不傳送任何資料。無需登入。無追蹤。"
+    "message": "無需登入。無追蹤。外部動作只會在你點擊時執行。"
   },
   "smaller": {
     "message": "更小"
@@ -483,5 +483,17 @@
   },
   "captureHint": {
     "message": "繪製矩形以擷取 · ESC 取消"
+  },
+  "settingGoogleLens": {
+    "message": "Google Lens 搜尋"
+  },
+  "settingGoogleLensHint": {
+    "message": "允許由你觸發的 Google Lens 圖片 URL 搜尋"
+  },
+  "googleLensDisabled": {
+    "message": "Google Lens 搜尋已在設定中停用"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens 需要遠端圖片 URL"
   }
 }

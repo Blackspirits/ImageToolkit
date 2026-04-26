@@ -122,7 +122,7 @@
     "message": "100% 로컬 처리"
   },
   "noTracking": {
-    "message": "데이터 전송 없음. 로그인 없음. 추적 없음."
+    "message": "로그인 없음. 추적 없음. 외부 작업은 클릭할 때만 실행됩니다."
   },
   "smaller": {
     "message": "더 작은"
@@ -483,5 +483,17 @@
   },
   "captureHint": {
     "message": "캡처할 영역을 드래그 · ESC로 취소"
+  },
+  "settingGoogleLens": {
+    "message": "Google Lens 검색"
+  },
+  "settingGoogleLensHint": {
+    "message": "이미지 URL에 대해 사용자가 실행하는 Google Lens 검색을 허용합니다"
+  },
+  "googleLensDisabled": {
+    "message": "Google Lens 검색이 설정에서 비활성화되어 있습니다"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens에는 원격 이미지 URL이 필요합니다"
   }
 }

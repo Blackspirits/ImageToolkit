@@ -122,7 +122,7 @@
     "message": "100% معالجة محلية"
   },
   "noTracking": {
-    "message": "لا بيانات مرسلة. بدون تسجيل دخول. بدون تتبع."
+    "message": "لا تسجيل دخول. لا تتبع. لا تعمل الإجراءات الخارجية إلا عند النقر عليها."
   },
   "smaller": {
     "message": "أصغر"
@@ -483,5 +483,17 @@
   },
   "captureHint": {
     "message": "ارسم مستطيلاً للالتقاط · ESC للإلغاء"
+  },
+  "settingGoogleLens": {
+    "message": "بحث Google Lens"
+  },
+  "settingGoogleLensHint": {
+    "message": "يسمح بعمليات بحث Google Lens التي تبدأها أنت لعناوين URL الخاصة بالصور"
+  },
+  "googleLensDisabled": {
+    "message": "تم تعطيل بحث Google Lens في الإعدادات"
+  },
+  "googleLensNeedsUrl": {
+    "message": "يتطلب Google Lens عنوان URL لصورة بعيدة"
   }
 }

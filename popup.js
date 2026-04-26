@@ -292,10 +292,16 @@ function renderGrid() {
     });
     bDl.addEventListener('click', e => { e.stopPropagation(); document.querySelectorAll('.gdl-menu.show').forEach(m => m.classList.remove('show')); dlM.classList.toggle('show'); });
     dlW.append(bDl, dlM);
-    // Google Lens button
+    // Google Lens button (optional external action)
     const bLens = document.createElement('button'); bLens.className = 'gact'; bLens.title = _('titleSearchSimilar');
     bLens.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>';
-    bLens.addEventListener('click', e => { e.stopPropagation(); if (!img.src.startsWith('data:')) chrome.tabs.create({ url: `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(img.src)}`, active: false }); else toast('⚠️ Lens needs a URL'); });
+    bLens.addEventListener('click', async e => {
+      e.stopPropagation();
+      const s = await getSettings();
+      if (s.enableGoogleLens === false) { toast('⚠️ ' + _('googleLensDisabled')); return; }
+      if (img.src.startsWith('data:')) { toast('⚠️ ' + _('googleLensNeedsUrl')); return; }
+      chrome.tabs.create({ url: `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(img.src)}`, active: false });
+    });
     acts.append(bTab, dlW, bLens); r1.appendChild(acts);
 
     const fn = document.createElement('div'); fn.className = 'gfname'; fn.textContent = img.filename; fn.title = img.filename;
@@ -620,14 +626,51 @@ async function cvtTool(mode) {
 }
 
 async function resizeTool() {
+  const input = $('tool-url-input');
+  const widthInput = $('resize-url-w');
+  const heightInput = $('resize-url-h');
+  const lock = $('resize-url-lock');
+  const btn = $('btn-resize-url');
+  const src = toolSrc || input?.value.trim();
 
-  const src = toolSrc || $('tool-url-input')?.value.trim();
-  if (!src) { $('tool-url-input')?.classList.add('input-error'); setTimeout(() => $('tool-url-input')?.classList.remove('input-error'), 1500); return; }
-  const w = parseInt($('resize-url-w').value, 10), lock = $('resize-url-lock');
-  if (!w || w < 1) { $('resize-url-w').classList.add('input-error'); setTimeout(() => $('resize-url-w').classList.remove('input-error'), 1500); return; }
-  const btn = $('btn-resize-url'); btn.disabled = true; const orig = btn.innerHTML; btn.textContent = _('processing') + '…';
-  try { const s = await getSettings(); const r = await xmsg({ action: 'processAndSave', imageUrl: src, instructions: { format: s.defaultFormat || 'webp', quality: s.defaultQuality / 100, width: w, height: lock.checked ? null : (parseInt($('resize-url-h').value, 10) || null), jpgBackground: '#FFFFFF' } });
-  btn.disabled = false; btn.innerHTML = orig; toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', [''])); } catch (e) { btn.disabled = false; btn.innerHTML = orig; toast(`❌ ${e.message}`); }
+  if (!src) {
+    input?.classList.add('input-error');
+    setTimeout(() => input?.classList.remove('input-error'), 1500);
+    return;
+  }
+
+  const width = parseInt(widthInput?.value, 10);
+  if (!width || width < 1) {
+    widthInput?.classList.add('input-error');
+    setTimeout(() => widthInput?.classList.remove('input-error'), 1500);
+    return;
+  }
+
+  const height = lock?.checked ? null : (parseInt(heightInput?.value, 10) || null);
+  const originalLabel = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = _('processing') + '…';
+
+  try {
+    const s = await getSettings();
+    const r = await xmsg({
+      action: 'processAndSave',
+      imageUrl: src,
+      instructions: {
+        format: s.defaultFormat || 'webp',
+        quality: s.defaultQuality / 100,
+        width,
+        height,
+        jpgBackground: '#FFFFFF',
+      },
+    });
+    toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', ['']));
+  } catch (e) {
+    toast(`❌ ${e.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+  }
 }
 
 function initResizeUrl() {} // Merged into initUrlConvert
@@ -645,7 +688,7 @@ async function runAdvisor(url) {
 // ===== Settings =====
 function initSettings() {
   const qr = $('setting-quality'), qv = $('quality-value'), df = $('setting-default-format'), rb = $('setting-resize-behavior');
-  const sa = $('setting-save-as'), sn = $('setting-show-notif'), sp = $('setting-open-sidepanel'), ts = $('setting-theme');
+  const sa = $('setting-save-as'), sn = $('setting-show-notif'), sp = $('setting-open-sidepanel'), gl = $('setting-google-lens'), ts = $('setting-theme');
   const lg = $('setting-language');
   // Download options
   const sf = $('setting-subfolder'), fn = $('setting-filename'), px = $('setting-prefix'), cd = $('setting-convert-dl'), zd = $('setting-zip-default');
@@ -655,7 +698,7 @@ function initSettings() {
     qr.value = s.defaultQuality; qv.textContent = s.defaultQuality + '%';
     df.value = s.defaultFormat || 'webp'; rb.value = s.resizeBehavior || 'crop';
     sa.checked = s.saveAs !== false; sn.checked = s.showNotification !== false;
-    sp.checked = s.openAsSidePanel !== false; ts.value = s.theme || 'auto';
+    sp.checked = s.openAsSidePanel !== false; if (gl) gl.checked = s.enableGoogleLens !== false; ts.value = s.theme || 'auto';
     if (lg) lg.value = s.locale || 'auto';
     // Download options
     if (sf) sf.value = s.subfolder || '';
@@ -675,13 +718,13 @@ function initSettings() {
 
   const save = () => chrome.storage.sync.set({ settings: {
     defaultQuality: parseInt(qr.value, 10), defaultFormat: df.value, resizeBehavior: rb.value,
-    saveAs: sa.checked, showNotification: sn.checked, openAsSidePanel: sp.checked, theme: ts.value,
+    saveAs: sa.checked, showNotification: sn.checked, openAsSidePanel: sp.checked, enableGoogleLens: gl?.checked !== false, theme: ts.value,
     locale: lg?.value || 'auto',
     jpgBackground: '#FFFFFF',
     subfolder: sf?.value || '', filenamePattern: fn?.value || 'original',
     filenamePrefix: px?.value || 'img_', convertOnDl: cd?.value || 'none', zipDefault: zd?.checked || false,
   }});
-  [qr, df, rb, sa, sn, sp, ts, lg, sf, fn, px, cd, zd].filter(Boolean).forEach(el => el.addEventListener('change', save));
+  [qr, df, rb, sa, sn, sp, gl, ts, lg, sf, fn, px, cd, zd].filter(Boolean).forEach(el => el.addEventListener('change', save));
 }
 
 

@@ -124,7 +124,7 @@
     "message": "100% lokale Verarbeitung"
   },
   "noTracking": {
-    "message": "Keine Daten gesendet. Kein Login. Kein Tracking."
+    "message": "Kein Login. Kein Tracking. Externe Aktionen laufen nur, wenn du sie anklickst."
   },
   "smaller": {
     "message": "kleiner"
@@ -485,5 +485,17 @@
   },
   "captureHint": {
     "message": "Rechteck zeichnen zum Erfassen · ESC zum Abbrechen"
+  },
+  "settingGoogleLens": {
+    "message": "Google-Lens-Suche"
+  },
+  "settingGoogleLensHint": {
+    "message": "Erlaubt von dir ausgelöste Google-Lens-Suchen für Bild-URLs"
+  },
+  "googleLensDisabled": {
+    "message": "Die Google-Lens-Suche ist in den Einstellungen deaktiviert"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Google Lens benötigt eine entfernte Bild-URL"
   }
 }

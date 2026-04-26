@@ -123,7 +123,7 @@
     "message": "100% локальная обработка"
   },
   "noTracking": {
-    "message": "Данные не отправляются. Без входа. Без отслеживания."
+    "message": "Без входа. Без отслеживания. Внешние действия выполняются только при нажатии."
   },
   "smaller": {
     "message": "меньше"
@@ -484,5 +484,17 @@
   },
   "captureHint": {
     "message": "Нарисуйте прямоугольник для захвата · ESC для отмены"
+  },
+  "settingGoogleLens": {
+    "message": "Поиск Google Lens"
+  },
+  "settingGoogleLensHint": {
+    "message": "Разрешает запускаемый вами поиск Google Lens по URL изображений"
+  },
+  "googleLensDisabled": {
+    "message": "Поиск Google Lens отключён в настройках"
+  },
+  "googleLensNeedsUrl": {
+    "message": "Для Google Lens нужен удалённый URL изображения"
   }
 }
