@@ -167,8 +167,18 @@ chrome.runtime.onInstalled.addListener(async () => {
   applySidePanelBehavior(settings);
 });
 
-// Prime the custom locale when the service worker wakes up.
-syncLocaleFromSettings().catch(() => {});
+// Keep runtime-only Chrome settings in sync whenever the service worker wakes up.
+async function initializeExtensionRuntime() {
+  const settings = await getSettings();
+  await syncLocaleFromSettings(settings);
+  applySidePanelBehavior(settings);
+}
+
+initializeExtensionRuntime().catch(() => {});
+
+chrome.runtime.onStartup.addListener(() => {
+  initializeExtensionRuntime().catch(() => {});
+});
 
 // ---------- Side Panel Behavior ----------
 function applySidePanelBehavior(settings) {

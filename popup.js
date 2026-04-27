@@ -2,6 +2,16 @@
 // ImageToolkit – Side Panel UI (final)
 // ============================================================
 'use strict';
+// ===== View Mode =====
+// The same UI is used both as a Chrome action popup and as a Side Panel.
+// Keep the layouts separate so disabling the Side Panel opens a correctly-sized popup.
+const VIEW_MODE = new URLSearchParams(window.location.search).get('mode') === 'sidepanel'
+  ? 'sidepanel'
+  : 'popup';
+
+document.body.classList.add(VIEW_MODE);
+document.documentElement.dataset.viewMode = VIEW_MODE;
+
 let customMessages = null; // Custom locale override
 
 function _(k, s) {

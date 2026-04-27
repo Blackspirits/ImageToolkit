@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [2.3.5] - 2026-04-27
+
+### Fixed
+- Fixed the action popup layout when the Side Panel option is disabled.
+- Added explicit popup vs side-panel mode detection for the shared popup UI.
+- Re-applied Side Panel click behaviour when the background service worker starts.
+
 ## [2.3.4] - 2026-04-26
 
 ### Changed
