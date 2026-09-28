@@ -19,7 +19,7 @@ ImageToolkit uses an original blue-purple image/export/toolmark designed for the
 ## ✨ Features
 
 ### 🔄 Format Conversion
-Right-click any image and instantly save it as **PNG**, **JPG**, **WebP**, or **AVIF**. Transparent images get a white background when converting to JPG — no more black artifacts. AVIF falls back to WebP on browsers that don't support it.
+Right-click any image and instantly save it as **PNG**, **JPG**, **WebP**, or **AVIF**. Transparent images get a white background when converting to JPG — no more black artifacts. Chrome cannot encode AVIF from a canvas yet, so AVIF requests fall back to WebP and the file is saved with a `.webp` extension.
 
 ### 🖼️ Image Grid
 Browse all images found on the current page in a visual grid with thumbnails, dimensions, file sizes, and type badges. Filter by **format**, **size range**, or **domain**. Select individual images or batch-select for download.
@@ -37,7 +37,7 @@ Skip the download — copy the converted image directly to your clipboard, ready
 Resize images to custom dimensions with aspect ratio lock, or use built-in presets for Instagram (1080×1080), YouTube Thumbnails (1280×720), TikTok (1080×1920), X/Twitter, LinkedIn, and more.
 
 ### 📦 Batch Download
-Select images from the grid and download them individually, convert to a different format, or package everything into a single ZIP file.
+Select images from the grid and download them individually, convert to a different format, or package everything into a single ZIP file. **Original** keeps the exact source bytes (GIF animation, SVG vectors, JPEG quality) — no re-encoding. Batch downloads never open one Save As dialog per image.
 
 ### ⚙️ Customizable Settings
 - **Quality slider** (10–100%) for lossy formats
@@ -48,11 +48,8 @@ Select images from the grid and download them individually, convert to a differe
 - **Optional Google Lens** external search toggle
 - **Dark/Light/Auto** theme
 
-### ⌨️ Keyboard Shortcut
-Quick-save with `Alt+Shift+S` (customizable in `chrome://extensions/shortcuts`).
-
 ### 🌍 Multilingual
-English, Português (PT), Português (BR), and Français are fully translated. 14 additional languages have partial translations.
+18 languages, all fully translated (see [TRANSLATION_AUDIT.md](TRANSLATION_AUDIT.md)). The interface language can be overridden in Settings.
 
 ---
 

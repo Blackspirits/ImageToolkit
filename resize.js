@@ -376,10 +376,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const mimeType = format === 'jpeg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : format === 'avif' ? 'image/avif' : 'image/png';
       const settings = await new Promise(r => chrome.runtime.sendMessage({ action: 'getSettings' }, r));
       const quality = format === 'png' ? undefined : ((settings?.defaultQuality || 85) / 100);
-      const dataUrl = outputCanvas.toDataURL(mimeType, quality);
+      let dataUrl = outputCanvas.toDataURL(mimeType, quality);
+      // Chrome cannot encode AVIF from a canvas and silently returns PNG; use WebP instead.
+      if (format === 'avif' && !dataUrl.startsWith('data:image/avif')) {
+        dataUrl = outputCanvas.toDataURL('image/webp', quality);
+      }
 
-      // Download via background
-      const ext = format === 'jpeg' ? 'jpg' : format;
+      // Download via background, named after the format actually produced
+      const realMime = dataUrl.slice(5, dataUrl.indexOf(';'));
+      const ext = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif' }[realMime] || 'png';
       const filename = `imagetoolkit_${finalW}x${finalH}.${ext}`;
       chrome.runtime.sendMessage({
         action: 'downloadBlob',
@@ -391,7 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (r?.error) {
           btnSave.textContent = '❌ ' + r.error;
         } else {
-          btnSave.textContent = '✅ ' + _('notifSavedAs').replace('$FORMAT$', format.toUpperCase());
+          btnSave.textContent = '✅ ' + _('notifSavedAs', [ext.toUpperCase()]);
           setTimeout(() => { btnSave.textContent = '💾 ' + _('saveImage'); }, 2500);
         }
       });

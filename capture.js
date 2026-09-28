@@ -92,8 +92,10 @@
     cleanup();
     // Minimum size check
     if (rect.width < 10 || rect.height < 10) return;
-    // Send to background
-    chrome.runtime.sendMessage({ action: 'captureSelection', rect });
+    // Wait two frames so the overlay removal is painted before the tab is captured
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      chrome.runtime.sendMessage({ action: 'captureSelection', rect });
+    }));
   });
 
   function cleanup() {

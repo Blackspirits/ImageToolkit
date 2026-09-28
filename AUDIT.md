@@ -26,6 +26,15 @@ Causas-raiz (3):
 | Documentação / loja | 4 |
 | Qualidade / dívida técnica | 4 |
 
+### Estado das correções
+
+| Estado | Itens |
+|---|---|
+| Corrigido (branch `claude/vibrant-rubin-hshlh0`) | A1, A2, A3, A4, A5 (atalho removido), M1, M3, M8, M9, B1, B3, D1 (parcial: README) |
+| Por fazer | M2, M4, M5, M6, M7, M10, B2, B4–B11, D2–D4, Q1–Q4 |
+
+Verificação: teste ponta a ponta com a extensão carregada no Chromium 141 (Playwright), corrido contra `main` e contra o branch. Resultados no branch: "Original" devolve bytes idênticos (GIF/SVG/PNG); AVIF → `photo.webp`; SVG → `logo.svg` com `image/svg+xml`; content script recebe recusa em `fetchAsDataUrl`; `savedAtLeastW/H` sobrevive a guardar definições; o scanner continua a funcionar.
+
 ---
 
 ## 2. Achados de severidade alta

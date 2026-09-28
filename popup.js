@@ -345,7 +345,7 @@ async function dlOne(img, fmt) {
   ins.filenamePattern = s.filenamePattern || 'original';
   ins.filenamePrefix = s.filenamePrefix || 'img_';
   const r = await xmsg({ action: 'processAndSave', imageUrl: img.src, instructions: ins });
-  toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', [(fmt === 'original' ? img.type : fmt).toUpperCase()]));
+  toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', [fmtLabel(r?.format)]));
 }
 
 function updateCount(n, total) {
@@ -483,6 +483,7 @@ async function batchDl(zip) {
   const fmt = v('action-format'), pE = $('batch-progress'), pT = $('progress-text'), pC = $('progress-count'), pF = $('progress-fill');
   pE.style.display = 'block'; pF.style.width = '0%'; pF.classList.remove('prog-done');
   const s = await getSettings(), zips = [];
+  let failed = 0;
   for (let i = 0; i < sel.length; i++) {
     pC.textContent = `${i + 1}/${sel.length}`; pF.style.width = `${Math.round(((i + 1) / sel.length) * 100)}%`;
     pT.textContent = zip ? _('preparingZip') : `${_('processing')} ${i + 1}...`;
@@ -493,16 +494,25 @@ async function batchDl(zip) {
       ins.subfolder = s.subfolder || '';
       ins.filenamePattern = s.filenamePattern || 'original';
       ins.filenamePrefix = s.filenamePrefix || 'img_';
-      if (zip) { const r = await xmsg({ action: 'processAndReturnData', imageUrl: sel[i].src, instructions: ins }); if (r && !r.error) zips.push({ name: zipNm(sel[i].src, ins, i), dataUrl: r.dataUrl }); }
-      else await xmsg({ action: 'processAndSave', imageUrl: sel[i].src, instructions: ins });
-    } catch {}
+      // One file per image: never open a Save As dialog or a notification for each one.
+      ins.saveAs = false; ins.silent = true;
+      const r = await xmsg({ action: zip ? 'processAndReturnData' : 'processAndSave', imageUrl: sel[i].src, instructions: ins });
+      if (!r || r.error) failed++;
+      else if (zip) zips.push({ name: zipNm(sel[i].src, r.format, i), dataUrl: r.dataUrl });
+    } catch { failed++; }
     await sleep(80);
   }
   if (zip && zips.length) { pT.textContent = _('creatingZip'); await mkZip(zips); }
-  pT.textContent = '✅'; pF.style.width = '100%'; pF.classList.add('prog-done');
+  pT.textContent = failed ? `⚠️ ${sel.length - failed}/${sel.length}` : '✅'; pF.style.width = '100%'; pF.classList.add('prog-done');
+  if (failed) toast(`❌ ${failed}/${sel.length}`);
   setTimeout(() => { pE.style.display = 'none'; pF.classList.remove('prog-done'); }, 2500);
 }
-function buildIns(fmt, img, s) { if (fmt === 'original') return { format: img.type === 'jpg' ? 'jpeg' : (img.type || 'png'), quality: s.defaultQuality / 100 }; return { format: fmt === 'jpg' ? 'jpeg' : fmt, quality: s.defaultQuality / 100 }; }
+function buildIns(fmt, img, s) {
+  // "Original" keeps the exact bytes; the background picks the extension from the real content type.
+  if (fmt === 'original') return { passthrough: true };
+  return { format: fmt === 'jpg' ? 'jpeg' : fmt, quality: s.defaultQuality / 100 };
+}
+function fmtLabel(f) { return f === 'jpeg' ? 'JPG' : String(f || '').toUpperCase(); }
 
 // ===== Preview =====
 let pvImg = null;
@@ -524,7 +534,7 @@ function openPreview(img) {
   $('preview-modal').style.display = 'flex';
 }
 function closePv() { $('preview-modal').style.display = 'none'; pvImg = null; }
-async function pvDl() { if (!pvImg) return; const s = await getSettings(), ins = buildIns(v('preview-format'), pvImg, s); ins.jpgBackground = '#FFFFFF'; const b = $('preview-download'); b.disabled = true; xmsg({ action: 'processAndSave', imageUrl: pvImg.src, instructions: ins }).then(r => { b.disabled = false; toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', [''])); }); }
+async function pvDl() { if (!pvImg) return; const s = await getSettings(), ins = buildIns(v('preview-format'), pvImg, s); ins.jpgBackground = '#FFFFFF'; const b = $('preview-download'); b.disabled = true; xmsg({ action: 'processAndSave', imageUrl: pvImg.src, instructions: ins }).then(r => { b.disabled = false; toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', [fmtLabel(r?.format)])); }); }
 async function pvCopy() {
   if (!pvImg) return;
   try {
@@ -626,7 +636,7 @@ async function cvtTool(mode) {
   try {
     const r = await xmsg({ action: 'processAndSave', imageUrl: src, instructions: ins });
     if (r?.error) throw new Error(r.error);
-    toast('✅ ' + _('notifSavedAs', [fmt.value.toUpperCase()]));
+    toast('✅ ' + _('notifSavedAs', [fmtLabel(r?.format)]));
   } catch (err) {
     toast(`❌ ${err.message}`);
   } finally {
@@ -674,7 +684,7 @@ async function resizeTool() {
         jpgBackground: '#FFFFFF',
       },
     });
-    toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', ['']));
+    toast(r?.error ? `❌ ${r.error}` : '✅ ' + _('notifSavedAs', [fmtLabel(r?.format)]));
   } catch (e) {
     toast(`❌ ${e.message}`);
   } finally {
@@ -726,7 +736,9 @@ function initSettings() {
     localizeUI();
   });
 
-  const save = () => chrome.storage.sync.set({ settings: {
+  // Merge into the stored settings so keys not shown in this form (e.g. saved "at least" size) survive.
+  const save = async () => chrome.storage.sync.set({ settings: {
+    ...(await getSettings()),
     defaultQuality: parseInt(qr.value, 10), defaultFormat: df.value, resizeBehavior: rb.value,
     saveAs: sa.checked, showNotification: sn.checked, openAsSidePanel: sp.checked, enableGoogleLens: gl?.checked !== false, theme: ts.value,
     locale: lg?.value || 'auto',
@@ -750,7 +762,7 @@ async function copyImageFromSource(src) {
 }
 
 // ===== ZIP =====
-function zipNm(url, ins, i) { let b = 'image'; try { b = new URL(url).pathname.split('/').pop().split('?')[0]; b = b.replace(/\.[^.]+$/, '') || 'image'; b = b.replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40); } catch {} return `${String(i + 1).padStart(3, '0')}_${b}.${ins.format === 'jpeg' ? 'jpg' : ins.format || 'png'}`; }
+function zipNm(url, format, i) { let b = 'image'; try { b = new URL(url).pathname.split('/').pop().split('?')[0]; b = b.replace(/\.[^.]+$/, '') || 'image'; b = b.replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40); } catch {} return `${String(i + 1).padStart(3, '0')}_${b}.${format === 'jpeg' ? 'jpg' : format || 'png'}`; }
 async function mkZip(files) { if (typeof JSZip === 'undefined') return; const z = new JSZip(); for (const f of files) z.file(f.name, f.dataUrl.split(',')[1], { base64: true }); const b = await z.generateAsync({ type: 'blob' }); const u = URL.createObjectURL(b); chrome.runtime.sendMessage({ action: 'downloadBlob', dataUrl: u, filename: `imagetoolkit-${Date.now()}.zip`, saveAs: true }); setTimeout(() => URL.revokeObjectURL(u), 10000); }
 
 // ===== Utility =====

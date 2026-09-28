@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [Unreleased]
+
+### Fixed
+- "Original" downloads now keep the exact source bytes instead of re-encoding through the canvas. SVGs are no longer saved as PNG data with a `.svg` extension, GIFs keep their animation and JPEGs are not recompressed.
+- Saved files are named after the format actually produced. AVIF requests (not encodable by Chrome's canvas) fall back to WebP and are saved as `.webp` instead of `.avif`; the crop editor no longer writes PNG data to `.avif` files.
+- Batch downloads no longer open one Save As dialog and one notification per image, and now report how many images failed.
+- Changing any setting no longer erases the saved "at least" size filter.
+- Long non-Latin filenames (e.g. Japanese) are no longer reduced to `image`.
+- "Saved as" messages now show the real output format.
+- The capture overlay is removed from the screen before the screenshot is taken.
+- A failed offscreen document creation no longer blocks every later conversion until the browser restarts.
+
+### Security
+- The background service worker and offscreen document now only accept privileged messages from extension pages; content scripts are limited to the capture and new-images notifications.
+
+### Removed
+- The `Alt+Shift+S` quick-save shortcut, which was declared but never implemented.
+
 ## [2.3.5] - 2026-04-27
 
 ### Fixed

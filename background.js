@@ -246,8 +246,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // ---------- Message Handler ----------
+// Content scripts run inside the page's renderer, so they may only trigger the
+// few actions they actually need. Everything else is reserved for extension pages.
+const EXTENSION_ORIGIN = chrome.runtime.getURL('');
+const CONTENT_SCRIPT_ACTIONS = new Set(['captureSelection', 'newImagesDetected']);
+
+function isExtensionPage(sender) {
+  return sender?.id === chrome.runtime.id && (sender.url || '').startsWith(EXTENSION_ORIGIN);
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const { action } = message || {};
+  if (!isExtensionPage(sender) && !CONTENT_SCRIPT_ACTIONS.has(action)) return false;
 
   if (action === 'openSidePanel') {
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
@@ -267,7 +277,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (action === 'processAndReturnData') {
-    processImage(message.imageUrl, message.instructions)
+    const instructions = message.instructions || {};
+    (instructions.passthrough ? fetchOriginal(message.imageUrl) : processImage(message.imageUrl, instructions))
       .then((result) => sendResponse(result))
       .catch((err) => sendResponse({ error: err.message }));
     return true;
@@ -374,18 +385,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // ===== Capture: screenshot + crop from selection =====
   if (action === 'captureSelection') {
     const rect = message.rect;
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (!tab?.id) return;
-      chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-        if (!dataUrl) return;
-        // Crop via offscreen
-        cropScreenshot(dataUrl, rect).then((cropped) => {
-          // Open in resize tool for further editing
-          chrome.storage.local.set({ _resizeImageUrl: cropped }, () => {
-            chrome.windows.create({
-              url: 'resize.html',
-              type: 'popup', width: 1600, height: 1040, focused: true,
-            });
+    const windowId = sender.tab?.windowId;
+    if (windowId == null) return false;
+    chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
+      if (chrome.runtime.lastError || !dataUrl) return;
+      // Crop via offscreen
+      cropScreenshot(dataUrl, rect).then((cropped) => {
+        // Open in resize tool for further editing
+        chrome.storage.local.set({ _resizeImageUrl: cropped }, () => {
+          chrome.windows.create({
+            url: 'resize.html',
+            type: 'popup', width: 1600, height: 1040, focused: true,
           });
         });
       });
@@ -528,8 +538,12 @@ async function ensureOffscreen() {
     }
   });
 
-  await offscreenCreating;
-  offscreenCreating = null;
+  try {
+    await offscreenCreating;
+  } finally {
+    // Reset even on failure, otherwise every later call awaits the same rejected promise.
+    offscreenCreating = null;
+  }
 }
 
 // ---------- Fetch Image ----------
@@ -538,15 +552,61 @@ async function fetchImageAsDataUrl(imageUrl) {
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const blob = await response.blob();
   const originalSize = blob.size;
+  const dataUrl = await blobToDataUrl(blob);
+  return { dataUrl, originalSize };
+}
 
-  const dataUrl = await new Promise((resolve, reject) => {
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error('Failed to read blob'));
     reader.readAsDataURL(blob);
   });
+}
 
-  return { dataUrl, originalSize };
+// ---------- Original Image (no re-encoding) ----------
+// "Original" downloads must keep the exact bytes (GIF animation, SVG vectors, JPEG quality),
+// so they bypass the canvas pipeline and take the extension from the real content type.
+async function fetchOriginal(imageUrl) {
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const blob = await response.blob();
+  if (!blob.size) throw new Error('Empty response');
+
+  const head = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
+  const mime = (blob.type || '').split(';')[0].trim().toLowerCase();
+  const isGenericMime = !mime || mime === 'application/octet-stream';
+  const format = sniffImageType(head)
+    || MIME_TO_TYPE[mime]
+    || (isGenericMime ? extensionToType(imageUrl) : null);
+  if (!format) throw new Error('Unsupported image type');
+
+  const dataUrl = await blobToDataUrl(blob);
+  return { dataUrl, originalSize: blob.size, newSize: blob.size, format };
+}
+
+function sniffImageType(bytes) {
+  const has = (offset, text) => [...text].every((ch, i) => bytes[offset + i] === ch.charCodeAt(0));
+  if (bytes[0] === 0x89 && has(1, 'PNG')) return 'png';
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return 'jpg';
+  if (has(0, 'GIF8')) return 'gif';
+  if (has(0, 'RIFF') && has(8, 'WEBP')) return 'webp';
+  if (has(4, 'ftyp') && (has(8, 'avif') || has(8, 'avis'))) return 'avif';
+  if (has(0, 'BM')) return 'bmp';
+  if (has(0, 'II*\0') || has(0, 'MM\0*')) return 'tiff';
+  if (bytes[0] === 0 && bytes[1] === 0 && bytes[2] === 1 && bytes[3] === 0) return 'ico';
+  return null;
+}
+
+function extensionToType(imageUrl) {
+  const map = { jpg: 'jpg', jpeg: 'jpg', jpe: 'jpg', png: 'png', webp: 'webp', gif: 'gif', svg: 'svg', avif: 'avif', bmp: 'bmp', tif: 'tiff', tiff: 'tiff', ico: 'ico' };
+  try {
+    const ext = new URL(imageUrl).pathname.toLowerCase().split('.').pop();
+    return map[ext] || null;
+  } catch {
+    return null;
+  }
 }
 
 // ---------- Process Image via Offscreen ----------
@@ -588,13 +648,17 @@ async function processAndSave(imageUrl, instructions, settings) {
     }
     instructions.jpgBackground = settings.jpgBackground || '#FFFFFF';
 
-    const result = await processImage(imageUrl, instructions);
-    const filename = buildFilename(imageUrl, instructions);
+    const result = instructions.passthrough
+      ? await fetchOriginal(imageUrl)
+      : await processImage(imageUrl, instructions);
+    // Name the file after the format actually produced (e.g. AVIF falls back to WebP).
+    const filename = buildFilename(imageUrl, { ...instructions, format: result.format });
 
-    triggerDownload(result.dataUrl, filename, settings.saveAs);
+    // Batch downloads pass saveAs: false so they never open one dialog per image.
+    triggerDownload(result.dataUrl, filename, instructions.saveAs ?? settings.saveAs);
 
-    if (settings.showNotification) {
-      showSaveNotification(filename, result.originalSize, result.newSize, instructions.format);
+    if (settings.showNotification && !instructions.silent) {
+      showSaveNotification(filename, result.originalSize, result.newSize, result.format);
     }
 
     return { success: true, filename, ...result };
@@ -675,7 +739,9 @@ function sanitizeFilename(input, allowSlash = false) {
       .replace(/^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$/i, 'image')
       .replace(/[\s.]+$/g, '')
       .trim();
-    if (name.length > 60) name = name.substring(0, 60).replace(/[^a-zA-Z0-9]+$/i, '');
+    // Truncate by code point and keep non-Latin letters (e.g. Japanese filenames).
+    const chars = [...name];
+    if (chars.length > 60) name = chars.slice(0, 60).join('').replace(/[^\p{L}\p{N}]+$/u, '');
     return name;
   };
 

@@ -5,7 +5,12 @@
 
 'use strict';
 
-chrome.runtime.onMessage.addListener((message) => {
+// Only the service worker (or another extension page) may drive this document.
+const EXTENSION_ORIGIN = chrome.runtime.getURL('');
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (sender?.id !== chrome.runtime.id || !(sender.url || '').startsWith(EXTENSION_ORIGIN)) return false;
+
   if (message.action === 'offscreen-process') {
     handleProcess(message)
       .then((result) => {
@@ -83,19 +88,12 @@ async function handleProcess(message) {
 
   const mimeType = getMimeType(format);
   const quality = format === 'png' ? undefined : (instructions.quality || 0.85);
-  const blob = await canvasToBlob(canvas, mimeType, quality);
+  let blob = await canvasToBlob(canvas, mimeType, quality);
 
+  // Chrome cannot encode AVIF from a canvas and silently returns PNG instead.
+  // Fall back to WebP (closest in size/quality) and report the real format.
   if (format === 'avif' && blob.type !== 'image/avif') {
-    const fallbackBlob = await canvasToBlob(canvas, 'image/webp', quality);
-    const dataUrl = await blobToDataUrl(fallbackBlob);
-    return {
-      dataUrl,
-      newSize: fallbackBlob.size,
-      width: dims.outWidth,
-      height: dims.outHeight,
-      format: 'webp',
-      hasAlpha,
-    };
+    blob = await canvasToBlob(canvas, 'image/webp', quality);
   }
 
   const dataUrl = await blobToDataUrl(blob);
@@ -104,7 +102,7 @@ async function handleProcess(message) {
     newSize: blob.size,
     width: dims.outWidth,
     height: dims.outHeight,
-    format,
+    format: getFormatFromMime(blob.type) || format,
     hasAlpha,
   };
 }
@@ -256,6 +254,11 @@ function loadImage(dataUrl) {
 function getMimeType(format) {
   const map = { png: 'image/png', jpeg: 'image/jpeg', jpg: 'image/jpeg', webp: 'image/webp', avif: 'image/avif' };
   return map[format] || 'image/png';
+}
+
+function getFormatFromMime(mimeType) {
+  const map = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/webp': 'webp', 'image/avif': 'avif' };
+  return map[mimeType] || null;
 }
 
 function canvasToBlob(canvas, mimeType, quality) {
