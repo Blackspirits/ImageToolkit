@@ -151,3 +151,12 @@ test('isExtensionSender trusts only this extension, even without sender.url', ()
   assert.ok(!core.isExtensionSender({ id: 'other', url: 'chrome-extension://abc/popup.html' }, id, origin));
   assert.ok(!core.isExtensionSender(undefined, id, origin));
 });
+
+test('looksLikeSvg recognises SVG text regardless of the declared type', () => {
+  assert.ok(core.looksLikeSvg('<svg xmlns="http://www.w3.org/2000/svg"/>'));
+  assert.ok(core.looksLikeSvg('﻿<?xml version="1.0"?>\n<!-- c -->\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x">\n<svg>'));
+  assert.ok(!core.looksLikeSvg('<!doctype html><svg></svg>'));
+  assert.ok(!core.looksLikeSvg('<html><body><svg></svg>'));
+  assert.ok(!core.looksLikeSvg('<svgfoo>'));
+  assert.ok(!core.looksLikeSvg(''));
+});

@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - A failed offscreen document creation no longer blocks every later conversion until the browser restarts.
 - The Format Advisor downloads and decodes the image once for all formats (it used to fetch it three times), and a newer image supersedes a pending analysis.
 - Downloads that Chrome does not start are reported as errors, and closing the Save As dialog no longer shows "Saved".
+- "Original" detects SVG by its content, so SVGs served as `text/plain` or XML are saved correctly; other unknown types fall back to the URL extension, while HTML error pages are still refused.
 
 ### Changed
 - Google Lens is now opt-in (off by default).

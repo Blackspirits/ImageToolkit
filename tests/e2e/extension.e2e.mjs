@@ -46,9 +46,13 @@ const FIXTURES = {
   'photo.png': png(30, 20),
   'wide.png': png(40, 20, [0, 128, 255, 255]),
   'noext': png(8, 8),
+  // Mislabelled responses: an SVG sent as text/plain, and an HTML error page behind a .jpg URL.
+  'plain.svg': Buffer.from('<?xml version="1.0"?>\n<!-- icon -->\n<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8"/></svg>'),
+  'fake.jpg': Buffer.from('<!doctype html><title>Not found</title><p>Sorry'),
   'page.html': Buffer.from('<!doctype html><title>t</title><body><img src="anim.gif"><img src="logo.svg"><img src="photo.png" srcset="photo.png 1x, wide.png 2x"><div style="position:fixed;inset:0 auto auto 0;width:50px;height:50px;background:url(wide.png)"></div><a href="javascript:alert(1)//x.png">x</a></body>'),
 };
 const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', html: 'text/html' };
+const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html' };
 
 let server, base, ctx, sw, id, ui;
 const hits = new Map(); // GET requests per path, to check that work is not repeated
@@ -74,7 +78,7 @@ before(async () => {
     const body = FIXTURES[name];
     if (!body) { res.writeHead(404); res.end(); return; }
     // "noext" is served without a useful type, like many CDNs do.
-    res.writeHead(200, { 'content-type': TYPES[name.split('.').pop()] || 'application/octet-stream', 'content-length': body.length });
+    res.writeHead(200, { 'content-type': TYPE_OVERRIDES[name] || TYPES[name.split('.').pop()] || 'application/octet-stream', 'content-length': body.length });
     res.end(req.method === 'HEAD' ? undefined : body);
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -103,6 +107,14 @@ test('"Original" keeps the exact bytes and detects the real type', async () => {
     assert.equal(r.format, type, name);
     assert.ok(Buffer.from(r.dataUrl.split(',')[1], 'base64').equals(FIXTURES[name]), `${name} bytes differ`);
   }
+});
+
+test('"Original" trusts content over a wrong MIME type, but never saves HTML as an image', async () => {
+  const svg = await send({ action: 'processAndReturnData', imageUrl: base + 'plain.svg', instructions: { passthrough: true } });
+  assert.equal(svg.format, 'svg');
+  assert.ok(Buffer.from(svg.dataUrl.split(',')[1], 'base64').equals(FIXTURES['plain.svg']));
+  const html = await send({ action: 'processAndReturnData', imageUrl: base + 'fake.jpg', instructions: { passthrough: true } });
+  assert.match(html.error, /Unsupported image type/);
 });
 
 test('AVIF falls back to WebP and reports it', async () => {

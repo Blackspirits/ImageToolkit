@@ -349,10 +349,12 @@ async function fetchOriginal(imageUrl) {
   const blob = await fetchImageBlob(imageUrl);
   const head = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
   const mime = (blob.type || '').split(';')[0].trim().toLowerCase();
-  const isGenericMime = !mime || mime === 'application/octet-stream';
+  // Content first (servers mislabel files), then the declared type, then the URL's
+  // extension — except for HTML, which is an error or login page, never an image.
   const format = ITK.sniffImageType(head)
+    || (ITK.looksLikeSvg(await blob.slice(0, 2048).text()) ? 'svg' : null)
     || ITK.mimeToType(mime)
-    || (isGenericMime ? ITK.extensionToType(imageUrl) : null);
+    || (mime !== 'text/html' ? ITK.extensionToType(imageUrl) : null);
   if (!format) throw new Error('Unsupported image type');
 
   return { dataUrl: await blobToDataUrl(blob), originalSize: blob.size, newSize: blob.size, format };
