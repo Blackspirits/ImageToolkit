@@ -12,15 +12,15 @@
   --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-pill:999px;
   --ease:cubic-bezier(.2,.8,.2,1);
   --brand-grad:linear-gradient(135deg,#22c1ee 0%,#6c5cff 52%,#c04df9 100%);
-  --primary-grad:linear-gradient(135deg,#7b61ff 0%,#5b6cff 100%);
+  --primary-grad:linear-gradient(135deg,#6d4dff 0%,#5a54f0 100%); /* white text ≥ 5:1 */
 }
 .app,.app.light{
   color-scheme:light;
   --bg:#f5f5f9;--bg-elev:#ffffff;--bg-sunken:#ececf3;--bg-hover:rgba(22,22,48,.05);--bg-glass:rgba(255,255,255,.78);
   --line:rgba(22,22,48,.08);--line-strong:rgba(22,22,48,.15);
-  --text:#16161f;--text-2:#565669;--text-3:#8a8a9e;
+  --text:#16161f;--text-2:#565669;--text-3:#6b6b80;
   --accent:#6a4dff;--accent-text:#5a3cf0;--accent-soft:rgba(106,77,255,.1);--accent-line:rgba(106,77,255,.35);
-  --success:#15a34a;--success-soft:rgba(21,163,74,.12);--danger:#e11d48;--danger-soft:rgba(225,29,72,.1);--warning:#d97706;--warning-soft:rgba(217,119,6,.12);--cyan:#0891b2;--cyan-soft:rgba(8,145,178,.12);
+  --success:#15803d;--success-soft:rgba(21,163,74,.12);--danger:#e11d48;--danger-soft:rgba(225,29,72,.1);--warning:#d97706;--warning-soft:rgba(217,119,6,.12);--cyan:#0891b2;--cyan-soft:rgba(8,145,178,.12);
   --shadow-sm:0 1px 2px rgba(22,22,48,.06),0 1px 1px rgba(22,22,48,.04);
   --shadow-md:0 10px 30px -12px rgba(22,22,48,.25),0 2px 6px rgba(22,22,48,.06);
   --shadow-lg:0 24px 60px -20px rgba(22,22,48,.45);
@@ -31,7 +31,7 @@
   color-scheme:dark;
   --bg:#0d0d13;--bg-elev:#16161f;--bg-sunken:#09090e;--bg-hover:rgba(255,255,255,.06);--bg-glass:rgba(22,22,31,.8);
   --line:rgba(255,255,255,.07);--line-strong:rgba(255,255,255,.13);
-  --text:#ededf4;--text-2:#a5a5b8;--text-3:#6d6d82;
+  --text:#ededf4;--text-2:#a5a5b8;--text-3:#8a8aa0;
   --accent:#8b76ff;--accent-text:#ad9dff;--accent-soft:rgba(139,118,255,.15);--accent-line:rgba(139,118,255,.45);
   --success:#34d399;--success-soft:rgba(52,211,153,.14);--danger:#fb7185;--danger-soft:rgba(251,113,133,.14);--warning:#fbbf24;--warning-soft:rgba(251,191,36,.14);--cyan:#22d3ee;--cyan-soft:rgba(34,211,238,.13);
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);

@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Hotlink-protected thumbnails are loaded through the extension instead of showing a broken image.
 - Google Lens appears in the image right-click menu when enabled.
 - Right-to-left layout for Arabic and correct `lang` for screen readers.
+- Colour contrast meets WCAG AA: secondary text (4.8–5.7:1), white on the primary button (≥ 5:1) and the success green (4.5:1).
 - `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
 
 ### Fixed
