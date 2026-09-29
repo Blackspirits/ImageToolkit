@@ -534,5 +534,15 @@
   "noImagesHint": {
     "message": "Daha fazla resim yüklemek için sayfayı kaydırın veya başka bir sekme deneyin.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Resim çok büyük (en fazla $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

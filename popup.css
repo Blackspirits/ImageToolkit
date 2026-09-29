@@ -100,7 +100,7 @@ body.popup #tab-images.view{padding-bottom:80px}
 
 .gbadges{position:absolute;top:8px;inset-inline-end:8px;display:flex;gap:4px;pointer-events:none}
 .gbadge{padding:2px 7px;border-radius:var(--r-pill);background:rgba(15,15,25,.62);color:#fff;font-size:10px;font-weight:750;letter-spacing:.03em;backdrop-filter:blur(6px)}
-.gbadge-dup{background:rgba(225,29,72,.85)}
+.gbadge-dup{background:#be123c} /* white text 6.6:1 */
 
 .gacts{position:absolute;top:94px;inset-inline-end:8px;display:flex;gap:4px;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .2s var(--ease)}
 .gcard:hover .gacts,.gcard:focus-within .gacts{opacity:1;transform:none}

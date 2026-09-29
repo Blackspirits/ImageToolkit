@@ -533,5 +533,15 @@
   "noImagesHint": {
     "message": "مرّر الصفحة لتحميل المزيد من الصور، أو جرّب علامة تبويب أخرى.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "الصورة كبيرة جدًا (الحد الأقصى $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

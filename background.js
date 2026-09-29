@@ -13,7 +13,7 @@ const t = i18n.t;
 // ---------- Constants ----------
 const MENU_FORMATS = ['png', 'jpg', 'webp', 'avif'];
 const OUTPUT_FORMATS = new Set(['png', 'jpeg', 'webp', 'avif']);
-const MAX_FETCH_BYTES = 40 * 1024 * 1024; // base64 must fit in one extension message
+const MAX_FETCH_BYTES = ITK.MAX_IMAGE_BYTES;
 const EDITOR_WINDOW = { type: 'popup', width: 1440, height: 920 };
 
 const DEFAULT_SETTINGS = {
@@ -162,7 +162,8 @@ const handlers = {
     return instructions.passthrough ? fetchOriginal(msg.imageUrl) : processImage(msg.imageUrl, instructions);
   },
 
-  analyzeFormats: (msg) => analyzeFormats(msg.imageUrl),
+  // Keyed by the calling document, so one window never cancels another's analysis.
+  analyzeFormats: (msg, sender) => analyzeFormats(msg.imageUrl, sender.documentId || sender.url || 'default'),
 
   fetchAsDataUrl: async (msg) => {
     const blob = await fetchImageBlob(msg.imageUrl);
@@ -313,25 +314,57 @@ function settleOffscreenRequest(message) {
 }
 
 // ---------- Fetching ----------
-async function fetchImageBlob(imageUrl) {
+function tooLarge(bytes) {
+  return new Error(`Image too large (${bytes > 0 ? ITK.formatBytes(bytes) : `> ${ITK.formatBytes(MAX_FETCH_BYTES)}`})`);
+}
+
+async function fetchImageBlob(imageUrl, { signal } = {}) {
   if (!ITK.isAllowedImageSrc(String(imageUrl || ''))) throw new Error('Unsupported image URL');
 
   let response;
   try {
     // Cookies help with images behind a login; retry without them on network errors.
-    response = await fetch(imageUrl, { credentials: 'include' });
-  } catch {
-    response = await fetch(imageUrl);
+    response = await fetch(imageUrl, { credentials: 'include', signal });
+  } catch (err) {
+    if (signal?.aborted) throw err;
+    response = await fetch(imageUrl, { signal });
   }
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
   const declared = ITK.parseSizeFromHeaders(response.headers);
-  if (declared > MAX_FETCH_BYTES) throw new Error(`Image too large (${ITK.formatBytes(declared)})`);
+  if (declared > MAX_FETCH_BYTES) {
+    response.body?.cancel().catch(() => {});
+    throw tooLarge(declared);
+  }
 
-  const blob = await response.blob();
+  const blob = await readBodyCapped(response, MAX_FETCH_BYTES);
   if (!blob.size) throw new Error('Empty response');
-  if (blob.size > MAX_FETCH_BYTES) throw new Error(`Image too large (${ITK.formatBytes(blob.size)})`);
   return blob;
+}
+
+// Reads the body chunk by chunk and stops as soon as it passes the cap, so a server
+// that sends no Content-Length can never push more than `cap` bytes into memory.
+async function readBodyCapped(response, cap) {
+  const type = (response.headers.get('content-type') || '').split(';')[0].trim();
+  if (!response.body) {
+    const blob = await response.blob();
+    if (blob.size > cap) throw tooLarge(blob.size);
+    return blob;
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > cap) {
+      reader.cancel().catch(() => {});
+      throw tooLarge(0);
+    }
+    chunks.push(value);
+  }
+  return new Blob(chunks, { type });
 }
 
 function blobToDataUrl(blob) {
@@ -396,16 +429,26 @@ async function processImage(imageUrl, instructions) {
 }
 
 // Format Advisor: one download and one decode, then every format is encoded from
-// the same bitmap. A newer request supersedes older ones before any work starts.
-let analysisCounter = 0;
+// the same bitmap. A newer request from the same document aborts the older download.
+const analysisControllers = new Map();
 
-async function analyzeFormats(imageUrl) {
-  const ticket = ++analysisCounter;
-  const blob = await fetchImageBlob(imageUrl);
-  if (ticket !== analysisCounter) return { superseded: true };
-  const dataUrl = await blobToDataUrl(blob);
-  const result = await offscreenRequest({ action: 'offscreen-analyze', imageDataUrl: dataUrl, formats: ['png', 'jpeg', 'webp'], quality: 0.85 });
-  return { ...result, originalSize: blob.size };
+async function analyzeFormats(imageUrl, contextKey) {
+  analysisControllers.get(contextKey)?.abort();
+  const controller = new AbortController();
+  analysisControllers.set(contextKey, controller);
+  try {
+    const blob = await fetchImageBlob(imageUrl, { signal: controller.signal });
+    if (controller.signal.aborted) return { superseded: true };
+    const dataUrl = await blobToDataUrl(blob);
+    const result = await offscreenRequest({ action: 'offscreen-analyze', imageDataUrl: dataUrl, formats: ['png', 'jpeg', 'webp'], quality: 0.85 });
+    if (controller.signal.aborted) return { superseded: true };
+    return { ...result, originalSize: blob.size };
+  } catch (err) {
+    if (controller.signal.aborted) return { superseded: true };
+    throw err;
+  } finally {
+    if (analysisControllers.get(contextKey) === controller) analysisControllers.delete(contextKey);
+  }
 }
 
 async function processAndSave(imageUrl, rawInstructions, settings) {

@@ -24,11 +24,11 @@ const state = {
   images: [],
   filtered: [],
   selected: new Set(),
-  lastClicked: -1,
+  lastClickedSrc: '',
   hideDups: false,
   layout: '2col',
   sort: 'pixels',
-  previewIndex: -1,
+  previewSrc: '',
   newImages: 0,
   tool: { src: '', name: '', ratio: 0, size: 0 },
   cards: new Map(),
@@ -55,11 +55,17 @@ async function loadSettings() {
   return state.settings;
 }
 
-async function saveSettings(patch) {
-  // Merge into the stored settings so keys not shown in this form survive.
-  const { settings } = await chrome.storage.sync.get('settings');
-  state.settings = { ...state.settings, ...(settings || {}), ...patch };
-  await chrome.storage.sync.set({ settings: state.settings });
+// Writes are chained so two quick changes never read the same old value and overwrite
+// each other; each write merges into what is stored so keys not shown here survive.
+let settingsWrite = Promise.resolve();
+
+function saveSettings(patch) {
+  Object.assign(state.settings, patch);
+  settingsWrite = settingsWrite.catch(() => {}).then(async () => {
+    const { settings } = await chrome.storage.sync.get('settings');
+    await chrome.storage.sync.set({ settings: { ...(settings || {}), ...patch } });
+  });
+  return settingsWrite;
 }
 
 // ---------- Theme ----------
@@ -184,8 +190,27 @@ function initHeader() {
 // ============================================================
 // Tabs
 // ============================================================
+// WAI-ARIA tabs pattern: one tab in the Tab order, arrows/Home/End move between tabs.
 function initTabs() {
-  document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+  const tabs = [...document.querySelectorAll('.tab')];
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    tab.addEventListener('keydown', (e) => {
+      const rtl = document.documentElement.dir === 'rtl';
+      const i = tabs.indexOf(tab);
+      const target = {
+        ArrowRight: tabs[(i + (rtl ? -1 : 1) + tabs.length) % tabs.length],
+        ArrowLeft: tabs[(i + (rtl ? 1 : -1) + tabs.length) % tabs.length],
+        Home: tabs[0],
+        End: tabs[tabs.length - 1],
+      }[e.key];
+      if (!target) return;
+      e.preventDefault();
+      switchTab(target.dataset.tab);
+      target.focus();
+    });
+  });
+  switchTab(activeTab() || 'images');
 }
 
 function switchTab(name) {
@@ -193,6 +218,7 @@ function switchTab(name) {
     const on = tab.dataset.tab === name;
     tab.classList.toggle('active', on);
     tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
   });
   document.querySelectorAll('.view').forEach((view) => view.classList.toggle('active', view.id === `tab-${name}`));
   updateActionBar();
@@ -417,6 +443,7 @@ function applyFilters({ animate = false } = {}) {
   $('filters-dot').hidden = activeFilterCount() === 0;
   renderGrid(animate);
   updateSelectionUI();
+  if (!$('preview-modal').hidden) refreshPreviewMeta();
 }
 
 const queueRefresh = debounce(() => applyFilters(), 150);
@@ -452,7 +479,7 @@ function createCard(img) {
   pic.src = img.src;
 
   const thumb = el('div', { class: 'gthumb' }, pic);
-  const check = el('button', { class: 'gcheck', 'data-act': 'select', tabindex: '-1', 'aria-label': t('titleSelectAll') }, icon('check'));
+  const check = el('button', { class: 'gcheck', 'data-act': 'select', tabindex: '-1', role: 'checkbox', 'aria-checked': 'false', 'aria-label': img.name }, icon('check'));
   const badges = el('div', { class: 'gbadges' });
 
   const acts = el('div', { class: 'gacts' }, [
@@ -470,7 +497,7 @@ function updateCard(card, img) {
   const selected = state.selected.has(img.src);
   card.classList.toggle('selected', selected);
   card.classList.toggle('is-dup', img.isDuplicate);
-  card.setAttribute('aria-selected', String(selected));
+  card.querySelector('.gcheck').setAttribute('aria-checked', String(selected));
   card.querySelector('[data-act="lens"]').hidden = !state.settings.enableGoogleLens || img.src.startsWith('data:');
 
   const name = card.querySelector('.gname');
@@ -490,32 +517,49 @@ function updateCard(card, img) {
 }
 
 // Hotlink-protected images fail inside the extension page; fetch them through the
-// service worker (with the site's cookies) a few at a time.
-const thumbQueue = [];
-let thumbActive = 0;
+// service worker (with the site's cookies), a few at a time and at most once per URL.
+// Thumbnails and dimension probing share the same result.
+const viaExtension = new Map();
+const viaExtensionQueue = [];
+let viaExtensionActive = 0;
 
-function thumbFallback(img, pic) {
-  if (img.src.startsWith('data:')) { markBroken(pic); return; }
-  thumbQueue.push({ img, pic });
-  pumpThumbQueue();
+function fetchViaExtension(src) {
+  if (src.startsWith('data:')) return Promise.resolve(src);
+  if (!viaExtension.has(src)) {
+    viaExtension.set(src, new Promise((resolve) => {
+      viaExtensionQueue.push({ src, resolve });
+      pumpViaExtension();
+    }));
+  }
+  return viaExtension.get(src);
 }
 
-function pumpThumbQueue() {
-  while (thumbActive < 4 && thumbQueue.length) {
-    const { img, pic } = thumbQueue.shift();
-    thumbActive++;
-    send({ action: 'fetchAsDataUrl', imageUrl: img.src })
-      .then((res) => {
-        if (res?.dataUrl) {
-          img.thumb = res.dataUrl;
-          pic.addEventListener('error', () => markBroken(pic), { once: true });
-          pic.src = res.dataUrl;
-        } else {
-          markBroken(pic);
-        }
-      })
-      .finally(() => { thumbActive--; pumpThumbQueue(); });
+function pumpViaExtension() {
+  while (viaExtensionActive < 4 && viaExtensionQueue.length) {
+    const { src, resolve } = viaExtensionQueue.shift();
+    viaExtensionActive++;
+    send({ action: 'fetchAsDataUrl', imageUrl: src })
+      .then((res) => resolve(res?.dataUrl || null), () => resolve(null))
+      .finally(() => { viaExtensionActive--; pumpViaExtension(); });
   }
+}
+
+async function thumbFallback(img, pic) {
+  const dataUrl = img.src.startsWith('data:') ? null : await fetchViaExtension(img.src);
+  if (!dataUrl) { markBroken(pic); return; }
+  img.thumb = dataUrl;
+  pic.addEventListener('error', () => markBroken(pic), { once: true });
+  pic.src = dataUrl;
+}
+
+// Direct load first; hotlink-protected images fall back to the extension fetch.
+async function loadDimensionsWithFallback(img) {
+  const direct = await loadDimensions(img.thumb || img.src).catch(() => null);
+  if (direct?.width > 0) return direct;
+  const dataUrl = await fetchViaExtension(img.src);
+  if (!dataUrl) return null;
+  img.thumb = dataUrl;
+  return loadDimensions(dataUrl).catch(() => null);
 }
 
 function markBroken(pic) {
@@ -542,20 +586,23 @@ function onGridClick(e) {
   if (action === 'download') { openDownloadMenu(e.target.closest('[data-act]'), img); return; }
   if (action === 'open') { chrome.tabs.create({ url: img.src, active: false }); return; }
   if (action === 'lens') { openLens(img.src); return; }
-  openPreview(state.filtered.indexOf(img));
+  openPreview(img.src);
 }
 
+// The range anchor is the image itself, so filtering or re-sorting never turns an old
+// position into a different image.
 function selectFromClick(img, range) {
   const index = state.filtered.indexOf(img);
-  if (range && state.lastClicked >= 0) {
-    const [from, to] = [Math.min(state.lastClicked, index), Math.max(state.lastClicked, index)];
+  const anchor = state.filtered.findIndex((i) => i.src === state.lastClickedSrc);
+  if (range && anchor >= 0 && index >= 0) {
+    const [from, to] = [Math.min(anchor, index), Math.max(anchor, index)];
     state.filtered.slice(from, to + 1).forEach((i) => state.selected.add(i.src));
   } else if (state.selected.has(img.src)) {
     state.selected.delete(img.src);
   } else {
     state.selected.add(img.src);
   }
-  state.lastClicked = index;
+  state.lastClickedSrc = img.src;
   updateSelectionUI();
 }
 
@@ -566,7 +613,7 @@ function onGridKeydown(e) {
   const index = cards.indexOf(card);
   const img = state.images.find((i) => i.src === card.dataset.src);
 
-  if (e.key === 'Enter') { e.preventDefault(); openPreview(state.filtered.indexOf(img)); return; }
+  if (e.key === 'Enter') { e.preventDefault(); openPreview(img.src); return; }
   if (e.key === ' ') { e.preventDefault(); selectFromClick(img, e.shiftKey); return; }
 
   const columns = Math.max(1, cards.filter((c) => c.offsetTop === cards[0].offsetTop).length);
@@ -591,7 +638,7 @@ function updateSelectionUI() {
   for (const [src, card] of state.cards) {
     const on = state.selected.has(src);
     card.classList.toggle('selected', on);
-    card.setAttribute('aria-selected', String(on));
+    card.querySelector('.gcheck')?.setAttribute('aria-checked', String(on));
   }
   const n = state.selected.size;
   const allSelected = state.filtered.length > 0 && state.filtered.every((i) => state.selected.has(i.src));
@@ -763,7 +810,16 @@ async function batchDownload(zip) {
 
   if (zip && files.length) {
     label.textContent = t('creatingZip');
-    try { await downloadZip(files); } catch { failed = items.length; }
+    let result = null;
+    try { result = await downloadZip(files); } catch { failed = items.length; }
+    // Closing the Save As dialog is a choice, not a failure: end quietly, nothing saved.
+    if (result?.cancelled) {
+      buttons.forEach((b) => { b.disabled = false; });
+      batchRunning = false;
+      progress.hidden = true;
+      updateActionBar();
+      return;
+    }
   }
 
   const ok = items.length - failed;
@@ -792,66 +848,96 @@ async function downloadZip(files) {
   // A data URL outlives this page (the popup may close while Save As is open), but
   // extension messages are capped at 64 MB, so very large archives use a blob URL.
   if (blob.size < 48 * 1024 * 1024) {
-    await call({ action: 'downloadBlob', dataUrl: await blobToDataUrl(blob), filename, saveAs: true });
-    return;
+    return call({ action: 'downloadBlob', dataUrl: await blobToDataUrl(blob), filename, saveAs: true });
   }
   const url = URL.createObjectURL(blob);
-  await call({ action: 'downloadBlob', dataUrl: url, filename, saveAs: true });
   setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return call({ action: 'downloadBlob', dataUrl: url, filename, saveAs: true });
 }
 
 // ============================================================
 // Preview
 // ============================================================
 let previewReturnFocus = null;
+// Everything behind the dialog; made inert while it is open.
+const BACKGROUND_REGIONS = ['.header', '.tabs', '.views', '#action-bar'];
 
 function initPreview() {
   $('preview-backdrop').addEventListener('click', closePreview);
   $('preview-close').addEventListener('click', closePreview);
   $('preview-prev').addEventListener('click', () => stepPreview(-1));
   $('preview-next').addEventListener('click', () => stepPreview(1));
-  $('preview-download').addEventListener('click', () => withBusy($('preview-download'), () => downloadOne(currentPreview(), $('preview-format').value)));
-  $('preview-copy').addEventListener('click', () => copyImage(currentPreview().src));
-  $('preview-resize').addEventListener('click', () => { openEditor(currentPreview().src); closePreview(); });
-  $('preview-open').addEventListener('click', () => chrome.tabs.create({ url: currentPreview().src, active: false }));
-  $('preview-lens').addEventListener('click', () => openLens(currentPreview().src));
+  // Actions resolve the image when clicked, by identity, so a re-sort underneath the
+  // dialog can never redirect them to another image.
+  const withImage = (fn) => () => { const img = currentPreview(); if (img) fn(img); };
+  $('preview-download').addEventListener('click', withImage((img) => withBusy($('preview-download'), () => downloadOne(img, $('preview-format').value))));
+  $('preview-copy').addEventListener('click', withImage((img) => copyImage(img.src)));
+  $('preview-resize').addEventListener('click', withImage((img) => { openEditor(img.src); closePreview(); }));
+  $('preview-open').addEventListener('click', withImage((img) => chrome.tabs.create({ url: img.src, active: false })));
+  $('preview-lens').addEventListener('click', withImage((img) => openLens(img.src)));
+  $('preview-modal').addEventListener('keydown', trapFocus);
 }
 
 function currentPreview() {
-  return state.filtered[state.previewIndex];
+  return state.previewSrc ? state.images.find((i) => i.src === state.previewSrc) : null;
 }
 
-function openPreview(index) {
-  if (index < 0 || index >= state.filtered.length) return;
+function openPreview(src) {
+  const img = state.images.find((i) => i.src === src);
+  if (!img) return;
   if ($('preview-modal').hidden) previewReturnFocus = document.activeElement;
-  state.previewIndex = index;
-  const img = currentPreview();
+  state.previewSrc = src;
   const stage = $('preview-img');
   stage.src = img.thumb || img.src;
   stage.alt = img.alt || img.name;
   $('preview-filename').textContent = img.name;
   $('preview-filename').title = img.src;
+  $('preview-lens').hidden = !state.settings.enableGoogleLens || img.src.startsWith('data:');
+  refreshPreviewMeta();
+  if ($('preview-modal').hidden) {
+    $('preview-modal').hidden = false;
+    BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.setAttribute('inert', ''));
+    $('preview-close').focus();
+  }
+}
+
+// Position and metadata follow the image through filtering, sorting and late probes.
+function refreshPreviewMeta() {
+  const img = currentPreview();
+  if (!img) return;
+  const index = state.filtered.findIndex((i) => i.src === img.src);
   const meta = [img.type === 'other' ? '' : img.type.toUpperCase()];
   if (img.width && img.height) meta.push(`${img.width} × ${img.height}`);
   if (img.fileSize > 0) meta.push(ITK.formatBytes(img.fileSize));
-  meta.push(`${index + 1}/${state.filtered.length}`);
+  if (index >= 0) meta.push(`${index + 1}/${state.filtered.length}`);
   $('preview-meta').textContent = meta.filter(Boolean).join(' · ');
-  $('preview-prev').disabled = index === 0;
-  $('preview-next').disabled = index === state.filtered.length - 1;
-  $('preview-lens').hidden = !state.settings.enableGoogleLens || img.src.startsWith('data:');
-  $('preview-modal').hidden = false;
-  $('preview-close').focus();
+  $('preview-prev').disabled = index <= 0;
+  $('preview-next').disabled = index < 0 || index >= state.filtered.length - 1;
 }
 
 function stepPreview(delta) {
-  openPreview(state.previewIndex + delta);
+  const index = state.filtered.findIndex((i) => i.src === state.previewSrc);
+  const next = state.filtered[index + delta];
+  if (index >= 0 && next) openPreview(next.src);
 }
 
 function closePreview() {
   if ($('preview-modal').hidden) return;
   $('preview-modal').hidden = true;
-  state.previewIndex = -1;
+  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.removeAttribute('inert'));
+  state.previewSrc = '';
   previewReturnFocus?.focus?.();
+}
+
+// Keep Tab and Shift+Tab inside the dialog.
+function trapFocus(e) {
+  if (e.key !== 'Tab') return;
+  const focusable = [...$('preview-modal').querySelectorAll('button, select, [tabindex]:not([tabindex="-1"])')]
+    .filter((node) => !node.disabled && !node.hidden && node.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 }
 
 // ============================================================
@@ -885,6 +971,9 @@ function initKeyboard() {
 // Tools
 // ============================================================
 let advisorToken = 0;
+// Every new source bumps this; async steps of an older source stop touching the UI.
+let toolToken = 0;
+let toolReader = null;
 
 function initPaste() {
   document.addEventListener('paste', (e) => {
@@ -963,13 +1052,23 @@ function isLocked() {
 }
 
 function loadToolFile(file) {
+  // Checked before reading: base64 would inflate it by a third in memory.
+  if (file.size > ITK.MAX_IMAGE_BYTES) {
+    toast(t('errorTooLarge', [ITK.formatBytes(ITK.MAX_IMAGE_BYTES)]), 'error');
+    return;
+  }
+  const token = ++toolToken;
+  toolReader?.abort();
   const reader = new FileReader();
-  reader.onload = () => setToolSource(reader.result, file.name, file.size);
+  toolReader = reader;
+  reader.onload = () => { if (token === toolToken) setToolSource(reader.result, file.name, file.size); };
   reader.readAsDataURL(file);
 }
 
 function clearToolSource() {
   advisorToken++;
+  toolToken++;
+  toolReader?.abort();
   state.tool = { src: '', name: '', ratio: 0, size: 0 };
   $('tool-preview').hidden = true;
   $('tool-url-input').value = '';
@@ -989,6 +1088,9 @@ function loadDimensions(src) {
 }
 
 async function setToolSource(src, name, size = 0) {
+  const token = ++toolToken;
+  if (!src.startsWith('data:')) toolReader?.abort();
+  const stale = () => token !== toolToken;
   state.tool = { src, name, ratio: 0, size };
   $('tool-url-input').value = src.startsWith('data:') ? '' : src;
   $('tool-preview-img').src = src;
@@ -997,17 +1099,20 @@ async function setToolSource(src, name, size = 0) {
   $('tool-preview').hidden = false;
 
   let dims = await loadDimensions(src).catch(() => null);
+  if (stale()) return;
   if (!dims && !src.startsWith('data:')) {
-    const res = await send({ action: 'fetchAsDataUrl', imageUrl: src });
-    if (res?.dataUrl) {
-      $('tool-preview-img').src = res.dataUrl;
-      dims = await loadDimensions(res.dataUrl).catch(() => null);
+    const dataUrl = await fetchViaExtension(src);
+    if (stale()) return;
+    if (dataUrl) {
+      $('tool-preview-img').src = dataUrl;
+      dims = await loadDimensions(dataUrl).catch(() => null);
+      if (stale()) return;
     }
   }
-  if (state.tool.src !== src) return;
 
   if (!size && !src.startsWith('data:')) {
     const sizes = await send({ action: 'probeImageSizes', urls: [src] });
+    if (stale()) return;
     size = sizes?.[src] || 0;
     state.tool.size = size;
   }
@@ -1071,7 +1176,8 @@ async function runAdvisor(src) {
 
   // One download and one decode in the background; stale answers are dropped here.
   const analysis = await send({ action: 'analyzeFormats', imageUrl: src });
-  if (token !== advisorToken || analysis?.superseded) return;
+  if (token !== advisorToken) return;
+  if (analysis?.superseded) { card.hidden = true; return; }
   if (!analysis?.results?.length || analysis.error) { card.hidden = true; return; }
   const results = analysis.results.map((r) => ({ label: ITK.formatLabel(r.format), size: r.size, format: r.format }));
 
@@ -1197,7 +1303,8 @@ async function probeMissingDimensions() {
   if (!pending.length) return;
   let changed = false;
   await ITK.mapLimit(pending, 8, async (img) => {
-    const dims = await loadDimensions(img.src).catch(() => null);
+    // Without this fallback, hotlink-protected images keep 0×0 and vanish from size filters.
+    const dims = await loadDimensionsWithFallback(img);
     if (dims?.width > 0 && dims?.height > 0) {
       img.width = dims.width;
       img.height = dims.height;

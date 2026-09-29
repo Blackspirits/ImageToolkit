@@ -534,5 +534,15 @@
   "noImagesHint": {
     "message": "Прокрутите страницу, чтобы загрузить больше изображений, или попробуйте другую вкладку.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Изображение слишком большое (макс. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

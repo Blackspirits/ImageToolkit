@@ -535,5 +535,15 @@
   "noImagesHint": {
     "message": "Desplázate por la página para cargar más imágenes o prueba otra pestaña.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Imagen demasiado grande (máx. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

@@ -533,5 +533,15 @@
   "noImagesHint": {
     "message": "Role a página para carregar mais imagens ou tente outra aba.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Imagem muito grande (máx. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

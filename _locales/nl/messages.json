@@ -534,5 +534,15 @@
   "noImagesHint": {
     "message": "Scrol door de pagina om meer afbeeldingen te laden, of probeer een ander tabblad.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Afbeelding te groot (max. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

@@ -33,7 +33,7 @@ To show file sizes and types in the image grid, the extension may send lightweig
 ## Local Storage
 
 - **Settings** are stored with `chrome.storage.sync`, which Chrome may synchronize across your signed-in browsers. ImageToolkit can only read and write its own settings and has no access to your Google Account or other sync data.
-- **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it. These entries are deleted automatically after 30 minutes.
+- **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it. These entries expire after 30 minutes: an expired entry is never shown again and is deleted when it is next looked up or on the extension's next cleanup pass (at startup or when another image is opened in the editor).
 - **Interface state** (grid layout, whether filters are open) is kept in the extension's local storage.
 
 ## Clipboard

@@ -535,5 +535,15 @@
   "noImagesHint": {
     "message": "Seite scrollen, um weitere Bilder zu laden, oder einen anderen Tab versuchen.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Bild zu groß (max. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

@@ -533,5 +533,15 @@
   "noImagesHint": {
     "message": "Cuộn trang để tải thêm ảnh hoặc thử một tab khác.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Ảnh quá lớn (tối đa $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

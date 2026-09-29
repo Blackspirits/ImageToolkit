@@ -136,6 +136,7 @@ ImageToolkit/
 
 ```bash
 npm run validate   # manifest, file references, JS syntax, i18n parity/placeholders/usage
+npm run check:contrast # WCAG AA for every text/background token pair, both themes
 npm test           # unit tests (node:test, no dependencies)
 npm run build      # dist/imagetoolkit-<version>.zip with runtime files only
 

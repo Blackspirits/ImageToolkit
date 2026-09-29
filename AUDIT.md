@@ -212,3 +212,26 @@ Máximo de 3 frentes em paralelo. Blocos pensados para sessões curtas.
 | **3 — Qualidade e loja** | Q1 (testes + workflow CI), D1–D4, M6, B1–B3 | 2–3 sessões | `npm test` com ≥ 15 casos nas funções puras a correr em PR; README/PRIVACY alinhados com o comportamento real. |
 
 **Risco a 3–6 meses:** se o objetivo é publicar na Chrome Web Store, A2 e D2 são os mais expostos. Um utilizador que grava `.avif` e recebe um PNG deixa uma avaliação de 1 estrela, e uma política de privacidade que omite a captura de ecrã é motivo documentado de rejeição. Convém fechar a Fase 1 e o D2 antes da submissão.
+
+
+---
+
+## 9. Segunda ronda (auditoria externa ao `e0546d5` e `15acdb3`)
+
+| # | Achado | Estado | Teste |
+|---|---|---|---|
+| 1 | Pré-visualização atuava sobre a imagem errada após reordenação | Corrigido — identidade por `src` | e2e |
+| 2 | "Custom" após preset fixo deformava o output | Corrigido | e2e |
+| 3 | Corrida ao guardar definições | Corrigido — escritas em série | e2e |
+| 4 | Corrida ao trocar a imagem em Ferramentas | Corrigido — token + `FileReader.abort()` | e2e |
+| 5 | Advisor cancelava análises de outras janelas | Corrigido — `AbortController` por documento | e2e |
+| 6 | Dimensões de imagens anti-hotlink | Corrigido — fallback partilhado com as miniaturas | e2e |
+| 7 | ZIP cancelado mostrava sucesso | Corrigido | e2e |
+| 8 | Download sem `Content-Length` lido por inteiro | Corrigido — leitura em streaming com corte | e2e |
+| 9 | Output/ficheiro local acima do limite | Corrigido — teto de 40 MB antes do base64 | e2e (ficheiro local) |
+| 10 | `parseSrcset("a.jpg,b.jpg")` | **Não é bug** — o Chromium pede `/a.jpg,b.jpg`, como manda a especificação HTML | unitário |
+| 11 | Âncora do Shift+clique por índice | Corrigido — âncora por `src` | e2e |
+| 12 | Caixa do editor em panorâmicas | Corrigido — escala comum (`stageSize`) | unitário |
+| A11y | `aria-selected` em `listitem`, tabs sem teclado, modal sem trap | Corrigido | e2e |
+| PRIVACY | "apagadas após 30 min" impreciso | Corrigido — `get()` expira e texto rigoroso | — |
+| Contraste | `text-3` sobre `bg-sunken` 4,42:1 | Corrigido, mais 3 pares encontrados (verde, vermelho e âmbar sobre fundos suaves) | `npm run check:contrast` no CI |

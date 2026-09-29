@@ -81,14 +81,14 @@
     </header>
 
     <nav class="tabs" role="tablist">
-      <button class="tab active" role="tab" aria-selected="true" data-tab="images"><svg class="i i-sm"><use href="#i-image"/></svg><span data-i18n="tabImages">Images</span><span class="tab-badge" id="tab-count"></span></button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="tools"><svg class="i i-sm"><use href="#i-wand"/></svg><span data-i18n="tabTools">Tools</span></button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="settings"><svg class="i i-sm"><use href="#i-settings"/></svg><span data-i18n="tabSettings">Settings</span></button>
+      <button class="tab active" role="tab" id="tab-btn-images" aria-controls="tab-images" aria-selected="true" data-tab="images"><svg class="i i-sm"><use href="#i-image"/></svg><span data-i18n="tabImages">Images</span><span class="tab-badge" id="tab-count"></span></button>
+      <button class="tab" role="tab" id="tab-btn-tools" aria-controls="tab-tools" aria-selected="false" data-tab="tools"><svg class="i i-sm"><use href="#i-wand"/></svg><span data-i18n="tabTools">Tools</span></button>
+      <button class="tab" role="tab" id="tab-btn-settings" aria-controls="tab-settings" aria-selected="false" data-tab="settings"><svg class="i i-sm"><use href="#i-settings"/></svg><span data-i18n="tabSettings">Settings</span></button>
     </nav>
 
     <main class="views">
       <!-- ====== IMAGES ====== -->
-      <section id="tab-images" class="view active" role="tabpanel">
+      <section id="tab-images" class="view active" role="tabpanel" aria-labelledby="tab-btn-images">
         <div class="toolbar">
           <div class="search">
             <svg class="i i-sm search-icon"><use href="#i-search"/></svg>
@@ -177,7 +177,7 @@
       </section>
 
       <!-- ====== TOOLS ====== -->
-      <section id="tab-tools" class="view" role="tabpanel">
+      <section id="tab-tools" class="view" role="tabpanel" aria-labelledby="tab-btn-tools">
         <div class="card">
           <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
             <div class="drop-art"><svg class="i"><use href="#i-upload"/></svg></div>
@@ -237,7 +237,7 @@
       </section>
 
       <!-- ====== SETTINGS ====== -->
-      <section id="tab-settings" class="view" role="tabpanel">
+      <section id="tab-settings" class="view" role="tabpanel" aria-labelledby="tab-btn-settings">
         <div class="card">
           <h3 class="card-title"><span class="card-icon"><svg class="i"><use href="#i-settings"/></svg></span><span data-i18n="settingsTitle">Preferences</span></h3>
           <div class="row">

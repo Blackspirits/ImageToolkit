@@ -60,11 +60,11 @@ async function resolveSource(source) {
 function fitStage(img) {
   const area = $('crop-area');
   const maxW = area.clientWidth - 56, maxH = area.clientHeight - 120;
-  if (!img.naturalWidth || maxW <= 0 || maxH <= 0) return;
-  const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+  if (!img.naturalWidth || !img.naturalHeight || maxW <= 0 || maxH <= 0) return;
+  const { width, height } = ITK.stageSize(img.naturalWidth, img.naturalHeight, maxW, maxH);
   const inner = area.querySelector('.crop-inner');
-  inner.style.width = `${Math.max(120, Math.round(img.naturalWidth * scale))}px`;
-  inner.style.height = `${Math.max(120, Math.round(img.naturalHeight * scale))}px`;
+  inner.style.width = `${width}px`;
+  inner.style.height = `${height}px`;
 }
 
 async function loadImage(source) {
@@ -194,10 +194,16 @@ function initControls() {
     if (value === 'free' || value === 'custom') {
       setLocked(false);
       editor.cropper.setAspectRatio(NaN);
+      // Both go back to "output follows the crop"; a fixed size from an earlier preset
+      // would otherwise stretch any new crop to the old proportions.
+      editor.outputManual = false;
       if (value === 'free') {
-        editor.outputManual = false;
         const image = editor.cropper.getImageData();
         editor.cropper.setData({ x: 0, y: 0, width: image.naturalWidth, height: image.naturalHeight });
+      } else {
+        const data = editor.cropper.getData(true);
+        $('out-w').value = data.width;
+        $('out-h').value = data.height;
       }
       return;
     }

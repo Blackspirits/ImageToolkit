@@ -534,5 +534,15 @@
   "noImagesHint": {
     "message": "Przewiń stronę, aby wczytać więcej obrazów, lub spróbuj innej karty.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Obraz jest za duży (maks. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

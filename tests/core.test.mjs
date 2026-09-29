@@ -160,3 +160,21 @@ test('looksLikeSvg recognises SVG text regardless of the declared type', () => {
   assert.ok(!core.looksLikeSvg('<svgfoo>'));
   assert.ok(!core.looksLikeSvg(''));
 });
+
+test('parseSrcset follows the HTML spec: a comma without whitespace stays inside the URL', () => {
+  // Chromium requests "/a.jpg,b.jpg" for srcset="a.jpg,b.jpg" (verified), so this is one candidate.
+  assert.deepEqual(core.parseSrcset('a.jpg,b.jpg'), ['a.jpg,b.jpg']);
+  assert.deepEqual(core.parseSrcset('a.jpg, b.jpg'), ['a.jpg', 'b.jpg']);
+  assert.deepEqual(core.parseSrcset('a.jpg,, b.jpg 2x'), ['a.jpg', 'b.jpg']);
+});
+
+test('stageSize keeps the image proportions, even for extreme panoramas', () => {
+  const pano = core.stageSize(4000, 100, 1000, 700);
+  assert.equal(pano.width, 1000);
+  assert.equal(pano.height, 25);
+  const tiny = core.stageSize(40, 20, 1000, 700);
+  assert.deepEqual(tiny, { width: 240, height: 120 });
+  const tall = core.stageSize(1000, 3000, 1000, 700);
+  assert.ok(Math.abs(tall.width / tall.height - 1 / 3) < 0.01);
+  assert.ok(tall.height <= 700);
+});

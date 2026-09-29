@@ -533,5 +533,15 @@
   "noImagesHint": {
     "message": "捲動頁面以載入更多圖片，或嘗試其他分頁。",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "圖片過大（最大 $SIZE$）",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

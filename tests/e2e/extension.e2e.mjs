@@ -56,6 +56,7 @@ const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html' };
 
 let server, base, ctx, sw, id, ui;
 const hits = new Map(); // GET requests per path, to check that work is not repeated
+let hugeBytesSent = 0;   // bytes the "huge" endpoint managed to push before the client hung up
 
 async function send(message) {
   return ui.evaluate((m) => chrome.runtime.sendMessage(m), message);
@@ -72,13 +73,36 @@ async function waitFor(fn, timeout = 8000) {
 }
 
 before(async () => {
-  server = http.createServer((req, res) => {
-    const name = decodeURIComponent(new URL(req.url, 'http://x').pathname.slice(1));
+  server = http.createServer(async (req, res) => {
+    const url = new URL(req.url, 'http://x');
+    const name = decodeURIComponent(url.pathname.slice(1));
     if (req.method === 'GET') hits.set(name, (hits.get(name) || 0) + 1);
-    const body = FIXTURES[name];
+
+    // Endless chunked body without Content-Length: the client must stop reading at its cap.
+    if (name === 'huge') {
+      hugeBytesSent = 0;
+      res.writeHead(200, { 'content-type': 'image/png' });
+      const chunk = Buffer.alloc(256 * 1024);
+      const pump = () => {
+        while (!res.destroyed && hugeBytesSent < 200 * 1024 * 1024) {
+          hugeBytesSent += chunk.length;
+          if (!res.write(chunk)) { res.once('drain', pump); return; }
+        }
+        if (!res.destroyed) res.end();
+      };
+      res.on('close', () => res.destroy());
+      pump();
+      return;
+    }
+    // Refuses <img> loads (like hotlink protection) but serves fetches.
+    if (name === 'hotlink.png' && req.headers['sec-fetch-dest'] === 'image') { res.writeHead(403); res.end(); return; }
+
+    const delay = Number(url.searchParams.get('delay')) || 0;
+    if (delay) await new Promise((r) => setTimeout(r, delay));
+    const body = name === 'hotlink.png' ? FIXTURES['wide.png'] : FIXTURES[name];
     if (!body) { res.writeHead(404); res.end(); return; }
     // "noext" is served without a useful type, like many CDNs do.
-    res.writeHead(200, { 'content-type': TYPE_OVERRIDES[name] || TYPES[name.split('.').pop()] || 'application/octet-stream', 'content-length': body.length });
+    res.writeHead(200, { 'content-type': TYPE_OVERRIDES[name] || TYPES[name.split('.').pop()] || 'application/octet-stream', 'cache-control': 'no-store', 'content-length': body.length });
     res.end(req.method === 'HEAD' ? undefined : body);
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -299,4 +323,147 @@ test('batch download from the panel saves every image without dialogs', async ()
   await waitFor(async () => /3/.test(await ui.textContent('#progress-text')) && !(await ui.isDisabled('#action-download')), 15000);
   assert.match(await ui.textContent('#progress-text'), /3\D+3/);
   await waitFor(async () => (await countDownloads()) >= before + 3);
+});
+
+
+// ---------- Regression tests for the second audit ----------
+
+async function freshPanel() {
+  await ui.bringToFront();
+  await ui.reload();
+  await ui.waitForSelector('#image-grid', { state: 'attached' });
+}
+
+test('preview actions follow the image, not its position, when the grid re-sorts', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([
+    { src: b + 'photo.png', width: 30, height: 20 },
+    { src: b + 'wide.png', width: 40, height: 20 },
+  ]), base);
+  await ui.evaluate((b) => openPreview(b + 'wide.png'), base);
+  // A late probe makes photo.png the largest image: the pixel sort puts it first.
+  await ui.evaluate((b) => { const img = state.images.find((i) => i.src === b + 'photo.png'); img.width = 3000; img.height = 2000; updateDerived(img); applyFilters(); }, base);
+  assert.equal(await ui.evaluate(() => state.filtered[0].src.split('/').pop()), 'photo.png');
+  assert.equal(await ui.evaluate(() => currentPreview().src.split('/').pop()), 'wide.png');
+  assert.match(await ui.textContent('#preview-meta'), /2\/2/);
+  await ui.evaluate(() => closePreview());
+});
+
+test('the preview dialog keeps focus inside and makes the background inert', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }]), base);
+  await ui.evaluate((b) => openPreview(b + 'photo.png'), base);
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').hasAttribute('inert')), true);
+  for (let i = 0; i < 12; i++) await ui.keyboard.press('Tab');
+  assert.equal(await ui.evaluate(() => document.getElementById('preview-modal').contains(document.activeElement)), true);
+  await ui.keyboard.press('Escape');
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').hasAttribute('inert')), false);
+});
+
+test('tabs follow the WAI-ARIA pattern (roving tabindex, arrow keys)', async () => {
+  await freshPanel();
+  await ui.focus('#tab-btn-images');
+  await ui.keyboard.press('ArrowRight');
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'tab-btn-tools');
+  assert.equal(await ui.getAttribute('#tab-btn-tools', 'aria-selected'), 'true');
+  assert.deepEqual(await ui.evaluate(() => [...document.querySelectorAll('.tab')].map((t) => t.tabIndex)), [-1, 0, -1]);
+  await ui.keyboard.press('End');
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'tab-btn-settings');
+  await ui.keyboard.press('Home');
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'tab-btn-images');
+});
+
+test('quick successive setting changes are all kept', async () => {
+  await freshPanel();
+  await ui.evaluate(() => Promise.all([saveSettings({ defaultQuality: 61 }), saveSettings({ theme: 'dark' }), saveSettings({ zipDefault: true })]));
+  const stored = await ui.evaluate(() => chrome.storage.sync.get('settings').then((r) => r.settings));
+  assert.equal(stored.defaultQuality, 61);
+  assert.equal(stored.theme, 'dark');
+  assert.equal(stored.zipDefault, true);
+  await ui.evaluate(() => saveSettings({ theme: 'auto', zipDefault: false }));
+});
+
+test('a slow earlier source in Tools never overwrites the newer one', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => { setToolSource(b + 'photo.png?delay=900', 'slow'); return setToolSource(b + 'wide.png', 'fast'); }, base);
+  await new Promise((r) => setTimeout(r, 1500));
+  assert.equal(await ui.textContent('#tool-preview-name'), 'fast');
+  assert.equal(await ui.inputValue('#resize-url-w'), '40');
+  assert.equal(await ui.evaluate(() => state.tool.src.split('/').pop()), 'wide.png');
+});
+
+test('local files over the size limit are refused before being read', async () => {
+  await freshPanel();
+  await ui.evaluate(() => loadToolFile(new File([new Uint8Array(ITK.MAX_IMAGE_BYTES + 1)], 'big.png', { type: 'image/png' })));
+  assert.match(await ui.textContent('#toasts'), /40/);
+  assert.equal(await ui.isHidden('#tool-preview'), true);
+});
+
+test('the format advisor in one window does not cancel another window', async () => {
+  const other = await ctx.newPage();
+  await other.goto(`chrome-extension://${id}/popup.html`);
+  const [a, b] = await Promise.all([
+    ui.evaluate((u) => chrome.runtime.sendMessage({ action: 'analyzeFormats', imageUrl: u }), base + 'photo.png?delay=300'),
+    other.evaluate((u) => chrome.runtime.sendMessage({ action: 'analyzeFormats', imageUrl: u }), base + 'wide.png'),
+  ]);
+  assert.ok(a.results?.length === 3 && !a.superseded, JSON.stringify(a));
+  assert.ok(b.results?.length === 3 && !b.superseded, JSON.stringify(b));
+  await other.close();
+});
+
+test('hotlink-protected images still get their dimensions', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([{ src: b + 'hotlink.png', width: 0, height: 0 }]), base);
+  const dims = await waitFor(() => ui.evaluate(() => (state.images[0].width ? [state.images[0].width, state.images[0].height] : null)), 10000);
+  assert.deepEqual(dims, [40, 20]);
+});
+
+test('a download without Content-Length stops at the size cap', async () => {
+  const r = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'huge' });
+  assert.match(r.error, /too large/i);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  assert.ok(hugeBytesSent < 80 * 1024 * 1024, `server pushed ${hugeBytesSent} bytes`);
+});
+
+test('closing Save As for a ZIP ends quietly instead of reporting success', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => {
+    // Simulate the user closing the Save As dialog.
+    const original = chrome.runtime.sendMessage.bind(chrome.runtime);
+    chrome.runtime.sendMessage = (message, callback) => (message?.action === 'downloadBlob' ? callback({ cancelled: true }) : original(message, callback));
+    setImages([{ src: b + 'photo.png', width: 30, height: 20 }]);
+    toggleSelectAll();
+  }, base);
+  await ui.evaluate(() => batchDownload(true));
+  assert.equal(await ui.textContent('#toasts'), '');
+  assert.equal(await ui.isHidden('#batch-progress'), true);
+});
+
+test('Shift-click ranges use the anchor image, not a stale position', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => {
+    setImages(['anim.gif', 'logo.svg', 'photo.png', 'wide.png', 'noext'].map((n, i) => ({ src: b + n, width: 10 * (5 - i), height: 10 })));
+    state.sort = 'position';
+    applyFilters();
+    const byName = (n) => state.images.find((i) => i.src === b + n);
+    selectFromClick(byName('noext'), false);          // anchor at the end
+    document.getElementById('filter-type').value = 'png';
+    applyFilters();                                  // only photo.png and wide.png remain (noext is 'other')
+    state.selected.clear();
+    selectFromClick(byName('wide.png'), true);       // anchor is gone: acts as a plain click
+  }, base);
+  assert.deepEqual(await ui.evaluate(() => [...state.selected].map((s) => s.split('/').pop())), ['wide.png']);
+});
+
+test('editor: "Custom" after a fixed preset lets the output follow the crop again', async () => {
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('[data-preset="1080x1080"]');
+  assert.equal(await editor.inputValue('#out-w'), '1080');
+  await editor.click('[data-preset="custom"]');
+  await editor.evaluate(() => editor.cropper.setData({ x: 0, y: 0, width: 32, height: 18 }));
+  const out = [await editor.inputValue('#out-w'), await editor.inputValue('#out-h')].map(Number);
+  assert.ok(Math.abs(out[0] / out[1] - 32 / 18) < 0.1, `output ${out} does not follow crop 32×18`);
+  await editor.close();
 });

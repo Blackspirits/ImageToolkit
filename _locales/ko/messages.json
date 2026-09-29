@@ -533,5 +533,15 @@
   "noImagesHint": {
     "message": "페이지를 스크롤해 이미지를 더 불러오거나 다른 탭을 사용해 보세요.",
     "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "이미지가 너무 큽니다(최대 $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
   }
 }

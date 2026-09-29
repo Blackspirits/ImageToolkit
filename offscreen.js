@@ -71,6 +71,11 @@ async function handleProcess(message) {
     blob = await canvasToBlob(canvas, 'image/webp', quality);
   }
 
+  // The result travels back as base64 in one message; refuse what cannot fit.
+  if (blob.size > ITK.MAX_IMAGE_BYTES) {
+    throw new Error(`Encoded image too large (${ITK.formatBytes(blob.size)})`);
+  }
+
   return {
     dataUrl: await blobToDataUrl(blob),
     newSize: blob.size,

@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Hotlink-protected thumbnails are loaded through the extension instead of showing a broken image.
 - Google Lens appears in the image right-click menu when enabled.
 - Right-to-left layout for Arabic and correct `lang` for screen readers.
-- Colour contrast meets WCAG AA: secondary text (4.8–5.7:1), white on the primary button (≥ 5:1) and the success green (4.5:1).
+- Colour contrast meets WCAG AA for every text/background token pair in both themes (secondary text on every surface, status colours on their tinted backgrounds, white on the primary button and badges), enforced in CI by `npm run check:contrast`.
 - `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
 
 ### Fixed
@@ -46,6 +46,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - A failed offscreen document creation no longer blocks every later conversion until the browser restarts.
 - The Format Advisor downloads and decodes the image once for all formats (it used to fetch it three times), and a newer image supersedes a pending analysis.
 - Downloads that Chrome does not start are reported as errors, and closing the Save As dialog no longer shows "Saved".
+- The preview acts on the image it shows, even if late size probes re-sort the grid underneath it.
+- "Custom" in the editor lets the output size follow the crop again after a fixed-size preset (it used to stretch the new crop).
+- Quick successive setting changes no longer overwrite each other.
+- In Tools, a slow earlier image (URL or file) can no longer replace a newer one.
+- The Format Advisor in one window no longer cancels another window's analysis; a new request in the same window aborts the old download.
+- Hotlink-protected images get their dimensions (and thumbnails) through the extension, so size filters no longer hide them.
+- Closing Save As for a ZIP ends quietly instead of reporting success.
+- Downloads without Content-Length stop at the 40 MB cap instead of being read in full first; encoded results and local files over the cap are refused before being expanded to base64.
+- Shift-click ranges use the anchor image, not a position that filtering may have changed.
+- The editor stage keeps the image proportions for extreme panoramas.
+- Tabs follow the WAI-ARIA pattern (arrow keys, roving tabindex), the preview dialog traps focus and makes the background inert, and selection state is exposed on a real checkbox.
 - "Original" detects SVG by its content, so SVGs served as `text/plain` or XML are saved correctly; other unknown types fall back to the URL extension, while HTML error pages are still refused.
 
 ### Changed
