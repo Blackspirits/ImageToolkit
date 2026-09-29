@@ -11,13 +11,14 @@ const EXTENSION_ORIGIN = chrome.runtime.getURL('');
 
 const OFFSCREEN_HANDLERS = {
   'offscreen-process': (message) => handleProcess(message),
+  'offscreen-analyze': (message) => handleAnalyze(message),
   'offscreen-copy': (message) => handleCopy(message).then(() => ({ copied: true })),
   'offscreen-copy-text': (message) => handleCopyText(message).then(() => ({ copied: true })),
   'offscreen-crop': (message) => handleCrop(message).then((dataUrl) => ({ dataUrl })),
 };
 
 chrome.runtime.onMessage.addListener((message, sender) => {
-  if (sender?.id !== chrome.runtime.id || !(sender.url || '').startsWith(EXTENSION_ORIGIN)) return false;
+  if (!ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN)) return false;
   const handler = OFFSCREEN_HANDLERS[message?.action];
   if (!handler) return false;
 
@@ -78,6 +79,33 @@ async function handleProcess(message) {
     format: ITK.formatFromMime(blob.type) || format,
     hasAlpha,
   };
+}
+
+// ---------- Format Advisor ----------
+// Decodes once and encodes the same pixels in every requested format; only sizes go back.
+async function handleAnalyze(message) {
+  const img = await loadImage(message.imageDataUrl);
+  const width = img.naturalWidth || 0, height = img.naturalHeight || 0;
+  if (!width || !height) throw new Error('Image has no intrinsic size');
+  ITK.checkOutputSize(width, height);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  const quality = message.quality || 0.85;
+  const results = [];
+  for (const format of message.formats || []) {
+    ctx.clearRect(0, 0, width, height);
+    if (format === 'jpeg') {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+    }
+    ctx.drawImage(img, 0, 0);
+    const blob = await canvasToBlob(canvas, ITK.outputMime(format), format === 'png' ? undefined : quality);
+    results.push({ format: ITK.formatFromMime(blob.type) || format, size: blob.size });
+  }
+  return { results, hasAlpha: detectAlpha(img), width, height };
 }
 
 // ---------- Clipboard fallback ----------

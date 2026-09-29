@@ -139,3 +139,15 @@ test('formatBytes and mapLimit', async () => {
   assert.equal(peak, 2);
   assert.deepEqual(seen.sort(), [1, 2, 3, 4, 5, 6]);
 });
+
+test('isExtensionSender trusts only this extension, even without sender.url', () => {
+  const id = 'abc', origin = 'chrome-extension://abc/';
+  assert.ok(core.isExtensionSender({ id, url: 'chrome-extension://abc/popup.html' }, id, origin));
+  assert.ok(core.isExtensionSender({ id, origin: 'chrome-extension://abc' }, id, origin));
+  assert.ok(core.isExtensionSender({ id }, id, origin), 'service worker without url');
+  assert.ok(!core.isExtensionSender({ id, url: 'https://evil.test/', tab: { id: 1 } }, id, origin), 'content script');
+  assert.ok(!core.isExtensionSender({ id, tab: { id: 1 } }, id, origin), 'unprovable sender in a tab');
+  assert.ok(!core.isExtensionSender({ id, url: 'chrome-extension://abcd/x.html' }, id, origin), 'prefix of another id');
+  assert.ok(!core.isExtensionSender({ id: 'other', url: 'chrome-extension://abc/popup.html' }, id, origin));
+  assert.ok(!core.isExtensionSender(undefined, id, origin));
+});

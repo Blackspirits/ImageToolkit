@@ -324,7 +324,8 @@ async function save() {
       url = URL.createObjectURL(blob);
       setTimeout(() => URL.revokeObjectURL(url), 120000);
     }
-    await call({ action: 'downloadBlob', dataUrl: url, filename, saveAs: s.saveAs !== false });
+    const res = await call({ action: 'downloadBlob', dataUrl: url, filename, saveAs: s.saveAs !== false });
+    if (res.cancelled) return;
     toast(`${t('notifSavedAs', [ITK.formatLabel(format)])} · ${width} × ${height} · ${ITK.formatBytes(blob.size)}`);
   } catch (err) {
     toast(`${t('errorSaveFailed')}: ${err.message}`, 'error');

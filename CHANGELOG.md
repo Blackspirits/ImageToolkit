@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - "Saved as" messages now show the real output format; substitutions containing `$` are no longer mangled.
 - Download options (subfolder, file name pattern) now also apply to right-click saves.
 - A failed offscreen document creation no longer blocks every later conversion until the browser restarts.
+- The Format Advisor downloads and decodes the image once for all formats (it used to fetch it three times), and a newer image supersedes a pending analysis.
+- Downloads that Chrome does not start are reported as errors, and closing the Save As dialog no longer shows "Saved".
 
 ### Changed
 - Google Lens is now opt-in (off by default).
@@ -52,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Security
 - The background service worker and offscreen document only accept privileged messages from extension pages; content scripts are limited to the capture and new-images notifications.
 - Instructions received by the service worker are validated (formats, sizes, quality, colours).
+- The sender check no longer depends only on `MessageSender.url` (an optional field): it falls back to `origin`, and refuses anything it cannot prove is an extension page.
 
 ### Removed
 - The unused `activeTab` permission (covered by the existing host permission).

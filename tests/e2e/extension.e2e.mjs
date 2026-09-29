@@ -51,6 +51,7 @@ const FIXTURES = {
 const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', html: 'text/html' };
 
 let server, base, ctx, sw, id, ui;
+const hits = new Map(); // GET requests per path, to check that work is not repeated
 
 async function send(message) {
   return ui.evaluate((m) => chrome.runtime.sendMessage(m), message);
@@ -69,6 +70,7 @@ async function waitFor(fn, timeout = 8000) {
 before(async () => {
   server = http.createServer((req, res) => {
     const name = decodeURIComponent(new URL(req.url, 'http://x').pathname.slice(1));
+    if (req.method === 'GET') hits.set(name, (hits.get(name) || 0) + 1);
     const body = FIXTURES[name];
     if (!body) { res.writeHead(404); res.end(); return; }
     // "noext" is served without a useful type, like many CDNs do.
@@ -116,6 +118,16 @@ test('saved files are named after the produced format', async () => {
   const svg = await send({ action: 'processAndSave', imageUrl: base + 'logo.svg', instructions: { passthrough: true, saveAs: false, silent: true } });
   assert.equal(svg.filename, 'logo.svg');
   assert.equal(svg.dataUrl, undefined, 'save responses should not carry the image back');
+});
+
+test('the format advisor downloads the image once and reports every format', async () => {
+  hits.delete('wide.png');
+  const r = await send({ action: 'analyzeFormats', imageUrl: base + 'wide.png' });
+  assert.deepEqual(r.results.map((x) => x.format), ['png', 'jpeg', 'webp']);
+  assert.ok(r.results.every((x) => x.size > 0));
+  assert.equal(r.originalSize, FIXTURES['wide.png'].length);
+  assert.equal(r.hasAlpha, false);
+  assert.equal(hits.get('wide.png'), 1);
 });
 
 test('fit mode letterboxes with transparency', async () => {

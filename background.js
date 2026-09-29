@@ -148,7 +148,7 @@ const EXTENSION_ORIGIN = chrome.runtime.getURL('');
 const CONTENT_SCRIPT_ACTIONS = new Set(['captureSelection', 'newImagesDetected']);
 
 function isExtensionPage(sender) {
-  return sender?.id === chrome.runtime.id && (sender.url || '').startsWith(EXTENSION_ORIGIN);
+  return ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN);
 }
 
 // Handlers return a value or a promise; the result is sent back to the caller.
@@ -162,6 +162,8 @@ const handlers = {
     return instructions.passthrough ? fetchOriginal(msg.imageUrl) : processImage(msg.imageUrl, instructions);
   },
 
+  analyzeFormats: (msg) => analyzeFormats(msg.imageUrl),
+
   fetchAsDataUrl: async (msg) => {
     const blob = await fetchImageBlob(msg.imageUrl);
     return { dataUrl: await blobToDataUrl(blob) };
@@ -172,7 +174,7 @@ const handlers = {
     const isAllowedUrl = url.startsWith('blob:') || /^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url);
     if (!isAllowedUrl) return { error: 'Unsupported download URL' };
     const filename = ITK.sanitizeFilename(msg.filename || 'download', true) || 'download';
-    return triggerDownload(url, filename, msg.saveAs !== false).then(() => ({ success: true }));
+    return triggerDownload(url, filename, msg.saveAs !== false).then((id) => (id == null ? { cancelled: true } : { success: true }));
   },
 
   collectImages: (msg) => collectImages(msg.tabId),
@@ -391,6 +393,19 @@ async function processImage(imageUrl, instructions) {
   return { ...result, originalSize: blob.size };
 }
 
+// Format Advisor: one download and one decode, then every format is encoded from
+// the same bitmap. A newer request supersedes older ones before any work starts.
+let analysisCounter = 0;
+
+async function analyzeFormats(imageUrl) {
+  const ticket = ++analysisCounter;
+  const blob = await fetchImageBlob(imageUrl);
+  if (ticket !== analysisCounter) return { superseded: true };
+  const dataUrl = await blobToDataUrl(blob);
+  const result = await offscreenRequest({ action: 'offscreen-analyze', imageDataUrl: dataUrl, formats: ['png', 'jpeg', 'webp'], quality: 0.85 });
+  return { ...result, originalSize: blob.size };
+}
+
 async function processAndSave(imageUrl, rawInstructions, settings) {
   const instructions = sanitizeInstructions(rawInstructions);
   try {
@@ -408,7 +423,8 @@ async function processAndSave(imageUrl, rawInstructions, settings) {
     const filename = ITK.buildFilename(imageUrl, { ...instructions, format: result.format });
 
     // Batch downloads pass saveAs: false so they never open one dialog per image.
-    await triggerDownload(result.dataUrl, filename, instructions.saveAs ?? settings.saveAs);
+    const downloadId = await triggerDownload(result.dataUrl, filename, instructions.saveAs ?? settings.saveAs);
+    if (downloadId == null) return { cancelled: true, filename };
 
     if (settings.showNotification && !instructions.silent) {
       showSaveNotification(result.originalSize, result.newSize, result.format);
@@ -469,18 +485,19 @@ async function pagePngToClipboard(base64) {
 }
 
 // ---------- Downloads ----------
+// Resolves with the download id once Chrome has accepted the download, or with null
+// when the user closed the Save As dialog. Anything else is an error.
 function triggerDownload(url, filename, saveAs = true) {
   return new Promise((resolve, reject) => {
     chrome.downloads.download({ url, filename, saveAs, conflictAction: 'uniquify' }, (downloadId) => {
       const error = chrome.runtime.lastError;
-      if (!downloadId) {
-        // Closing the Save As dialog is not an error worth reporting.
-        if (error && !/cancel/i.test(error.message)) {
-          reject(new Error(error.message));
-          return;
-        }
+      if (Number.isInteger(downloadId) && !error) {
+        resolve(downloadId);
+      } else if (error && /cancel/i.test(error.message)) {
+        resolve(null);
+      } else {
+        reject(new Error(error?.message || 'Download failed'));
       }
-      resolve(downloadId);
     });
   });
 }

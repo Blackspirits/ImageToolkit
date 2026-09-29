@@ -654,6 +654,7 @@ function buildInstructions(format) {
 async function downloadOne(img, format) {
   try {
     const r = await call({ action: 'processAndSave', imageUrl: img.src, instructions: buildInstructions(format) });
+    if (r.cancelled) return;
     toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + sizeSummary(r));
   } catch (err) {
     toast(`${t('errorSaveFailed')}: ${err.message}`, 'error');
@@ -1029,6 +1030,7 @@ async function convertTool() {
   await withBusy($('btn-convert-url'), async () => {
     try {
       const r = await call({ action: 'processAndSave', imageUrl: state.tool.src, instructions: { format, quality: state.settings.defaultQuality / 100, silent: true } });
+      if (r.cancelled) return;
       toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + sizeSummary(r));
     } catch (err) {
       toast(`${t('errorSaveFailed')}: ${err.message}`, 'error');
@@ -1052,6 +1054,7 @@ async function resizeTool() {
   await withBusy($('btn-resize-url'), async () => {
     try {
       const r = await call({ action: 'processAndSave', imageUrl: state.tool.src, instructions: ins });
+      if (r.cancelled) return;
       toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + ` · ${r.width} × ${r.height}`);
     } catch (err) {
       toast(`${t('errorSaveFailed')}: ${err.message}`, 'error');
@@ -1066,16 +1069,14 @@ async function runAdvisor(src) {
   rec.textContent = t('analyzing');
   bars.replaceChildren();
 
-  const results = [];
-  for (const format of ['png', 'jpeg', 'webp']) {
-    const r = await send({ action: 'processAndReturnData', imageUrl: src, instructions: { format, quality: 0.85 } });
-    if (token !== advisorToken) return;
-    if (r && !r.error) results.push({ label: ITK.formatLabel(r.format), size: r.newSize, hasAlpha: r.hasAlpha, format: r.format });
-  }
-  if (!results.length) { card.hidden = true; return; }
+  // One download and one decode in the background; stale answers are dropped here.
+  const analysis = await send({ action: 'analyzeFormats', imageUrl: src });
+  if (token !== advisorToken || analysis?.superseded) return;
+  if (!analysis?.results?.length || analysis.error) { card.hidden = true; return; }
+  const results = analysis.results.map((r) => ({ label: ITK.formatLabel(r.format), size: r.size, format: r.format }));
 
   // Formats that keep transparency when the image has it.
-  const hasAlpha = results.some((r) => r.hasAlpha);
+  const hasAlpha = !!analysis.hasAlpha;
   const candidates = hasAlpha ? results.filter((r) => r.format !== 'jpeg') : results;
   const best = candidates.reduce((a, b) => (b.size < a.size ? b : a));
   rec.textContent = hasAlpha
