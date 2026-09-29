@@ -5,27 +5,27 @@ import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const svg = (name) => `data:image/svg+xml;base64,${readFileSync(`docs/brand/${name}`).toString('base64')}`;
-const FULL = svg('logo.svg');
-const MEDIUM = svg('logo-medium.svg'); // one solid mountain, no translucency or shadow: 32/48 px
-const SMALL = svg('logo-small.svg'); // heaviest strokes, no inner detail: 16 px
+const MASTER = svg('logo.svg'); // full finish: 128 px and up
+const COMPACT = svg('logo-compact.svg'); // one solid mountain, no translucency or shadow: 32/48 px
+const MICRO = svg('logo-micro.svg'); // frame and arrow only, heaviest strokes: 16 px
 
 // [output, source, canvas size, artwork size]
 const TARGETS = [
-  ['icons/icon16.png', SMALL, 16, 16],
-  ['icons/icon32.png', MEDIUM, 32, 32],
-  ['icons/icon48.png', MEDIUM, 48, 48],
+  ['icons/icon16.png', MICRO, 16, 16],
+  ['icons/icon32.png', COMPACT, 32, 32],
+  ['icons/icon48.png', COMPACT, 48, 48],
   // Chrome Web Store: 96 px artwork with 16 px of transparent padding (room for the shadow).
-  ['icons/icon128.png', FULL, 128, 96],
-  ['icons/logo16.png', SMALL, 16, 16],
-  ['icons/logo32.png', MEDIUM, 32, 32],
-  ['icons/logo48.png', MEDIUM, 48, 48],
-  ['icons/logo128.png', FULL, 128, 128],
-  ['icons/logo256.png', FULL, 256, 256],
-  ['icons/logo256-rounded.png', FULL, 256, 256],
-  ['icons/logo512.png', FULL, 512, 512],
-  ['icons/logo512-rounded.png', FULL, 512, 512],
-  ['icons/logo1024.png', FULL, 1024, 1024],
-  ['icons/logo.png', FULL, 1024, 1024],
+  ['icons/icon128.png', MASTER, 128, 96],
+  ['icons/logo16.png', MICRO, 16, 16],
+  ['icons/logo32.png', COMPACT, 32, 32],
+  ['icons/logo48.png', COMPACT, 48, 48],
+  ['icons/logo128.png', MASTER, 128, 128],
+  ['icons/logo256.png', MASTER, 256, 256],
+  ['icons/logo256-rounded.png', MASTER, 256, 256],
+  ['icons/logo512.png', MASTER, 512, 512],
+  ['icons/logo512-rounded.png', MASTER, 512, 512],
+  ['icons/logo1024.png', MASTER, 1024, 1024],
+  ['icons/logo.png', MASTER, 1024, 1024],
 ];
 
 const browser = await chromium.launch();

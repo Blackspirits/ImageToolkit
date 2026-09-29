@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- **New logo**: a continuous image frame that opens into an export arrow, on the brand gradient tile. Vector sources and a light/dark wordmark live in `docs/brand`, with simplified cuts for 32/48 px and 16 px toolbar icons, a 128 px store icon with the Web Store's 16 px padding, and `npm run build:icons` to re-render the PNG set.
+- **New logo**: a continuous image frame that opens into an export arrow, on the brand gradient tile. Vector sources, usage rules and a light/dark wordmark live in `docs/brand`, with three cuts (Master, Compact for 32/48 px, Micro for 16 px), a 128 px store icon with the Web Store's 16 px padding, and `npm run build:icons` to re-render the PNG set.
 - **Redesigned interface** for the popup, side panel and editor: new design system (light/dark/auto), segmented tabs, collapsible filters, image cards with hover actions, floating selection bar, skeleton loading, toasts and an SVG icon set. System fonts only, no network.
 - **Three grid layouts** (grid, compact, list), search that also matches alt text, and a filter indicator with one-click reset.
 - **Keyboard support**: arrow-key navigation, Enter to preview, Space to select, Shift-click ranges, Ctrl/⌘-click toggles, `/` to search, Ctrl/⌘+A to select all, Esc to clear; ← / → to browse in the preview.
