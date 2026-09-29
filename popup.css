@@ -12,7 +12,7 @@ body.sidepanel .app{height:100vh}
 /* ---------- Header ---------- */
 .header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px 10px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand-logo{width:30px;height:30px;border-radius:9px;box-shadow:0 4px 14px -4px rgba(108,92,255,.6)}
+.brand-logo{width:30px;height:30px;filter:drop-shadow(0 3px 6px rgba(90,84,240,.45))}
 .brand-text{min-width:0}
 .brand-title{font-size:15px;font-weight:750;letter-spacing:-.01em;line-height:1.2}
 .brand-sub{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -205,7 +205,7 @@ body.popup #tab-images.view{padding-bottom:80px}
 .row-ctrl{display:flex;align-items:center;gap:8px;flex:none}
 
 .about{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px}
-.about-logo{border-radius:14px;box-shadow:0 12px 30px -12px rgba(108,92,255,.8);margin-bottom:4px}
+.about-logo{filter:drop-shadow(0 8px 14px rgba(90,84,240,.45));margin-bottom:4px}
 .about-name{font-size:15px;font-weight:750}
 .about-version{font-size:11px;font-weight:650;color:var(--text-3);font-variant-numeric:tabular-nums;padding:1px 7px;border-radius:var(--r-pill);border:1px solid var(--line-strong);margin-inline-start:4px;vertical-align:middle}
 .about-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-pill);font-size:12px;font-weight:650;color:var(--success);background:var(--success-soft)}

@@ -15,7 +15,7 @@ const RUNTIME = [
   'popup.html', 'popup.css', 'popup.js',
   'resize.html', 'resize.css', 'resize.js',
   'lib', '_locales',
-  'icons/icon16.png', 'icons/icon32.png', 'icons/icon48.png', 'icons/icon128.png',
+  'icons/icon16.png', 'icons/icon32.png', 'icons/icon48.png', 'icons/icon128.png', 'icons/logo128.png',
   'LICENSE',
 ];
 

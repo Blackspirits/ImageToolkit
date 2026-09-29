@@ -1,8 +1,9 @@
-# 🖼️ ImageToolkit
-
-<p align="center">
-  <img src="icons/icon128.png" alt="ImageToolkit logo" width="128" height="128">
-</p>
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup-dark.svg">
+    <img src="docs/brand/lockup-light.svg" alt="ImageToolkit" width="440">
+  </picture>
+</h1>
 
 > **The browser extension to find, save, convert, capture, crop and optimize images — 100% local, zero tracking.**
 
@@ -14,7 +15,10 @@
 
 ## 🎨 Brand
 
-ImageToolkit uses an original blue-purple image/export/tool mark designed for the project. The mark combines an image frame, an export arrow and a brush/tool cue to represent image discovery, editing, resizing, conversion and export. The interface picks up the same cyan → indigo → violet gradient, with light, dark and automatic themes.
+The mark is a single continuous image frame that opens into an export arrow: find an image, work on it, take it with you. It sits on a cyan → indigo → violet tile, the same gradient the interface uses in its light, dark and automatic themes.
+
+- Vector sources live in [`docs/brand`](docs/brand): `logo.svg` (48 px and up), `logo-small.svg` (a heavier, detail-free cut for 16 and 32 px) and the light/dark wordmark lockups.
+- `npm run build:icons` renders every PNG in `icons/` from those sources, including the 128 px store icon with the 16 px padding the Chrome Web Store asks for.
 
 ## 📸 Screenshots
 
@@ -139,6 +143,7 @@ npm run validate   # manifest, file references, JS syntax, i18n parity/placehold
 npm run check:contrast # WCAG AA for every text/background token pair, both themes
 npm test           # unit tests (node:test, no dependencies)
 npm run build      # dist/imagetoolkit-<version>.zip with runtime files only
+npm run build:icons # re-render icons/*.png from docs/brand (needs Playwright Chromium)
 
 npm ci && npx playwright install chromium
 npm run test:e2e   # loads the extension in Chromium and drives real flows

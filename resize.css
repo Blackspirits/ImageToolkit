@@ -9,7 +9,7 @@ html,body{height:100%;overflow:hidden}
 /* ---------- Top bar ---------- */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--bg-glass);backdrop-filter:blur(12px);flex:none;z-index:2}
 .topbar-brand{display:flex;align-items:center;gap:10px;min-width:0}
-.topbar-logo{border-radius:8px;box-shadow:0 4px 14px -4px rgba(108,92,255,.6)}
+.topbar-logo{filter:drop-shadow(0 3px 6px rgba(90,84,240,.45))}
 .topbar h1{font-size:15px;font-weight:750;letter-spacing:-.01em;white-space:nowrap}
 .topbar-info{display:flex;align-items:center;gap:6px;min-width:0}
 .pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--bg-elev);font-size:12px;font-weight:650;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap}
