@@ -4,69 +4,85 @@
   <img src="icons/icon128.png" alt="ImageToolkit logo" width="128" height="128">
 </p>
 
-> **The browser extension to save, convert, resize, inspect, and optimize images — 100% local, zero tracking.**
+> **The browser extension to find, save, convert, capture, crop and optimize images — 100% local, zero tracking.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square&labelColor=313244)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-green?style=flat-square&labelColor=313244)](https://developer.chrome.com/docs/extensions/mv3/)
+[![CI](https://github.com/BlackSpirits/ImageToolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/BlackSpirits/ImageToolkit/actions/workflows/ci.yml)
 
 ---
 
-
 ## 🎨 Brand
 
-ImageToolkit uses an original blue-purple image/export/toolmark designed for the project. The mark combines an image frame, an export arrow, and a brush/tool cue to represent image discovery, editing, resizing, conversion, and export. The toolbar icon variant uses a tighter zoom and rounded-square treatment so it remains legible at very small sizes.
+ImageToolkit uses an original blue-purple image/export/tool mark designed for the project. The mark combines an image frame, an export arrow and a brush/tool cue to represent image discovery, editing, resizing, conversion and export. The interface picks up the same cyan → indigo → violet gradient, with light, dark and automatic themes.
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/images-dark.png" alt="Image grid with selection (dark theme)" width="280">
+  <img src="docs/screenshots/tools-light.png" alt="Tools: convert, format advisor and resize (light theme)" width="280">
+  <img src="docs/screenshots/settings-light.png" alt="Settings (light theme)" width="280">
+</p>
+<p align="center">
+  <img src="docs/screenshots/editor-dark.png" alt="Editor with crop presets" width="860">
+</p>
 
 ## ✨ Features
 
 ### 🔄 Format Conversion
-Right-click any image and instantly save it as **PNG**, **JPG**, **WebP**, or **AVIF**. Transparent images get a white background when converting to JPG — no more black artifacts. Chrome cannot encode AVIF from a canvas yet, so AVIF requests fall back to WebP and the file is saved with a `.webp` extension.
+Right-click any image and save it as **PNG**, **JPG**, **WebP** or **AVIF**. Transparent images get a white background when converting to JPG — no more black artifacts. Chrome cannot encode AVIF from a canvas yet, so AVIF requests fall back to WebP and the file is saved with a `.webp` extension: the extension always matches the real content.
+
+### 📥 True "Original" Downloads
+**Original** keeps the exact source bytes — GIF animation, SVG vectors and JPEG quality are preserved, and the file extension comes from the real content type, even when the URL has none.
 
 ### 🖼️ Image Grid
-Browse all images found on the current page in a visual grid with thumbnails, dimensions, file sizes, and type badges. Filter by **format**, **size range**, or **domain**. Select individual images or batch-select for download.
+Browse every image on the current page in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape** or **domain**. Hotlink-protected thumbnails are fetched through the extension so they still show. In the side panel, the grid follows the active tab and page loads automatically.
+
+### ⌨️ Keyboard & Selection
+- Shift-click selects a range, Ctrl/⌘-click toggles a single image
+- Arrow keys move between images, **Enter** opens the preview, **Space** selects
+- **/** focuses the search, **Ctrl/⌘ + A** selects everything visible, **Esc** clears
+- In the preview, ← / → browse through the filtered images
+
+### 📸 Screen Capture
+Capture an **area** (with an optional 3/5/10-second delay) or the **visible page**, straight into the editor. Start it from the panel, by right-clicking the toolbar icon, or with the `Alt+Shift+S` shortcut (customizable in `chrome://extensions/shortcuts`).
+
+### ✂️ Editor
+Crop, rotate and flip with presets for aspect ratios, common resolutions, social networks (Instagram, Facebook, YouTube, X, LinkedIn, Pinterest), TMDB and TheTVDB. Pick the output size and format, then **Save** (`Ctrl/⌘ + S`) or **Copy** (`Ctrl/⌘ + C`) the result.
+
+### 📋 Copy & Paste
+Copy any image to the clipboard as PNG, ready to paste into Slack, Discord, Figma or any app. Paste an image (or an image URL) anywhere in the panel with **Ctrl/⌘ + V** to open it in Tools, or drag one in from a web page.
+
+### 🧠 Format Advisor
+Load an image in Tools and see how large it would be as PNG, JPG and WebP next to the original — with a recommendation that respects transparency.
 
 ### 🔁 Duplicate Detection
-URL-based heuristic deduplication identifies likely-duplicate images (same path, different cache-busting params). Duplicates are visually flagged and can be hidden with one click. Note: this is URL-based, not pixel-based — it catches most common duplicates but isn't perfect.
-
-### 🧠 Smart Format Advisor
-Paste an image URL and the extension analyzes the image, showing estimated file sizes for each format and recommending the best one. Detects transparency automatically.
-
-### 📋 Copy to Clipboard
-Skip the download — copy the converted image directly to your clipboard, ready to paste into Slack, Discord, Figma, or any other app.
-
-### 📐 Resize & Social Media Presets
-Resize images to custom dimensions with aspect ratio lock, or use built-in presets for Instagram (1080×1080), YouTube Thumbnails (1280×720), TikTok (1080×1920), X/Twitter, LinkedIn, and more.
+URL-based heuristic deduplication identifies likely duplicates (same path, different cache-busting params). Duplicates are flagged and can be hidden with one click. It is URL-based, not pixel-based.
 
 ### 📦 Batch Download
-Select images from the grid and download them individually, convert to a different format, or package everything into a single ZIP file. **Original** keeps the exact source bytes (GIF animation, SVG vectors, JPEG quality) — no re-encoding. Batch downloads never open one Save As dialog per image.
+Select images and download them one by one (never one Save As dialog per image) or as a single ZIP, in their original format or converted. Copy all selected URLs in one click.
 
-### ⚙️ Customizable Settings
-- **Quality slider** (10–100%) for lossy formats
-- **Default format** selection
-- **Save As dialog** toggle
-- **Resize behavior**: Center Crop or Fit (Letterbox)
-- **Notification** toggle
-- **Optional Google Lens** external search toggle
-- **Dark/Light/Auto** theme
+### ⚙️ Settings
+- Default quality and format, resize behavior (center crop or fit/letterbox)
+- Save As dialog, notifications, side panel or popup
+- Subfolder, file name pattern (original, system or custom prefix), convert-on-download, ZIP by default
+- Optional, off-by-default Google Lens search
+- Auto / light / dark theme and 18 interface languages
 
 ### 🌍 Multilingual
-18 languages, all fully translated (see [TRANSLATION_AUDIT.md](TRANSLATION_AUDIT.md)). The interface language can be overridden in Settings.
+18 languages, all fully translated (see [TRANSLATION_AUDIT.md](TRANSLATION_AUDIT.md)), with right-to-left layout for Arabic. The interface language can be overridden in Settings.
 
 ---
 
 ## 🔒 Privacy
 
 - **Zero data collection** — all processing happens locally in your browser
-- **No analytics, no tracking**
-- **No remote scripts** — everything is bundled
-- **`host_permissions: <all_urls>`** — required for scanning page images and fetching cross-origin images for conversion. Optional user-triggered actions such as Google Lens may open external services only when enabled and clicked.
+- **No analytics, no tracking, no remote scripts** — everything is bundled
+- **`host_permissions: <all_urls>`** — needed to scan pages and to fetch cross-origin images for conversion. Optional actions such as Google Lens only run when enabled and clicked.
 
 See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
 
 ---
-
-## 📦 Chrome Web Store bundle
-
-The Web Store upload ZIP is built as a minimal runtime bundle: repository metadata, development scripts and unused brand assets are excluded from the submission package.
 
 ## 🚀 Installation
 
@@ -86,28 +102,48 @@ The Web Store upload ZIP is built as a minimal runtime bundle: repository metada
 
 ```
 ImageToolkit/
-├── manifest.json        MV3 manifest with host_permissions
-├── background.js        Service worker: menus, routing, downloads, type probing
-├── offscreen.html/js    Canvas engine: conversion, resize, crop
-├── content.js           Image scanner (injected on-demand, TreeWalker-based)
-├── popup.html/css/js    3-tab UI: Images, Tools, Settings
-├── resize.html/css/js   Custom resize popup window
-├── _locales/            18 language packs
-├── icons/               Extension icons
-├── lib/                 JSZip for batch ZIP downloads
-├── PRIVACY.md           Privacy policy
-├── CHANGELOG.md         Version history
-└── LICENSE              MIT License
+├── manifest.json          MV3 manifest
+├── background.js          Service worker: menus, commands, routing, downloads, capture, probing
+├── offscreen.html/js      Canvas engine: conversion, resize, crop (+ clipboard fallback)
+├── content.js             Image scanner (injected on demand)
+├── capture.js             Area-selection overlay (injected on demand)
+├── popup.html/css/js      Panel UI: Images, Tools, Settings (popup and side panel)
+├── resize.html/css/js     Editor window (Cropper.js)
+├── lib/
+│   ├── core.js            Pure helpers shared by every context (and unit-tested)
+│   ├── i18n.js            chrome.i18n-compatible language override
+│   ├── ui.js / ui.css     Design tokens and shared UI components
+│   ├── handoff.js         IndexedDB handoff of images between contexts
+│   └── jszip / cropper    Bundled third-party libraries (MIT)
+├── _locales/              18 language packs
+├── tests/                 Unit (node:test) and end-to-end (Playwright) tests
+└── scripts/               Validation and Web Store bundle build
 ```
 
 ### Design Decisions
 
-- **Offscreen Document** for Canvas operations — no code injected into pages for conversion
-- **On-demand content script** — image scanner only injected when the user opens the popup or triggers a scan
-- **TreeWalker-based scanner** — single DOM pass collects `<img>` elements and shadow roots simultaneously, targeted CSS background scan (not `querySelectorAll('*')`)
-- **Type probing** — images with unrecognizable URL extensions are probed via HEAD request (with GET Range fallback) to detect real Content-Type, with conservative limits to avoid excessive requests
-- **`host_permissions: <all_urls>`** — required for side panel to inject content scripts and fetch images from any page
-- **No React, no frameworks** — pure JS/CSS for minimal footprint (bundled JSZip and Cropper.js, no remote scripts)
+- **Offscreen document** for canvas work — no code is injected into pages to convert images
+- **On-demand scripts** — the scanner and the capture overlay are only injected when you use them, and the live observer stops after a few idle minutes
+- **Least trust between contexts** — the service worker only accepts privileged messages from extension pages; content scripts can report captures and new images, nothing else
+- **Real formats** — output names follow the format actually produced, and "Original" keeps the source bytes
+- **Clipboard where there is focus** — the panel and editor write to the clipboard directly; context-menu copies are written from the page you right-clicked
+- **Bounded work** — image size, canvas area, probe counts and probe downloads are capped
+- **No frameworks** — plain JS/CSS, system fonts, one SVG icon sprite
+
+---
+
+## 🧪 Development
+
+```bash
+npm run validate   # manifest, file references, JS syntax, i18n parity/placeholders/usage
+npm test           # unit tests (node:test, no dependencies)
+npm run build      # dist/imagetoolkit-<version>.zip with runtime files only
+
+npm ci && npx playwright install chromium
+npm run test:e2e   # loads the extension in Chromium and drives real flows
+```
+
+CI runs all of the above on every pull request.
 
 ---
 
@@ -117,9 +153,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Run `npm run check` (and `npm run test:e2e` for UI changes)
+4. Commit your changes and open a Pull Request
 
 ---
 

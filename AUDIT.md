@@ -30,10 +30,19 @@ Causas-raiz (3):
 
 | Estado | Itens |
 |---|---|
-| Corrigido (branch `claude/vibrant-rubin-hshlh0`) | A1, A2, A3, A4, A5 (atalho removido), M1, M3, M8, M9, B1, B3, D1 (parcial: README) |
-| Por fazer | M2, M4, M5, M6, M7, M10, B2, B4–B11, D2–D4, Q1–Q4 |
+| Corrigido | A1–A5, M1–M10, B1–B11, D1–D4, Q1–Q4 |
+| Por fazer | — |
 
-Verificação: teste ponta a ponta com a extensão carregada no Chromium 141 (Playwright), corrido contra `main` e contra o branch. Resultados no branch: "Original" devolve bytes idênticos (GIF/SVG/PNG); AVIF → `photo.webp`; SVG → `logo.svg` com `image/svg+xml`; content script recebe recusa em `fetchAsDataUrl`; `savedAtLeastW/H` sobrevive a guardar definições; o scanner continua a funcionar.
+Notas por item:
+- **A5** — o atalho `Alt+Shift+S` passou a ter comportamento real: captura de área.
+- **M2** — cópia a partir do painel/editor escreve diretamente (página focada); a partir do menu de contexto, escreve a partir da página clicada. Offscreen fica só como último recurso.
+- **M4** — passagem de imagens por IndexedDB (`lib/handoff.js`), com chave por janela e expiração a 30 min.
+- **M7** — limites: 40 MB por imagem, 16384 px por lado, 100 MP por imagem.
+- **B9** — cartões focáveis com navegação por teclado, anéis de foco, `lang`/`dir` dinâmicos (árabe em RTL), rótulos ARIA.
+- **D4** — `activeTab` removido (redundante com `<all_urls>`). A troca para `optional_host_permissions` fica como decisão do autor: reduz o aviso na instalação, mas acrescenta um pedido de permissão na primeira utilização.
+- **Q1** — `npm test` (14 testes unitários), `npm run test:e2e` (15 testes com a extensão real no Chromium) e workflow de CI.
+
+Verificação: `npm run validate`, `npm test` e `npm run test:e2e` verdes no Chromium 141. O e2e cobre, entre outros: bytes idênticos no "Original" (GIF/SVG/PNG/sem extensão), AVIF→WebP com nome correto, letterbox transparente, limites de tamanho, esquemas recusados, scanner com reinjeção, recusa de ações privilegiadas a content scripts, páginas restritas, merge de definições, editor (abrir, recortar, guardar), clipboard a partir do painel e do menu de contexto, captura de área até ao editor e lote sem diálogos.
 
 ---
 

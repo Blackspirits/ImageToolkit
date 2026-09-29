@@ -8,21 +8,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Redesigned interface** for the popup, side panel and editor: new design system (light/dark/auto), segmented tabs, collapsible filters, image cards with hover actions, floating selection bar, skeleton loading, toasts and an SVG icon set. System fonts only, no network.
+- **Three grid layouts** (grid, compact, list), search that also matches alt text, and a filter indicator with one-click reset.
+- **Keyboard support**: arrow-key navigation, Enter to preview, Space to select, Shift-click ranges, Ctrl/⌘-click toggles, `/` to search, Ctrl/⌘+A to select all, Esc to clear; ← / → to browse in the preview.
+- **Preview navigation** between the filtered images, with copy, edit, open and Google Lens actions.
+- **Copy image** from any card, the preview and the editor; **Copy URLs** for the whole selection.
+- **Paste to open**: Ctrl/⌘+V with an image or image URL loads it in Tools; images can also be dragged in from web pages.
+- **Capture visible page**, a 10-second capture delay, capture actions on the toolbar icon's right-click menu, and a working `Alt+Shift+S` shortcut for area capture.
+- The side panel **follows the active tab** and rescans after page loads.
+- **Editor**: floating transform bar, sticky footer (format, quality, Copy, Save), collapsible preset sections, exact crop sizes, proportional output size, `Ctrl/⌘+S` / `Ctrl/⌘+C`, and a fixed Instagram Story preset (1080×1920).
+- **Format Advisor** shows the original size next to PNG/JPG/WebP as bars and preselects the best format.
+- Hotlink-protected thumbnails are loaded through the extension instead of showing a broken image.
+- Google Lens appears in the image right-click menu when enabled.
+- Right-to-left layout for Arabic and correct `lang` for screen readers.
+- `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
+
 ### Fixed
 - "Original" downloads now keep the exact source bytes instead of re-encoding through the canvas. SVGs are no longer saved as PNG data with a `.svg` extension, GIFs keep their animation and JPEGs are not recompressed.
 - Saved files are named after the format actually produced. AVIF requests (not encodable by Chrome's canvas) fall back to WebP and are saved as `.webp` instead of `.avif`; the crop editor no longer writes PNG data to `.avif` files.
 - Batch downloads no longer open one Save As dialog and one notification per image, and now report how many images failed.
 - Changing any setting no longer erases the saved "at least" size filter.
+- Copying an image from the right-click menu now puts a real PNG on the clipboard (it used to depend on a document that never has focus).
+- Large screenshots no longer fail silently when opened in the editor (IndexedDB handoff instead of the 10 MB `storage.local`), and several editor windows no longer overwrite each other's image.
+- The "Resize Behavior" setting (crop/fit) is now applied in Tools; fit mode keeps transparency instead of painting black bars.
+- The editor no longer overflows the window and the Save button is always visible.
+- Card actions are no longer clipped in the grid; dark-theme text colours are applied consistently.
+- Scanning or capturing browser pages now shows a clear message instead of doing nothing.
+- The capture overlay is removed from the screen before the screenshot is taken, the selection keeps tracking outside the window, and it is clamped to the captured bitmap.
+- Background images on `position: fixed` elements are found; `javascript:`, `file:` and `blob:` URLs are no longer listed; srcset URLs containing commas are parsed correctly.
+- Re-injecting the scanner no longer throws or duplicates listeners; the page observer stops when idle.
+- Size probing no longer downloads whole files without limit.
 - Long non-Latin filenames (e.g. Japanese) are no longer reduced to `image`.
-- "Saved as" messages now show the real output format.
-- The capture overlay is removed from the screen before the screenshot is taken.
+- "Saved as" messages now show the real output format; substitutions containing `$` are no longer mangled.
+- Download options (subfolder, file name pattern) now also apply to right-click saves.
 - A failed offscreen document creation no longer blocks every later conversion until the browser restarts.
 
+### Changed
+- Google Lens is now opt-in (off by default).
+- Oversized outputs (more than 16384 px per side or 100 MP) and inputs above 40 MB are rejected with a clear error.
+- Shared code moved to `lib/` (`core.js`, `i18n.js`, `ui.js`, `ui.css`, `handoff.js`); the validator now also checks file references, placeholders, unused and undefined i18n keys, and version parity.
+
 ### Security
-- The background service worker and offscreen document now only accept privileged messages from extension pages; content scripts are limited to the capture and new-images notifications.
+- The background service worker and offscreen document only accept privileged messages from extension pages; content scripts are limited to the capture and new-images notifications.
+- Instructions received by the service worker are validated (formats, sizes, quality, colours).
 
 ### Removed
-- The `Alt+Shift+S` quick-save shortcut, which was declared but never implemented.
+- The unused `activeTab` permission (covered by the existing host permission).
+- The Ko-fi GIF (replaced by an icon) and unused i18n keys.
 
 ## [2.3.5] - 2026-04-27
 
