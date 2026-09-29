@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Sla afbeeldingen op, converteer, wijzig formaat en kopieer ze. 100% lokaal, geen tracking."
   },
-  "cmdQuickSave": {
-    "message": "Snel opslaan in standaardformaat"
-  },
   "menuParent": {
     "message": "Afbeelding opslaan als..."
   },
@@ -161,9 +158,6 @@
   "errorCopyFailed": {
     "message": "Kopiëren mislukt"
   },
-  "errorOnSaving": {
-    "message": "Fout bij opslaan"
-  },
   "tabImages": {
     "message": "Afbeeldingen"
   },
@@ -187,9 +181,6 @@
   },
   "originalFormat": {
     "message": "Origineel"
-  },
-  "resize": {
-    "message": "Formaat wijzigen"
   },
   "settingOpenSidePanel": {
     "message": "Openen als zijpaneel"
@@ -269,12 +260,6 @@
   "outputSize": {
     "message": "Uitvoergrootte"
   },
-  "presets": {
-    "message": "Voorinstellingen"
-  },
-  "presetFree": {
-    "message": "Vrij"
-  },
   "applyDimensions": {
     "message": "Toepassen"
   },
@@ -295,9 +280,6 @@
   },
   "openCropTool": {
     "message": "Bijsnijdtool openen"
-  },
-  "lockRatio": {
-    "message": "Verhouding vastzetten"
   },
   "titleCapture": {
     "message": "Gebied vastleggen"
@@ -461,18 +443,6 @@
   "settingSubfolderNote": {
     "message": "Werkt het beste met 'Vraag opslaglocatie' uitgeschakeld"
   },
-  "pTransform": {
-    "message": "Transformeren"
-  },
-  "pRotate": {
-    "message": "Draaien"
-  },
-  "pHorizontal": {
-    "message": "Horizontaal"
-  },
-  "pVertical": {
-    "message": "Verticaal"
-  },
   "pRotateLeft": {
     "message": "Links draaien"
   },
@@ -496,5 +466,73 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens heeft een externe afbeeldings-URL nodig"
+  },
+  "cmdCaptureArea": {
+    "message": "Een gebied van de pagina vastleggen",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Zichtbaar deel vastleggen",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Extensies hebben geen toegang tot deze pagina (browserpagina's, Chrome Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Vastleggen mislukt",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Afbeelding kopiëren",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "URL's kopiëren",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ URL's gekopieerd",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "of druk op Ctrl+V om een afbeelding te plakken",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Selectie wissen",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$DONE$ van $TOTAL$ opgeslagen",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filters",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Filters wissen",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Scrol door de pagina om meer afbeeldingen te laden, of probeer een ander tabblad.",
+    "description": "Empty state hint"
   }
 }

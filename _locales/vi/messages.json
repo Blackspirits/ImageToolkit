@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Lưu, chuyển đổi, đổi kích thước và sao chép ảnh. 100% cục bộ, không theo dõi."
   },
-  "cmdQuickSave": {
-    "message": "Lưu nhanh ở định dạng mặc định"
-  },
   "menuParent": {
     "message": "Lưu ảnh dưới dạng..."
   },
@@ -160,9 +157,6 @@
   "errorCopyFailed": {
     "message": "Sao chép thất bại"
   },
-  "errorOnSaving": {
-    "message": "Lỗi khi lưu ảnh"
-  },
   "tabImages": {
     "message": "Hình ảnh"
   },
@@ -186,9 +180,6 @@
   },
   "originalFormat": {
     "message": "Gốc"
-  },
-  "resize": {
-    "message": "Thay đổi kích thước"
   },
   "settingOpenSidePanel": {
     "message": "Mở dạng bảng bên"
@@ -268,12 +259,6 @@
   "outputSize": {
     "message": "Kích thước đầu ra"
   },
-  "presets": {
-    "message": "Cài sẵn"
-  },
-  "presetFree": {
-    "message": "Tự do"
-  },
   "applyDimensions": {
     "message": "Áp dụng"
   },
@@ -294,9 +279,6 @@
   },
   "openCropTool": {
     "message": "Mở công cụ cắt"
-  },
-  "lockRatio": {
-    "message": "Khóa tỷ lệ"
   },
   "titleCapture": {
     "message": "Chụp vùng"
@@ -460,18 +442,6 @@
   "settingSubfolderNote": {
     "message": "Hoạt động tốt nhất khi tắt 'Hỏi vị trí lưu'"
   },
-  "pTransform": {
-    "message": "Biến đổi"
-  },
-  "pRotate": {
-    "message": "Xoay"
-  },
-  "pHorizontal": {
-    "message": "Ngang"
-  },
-  "pVertical": {
-    "message": "Dọc"
-  },
   "pRotateLeft": {
     "message": "Xoay trái"
   },
@@ -495,5 +465,73 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens cần URL hình ảnh từ xa"
+  },
+  "cmdCaptureArea": {
+    "message": "Chụp một vùng của trang",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Chụp phần đang hiển thị",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Tiện ích không thể truy cập trang này (trang của trình duyệt, Cửa hàng Chrome trực tuyến).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Chụp thất bại",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Sao chép ảnh",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "Sao chép URL",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "Đã sao chép $COUNT$ URL",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "hoặc nhấn Ctrl+V để dán ảnh",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Bỏ chọn",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "Đã lưu $DONE$/$TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Bộ lọc",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Đặt lại bộ lọc",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Cuộn trang để tải thêm ảnh hoặc thử một tab khác.",
+    "description": "Empty state hint"
   }
 }

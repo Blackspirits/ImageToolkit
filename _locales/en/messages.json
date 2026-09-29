@@ -11,10 +11,6 @@
     "message": "Save, convert (PNG/JPG/WebP/AVIF), resize and copy any image. 100% local, no tracking.",
     "description": "Extension description for the store"
   },
-  "cmdQuickSave": {
-    "message": "Quick save in default format",
-    "description": "Keyboard shortcut description"
-  },
   "menuParent": {
     "message": "Save Image As..."
   },
@@ -97,9 +93,6 @@
   },
   "originalFormat": {
     "message": "Original"
-  },
-  "resize": {
-    "message": "Resize"
   },
   "processing": {
     "message": "Processing"
@@ -187,9 +180,6 @@
   "errorCopyFailed": {
     "message": "Copy failed"
   },
-  "errorOnSaving": {
-    "message": "Error saving image"
-  },
   "settingOpenSidePanel": {
     "message": "Open as Side Panel"
   },
@@ -268,12 +258,6 @@
   "outputSize": {
     "message": "Output Size"
   },
-  "presets": {
-    "message": "Presets"
-  },
-  "presetFree": {
-    "message": "Free"
-  },
   "applyDimensions": {
     "message": "Apply"
   },
@@ -294,9 +278,6 @@
   },
   "openCropTool": {
     "message": "Open Crop Tool"
-  },
-  "lockRatio": {
-    "message": "Lock ratio"
   },
   "titleCapture": {
     "message": "Capture area"
@@ -460,18 +441,6 @@
   "settingSubfolderNote": {
     "message": "Works best with 'Ask save location' disabled"
   },
-  "pTransform": {
-    "message": "Transform"
-  },
-  "pRotate": {
-    "message": "Rotate"
-  },
-  "pHorizontal": {
-    "message": "Horizontal"
-  },
-  "pVertical": {
-    "message": "Vertical"
-  },
   "pRotateLeft": {
     "message": "Rotate left"
   },
@@ -495,5 +464,73 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens needs a remote image URL"
+  },
+  "cmdCaptureArea": {
+    "message": "Capture an area of the page",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Capture visible page",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Extensions can't access this page (browser pages, Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Capture failed",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Copy image",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "Copy URLs",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ URLs copied",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "or press Ctrl+V to paste an image",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Clear selection",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$DONE$ of $TOTAL$ saved",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filters",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Reset filters",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Scroll the page to load more images, or try another tab.",
+    "description": "Empty state hint"
   }
 }

@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "احفظ وحوّل وغيّر حجم وانسخ الصور من صفحات الويب. معالجة محلية 100%، بلا تتبّع."
   },
-  "cmdQuickSave": {
-    "message": "حفظ سريع بالتنسيق الافتراضي"
-  },
   "menuParent": {
     "message": "حفظ الصورة بصيغة..."
   },
@@ -160,9 +157,6 @@
   "errorCopyFailed": {
     "message": "فشل النسخ"
   },
-  "errorOnSaving": {
-    "message": "خطأ في حفظ الصورة"
-  },
   "tabImages": {
     "message": "الصور"
   },
@@ -186,9 +180,6 @@
   },
   "originalFormat": {
     "message": "الأصلي"
-  },
-  "resize": {
-    "message": "تغيير الحجم"
   },
   "settingOpenSidePanel": {
     "message": "فتح كلوحة جانبية"
@@ -268,12 +259,6 @@
   "outputSize": {
     "message": "الحجم النهائي"
   },
-  "presets": {
-    "message": "إعدادات مسبقة"
-  },
-  "presetFree": {
-    "message": "حر"
-  },
   "applyDimensions": {
     "message": "تطبيق"
   },
@@ -294,9 +279,6 @@
   },
   "openCropTool": {
     "message": "فتح أداة القص"
-  },
-  "lockRatio": {
-    "message": "قفل النسبة"
   },
   "titleCapture": {
     "message": "التقاط منطقة"
@@ -460,18 +442,6 @@
   "settingSubfolderNote": {
     "message": "يعمل بشكل أفضل مع تعطيل 'طلب موقع الحفظ'"
   },
-  "pTransform": {
-    "message": "تحويل"
-  },
-  "pRotate": {
-    "message": "تدوير"
-  },
-  "pHorizontal": {
-    "message": "أفقي"
-  },
-  "pVertical": {
-    "message": "عمودي"
-  },
   "pRotateLeft": {
     "message": "تدوير لليسار"
   },
@@ -495,5 +465,73 @@
   },
   "googleLensNeedsUrl": {
     "message": "يتطلب Google Lens عنوان URL لصورة بعيدة"
+  },
+  "cmdCaptureArea": {
+    "message": "التقاط منطقة من الصفحة",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "التقاط الجزء المرئي من الصفحة",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "لا يمكن للإضافات الوصول إلى هذه الصفحة (صفحات المتصفح، سوق Chrome الإلكتروني).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "فشل الالتقاط",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "نسخ الصورة",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "نسخ الروابط",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "تم نسخ $COUNT$ رابط",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "أو اضغط Ctrl+V للصق صورة",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "إلغاء التحديد",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "تم حفظ $DONE$ من $TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "عوامل التصفية",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "إعادة ضبط عوامل التصفية",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "مرّر الصفحة لتحميل المزيد من الصور، أو جرّب علامة تبويب أخرى.",
+    "description": "Empty state hint"
   }
 }

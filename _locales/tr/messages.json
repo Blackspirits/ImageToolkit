@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Görselleri kaydet, dönüştür, yeniden boyutlandır ve kopyala. %100 yerel, izleme yok."
   },
-  "cmdQuickSave": {
-    "message": "Varsayılan formatta hızlı kaydet"
-  },
   "menuParent": {
     "message": "Resmi farklı kaydet..."
   },
@@ -108,16 +105,16 @@
     "message": "Bildirim göster"
   },
   "settingTheme": {
-    "message": "Theme"
+    "message": "Tema"
   },
   "themeAuto": {
     "message": "Otomatik (Sistem)"
   },
   "themeLight": {
-    "message": "Light"
+    "message": "Açık"
   },
   "themeDark": {
-    "message": "Dark"
+    "message": "Koyu"
   },
   "localProcessing": {
     "message": "100% yerel işleme"
@@ -161,9 +158,6 @@
   "errorCopyFailed": {
     "message": "Kopyalama başarısız"
   },
-  "errorOnSaving": {
-    "message": "Kaydetme hatası"
-  },
   "tabImages": {
     "message": "Görseller"
   },
@@ -187,9 +181,6 @@
   },
   "originalFormat": {
     "message": "Orijinal"
-  },
-  "resize": {
-    "message": "Boyutlandır"
   },
   "settingOpenSidePanel": {
     "message": "Yan panel olarak aç"
@@ -269,12 +260,6 @@
   "outputSize": {
     "message": "Çıkış boyutu"
   },
-  "presets": {
-    "message": "Hazır boyutlar"
-  },
-  "presetFree": {
-    "message": "Serbest"
-  },
   "applyDimensions": {
     "message": "Uygula"
   },
@@ -295,9 +280,6 @@
   },
   "openCropTool": {
     "message": "Kırpma aracını aç"
-  },
-  "lockRatio": {
-    "message": "Oranı kilitle"
   },
   "titleCapture": {
     "message": "Alan yakala"
@@ -461,18 +443,6 @@
   "settingSubfolderNote": {
     "message": "'Kayıt konumunu sor' devre dışı bırakıldığında en iyi çalışır"
   },
-  "pTransform": {
-    "message": "Dönüştür"
-  },
-  "pRotate": {
-    "message": "Döndür"
-  },
-  "pHorizontal": {
-    "message": "Yatay"
-  },
-  "pVertical": {
-    "message": "Dikey"
-  },
   "pRotateLeft": {
     "message": "Sola döndür"
   },
@@ -496,5 +466,73 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens için uzak bir görsel URL’si gerekir"
+  },
+  "cmdCaptureArea": {
+    "message": "Sayfanın bir alanını yakala",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Görünen alanı yakala",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Uzantılar bu sayfaya erişemez (tarayıcı sayfaları, Chrome Web Mağazası).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Yakalama başarısız",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Resmi kopyala",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "URL'leri kopyala",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ URL kopyalandı",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "veya resim yapıştırmak için Ctrl+V'ye basın",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Seçimi temizle",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$TOTAL$ resimden $DONE$ tanesi kaydedildi",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filtreler",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Filtreleri sıfırla",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Daha fazla resim yüklemek için sayfayı kaydırın veya başka bir sekme deneyin.",
+    "description": "Empty state hint"
   }
 }
