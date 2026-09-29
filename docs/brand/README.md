@@ -10,13 +10,13 @@
 ## Mark
 
 A single continuous image frame that opens into an export arrow, on a cyan → indigo → violet tile.
-The drawing changes with size instead of shrinking one file:
+Every cut has the same elements in the same place: frame, sun, mountain and arrow. Only the stroke weight and the finish change with size (optical sizing), so small icons stay crisp without changing the mark:
 
-| Cut | File | Use | Content |
-|---|---|---|---|
-| Master | `logo.svg` | 64 px and up | Frame, sun, two mountains (one translucent), arrow, soft glyph shadow |
-| Compact | `logo-compact.svg` | 24–63 px (32 and 48 px icons) | Frame, sun, one solid mountain, arrow; no translucency or shadow |
-| Micro | `logo-micro.svg` | Below 24 px (16 px icon) | Frame and arrow only, heaviest strokes, wide opening between them |
+| Cut | File | Use | Stroke | Finish |
+|---|---|---|---|---|
+| Master | `logo.svg` | 64 px and up (exported at 128–1024 px) | 64 | Four-stop gradient, highlight, shade, inner edge, soft glyph shadow |
+| Compact | `logo-compact.svg` | 24–63 px (32 and 48 px icons) | 88 | Four-stop gradient, lighter highlight and shade, no shadow |
+| Micro | `logo-micro.svg` | Below 24 px (16 px icon) | 112 | Three-stop gradient, no effects |
 
 `npm run build:icons` renders every PNG in `icons/` from these files. The 128 px `icon128.png` follows the Chrome Web Store layout: 96 px artwork with 16 px of transparent padding.
 
@@ -40,4 +40,5 @@ The drawing changes with size instead of shrinking one file:
 
 - Recolour, stretch or rotate the tile.
 - Put the mark inside another rounded container or add an outline.
+- Add or remove elements in one cut only: all cuts share one drawing.
 - Use the Master cut at 16/32 px, or the Micro cut above 24 px.

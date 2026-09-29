@@ -5,9 +5,10 @@ import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const svg = (name) => `data:image/svg+xml;base64,${readFileSync(`docs/brand/${name}`).toString('base64')}`;
-const MASTER = svg('logo.svg'); // full finish: 128 px and up
-const COMPACT = svg('logo-compact.svg'); // one solid mountain, no translucency or shadow: 32/48 px
-const MICRO = svg('logo-micro.svg'); // frame and arrow only, heaviest strokes: 16 px
+// Same drawing in all three; only stroke weight and finish change (see docs/brand/README.md).
+const MASTER = svg('logo.svg'); // 64 px and up (every export here is 128 px or larger)
+const COMPACT = svg('logo-compact.svg'); // 32/48 px
+const MICRO = svg('logo-micro.svg'); // 16 px
 
 // [output, source, canvas size, artwork size]
 const TARGETS = [
