@@ -10,7 +10,7 @@
 ## Mark
 
 A single continuous image frame that opens into an export arrow, on a cyan → indigo → violet tile.
-Every cut has the same elements in the same place: frame, sun, mountain and arrow. Only the stroke weight and the finish change with size (optical sizing), so small icons stay crisp without changing the mark:
+Every cut has the same elements in the same place: frame, sun, a mountain with a smaller, lighter one behind it, and arrow. Only the stroke weight and the finish change with size (optical sizing), so small icons stay crisp without changing the mark:
 
 | Cut | File | Use | Stroke | Finish |
 |---|---|---|---|---|

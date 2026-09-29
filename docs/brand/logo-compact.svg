@@ -19,7 +19,8 @@
     <path d="M636 388L800 224M688 224h112v112"/>
     <g clip-path="url(#inside)" stroke="none" fill="#fff">
       <circle cx="404" cy="444" r="49"/>
-      <path d="M250 800L482 572a34 34 0 0 1 48 0L780 800Z"/>
+      <path d="M520 800L630 610a28 28 0 0 1 42 0L800 760V800Z" opacity="0.6"/>
+      <path d="M250 800L482 572a34 34 0 0 1 48 0L740 800Z"/>
     </g>
   </g>
 </svg>
