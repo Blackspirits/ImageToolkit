@@ -1,10 +1,22 @@
 {
+  "name": "imagetoolkit",
+  "version": "2.3.5",
+  "private": true,
+  "description": "Browser extension to save, convert, resize, capture and inspect images locally.",
+  "license": "MIT",
   "scripts": {
     "validate": "node scripts/validate-extension.mjs",
     "check:js": "node scripts/validate-extension.mjs --js-only",
-    "check:i18n": "node scripts/validate-extension.mjs --i18n-only"
+    "check:i18n": "node scripts/validate-extension.mjs --i18n-only",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "node --test --test-concurrency=1 tests/e2e/*.e2e.mjs",
+    "check": "npm run validate && npm test",
+    "build": "node scripts/build-zip.mjs"
   },
-  "devDependencies": {},
-  "private": true,
-  "version": "2.3.5"
+  "devDependencies": {
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
