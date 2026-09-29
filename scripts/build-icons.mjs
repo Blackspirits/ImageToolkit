@@ -6,18 +6,19 @@ import { chromium } from 'playwright';
 
 const svg = (name) => `data:image/svg+xml;base64,${readFileSync(`docs/brand/${name}`).toString('base64')}`;
 const FULL = svg('logo.svg');
-const SMALL = svg('logo-small.svg'); // heavier strokes, no inner detail: legible at 16/32 px
+const MEDIUM = svg('logo-medium.svg'); // one solid mountain, no translucency or shadow: 32/48 px
+const SMALL = svg('logo-small.svg'); // heaviest strokes, no inner detail: 16 px
 
 // [output, source, canvas size, artwork size]
 const TARGETS = [
   ['icons/icon16.png', SMALL, 16, 16],
-  ['icons/icon32.png', SMALL, 32, 32],
-  ['icons/icon48.png', FULL, 48, 48],
+  ['icons/icon32.png', MEDIUM, 32, 32],
+  ['icons/icon48.png', MEDIUM, 48, 48],
   // Chrome Web Store: 96 px artwork with 16 px of transparent padding (room for the shadow).
   ['icons/icon128.png', FULL, 128, 96],
   ['icons/logo16.png', SMALL, 16, 16],
-  ['icons/logo32.png', SMALL, 32, 32],
-  ['icons/logo48.png', FULL, 48, 48],
+  ['icons/logo32.png', MEDIUM, 32, 32],
+  ['icons/logo48.png', MEDIUM, 48, 48],
   ['icons/logo128.png', FULL, 128, 128],
   ['icons/logo256.png', FULL, 256, 256],
   ['icons/logo256-rounded.png', FULL, 256, 256],

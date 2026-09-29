@@ -17,7 +17,7 @@
 
 The mark is a single continuous image frame that opens into an export arrow: find an image, work on it, take it with you. It sits on a cyan → indigo → violet tile, the same gradient the interface uses in its light, dark and automatic themes.
 
-- Vector sources live in [`docs/brand`](docs/brand): `logo.svg` (48 px and up), `logo-small.svg` (a heavier, detail-free cut for 16 and 32 px) and the light/dark wordmark lockups.
+- Vector sources live in [`docs/brand`](docs/brand): `logo.svg` (128 px and up), `logo-medium.svg` (32 and 48 px: one solid mountain, no translucency or shadow), `logo-small.svg` (16 px: frame and arrow only) and the light/dark wordmark lockups.
 - `npm run build:icons` renders every PNG in `icons/` from those sources, including the 128 px store icon with the 16 px padding the Chrome Web Store asks for.
 
 ## 📸 Screenshots
