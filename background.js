@@ -1,87 +1,19 @@
 // ============================================================
 // ImageToolkit – Background Service Worker
-// Context menus · Message routing · Offscreen management · Downloads
+// Context menus · Commands · Message routing · Offscreen management · Downloads
 // ============================================================
 
 'use strict';
 
-// ---------- i18n Helper ----------
-let customMessages = null;
-let customLocale = 'auto';
-let customLocaleLoading = null;
+importScripts('lib/core.js', 'lib/i18n.js', 'lib/handoff.js');
 
-function formatCustomMessage(key, substitutions) {
-  const entry = customMessages?.[key];
-  if (!entry) return null;
-
-  let msg = entry.message || key;
-  const values = Array.isArray(substitutions) ? substitutions : (substitutions != null ? [substitutions] : []);
-
-  values.forEach((value, index) => {
-    const str = String(value);
-    const positional = index + 1;
-    msg = msg.replace(new RegExp(`\\$${positional}`, 'g'), str);
-
-    if (entry.placeholders) {
-      for (const [name, def] of Object.entries(entry.placeholders)) {
-        if (def.content === `$${positional}`) {
-          msg = msg.replace(new RegExp(`\\$${name.toUpperCase()}\\$`, 'gi'), str);
-        }
-      }
-    }
-  });
-
-  return msg;
-}
-
-const i18n = (key, substitutions) => {
-  const custom = formatCustomMessage(key, substitutions);
-  if (custom) return custom;
-
-  try {
-    return chrome.i18n.getMessage(key, substitutions) || key;
-  } catch {
-    return key;
-  }
-};
-
-async function loadCustomLocale(locale) {
-  const nextLocale = locale && locale !== 'auto' ? locale : 'auto';
-  if (nextLocale === customLocale && (nextLocale === 'auto' || customMessages)) return;
-
-  if (customLocaleLoading) await customLocaleLoading.catch(() => {});
-
-  customLocaleLoading = (async () => {
-    if (nextLocale === 'auto') {
-      customMessages = null;
-      customLocale = 'auto';
-      return;
-    }
-
-    try {
-      const resp = await fetch(chrome.runtime.getURL(`_locales/${nextLocale}/messages.json`));
-      customMessages = resp.ok ? await resp.json() : null;
-      customLocale = customMessages ? nextLocale : 'auto';
-    } catch {
-      customMessages = null;
-      customLocale = 'auto';
-    }
-  })();
-
-  try {
-    await customLocaleLoading;
-  } finally {
-    customLocaleLoading = null;
-  }
-}
-
-async function syncLocaleFromSettings(settings = null) {
-  const current = settings || await getSettings();
-  await loadCustomLocale(current.locale || 'auto');
-}
+const { i18n, handoff } = ITK;
+const t = i18n.t;
 
 // ---------- Constants ----------
-const FORMATS = ['png', 'jpg', 'webp', 'avif'];
+const MENU_FORMATS = ['png', 'jpg', 'webp', 'avif'];
+const MAX_FETCH_BYTES = ITK.MAX_IMAGE_BYTES;
+const EDITOR_WINDOW = { type: 'popup', width: 1440, height: 920 };
 
 const DEFAULT_SETTINGS = {
   defaultQuality: 85,
@@ -91,416 +23,246 @@ const DEFAULT_SETTINGS = {
   resizeBehavior: 'crop',
   showNotification: true,
   theme: 'auto',
+  locale: 'auto',
   openAsSidePanel: true,
-  enableGoogleLens: true,
+  enableGoogleLens: false,
+  subfolder: '',
+  filenamePattern: 'original',
+  filenamePrefix: 'img_',
+  convertOnDl: 'none',
+  zipDefault: false,
 };
 
-// ---------- Context Menu Setup ----------
+// ---------- Settings ----------
+async function getSettings() {
+  const { settings } = await chrome.storage.sync.get('settings');
+  return { ...DEFAULT_SETTINGS, ...(settings || {}) };
+}
+
+async function loadSettingsAndLocale() {
+  const settings = await getSettings();
+  await i18n.load(settings.locale);
+  return settings;
+}
+
+// ---------- Context Menus ----------
 async function buildContextMenus() {
-  await syncLocaleFromSettings();
+  const settings = await loadSettingsAndLocale();
+  await chrome.contextMenus.removeAll();
 
-  await new Promise((resolve) => chrome.contextMenus.removeAll(resolve));
+  const add = (props) => chrome.contextMenus.create(props, () => void chrome.runtime.lastError);
+  const image = { contexts: ['image'] };
 
-  // Parent menu
-  chrome.contextMenus.create({
-    id: 'imagetoolkit-parent',
-    title: i18n('menuParent'),
-    contexts: ['image'],
+  add({ id: 'imagetoolkit-parent', title: t('menuParent'), ...image });
+  MENU_FORMATS.forEach((fmt) => {
+    add({ id: `save-as-${fmt}`, title: t('menuSaveAs', [fmt.toUpperCase()]), parentId: 'imagetoolkit-parent', ...image });
   });
+  add({ id: 'sep-1', type: 'separator', parentId: 'imagetoolkit-parent', ...image });
+  add({ id: 'copy-to-clipboard', title: t('menuCopyClipboard'), parentId: 'imagetoolkit-parent', ...image });
+  add({ id: 'sep-2', type: 'separator', parentId: 'imagetoolkit-parent', ...image });
+  add({ id: 'resize-1080', title: t('menuResize1080'), parentId: 'imagetoolkit-parent', ...image });
+  add({ id: 'custom-resize', title: t('menuCustomResize'), parentId: 'imagetoolkit-parent', ...image });
+  if (settings.enableGoogleLens) {
+    add({ id: 'sep-3', type: 'separator', parentId: 'imagetoolkit-parent', ...image });
+    add({ id: 'google-lens', title: t('titleSearchSimilar'), parentId: 'imagetoolkit-parent', ...image });
+  }
 
-  // Format items
-  FORMATS.forEach((fmt) => {
-    chrome.contextMenus.create({
-      id: `save-as-${fmt}`,
-      title: i18n('menuSaveAs', [fmt.toUpperCase()]),
-      parentId: 'imagetoolkit-parent',
-      contexts: ['image'],
-    });
-  });
+  // Right-click on the toolbar icon
+  add({ id: 'action-capture-area', title: t('titleCapture'), contexts: ['action'] });
+  add({ id: 'action-capture-visible', title: t('captureVisible'), contexts: ['action'] });
+}
 
-  chrome.contextMenus.create({
-    id: 'sep-1',
-    type: 'separator',
-    parentId: 'imagetoolkit-parent',
-    contexts: ['image'],
-  });
-
-  chrome.contextMenus.create({
-    id: 'copy-to-clipboard',
-    title: i18n('menuCopyClipboard'),
-    parentId: 'imagetoolkit-parent',
-    contexts: ['image'],
-  });
-
-  chrome.contextMenus.create({
-    id: 'sep-2',
-    type: 'separator',
-    parentId: 'imagetoolkit-parent',
-    contexts: ['image'],
-  });
-
-  chrome.contextMenus.create({
-    id: 'resize-1080',
-    title: i18n('menuResize1080'),
-    parentId: 'imagetoolkit-parent',
-    contexts: ['image'],
-  });
-
-  chrome.contextMenus.create({
-    id: 'custom-resize',
-    title: i18n('menuCustomResize'),
-    parentId: 'imagetoolkit-parent',
-    contexts: ['image'],
-  });
+// 2.3.5 and earlier passed the image to the editor through chrome.storage.local and only
+// removed it once the editor loaded it; IndexedDB handoff replaced that. Safe to run repeatedly.
+function cleanupLegacyStorage() {
+  return chrome.storage.local.remove('_resizeImageUrl').catch(() => {});
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
-  const settings = await new Promise((resolve) => {
-    chrome.storage.sync.get(['settings'], (result) => {
-      if (!result.settings) chrome.storage.sync.set({ settings: DEFAULT_SETTINGS });
-      resolve(result.settings || DEFAULT_SETTINGS);
-    });
-  });
-
-  await syncLocaleFromSettings(settings);
+  await cleanupLegacyStorage();
+  const { settings } = await chrome.storage.sync.get('settings');
+  if (!settings) await chrome.storage.sync.set({ settings: DEFAULT_SETTINGS });
   await buildContextMenus();
-  applySidePanelBehavior(settings);
+  applySidePanelBehavior(await getSettings());
 });
 
 // Keep runtime-only Chrome settings in sync whenever the service worker wakes up.
 async function initializeExtensionRuntime() {
-  const settings = await getSettings();
-  await syncLocaleFromSettings(settings);
+  const settings = await loadSettingsAndLocale();
   applySidePanelBehavior(settings);
+  handoff.prune().catch(() => {});
+  cleanupLegacyStorage();
 }
 
 initializeExtensionRuntime().catch(() => {});
-
 chrome.runtime.onStartup.addListener(() => {
   initializeExtensionRuntime().catch(() => {});
 });
 
-// ---------- Side Panel Behavior ----------
 function applySidePanelBehavior(settings) {
-  // Default to true (side panel) — only disable if explicitly set to false
   const openAsPanel = settings.openAsSidePanel !== false;
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: openAsPanel }).catch(() => {});
 }
 
-// Listen for settings changes
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName !== 'sync' || !changes.settings?.newValue) return;
-
   const next = changes.settings.newValue;
   const prev = changes.settings.oldValue || {};
   applySidePanelBehavior(next);
 
-  if ((prev.locale || 'auto') !== (next.locale || 'auto')) {
-    (async () => {
-      await syncLocaleFromSettings(next);
-      await buildContextMenus();
-    })().catch(() => {});
-  }
+  const localeChanged = (prev.locale || 'auto') !== (next.locale || 'auto');
+  const lensChanged = !!prev.enableGoogleLens !== !!next.enableGoogleLens;
+  if (localeChanged || lensChanged) buildContextMenus().catch(() => {});
 });
 
 // ---------- Context Menu Click Handler ----------
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  const settings = await getSettings();
-  await syncLocaleFromSettings(settings);
+  const settings = await loadSettingsAndLocale();
+  const id = String(info.menuItemId);
+
+  if (id === 'action-capture-area') { startCapture(tab?.id).catch(() => {}); return; }
+  if (id === 'action-capture-visible') { captureVisible(tab?.id).catch(() => {}); return; }
 
   const imageUrl = info.srcUrl;
   if (!imageUrl) {
-    notify(i18n('errorNoImage'));
+    notify(t('errorNoImage'), { error: true });
     return;
   }
 
-  // Custom resize opens a separate window
-  if (info.menuItemId === 'custom-resize') {
-    openCustomResizeWindow(imageUrl);
-    return;
-  }
-
-  // Copy to clipboard
-  if (info.menuItemId === 'copy-to-clipboard') {
-    await processAndCopy(imageUrl, tab);
-    return;
-  }
+  if (id === 'custom-resize') { openEditor(imageUrl); return; }
+  if (id === 'google-lens') { openGoogleLens(imageUrl, tab); return; }
+  if (id === 'copy-to-clipboard') { await copyImageUrl(imageUrl, tab?.id, settings); return; }
 
   let instructions = {};
-
-  if (info.menuItemId.startsWith('save-as-')) {
-    const fmt = info.menuItemId.replace('save-as-', '');
-    instructions = {
-      format: fmt === 'jpg' ? 'jpeg' : fmt,
-      quality: settings.defaultQuality / 100,
-    };
-  } else if (info.menuItemId === 'resize-1080') {
-    instructions = {
-      format: 'jpeg',
-      quality: settings.defaultQuality / 100,
-      resizeWidth: 1080,
-    };
+  if (id.startsWith('save-as-')) {
+    const fmt = id.replace('save-as-', '');
+    instructions = { format: fmt === 'jpg' ? 'jpeg' : fmt };
+  } else if (id === 'resize-1080') {
+    instructions = { format: 'jpeg', resizeWidth: 1080 };
   }
 
   await processAndSave(imageUrl, instructions, settings);
 });
 
+chrome.commands.onCommand.addListener(async (command, tab) => {
+  if (command === 'capture-area') startCapture(tab?.id).catch(() => {});
+});
+
 // ---------- Message Handler ----------
+// Content scripts run inside the page's renderer, so they may only trigger the
+// few actions they actually need. Everything else is reserved for extension pages.
+const EXTENSION_ORIGIN = chrome.runtime.getURL('');
+const CONTENT_SCRIPT_ACTIONS = new Set(['captureSelection', 'newImagesDetected']);
+
+function isExtensionPage(sender) {
+  return ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN);
+}
+
+// Handlers return a value or a promise; the result is sent back to the caller.
+const handlers = {
+  getSettings: () => getSettings(),
+
+  processAndSave: (msg) => processAndSave(msg.imageUrl, msg.instructions, null),
+
+  processAndReturnData: (msg) => {
+    const instructions = ITK.sanitizeInstructions(msg.instructions);
+    return instructions.passthrough ? fetchOriginal(msg.imageUrl) : processImage(msg.imageUrl, instructions);
+  },
+
+  // Keyed by the calling document, so one window never cancels another's analysis.
+  analyzeFormats: (msg, sender) => analyzeFormats(msg.imageUrl, analysisKey(sender)),
+  cancelAnalysis: (msg, sender) => { analysisControllers.get(analysisKey(sender))?.abort(); return { success: true }; },
+
+  // `maxBytes` lets previews and metadata ask for less than a full-size download.
+  fetchAsDataUrl: async (msg) => {
+    const maxBytes = Math.min(MAX_FETCH_BYTES, Math.max(1, Number(msg.maxBytes) || MAX_FETCH_BYTES));
+    const blob = await fetchImageBlob(msg.imageUrl, { maxBytes });
+    return { dataUrl: await blobToDataUrl(blob), size: blob.size };
+  },
+
+  downloadBlob: (msg) => {
+    const url = typeof msg.dataUrl === 'string' ? msg.dataUrl : '';
+    const isAllowedUrl = url.startsWith('blob:') || /^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url);
+    if (!isAllowedUrl) return { error: 'Unsupported download URL' };
+    const filename = ITK.sanitizeFilename(msg.filename || 'download', true) || 'download';
+    return triggerDownload(url, filename, msg.saveAs !== false).then((id) => (id == null ? { cancelled: true } : { success: true, downloadId: id }));
+  },
+
+  collectImages: (msg) => collectImages(msg.tabId),
+  highlightImages: (msg) => {
+    if (Number.isInteger(msg.tabId)) {
+      chrome.tabs.sendMessage(msg.tabId, { action: 'highlightImages', urls: msg.urls || [] }).catch(() => {});
+    }
+    return { success: true };
+  },
+
+  startCapture: (msg) => startCapture(msg.tabId, msg.delay),
+  captureVisible: (msg) => captureVisible(msg.tabId),
+  openEditor: (msg) => openEditor(msg.imageUrl).then(() => ({ success: true })),
+
+  copyDataUrlToClipboard: (msg) => offscreenRequest({ action: 'offscreen-copy', imageDataUrl: msg.dataUrl }, 15000),
+  copyTextToClipboard: (msg) => offscreenRequest({ action: 'offscreen-copy-text', text: String(msg.text || '') }, 15000),
+
+  probeImageSizes: (msg) => probeImageSizes(msg.urls || []),
+  probeImageTypes: (msg) => probeImageTypes(msg.urls || []),
+
+  // ----- From content scripts -----
+  captureSelection: (msg, sender) => captureSelection(sender.tab, msg.rect),
+  newImagesDetected: (msg, sender) => {
+    chrome.runtime.sendMessage({ action: 'newImagesAvailable', tabId: sender.tab?.id, count: msg.count || 0 }).catch(() => {});
+  },
+};
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const { action } = message || {};
 
-  if (action === 'openSidePanel') {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (tab?.id) {
-        chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
-      }
-    });
-    sendResponse({ success: true });
+  if (action === 'offscreen-response') {
+    if (isExtensionPage(sender)) settleOffscreenRequest(message);
     return false;
   }
 
-  if (action === 'processAndSave') {
-    processAndSave(message.imageUrl, message.instructions, null)
-      .then((result) => sendResponse(result))
-      .catch((err) => sendResponse({ error: err.message }));
-    return true;
-  }
+  const handler = Object.prototype.hasOwnProperty.call(handlers, action) ? handlers[action] : null;
+  if (!handler) return false;
+  if (!isExtensionPage(sender) && !CONTENT_SCRIPT_ACTIONS.has(action)) return false;
 
-  if (action === 'processAndReturnData') {
-    processImage(message.imageUrl, message.instructions)
-      .then((result) => sendResponse(result))
-      .catch((err) => sendResponse({ error: err.message }));
-    return true;
-  }
-
-  // Fetch image and return as data URL (for crop tool CORS bypass)
-  if (action === 'fetchAsDataUrl') {
-    (async () => {
-      try {
-        // Try with credentials first (some servers need cookies)
-        let resp;
-        try {
-          resp = await fetch(message.imageUrl, { credentials: 'include' });
-        } catch {
-          // Fallback without credentials
-          resp = await fetch(message.imageUrl);
-        }
-        if (!resp.ok) { sendResponse({ error: `HTTP ${resp.status}` }); return; }
-        const blob = await resp.blob();
-        if (blob.size === 0) { sendResponse({ error: 'Empty response' }); return; }
-        const reader = new FileReader();
-        reader.onloadend = () => sendResponse({ dataUrl: reader.result });
-        reader.onerror = () => sendResponse({ error: 'Failed to read image' });
-        reader.readAsDataURL(blob);
-      } catch (err) {
-        sendResponse({ error: err.message });
-      }
-    })();
-    return true;
-  }
-
-  if (action === 'getSettings') {
-    getSettings().then((s) => sendResponse(s));
-    return true;
-  }
-
-  if (action === 'downloadBlob') {
-    const url = typeof message.dataUrl === 'string' ? message.dataUrl : '';
-    const isAllowedUrl = url.startsWith('blob:') || /^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url);
-
-    if (!isAllowedUrl) {
-      sendResponse({ error: 'Unsupported download URL' });
-      return false;
-    }
-
-    const filename = sanitizeFilename(message.filename || 'download', true) || 'download';
-    triggerDownload(url, filename, message.saveAs);
-    sendResponse({ success: true });
-    return false;
-  }
-
-  if (action === 'collectImages') {
-    (async () => {
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!tab?.id) { sendResponse([]); return; }
-
-        // Try sending message first (content script may already be injected)
-        let images = await trySendMessage(tab.id);
-        if (images) { sendResponse(images); return; }
-
-        // Inject content script and retry
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ['content.js'],
-        }).catch(() => {});
-
-        if (chrome.runtime.lastError) { sendResponse([]); return; }
-
-        // Small delay to let content script initialize
-        await new Promise((r) => setTimeout(r, 100));
-
-        images = await trySendMessage(tab.id);
-        sendResponse(images || []);
-      } catch {
-        sendResponse([]);
-      }
-    })();
-    return true;
-  }
-
-  // ===== Capture: inject selection overlay =====
-  if (action === 'startCapture') {
-    chrome.tabs.query({ active: true, currentWindow: true }, async ([tab]) => {
-      if (!tab?.id) { sendResponse({ error: 'No tab' }); return; }
-      // Resolve hint string respecting locale override
-      const settings = await getSettings();
-      await syncLocaleFromSettings(settings);
-      const hint = i18n('captureHint');
-      // Inject hint variable, then capture script
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: (h) => { window.__imagetoolkit_hint = h; },
-        args: [hint],
-      }).catch(() => {});
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['capture.js'],
-      }, () => sendResponse({ success: true }));
-    });
-    return true;
-  }
-
-  // ===== Capture: screenshot + crop from selection =====
-  if (action === 'captureSelection') {
-    const rect = message.rect;
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (!tab?.id) return;
-      chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-        if (!dataUrl) return;
-        // Crop via offscreen
-        cropScreenshot(dataUrl, rect).then((cropped) => {
-          // Open in resize tool for further editing
-          chrome.storage.local.set({ _resizeImageUrl: cropped }, () => {
-            chrome.windows.create({
-              url: 'resize.html',
-              type: 'popup', width: 1600, height: 1040, focused: true,
-            });
-          });
-        });
-      });
-    });
-    return false;
-  }
-
-  // ===== Highlight images on page =====
-  if (action === 'highlightImages') {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      if (!tab?.id) return;
-      chrome.tabs.sendMessage(tab.id, {
-        action: 'highlightImages',
-        urls: message.urls || [],
-      }).catch(() => {});
-    });
-    sendResponse({ success: true });
-    return false;
-  }
-
-  // ===== New images detected by content script observer =====
-  if (action === 'newImagesDetected') {
-    // Relay to popup/side panel if open
-    chrome.runtime.sendMessage({
-      action: 'newImagesAvailable',
-      count: message.count || 0,
-    }).catch(() => {}); // popup may not be open
-    return false;
-  }
-
-  if (action === 'openCustomResize') {
-    openCustomResizeWindow(message.imageUrl);
-    sendResponse({ success: true });
-    return false;
-  }
-
-  if (action === 'copyToClipboard') {
-    processAndCopy(message.imageUrl, null)
-      .then((result) => sendResponse(result))
-      .catch((err) => sendResponse({ error: err.message }));
-    return true;
-  }
-
-  if (action === 'copyDataUrlToClipboard') {
-    copyDataUrlToClipboard(message.dataUrl)
-      .then((result) => sendResponse(result))
-      .catch((err) => sendResponse({ error: err.message }));
-    return true;
-  }
-
-  if (action === 'copyTextToClipboard') {
-    copyTextToClipboard(message.text || '')
-      .then((result) => sendResponse(result))
-      .catch((err) => sendResponse({ error: err.message }));
-    return true;
-  }
-
-  if (action === 'probeImageSizes') {
-    probeImageSizes(message.urls || [])
-      .then((result) => sendResponse(result))
-      .catch(() => sendResponse({}));
-    return true;
-  }
-
-  // Probe image types via HEAD requests (no CORS in service worker)
-  if (action === 'probeImageTypes') {
-    probeImageTypes(message.urls || [])
-      .then((result) => sendResponse(result))
-      .catch(() => sendResponse({}));
-    return true;
-  }
-
-  // Offscreen response
-  if (action === 'offscreen-response' && message.id) {
-    const pending = pendingRequests.get(message.id);
-    if (pending) {
-      clearTimeout(pending.timeout);
-      pendingRequests.delete(message.id);
-      if (message.error) {
-        pending.reject(new Error(message.error));
-      } else if (message.copied) {
-        pending.resolve({ success: true });
-      } else {
-        pending.resolve({
-          dataUrl: message.dataUrl,
-          originalSize: pending.originalSize,
-          newSize: message.newSize,
-          width: message.width,
-          height: message.height,
-          format: message.format,
-          hasAlpha: message.hasAlpha,
-        });
-      }
-    }
-    return false;
-  }
-
-  return false;
+  Promise.resolve()
+    .then(() => handler(message, sender))
+    .then((result) => sendResponse(result ?? { success: true }))
+    .catch((err) => sendResponse({ error: err?.message || String(err) }));
+  return true;
 });
 
-// ---------- Try Send Message to Tab ----------
-function trySendMessage(tabId) {
+// ---------- Image Scanner ----------
+async function collectImages(tabId) {
+  if (!Number.isInteger(tabId)) return { images: [], error: 'noTab' };
+
+  let result = await requestImages(tabId);
+  if (result) return result;
+
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['lib/core.js', 'content.js'] });
+  } catch {
+    return { images: [], error: 'restricted' };
+  }
+
+  return (await requestImages(tabId)) || { images: [] };
+}
+
+function requestImages(tabId) {
   return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, { action: 'getImages' }, (images) => {
-      if (chrome.runtime.lastError) {
-        resolve(null); // Content script not ready
-      } else {
-        resolve(images || []);
-      }
+    chrome.tabs.sendMessage(tabId, { action: 'getImages' }, (response) => {
+      if (chrome.runtime.lastError || !response) { resolve(null); return; }
+      // { images, truncated } — a bare array is accepted for scanners injected by older builds.
+      const images = Array.isArray(response) ? response : (Array.isArray(response.images) ? response.images : []);
+      resolve({ images, truncated: !!response.truncated });
     });
   });
 }
 
-// ---------- Offscreen Document Management ----------
+// ---------- Offscreen Document ----------
 let offscreenCreating = null;
+const pendingRequests = new Map();
+let requestIdCounter = 0;
 
 async function ensureOffscreen() {
   try {
@@ -513,452 +275,483 @@ async function ensureOffscreen() {
     // getContexts not available in older Chrome
   }
 
-  if (offscreenCreating) {
-    await offscreenCreating;
-    return;
+  if (!offscreenCreating) {
+    offscreenCreating = chrome.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: [chrome.offscreen.Reason.BLOBS, chrome.offscreen.Reason.CLIPBOARD],
+      justification: 'Canvas-based image conversion and clipboard fallback',
+    }).catch((err) => {
+      if (!err.message?.includes('Only a single offscreen')) throw err;
+    });
   }
 
-  offscreenCreating = chrome.offscreen.createDocument({
-    url: 'offscreen.html',
-    reasons: [chrome.offscreen.Reason.DOM_SCRAPING, chrome.offscreen.Reason.BLOBS, chrome.offscreen.Reason.CLIPBOARD],
-    justification: 'Canvas-based image processing, metadata probing, and clipboard operations',
-  }).catch((err) => {
-    if (!err.message?.includes('Only a single offscreen')) {
-      throw err;
-    }
-  });
-
-  await offscreenCreating;
-  offscreenCreating = null;
+  try {
+    await offscreenCreating;
+  } finally {
+    // Reset even on failure, otherwise every later call awaits the same rejected promise.
+    offscreenCreating = null;
+  }
 }
 
-// ---------- Fetch Image ----------
-async function fetchImageAsDataUrl(imageUrl) {
-  const response = await fetch(imageUrl);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const blob = await response.blob();
-  const originalSize = blob.size;
+async function offscreenRequest(payload, timeoutMs = 30000) {
+  await ensureOffscreen();
+  const id = ++requestIdCounter;
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      pendingRequests.delete(id);
+      reject(new Error(`Processing timed out (${Math.round(timeoutMs / 1000)}s)`));
+    }, timeoutMs);
+    pendingRequests.set(id, { resolve, reject, timeout });
+    chrome.runtime.sendMessage({ ...payload, id }).catch((err) => {
+      // The offscreen document answers with a separate message, so a closed port is expected.
+      if (!/Receiving end does not exist/i.test(err?.message || '')) return;
+      clearTimeout(timeout);
+      pendingRequests.delete(id);
+      reject(err);
+    });
+  });
+}
 
-  const dataUrl = await new Promise((resolve, reject) => {
+function settleOffscreenRequest(message) {
+  const pending = pendingRequests.get(message.id);
+  if (!pending) return;
+  clearTimeout(pending.timeout);
+  pendingRequests.delete(message.id);
+  if (message.error) {
+    pending.reject(new Error(message.error));
+  } else {
+    const { action, id, ...result } = message;
+    pending.resolve(result);
+  }
+}
+
+// ---------- Fetching ----------
+function tooLarge(bytes) {
+  return new Error(`Image too large (${bytes > 0 ? ITK.formatBytes(bytes) : `> ${ITK.formatBytes(MAX_FETCH_BYTES)}`})`);
+}
+
+async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES } = {}) {
+  if (!ITK.isAllowedImageSrc(String(imageUrl || ''))) throw new Error('Unsupported image URL');
+
+  let response;
+  try {
+    // Cookies help with images behind a login; retry without them on network errors.
+    response = await fetch(imageUrl, { credentials: 'include', signal });
+  } catch (err) {
+    if (signal?.aborted) throw err;
+    response = await fetch(imageUrl, { signal });
+  }
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+  const declared = ITK.parseSizeFromHeaders(response.headers);
+  if (declared > maxBytes) {
+    response.body?.cancel().catch(() => {});
+    throw tooLarge(declared);
+  }
+
+  const blob = await readBodyCapped(response, maxBytes);
+  if (!blob.size) throw new Error('Empty response');
+  return blob;
+}
+
+// Reads the body chunk by chunk and stops as soon as it passes the cap, so a server
+// that sends no Content-Length can never push more than `cap` bytes into memory.
+async function readBodyCapped(response, cap) {
+  const type = (response.headers.get('content-type') || '').split(';')[0].trim();
+  if (!response.body) {
+    const blob = await response.blob();
+    if (blob.size > cap) throw tooLarge(blob.size);
+    return blob;
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > cap) {
+      reader.cancel().catch(() => {});
+      throw tooLarge(0);
+    }
+    chunks.push(value);
+  }
+  return new Blob(chunks, { type });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error('Failed to read blob'));
     reader.readAsDataURL(blob);
   });
-
-  return { dataUrl, originalSize };
 }
 
-// ---------- Process Image via Offscreen ----------
-const pendingRequests = new Map();
-let requestIdCounter = 0;
+// "Original" downloads must keep the exact bytes (GIF animation, SVG vectors, JPEG quality),
+// so they bypass the canvas pipeline and take the extension from the real content type.
+async function fetchOriginal(imageUrl) {
+  const blob = await fetchImageBlob(imageUrl);
+  const head = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
+  const mime = (blob.type || '').split(';')[0].trim().toLowerCase();
+  // Content first (servers mislabel files), then the declared type, then the URL's
+  // extension — except for HTML, which is an error or login page, never an image.
+  const format = ITK.sniffImageType(head)
+    || (ITK.looksLikeSvg(await blob.slice(0, 2048).text()) ? 'svg' : null)
+    || ITK.mimeToType(mime)
+    || (mime !== 'text/html' ? ITK.extensionToType(imageUrl) : null);
+  if (!format) throw new Error('Unsupported image type');
 
+  return { dataUrl: await blobToDataUrl(blob), originalSize: blob.size, newSize: blob.size, format };
+}
+
+// ---------- Processing ----------
 async function processImage(imageUrl, instructions) {
-  const { dataUrl, originalSize } = await fetchImageAsDataUrl(imageUrl);
-  await ensureOffscreen();
-
-  const id = ++requestIdCounter;
-
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      pendingRequests.delete(id);
-      reject(new Error('Processing timed out (30s)'));
-    }, 30000);
-
-    pendingRequests.set(id, { resolve, reject, timeout, originalSize });
-
-    chrome.runtime.sendMessage({
-      action: 'offscreen-process',
-      id,
-      imageDataUrl: dataUrl,
-      originalSize,
-      instructions,
-    });
-  });
+  const blob = await fetchImageBlob(imageUrl);
+  const dataUrl = await blobToDataUrl(blob);
+  const result = await offscreenRequest({ action: 'offscreen-process', imageDataUrl: dataUrl, instructions });
+  return { ...result, originalSize: blob.size };
 }
 
-// ---------- Process and Save ----------
-async function processAndSave(imageUrl, instructions, settings) {
+// Format Advisor: one download and one decode, then every format is encoded from
+// the same bitmap. A newer request from the same document aborts the older download.
+const analysisControllers = new Map();
+const analysisKey = (sender) => sender.documentId || sender.url || 'default';
+
+async function analyzeFormats(imageUrl, contextKey) {
+  analysisControllers.get(contextKey)?.abort();
+  const controller = new AbortController();
+  analysisControllers.set(contextKey, controller);
   try {
-    instructions = instructions || {};
-    if (!settings) settings = await getSettings();
-    await syncLocaleFromSettings(settings);
-    if (instructions.quality == null) {
-      instructions.quality = settings.defaultQuality / 100;
-    }
-    instructions.jpgBackground = settings.jpgBackground || '#FFFFFF';
-
-    const result = await processImage(imageUrl, instructions);
-    const filename = buildFilename(imageUrl, instructions);
-
-    triggerDownload(result.dataUrl, filename, settings.saveAs);
-
-    if (settings.showNotification) {
-      showSaveNotification(filename, result.originalSize, result.newSize, instructions.format);
-    }
-
-    return { success: true, filename, ...result };
+    const blob = await fetchImageBlob(imageUrl, { signal: controller.signal });
+    if (controller.signal.aborted) return { superseded: true };
+    const dataUrl = await blobToDataUrl(blob);
+    const result = await offscreenRequest({ action: 'offscreen-analyze', imageDataUrl: dataUrl, formats: ['png', 'jpeg', 'webp'], quality: 0.85 });
+    if (controller.signal.aborted) return { superseded: true };
+    return { ...result, originalSize: blob.size };
   } catch (err) {
-    notify(`${i18n('errorSaveFailed')}: ${err.message}`);
+    if (controller.signal.aborted) return { superseded: true };
+    throw err;
+  } finally {
+    if (analysisControllers.get(contextKey) === controller) analysisControllers.delete(contextKey);
+  }
+}
+
+async function processAndSave(imageUrl, rawInstructions, settings) {
+  let instructions = { silent: !!rawInstructions?.silent };
+  try {
+    instructions = ITK.sanitizeInstructions(rawInstructions);
+    if (!settings) settings = await loadSettingsAndLocale();
+    if (instructions.quality == null) instructions.quality = settings.defaultQuality / 100;
+    if (!instructions.jpgBackground) instructions.jpgBackground = settings.jpgBackground || '#FFFFFF';
+    for (const key of ['subfolder', 'filenamePattern', 'filenamePrefix']) {
+      if (instructions[key] == null) instructions[key] = settings[key];
+    }
+
+    const result = instructions.passthrough
+      ? await fetchOriginal(imageUrl)
+      : await processImage(imageUrl, instructions);
+    // Name the file after the format actually produced (e.g. AVIF falls back to WebP).
+    const filename = ITK.buildFilename(imageUrl, { ...instructions, format: result.format });
+
+    // Batch downloads pass saveAs: false so they never open one dialog per image.
+    const downloadId = await triggerDownload(result.dataUrl, filename, instructions.saveAs ?? settings.saveAs);
+    if (downloadId == null) return { cancelled: true, filename };
+
+    if (settings.showNotification && !instructions.silent) {
+      showSaveNotification(result.originalSize, result.newSize, result.format);
+    }
+
+    const { dataUrl, ...meta } = result;
+    return { success: true, filename, ...meta };
+  } catch (err) {
+    if (!instructions.silent) notify(`${t('errorSaveFailed')}: ${err.message}`, { error: true });
     return { error: err.message };
   }
 }
 
-
-// ---------- Process and Copy to Clipboard ----------
-async function processAndCopy(imageUrl) {
+// ---------- Clipboard ----------
+// Clipboard writes need a focused document. The offscreen document never has focus,
+// so the image is written from the page the user just right-clicked; the offscreen
+// document is only a last resort.
+async function copyImageUrl(imageUrl, tabId, settings) {
   try {
-    const settings = await getSettings();
-    await syncLocaleFromSettings(settings);
-    const instructions = {
-      format: 'png',
-      quality: 1.0,
-      jpgBackground: settings.jpgBackground || '#FFFFFF',
-    };
-    const result = await processImage(imageUrl, instructions);
-    const copyResult = await copyDataUrlToClipboard(result.dataUrl);
-    if (copyResult?.error) throw new Error(copyResult.error);
-    notify(i18n('notifCopied'));
+    const result = await processImage(imageUrl, { format: 'png' });
+    await writeImageToClipboard(result.dataUrl, tabId);
+    if (settings.showNotification) notify(t('notifCopied'));
     return { success: true };
   } catch (err) {
-    notify(`${i18n('errorCopyFailed')}: ${err.message}`);
+    notify(`${t('errorCopyFailed')}: ${err.message}`, { error: true });
     return { error: err.message };
   }
 }
 
-async function copyDataUrlToClipboard(dataUrl) {
-  await ensureOffscreen();
-  const id = ++requestIdCounter;
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      pendingRequests.delete(id);
-      reject(new Error('Clipboard timed out (15s)'));
-    }, 15000);
-
-    pendingRequests.set(id, { resolve, reject, timeout, originalSize: 0 });
-    chrome.runtime.sendMessage({
-      action: 'offscreen-copy',
-      id,
-      imageDataUrl: dataUrl,
-    });
-  });
-}
-
-async function copyTextToClipboard(text) {
-  await ensureOffscreen();
-  const id = ++requestIdCounter;
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      pendingRequests.delete(id);
-      reject(new Error('Clipboard timed out (15s)'));
-    }, 15000);
-
-    pendingRequests.set(id, { resolve, reject, timeout, originalSize: 0 });
-    chrome.runtime.sendMessage({
-      action: 'offscreen-copy-text',
-      id,
-      text,
-    });
-  });
-}
-
-
-// ---------- Filename Sanitization ----------
-function sanitizeFilename(input, allowSlash = false) {
-  if (!input) return allowSlash ? '' : 'image';
-
-  const cleanSegment = (segment) => {
-    let name = String(segment)
-      .replace(/[\\/\?<>:*|"]/g, '')
-      .replace(/[\x00-\x1f\x80-\x9f]/g, '')
-      .replace(/^\.+$/, 'image')
-      .replace(/^(con|prn|aux|nul|com\d|lpt\d)(\..*)?$/i, 'image')
-      .replace(/[\s.]+$/g, '')
-      .trim();
-    if (name.length > 60) name = name.substring(0, 60).replace(/[^a-zA-Z0-9]+$/i, '');
-    return name;
-  };
-
-  if (allowSlash) {
-    return String(input)
-      .split('/')
-      .map(cleanSegment)
-      .filter((segment) => segment && segment !== '.' && segment !== '..')
-      .join('/');
-  }
-
-  return cleanSegment(input) || 'image';
-}
-
-function buildFilename(imageUrl, instructions) {
-  let baseName = 'image';
-  try {
-    const urlPath = new URL(imageUrl).pathname;
-    baseName = urlPath.split('/').pop().split('?')[0].split('#')[0];
-    baseName = decodeURIComponent(baseName);
-    baseName = baseName.replace(/\.(jpe?g|png|gif|webp|avif|svg|bmp|tiff?)$/i, '');
-  } catch {
-    baseName = 'image';
-  }
-
-  baseName = sanitizeFilename(baseName);
-
-  // Filename pattern
-  const pattern = instructions.filenamePattern || 'original';
-  if (pattern === 'system') {
-    baseName = `imagetoolkit_${Date.now()}`;
-  } else if (pattern === 'custom') {
-    const prefix = sanitizeFilename(instructions.filenamePrefix || 'img_');
-    baseName = `${prefix}${baseName}`;
-  }
-
-  // Suffix for resize/crop
-  let suffix = '';
-  if (instructions.resizeWidth) suffix = `_${instructions.resizeWidth}px`;
-  if (instructions.cropWidth) suffix = `_${instructions.cropWidth}x${instructions.cropHeight}`;
-
-  // Extension
-  const fmt = instructions.format || 'png';
-  const ext = fmt === 'jpeg' ? 'jpg' : fmt;
-
-  // Subfolder
-  const sub = sanitizeFilename(instructions.subfolder || '', true);
-  const path = sub ? `${sub}/${baseName}${suffix}.${ext}` : `${baseName}${suffix}.${ext}`;
-  return path;
-}
-
-// ---------- Download ----------
-function triggerDownload(dataUrl, filename, saveAs = true) {
-  chrome.downloads.download({
-    url: dataUrl,
-    filename,
-    saveAs,
-    conflictAction: 'uniquify',
-  }, (downloadId) => {
-    if (!downloadId && chrome.runtime.lastError) {
-      notify(`${i18n('errorOnSaving')}: ${chrome.runtime.lastError.message}`);
+async function writeImageToClipboard(pngDataUrl, tabId) {
+  if (Number.isInteger(tabId)) {
+    try {
+      const [injection] = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: pagePngToClipboard,
+        args: [pngDataUrl.slice(pngDataUrl.indexOf(',') + 1)],
+      });
+      if (injection?.result?.ok) return;
+    } catch {
+      // Restricted page: fall through to the offscreen document.
     }
+  }
+  await offscreenRequest({ action: 'offscreen-copy', imageDataUrl: pngDataUrl }, 15000);
+}
+
+// Runs inside the page (isolated world). Must be self-contained.
+async function pagePngToClipboard(base64) {
+  try {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'image/png' });
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+// ---------- Downloads ----------
+// Resolves with the download id once Chrome has accepted the download, or with null
+// when the user closed the Save As dialog. Anything else is an error.
+function triggerDownload(url, filename, saveAs = true) {
+  return new Promise((resolve, reject) => {
+    chrome.downloads.download({ url, filename, saveAs, conflictAction: 'uniquify' }, (downloadId) => {
+      const error = chrome.runtime.lastError;
+      if (Number.isInteger(downloadId) && !error) {
+        resolve(downloadId);
+      } else if (error && /cancel/i.test(error.message)) {
+        resolve(null);
+      } else {
+        reject(new Error(error?.message || 'Download failed'));
+      }
+    });
   });
 }
 
-// ---------- Custom Resize Window ----------
-// ---------- Screenshot Crop ----------
-async function cropScreenshot(dataUrl, rect) {
-  // Use offscreen canvas to crop the screenshot
-  await ensureOffscreen();
-  const id = ++requestIdCounter;
-  return new Promise((resolve) => {
-    const timeout = setTimeout(() => {
-      pendingRequests.delete(id);
-      resolve(dataUrl); // Fallback: return uncropped
-    }, 15000);
-    pendingRequests.set(id, {
-      resolve: (r) => { clearTimeout(timeout); resolve(r.dataUrl || dataUrl); },
-      reject: () => { clearTimeout(timeout); resolve(dataUrl); },
-      timeout, originalSize: 0,
-    });
-    chrome.runtime.sendMessage({
-      action: 'offscreen-crop',
-      id,
-      dataUrl,
-      rect,
+// ---------- Capture ----------
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function startCapture(tabId, delaySeconds = 0) {
+  if (!Number.isInteger(tabId)) return { error: 'noTab' };
+  await loadSettingsAndLocale();
+  const target = { tabId };
+  try {
+    // Also tells us early whether the page can be scripted at all (chrome://, Web Store…).
+    await chrome.scripting.executeScript({ target, func: (hint) => { window.__imagetoolkit_hint = hint; }, args: [t('captureHint')] });
+  } catch {
+    notify(t('errorRestrictedPage'), { error: true });
+    return { error: 'restricted' };
+  }
+
+  const inject = () => chrome.scripting.executeScript({ target, files: ['capture.js'] }).catch(() => {});
+  const delay = Math.min(10, Math.max(0, Number(delaySeconds) || 0));
+  if (delay > 0) {
+    sleep(delay * 1000).then(inject);
+  } else {
+    await inject();
+  }
+  return { success: true };
+}
+
+function captureTab(windowId) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
+      const error = chrome.runtime.lastError;
+      if (error || !dataUrl) reject(new Error(error?.message || 'Capture failed'));
+      else resolve(dataUrl);
     });
   });
 }
 
-function openCustomResizeWindow(imageUrl) {
-  // Store URL in local storage (handles long URLs and data URLs)
-  chrome.storage.local.set({ _resizeImageUrl: imageUrl }, () => {
-    chrome.windows.create({
-      url: 'resize.html',
-      type: 'popup',
-      width: 1600,
-      height: 1040,
-      focused: true,
-    });
+// The rectangle comes from a content script: only finite, positive sizes are accepted.
+function validCaptureRect(rect) {
+  const values = [rect?.x, rect?.y, rect?.width, rect?.height].map(Number);
+  if (!values.every(Number.isFinite)) return null;
+  const [x, y, width, height] = values;
+  return width >= 1 && height >= 1 && x >= 0 && y >= 0 ? { x, y, width, height } : null;
+}
+
+async function captureSelection(tab, rawRect) {
+  if (tab?.windowId == null) return { error: 'noTab' };
+  try {
+    const rect = validCaptureRect(rawRect);
+    if (!rect) throw new Error('Invalid selection');
+    const dataUrl = await captureTab(tab.windowId);
+    // Never fall back to the whole screenshot: the user asked for one area only.
+    const { dataUrl: cropped } = await offscreenRequest({ action: 'offscreen-crop', dataUrl, rect }, 15000);
+    if (!cropped || !cropped.startsWith('data:image/')) throw new Error('Crop failed');
+    await openEditor(cropped);
+    return { success: true };
+  } catch (err) {
+    await loadSettingsAndLocale();
+    notify(`${t('errorCaptureFailed')}: ${err.message}`, { error: true });
+    return { error: err.message };
+  }
+}
+
+async function captureVisible(tabId) {
+  if (!Number.isInteger(tabId)) return { error: 'noTab' };
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    await openEditor(await captureTab(tab.windowId));
+    return { success: true };
+  } catch {
+    await loadSettingsAndLocale();
+    notify(t('errorRestrictedPage'), { error: true });
+    return { error: 'restricted' };
+  }
+}
+
+// ---------- Editor Window ----------
+async function openEditor(imageUrl) {
+  if (!imageUrl) return;
+  const key = await handoff.put(imageUrl);
+  await chrome.windows.create({ url: `resize.html?key=${encodeURIComponent(key)}`, ...EDITOR_WINDOW, focused: true });
+}
+
+function openGoogleLens(imageUrl, tab) {
+  if (!/^https?:/i.test(imageUrl)) {
+    notify(t('googleLensNeedsUrl'), { error: true });
+    return;
+  }
+  chrome.tabs.create({
+    url: `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(imageUrl)}`,
+    index: tab ? tab.index + 1 : undefined,
+    active: true,
   });
 }
 
 // ---------- Notifications ----------
-function notify(msg) {
+function notify(message, { error = false } = {}) {
   chrome.notifications.create({
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: i18n('extShortName'),
-    message: typeof msg === 'string' ? msg : String(msg),
-    priority: 1,
+    title: t('extShortName'),
+    message: String(message),
+    priority: error ? 2 : 0,
   });
 }
 
-function showSaveNotification(filename, originalSize, newSize, format) {
-  const reduction = originalSize > 0
-    ? Math.round((1 - newSize / originalSize) * 100)
-    : 0;
-  const fmtLabel = format === 'jpeg' ? 'JPG' : (format || 'PNG').toUpperCase();
-  const sizeInfo = `${formatBytes(originalSize)} → ${formatBytes(newSize)}`;
-  const reductionInfo = reduction > 0 ? ` (${reduction}% ${i18n('smaller')})` : '';
+function showSaveNotification(originalSize, newSize, format) {
+  const reduction = originalSize > 0 ? Math.round((1 - newSize / originalSize) * 100) : 0;
+  const sizeInfo = `${ITK.formatBytes(originalSize)} → ${ITK.formatBytes(newSize)}`;
+  const reductionInfo = reduction > 0 ? ` (${reduction}% ${t('smaller')})` : '';
 
   chrome.notifications.create({
     type: 'basic',
     iconUrl: 'icons/icon128.png',
-    title: `✅ ${i18n('notifSavedAs', [fmtLabel])}`,
+    title: t('notifSavedAs', [ITK.formatLabel(format || 'png')]),
     message: `${sizeInfo}${reductionInfo}`,
-    priority: 1,
+    priority: 0,
   });
 }
 
-function formatBytes(bytes) {
-  if (!bytes || bytes < 0) return '0 B';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(2) + ' MB';
-}
-
-
-// ---------- Type Probing & Metadata ----------
-const MIME_TO_TYPE = {
-  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
-  'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/avif': 'avif',
-  'image/bmp': 'bmp', 'image/tiff': 'tiff', 'image/x-icon': 'ico',
-  'image/vnd.microsoft.icon': 'ico',
-};
-
+// ---------- Type & Size Probing ----------
 const PROBE_TYPE_LIMIT = 30;
 const PROBE_SIZE_LIMIT = 100;
 const PROBE_CACHE_MAX = 500;
+// Metadata only: when a server sends no length, count at most this much of one body, and at
+// most PROBE_BODY_BUDGET across all images of one request. Past either, the size stays unknown.
+const PROBE_BODY_CAP = 2 * 1024 * 1024;
+const PROBE_BODY_BUDGET = 8 * 1024 * 1024;
 const typeProbeCache = new Map();
 const sizeProbeCache = new Map();
 
 function rememberProbe(cache, url, value) {
   if (!url || !value) return;
   cache.set(url, value);
-  if (cache.size > PROBE_CACHE_MAX) {
-    const first = cache.keys().next().value;
-    cache.delete(first);
-  }
+  if (cache.size > PROBE_CACHE_MAX) cache.delete(cache.keys().next().value);
+}
+
+function probeableUrls(urls, limit) {
+  return [...new Set((urls || []).filter((u) => typeof u === 'string' && /^https?:/i.test(u)))].slice(0, limit);
 }
 
 async function probeImageTypes(urls) {
   const out = {};
-  const uniqueUrls = [...new Set((urls || []).filter(Boolean))].slice(0, PROBE_TYPE_LIMIT);
-  await mapLimit(uniqueUrls, 6, async (url) => {
-    if (typeProbeCache.has(url)) {
-      out[url] = typeProbeCache.get(url);
-      return;
-    }
-    const type = await probeType(url);
-    if (type) {
-      rememberProbe(typeProbeCache, url, type);
-      out[url] = type;
-    }
+  await ITK.mapLimit(probeableUrls(urls, PROBE_TYPE_LIMIT), 6, async (url) => {
+    if (!typeProbeCache.has(url)) rememberProbe(typeProbeCache, url, await probeType(url));
+    if (typeProbeCache.has(url)) out[url] = typeProbeCache.get(url);
   });
   return out;
 }
 
 async function probeImageSizes(urls) {
   const out = {};
-  const uniqueUrls = [...new Set((urls || []).filter(Boolean))].slice(0, PROBE_SIZE_LIMIT);
-  await mapLimit(uniqueUrls, 6, async (url) => {
-    if (sizeProbeCache.has(url)) {
-      out[url] = sizeProbeCache.get(url);
-      return;
-    }
-    const size = await probeRemoteSize(url);
-    if (size > 0) {
-      rememberProbe(sizeProbeCache, url, size);
-      out[url] = size;
-    }
+  const budget = { bytes: PROBE_BODY_BUDGET };
+  await ITK.mapLimit(probeableUrls(urls, PROBE_SIZE_LIMIT), 6, async (url) => {
+    if (!sizeProbeCache.has(url)) rememberProbe(sizeProbeCache, url, await probeRemoteSize(url, budget));
+    if (sizeProbeCache.has(url)) out[url] = sizeProbeCache.get(url);
   });
   return out;
 }
 
-async function probeType(url) {
-  try {
-    const response = await fetchWithFallback(url, { method: 'HEAD', cache: 'force-cache' }, true);
-    const ct = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    return MIME_TO_TYPE[ct] || null;
-  } catch {
-    return null;
-  }
-}
-
-async function probeRemoteSize(url) {
-  try {
-    const head = await fetchWithFallback(url, { method: 'HEAD', cache: 'force-cache' }, true);
-    let size = parseSizeFromHeaders(head.headers);
-    if (size > 0) return size;
-  } catch {}
-
-  try {
-    const range = await fetchWithFallback(url, { headers: { Range: 'bytes=0-0' }, cache: 'force-cache' }, true);
-    let size = parseSizeFromHeaders(range.headers);
-    if (size > 0) return size;
-  } catch {}
-
-  try {
-    const full = await fetchWithFallback(url, { cache: 'force-cache' }, false);
-    let size = parseSizeFromHeaders(full.headers);
-    if (size > 0) return size;
-    const blob = await full.blob();
-    return blob.size || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function parseSizeFromHeaders(headers) {
-  const len = headers.get('content-length');
-  if (len && /^\d+$/.test(len)) return parseInt(len, 10);
-  const range = headers.get('content-range');
-  if (range) {
-    const match = /\/(\d+)$/.exec(range);
-    if (match) return parseInt(match[1], 10);
-  }
-  return 0;
-}
-
-async function fetchWithFallback(url, init, allowGetFallback) {
+// Resolves once headers arrive; the body is never read.
+async function fetchHeaders(url, init, timeoutMs = 4000) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { ...init, signal: controller.signal });
+    const response = await fetch(url, { cache: 'force-cache', ...init, signal: controller.signal });
     if (!response.ok && response.status !== 206) throw new Error(`HTTP ${response.status}`);
     return response;
-  } catch (err) {
-    if (allowGetFallback && (init.method === 'HEAD' || !init.method)) {
-      const fallbackController = new AbortController();
-      const fallbackTimeout = setTimeout(() => fallbackController.abort(), 4000);
-      try {
-        const response = await fetch(url, { headers: { Range: 'bytes=0-0' }, cache: 'force-cache', signal: fallbackController.signal });
-        if (!response.ok && response.status !== 206) throw new Error(`HTTP ${response.status}`);
-        return response;
-      } finally {
-        clearTimeout(fallbackTimeout);
-      }
-    }
-    throw err;
   } finally {
-    clearTimeout(timeout);
+    clearTimeout(timer);
+    controller.abort(); // drop any body we did not read
   }
 }
 
-async function mapLimit(items, limit, worker) {
-  let index = 0;
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (index < items.length) {
-      const current = items[index++];
-      await worker(current);
-    }
-  });
-  await Promise.all(runners);
+async function probeType(url) {
+  for (const init of [{ method: 'HEAD' }, { headers: { Range: 'bytes=0-0' } }]) {
+    try {
+      const response = await fetchHeaders(url, init);
+      const type = ITK.mimeToType(response.headers.get('content-type'));
+      if (type) return type;
+    } catch {}
+  }
+  return null;
 }
 
-// ---------- Settings ----------
+async function probeRemoteSize(url, budget) {
+  for (const init of [{ method: 'HEAD' }, { headers: { Range: 'bytes=0-0' } }]) {
+    try {
+      const size = ITK.parseSizeFromHeaders((await fetchHeaders(url, init)).headers);
+      if (size > 0) return size;
+    } catch {}
+  }
+  if (budget.bytes <= 0) return 0;
+  return countBodyBytes(url, PROBE_BODY_CAP, 8000, budget);
+}
 
-function getSettings() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(['settings'], (result) => {
-      resolve({ ...DEFAULT_SETTINGS, ...(result.settings || {}) });
-    });
-  });
+// Last resort for servers that send no length: stream and count, with a byte and time cap.
+async function countBodyBytes(url, cap, timeoutMs, budget) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { cache: 'force-cache', signal: controller.signal });
+    if (!response.ok || !response.body) return 0;
+    const declared = ITK.parseSizeFromHeaders(response.headers);
+    if (declared > 0) return declared;
+    const reader = response.body.getReader();
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) return total;
+      total += value.byteLength;
+      budget.bytes -= value.byteLength;
+      if (total > cap || budget.bytes < 0) return 0;
+    }
+  } catch {
+    return 0;
+  } finally {
+    clearTimeout(timer);
+    controller.abort();
+  }
 }

@@ -1,247 +1,162 @@
 // ============================================================
 // ImageToolkit – Offscreen Engine
-// Canvas-based conversion · Resize · Crop · Clipboard support
+// Canvas-based conversion · Resize · Crop · Clipboard fallback
+// Requires lib/core.js.
 // ============================================================
 
 'use strict';
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.action === 'offscreen-process') {
-    handleProcess(message)
-      .then((result) => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, ...result });
-      })
-      .catch((err) => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err.message || 'Unknown processing error' });
-      });
-    return false;
-  }
+// Only the service worker (or another extension page) may drive this document.
+const EXTENSION_ORIGIN = chrome.runtime.getURL('');
 
-  if (message.action === 'offscreen-copy') {
-    handleCopy(message)
-      .then(() => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, copied: true });
-      })
-      .catch((err) => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err.message || 'Clipboard write failed' });
-      });
-    return false;
-  }
+const OFFSCREEN_HANDLERS = {
+  'offscreen-process': (message) => handleProcess(message),
+  'offscreen-analyze': (message) => handleAnalyze(message),
+  'offscreen-copy': (message) => handleCopy(message).then(() => ({ copied: true })),
+  'offscreen-copy-text': (message) => handleCopyText(message).then(() => ({ copied: true })),
+  'offscreen-crop': (message) => handleCrop(message).then((dataUrl) => ({ dataUrl })),
+};
 
-  if (message.action === 'offscreen-copy-text') {
-    handleCopyText(message)
-      .then(() => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, copied: true });
-      })
-      .catch((err) => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err.message || 'Clipboard write failed' });
-      });
-    return false;
-  }
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (!ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN)) return false;
+  const handler = OFFSCREEN_HANDLERS[message?.action];
+  if (!handler) return false;
 
-  if (message.action === 'offscreen-crop') {
-    handleCrop(message)
-      .then((dataUrl) => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, dataUrl });
-      })
-      .catch((err) => {
-        chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err.message });
-      });
-    return false;
-  }
-
+  handler(message)
+    .then((result) => chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, ...result }))
+    .catch((err) => chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err?.message || 'Processing failed' }));
   return false;
 });
 
 // ---------- Main Processing Pipeline ----------
 async function handleProcess(message) {
-  const { imageDataUrl, instructions } = message;
+  const { imageDataUrl, instructions = {} } = message;
   const img = await loadImage(imageDataUrl);
+  const naturalWidth = img.naturalWidth || 0;
+  const naturalHeight = img.naturalHeight || 0;
+  if (!naturalWidth || !naturalHeight) throw new Error('Image has no intrinsic size');
+
   const hasAlpha = detectAlpha(img);
-  const dims = calculateDimensions(img, instructions);
+  const dims = ITK.calculateDimensions(naturalWidth, naturalHeight, instructions);
+  ITK.checkOutputSize(dims.outWidth, dims.outHeight);
 
   const canvas = document.createElement('canvas');
   canvas.width = dims.outWidth;
   canvas.height = dims.outHeight;
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   const format = instructions.format || 'png';
-  if (format === 'jpeg' || format === 'jpg') {
+  const isJpeg = format === 'jpeg' || format === 'jpg';
+  // JPEG has no alpha channel: paint the background instead of letting it turn black.
+  if (isJpeg) {
     ctx.fillStyle = instructions.jpgBackground || '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  } else {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   if (instructions.fitMode && instructions.cropWidth) {
-    drawFitMode(ctx, img, dims, instructions);
-  } else if (instructions.cropWidth) {
-    ctx.drawImage(img, dims.sx, dims.sy, dims.sw, dims.sh, 0, 0, dims.outWidth, dims.outHeight);
+    const box = ITK.letterboxRect(naturalWidth, naturalHeight, dims.outWidth, dims.outHeight);
+    ctx.drawImage(img, box.x, box.y, box.w, box.h);
   } else {
-    ctx.drawImage(img, 0, 0, dims.outWidth, dims.outHeight);
+    ctx.drawImage(img, dims.sx, dims.sy, dims.sw, dims.sh, 0, 0, dims.outWidth, dims.outHeight);
   }
 
-  const mimeType = getMimeType(format);
   const quality = format === 'png' ? undefined : (instructions.quality || 0.85);
-  const blob = await canvasToBlob(canvas, mimeType, quality);
+  let blob = await canvasToBlob(canvas, ITK.outputMime(format), quality);
 
+  // Chrome cannot encode AVIF from a canvas and silently returns PNG instead.
+  // Fall back to WebP (closest in size/quality) and report the real format.
   if (format === 'avif' && blob.type !== 'image/avif') {
-    const fallbackBlob = await canvasToBlob(canvas, 'image/webp', quality);
-    const dataUrl = await blobToDataUrl(fallbackBlob);
-    return {
-      dataUrl,
-      newSize: fallbackBlob.size,
-      width: dims.outWidth,
-      height: dims.outHeight,
-      format: 'webp',
-      hasAlpha,
-    };
+    blob = await canvasToBlob(canvas, 'image/webp', quality);
   }
 
-  const dataUrl = await blobToDataUrl(blob);
+  // The result travels back as base64 in one message; refuse what cannot fit.
+  if (blob.size > ITK.MAX_IMAGE_BYTES) {
+    throw new Error(`Encoded image too large (${ITK.formatBytes(blob.size)})`);
+  }
+
   return {
-    dataUrl,
+    dataUrl: await blobToDataUrl(blob),
     newSize: blob.size,
     width: dims.outWidth,
     height: dims.outHeight,
-    format,
+    format: ITK.formatFromMime(blob.type) || format,
     hasAlpha,
   };
 }
 
+// ---------- Format Advisor ----------
+// Decodes once and encodes the same pixels in every requested format; only sizes go back.
+async function handleAnalyze(message) {
+  const img = await loadImage(message.imageDataUrl);
+  const width = img.naturalWidth || 0, height = img.naturalHeight || 0;
+  if (!width || !height) throw new Error('Image has no intrinsic size');
+  ITK.checkOutputSize(width, height);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  const quality = message.quality || 0.85;
+  const results = [];
+  for (const format of message.formats || []) {
+    ctx.clearRect(0, 0, width, height);
+    if (format === 'jpeg') {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+    }
+    ctx.drawImage(img, 0, 0);
+    const blob = await canvasToBlob(canvas, ITK.outputMime(format), format === 'png' ? undefined : quality);
+    results.push({ format: ITK.formatFromMime(blob.type) || format, size: blob.size });
+  }
+  return { results, hasAlpha: detectAlpha(img), width, height };
+}
+
+// ---------- Clipboard fallback ----------
+// Only used when the page cannot be scripted; the offscreen document has no focus,
+// so this can fail and the caller reports the error.
 async function handleCopy(message) {
   const blob = await dataUrlToBlob(message.imageDataUrl);
-  const clipboardBlob = blob.type === 'image/png' ? blob : await convertBlobToPng(blob);
-  
-  // Try Clipboard API first (needs focus)
-  try {
-    if (self.ClipboardItem && navigator.clipboard?.write) {
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': clipboardBlob })
-      ]);
-      return;
-    }
-  } catch {}
-
-  // Fallback: canvas → img → selection → execCommand
-  try {
-    const dataUrl = await blobToDataUrl(clipboardBlob);
-    const img = document.createElement('img');
-    img.src = dataUrl;
-    document.body.appendChild(img);
-    const range = document.createRange();
-    range.selectNode(img);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    document.execCommand('copy');
-    sel.removeAllRanges();
-    img.remove();
+  const pngBlob = blob.type === 'image/png' ? blob : await convertBlobToPng(blob);
+  if (self.ClipboardItem && navigator.clipboard?.write) {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
     return;
-  } catch {}
-
+  }
   throw new Error('Clipboard API unavailable');
 }
 
 async function handleCopyText(message) {
-  const text = message.text || '';
-  
-  // Try Clipboard API first
+  const text = String(message.text || '');
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
+    await navigator.clipboard.writeText(text);
+    return;
   } catch {}
 
-  // Fallback: textarea + execCommand
+  // execCommand works without focus in an offscreen document with the CLIPBOARD reason.
   const ta = document.createElement('textarea');
   ta.value = text;
-  ta.style.cssText = 'position:fixed;left:-9999px;opacity:0';
   document.body.appendChild(ta);
   ta.select();
-  document.execCommand('copy');
+  const ok = document.execCommand('copy');
   ta.remove();
+  if (!ok) throw new Error('Clipboard write failed');
 }
 
-// ---------- Dimension Calculation ----------
-function calculateDimensions(img, instructions) {
-  let outWidth = img.naturalWidth;
-  let outHeight = img.naturalHeight;
-  let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
-
-  if (instructions.cropWidth && instructions.cropHeight) {
-    const targetW = instructions.cropWidth;
-    const targetH = instructions.cropHeight;
-    const targetRatio = targetW / targetH;
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-
-    if (instructions.fitMode) {
-      outWidth = targetW;
-      outHeight = targetH;
-    } else {
-      if (imgRatio > targetRatio) {
-        sh = img.naturalHeight;
-        sw = Math.round(sh * targetRatio);
-        sx = Math.round((img.naturalWidth - sw) / 2);
-      } else {
-        sw = img.naturalWidth;
-        sh = Math.round(sw / targetRatio);
-        sy = Math.round((img.naturalHeight - sh) / 2);
-      }
-      outWidth = targetW;
-      outHeight = targetH;
-    }
-  } else if (instructions.resizeWidth) {
-    outWidth = instructions.resizeWidth;
-    outHeight = Math.round(img.naturalHeight * (instructions.resizeWidth / img.naturalWidth));
-  } else if (instructions.width) {
-    outWidth = instructions.width;
-    outHeight = instructions.height
-      ? instructions.height
-      : Math.round(img.naturalHeight * (instructions.width / img.naturalWidth));
-  }
-
-  return { outWidth, outHeight, sx, sy, sw, sh };
-}
-
-function drawFitMode(ctx, img, dims, instructions) {
-  ctx.fillStyle = instructions.jpgBackground || '#000000';
-  ctx.fillRect(0, 0, dims.outWidth, dims.outHeight);
-
-  const targetRatio = instructions.cropWidth / instructions.cropHeight;
-  const imgRatio = img.naturalWidth / img.naturalHeight;
-  let drawW, drawH, drawX, drawY;
-
-  if (imgRatio > targetRatio) {
-    drawW = dims.outWidth;
-    drawH = Math.round(dims.outWidth / imgRatio);
-    drawX = 0;
-    drawY = Math.round((dims.outHeight - drawH) / 2);
-  } else {
-    drawH = dims.outHeight;
-    drawW = Math.round(dims.outHeight * imgRatio);
-    drawX = Math.round((dims.outWidth - drawW) / 2);
-    drawY = 0;
-  }
-
-  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, drawX, drawY, drawW, drawH);
+// ---------- Helpers ----------
+function makeCanvas(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
 }
 
 function detectAlpha(img) {
   try {
-    const canvas = document.createElement('canvas');
-    const size = Math.min(img.naturalWidth, img.naturalHeight, 100);
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, size, size);
-    const data = ctx.getImageData(0, 0, size, size).data;
-    for (let i = 3; i < data.length; i += 16) {
-      if (data[i] < 250) return true;
-    }
-  } catch {}
-  return false;
+    return ITK.hasTransparency(img, img.naturalWidth, img.naturalHeight, makeCanvas);
+  } catch {
+    return false;
+  }
 }
 
 function loadImage(dataUrl) {
@@ -253,14 +168,9 @@ function loadImage(dataUrl) {
   });
 }
 
-function getMimeType(format) {
-  const map = { png: 'image/png', jpeg: 'image/jpeg', jpg: 'image/jpeg', webp: 'image/webp', avif: 'image/avif' };
-  return map[format] || 'image/png';
-}
-
 function canvasToBlob(canvas, mimeType, quality) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed')), mimeType, quality);
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Canvas toBlob failed'))), mimeType, quality);
   });
 }
 
@@ -279,13 +189,11 @@ async function dataUrlToBlob(dataUrl) {
 }
 
 async function convertBlobToPng(blob) {
-  const dataUrl = await blobToDataUrl(blob);
-  const img = await loadImage(dataUrl);
+  const img = await loadImage(await blobToDataUrl(blob));
   const canvas = document.createElement('canvas');
   canvas.width = img.naturalWidth;
   canvas.height = img.naturalHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
+  canvas.getContext('2d').drawImage(img, 0, 0);
   return canvasToBlob(canvas, 'image/png');
 }
 
@@ -293,14 +201,16 @@ async function convertBlobToPng(blob) {
 async function handleCrop(message) {
   const { dataUrl, rect } = message;
   const img = await loadImage(dataUrl);
+  const x = Math.round(rect.x), y = Math.round(rect.y);
+  if (!(x >= 0 && y >= 0 && x < img.naturalWidth && y < img.naturalHeight)) throw new Error('Selection outside the captured area');
+  // Clamp the far edges to the captured bitmap (zoom/DPR rounding can overshoot by a pixel).
+  const width = Math.min(img.naturalWidth - x, Math.round(rect.width));
+  const height = Math.min(img.naturalHeight - y, Math.round(rect.height));
+  if (!(width >= 1 && height >= 1)) throw new Error('Empty selection');
+
   const canvas = document.createElement('canvas');
-  canvas.width = Math.round(rect.width);
-  canvas.height = Math.round(rect.height);
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img,
-    Math.round(rect.x), Math.round(rect.y),
-    Math.round(rect.width), Math.round(rect.height),
-    0, 0, canvas.width, canvas.height
-  );
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(img, x, y, width, height, 0, 0, width, height);
   return canvas.toDataURL('image/png');
 }

@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "画像を保存、変換、リサイズ、コピー。100%ローカル処理、追跡なし。"
   },
-  "cmdQuickSave": {
-    "message": "デフォルト形式でクイック保存"
-  },
   "menuParent": {
     "message": "画像を保存..."
   },
@@ -64,14 +61,6 @@
   },
   "scanning": {
     "message": "検索中..."
-  },
-  "imagesFound": {
-    "message": "$COUNT$件の画像",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
   },
   "processing": {
     "message": "処理中"
@@ -160,9 +149,6 @@
   "errorCopyFailed": {
     "message": "コピー失敗"
   },
-  "errorOnSaving": {
-    "message": "保存エラー"
-  },
   "tabImages": {
     "message": "画像"
   },
@@ -186,9 +172,6 @@
   },
   "originalFormat": {
     "message": "オリジナル"
-  },
-  "resize": {
-    "message": "リサイズ"
   },
   "settingOpenSidePanel": {
     "message": "サイドパネルで開く"
@@ -222,6 +205,15 @@
   },
   "titleHideDupes": {
     "message": "重複を非表示"
+  },
+  "titleTransparency": {
+    "message": "透明部分の背景: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "レイアウト切替"
@@ -268,12 +260,6 @@
   "outputSize": {
     "message": "出力サイズ"
   },
-  "presets": {
-    "message": "プリセット"
-  },
-  "presetFree": {
-    "message": "フリー"
-  },
   "applyDimensions": {
     "message": "適用"
   },
@@ -294,9 +280,6 @@
   },
   "openCropTool": {
     "message": "クロップツールを開く"
-  },
-  "lockRatio": {
-    "message": "比率をロック"
   },
   "titleCapture": {
     "message": "範囲をキャプチャ"
@@ -354,9 +337,6 @@
   },
   "settingZipDefault": {
     "message": "ZIPをデフォルトに"
-  },
-  "newImagesDetected": {
-    "message": "新しい画像が見つかりました"
   },
   "rescan": {
     "message": "更新"
@@ -458,19 +438,13 @@
     "message": "オリジナル形式でダウンロード時のみ適用"
   },
   "settingSubfolderNote": {
-    "message": "「保存場所を確認」を無効にすると最適に動作します"
-  },
-  "pTransform": {
-    "message": "変形"
-  },
-  "pRotate": {
-    "message": "回転"
-  },
-  "pHorizontal": {
-    "message": "水平"
-  },
-  "pVertical": {
-    "message": "垂直"
+    "message": "「$OPTION$」をオフにすると最適に動作します",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "左に回転"
@@ -495,5 +469,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens にはリモート画像 URL が必要です"
+  },
+  "cmdCaptureArea": {
+    "message": "ページの範囲をキャプチャ",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "表示部分をキャプチャ",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "このページには拡張機能からアクセスできません（ブラウザのページ、Chrome ウェブストア）。",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "キャプチャに失敗しました",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "画像をコピー",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "URLをコピー",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ 件のURLをコピーしました",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "または Ctrl+V で画像を貼り付け",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "選択を解除",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$TOTAL$ 件中 $DONE$ 件を保存しました",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "フィルター",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "フィルターをリセット",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "ページをスクロールして画像を読み込むか、別のタブをお試しください。",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "画像が大きすぎます（最大 $SIZE$）",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "一部の画像を省略しました。このページは画像が多すぎるか、非常に大きな埋め込み画像があります。"
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP が大きすぎます（最大 $SIZE$）。選択する画像を減らすか、ZIP を使わずにダウンロードしてください。",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "1 辺あたり最大 $MAX$ px です。",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "自動（ブラウザー）"
+  },
+  "qualityLabel": {
+    "message": "品質"
+  },
+  "newImagesOne": {
+    "message": "新しい画像 +$COUNT$ 件",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "新しい画像 +$COUNT$ 件",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ 枚の画像",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ 枚の画像",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "グリッド"
+  },
+  "layoutCompact": {
+    "message": "コンパクトグリッド"
+  },
+  "layoutList": {
+    "message": "リスト"
+  },
+  "clearSource": {
+    "message": "画像を削除"
+  },
+  "close": {
+    "message": "閉じる"
+  },
+  "previousImage": {
+    "message": "前の画像"
+  },
+  "nextImage": {
+    "message": "次の画像"
+  },
+  "downloadZip": {
+    "message": "ZIP でダウンロード"
   }
 }

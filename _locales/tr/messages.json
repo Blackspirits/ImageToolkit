@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Görselleri kaydet, dönüştür, yeniden boyutlandır ve kopyala. %100 yerel, izleme yok."
   },
-  "cmdQuickSave": {
-    "message": "Varsayılan formatta hızlı kaydet"
-  },
   "menuParent": {
     "message": "Resmi farklı kaydet..."
   },
@@ -66,14 +63,6 @@
   "scanning": {
     "message": "Aranıyor..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ görsel",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "İşleniyor"
   },
@@ -108,16 +97,16 @@
     "message": "Bildirim göster"
   },
   "settingTheme": {
-    "message": "Theme"
+    "message": "Tema"
   },
   "themeAuto": {
     "message": "Otomatik (Sistem)"
   },
   "themeLight": {
-    "message": "Light"
+    "message": "Açık"
   },
   "themeDark": {
-    "message": "Dark"
+    "message": "Koyu"
   },
   "localProcessing": {
     "message": "100% yerel işleme"
@@ -161,9 +150,6 @@
   "errorCopyFailed": {
     "message": "Kopyalama başarısız"
   },
-  "errorOnSaving": {
-    "message": "Kaydetme hatası"
-  },
   "tabImages": {
     "message": "Görseller"
   },
@@ -187,9 +173,6 @@
   },
   "originalFormat": {
     "message": "Orijinal"
-  },
-  "resize": {
-    "message": "Boyutlandır"
   },
   "settingOpenSidePanel": {
     "message": "Yan panel olarak aç"
@@ -223,6 +206,15 @@
   },
   "titleHideDupes": {
     "message": "Kopyaları gizle"
+  },
+  "titleTransparency": {
+    "message": "Saydamlık arka planı: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "Düzeni değiştir"
@@ -269,12 +261,6 @@
   "outputSize": {
     "message": "Çıkış boyutu"
   },
-  "presets": {
-    "message": "Hazır boyutlar"
-  },
-  "presetFree": {
-    "message": "Serbest"
-  },
   "applyDimensions": {
     "message": "Uygula"
   },
@@ -295,9 +281,6 @@
   },
   "openCropTool": {
     "message": "Kırpma aracını aç"
-  },
-  "lockRatio": {
-    "message": "Oranı kilitle"
   },
   "titleCapture": {
     "message": "Alan yakala"
@@ -355,9 +338,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP varsayılan"
-  },
-  "newImagesDetected": {
-    "message": "yeni resim bulundu"
   },
   "rescan": {
     "message": "Yenile"
@@ -459,19 +439,13 @@
     "message": "Yalnızca Orijinal formatta indirirken geçerlidir"
   },
   "settingSubfolderNote": {
-    "message": "'Kayıt konumunu sor' devre dışı bırakıldığında en iyi çalışır"
-  },
-  "pTransform": {
-    "message": "Dönüştür"
-  },
-  "pRotate": {
-    "message": "Döndür"
-  },
-  "pHorizontal": {
-    "message": "Yatay"
-  },
-  "pVertical": {
-    "message": "Dikey"
+    "message": "'$OPTION$' kapalıyken en iyi çalışır",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Sola döndür"
@@ -496,5 +470,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens için uzak bir görsel URL’si gerekir"
+  },
+  "cmdCaptureArea": {
+    "message": "Sayfanın bir alanını yakala",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Görünen alanı yakala",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Uzantılar bu sayfaya erişemez (tarayıcı sayfaları, Chrome Web Mağazası).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Yakalama başarısız",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Resmi kopyala",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "URL'leri kopyala",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ URL kopyalandı",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "veya resim yapıştırmak için Ctrl+V'ye basın",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Seçimi temizle",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$TOTAL$ resimden $DONE$ tanesi kaydedildi",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filtreler",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Filtreleri sıfırla",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Daha fazla resim yüklemek için sayfayı kaydırın veya başka bir sekme deneyin.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Resim çok büyük (en fazla $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "Bazı görseller atlandı: bu sayfada çok fazla görsel veya çok büyük gömülü görseller var."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP çok büyük olur (en fazla $SIZE$). Daha az görsel seçin veya ZIP olmadan indirin.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Kenar başına en fazla $MAX$ px.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Otomatik (tarayıcı)"
+  },
+  "qualityLabel": {
+    "message": "Kalite"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ yeni görsel bulundu",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ yeni görsel bulundu",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ görsel",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ görsel",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Izgara"
+  },
+  "layoutCompact": {
+    "message": "Sıkı ızgara"
+  },
+  "layoutList": {
+    "message": "Liste"
+  },
+  "clearSource": {
+    "message": "Görseli kaldır"
+  },
+  "close": {
+    "message": "Kapat"
+  },
+  "previousImage": {
+    "message": "Önceki görsel"
+  },
+  "nextImage": {
+    "message": "Sonraki görsel"
+  },
+  "downloadZip": {
+    "message": "ZIP olarak indir"
   }
 }
