@@ -645,6 +645,30 @@ test('hotlink fallback for previews and dimensions has a per-scan budget, reset 
   assert.equal(await ui.evaluate(() => viaExtension.size), 0);
 });
 
+test('the preview byte budget is reserved up front: concurrent downloads never exceed it', async () => {
+  await waitFor(() => ui.evaluate(() => document.getElementById('grid-loading').hidden));
+  traffic.hotBytes = 0; traffic.hotGets = 0;
+  // 3 MiB in total, 1 MiB per download, 1 MiB images and 4 downloads in parallel: without a
+  // reservation, four start against the same untouched 3 MiB.
+  await ui.evaluate((b) => {
+    Object.assign(LIMITS, { fallbackBytes: 3 * 1024 * 1024, fallbackItemBytes: 1024 * 1024 });
+    resetViaExtension();
+    setImages(Array.from({ length: 12 }, (_, i) => ({ src: `${b}hot/r${i}.png`, width: 0, height: 0, fileSize: 1 })));
+  }, base);
+  let last = -1, since = Date.now();
+  await waitFor(async () => {
+    if (traffic.hotGets !== last) { last = traffic.hotGets; since = Date.now(); }
+    return last > 0 && Date.now() - since > 2000;
+  }, 30000);
+  assert.ok(traffic.hotBytes <= 3 * MiB, `${(traffic.hotBytes / MiB).toFixed(1)} MiB downloaded`);
+  assert.equal(traffic.hotGets, 3);
+  await ui.evaluate(() => {
+    Object.assign(LIMITS, { fallbackBytes: 48 * 1024 * 1024, fallbackItemBytes: 8 * 1024 * 1024 });
+    resetViaExtension();
+    setImages([]);
+  });
+});
+
 test('ZIP refuses an oversized selection before and during the batch, with no download', async () => {
   const before = await countDownloadsAll();
   await ui.evaluate((b) => {

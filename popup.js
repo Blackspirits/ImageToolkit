@@ -589,14 +589,17 @@ function pumpViaExtension() {
     const { src, resolve } = viaExtensionQueue.shift();
     const budget = viaExtensionBudget;
     if (budget.fetches <= 0 || budget.bytes <= 0) { resolve(null); continue; }
-    budget.fetches--;
-    viaExtensionActive++;
+    // Reserve the most this download may use before it starts, so concurrent downloads can
+    // never spend the same bytes twice; what it did not use goes back when it ends.
     const maxBytes = Math.min(LIMITS.fallbackItemBytes, budget.bytes);
+    budget.fetches--;
+    budget.bytes -= maxBytes;
+    viaExtensionActive++;
     send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes })
       .then((res) => {
-        budget.bytes -= res?.size || 0;
+        budget.bytes += maxBytes - Math.min(maxBytes, res?.dataUrl ? res.size || 0 : 0);
         resolve(res?.dataUrl || null);
-      }, () => resolve(null))
+      }, () => { budget.bytes += maxBytes; resolve(null); })
       .finally(() => { viaExtensionActive--; pumpViaExtension(); });
   }
 }
