@@ -214,6 +214,15 @@
   "titleHideDupes": {
     "message": "Ẩn trùng lặp"
   },
+  "titleTransparency": {
+    "message": "Nền vùng trong suốt: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Đổi bố cục"
   },

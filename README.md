@@ -40,7 +40,7 @@ Right-click any image and save it as **PNG**, **JPG**, **WebP** or **AVIF**. Tra
 **Original** keeps the exact source bytes — GIF animation, SVG vectors and JPEG quality are preserved, and the file extension comes from the real content type, even when the URL has none.
 
 ### 🖼️ Image Grid
-Browse every image on the current page in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape** or **domain**. Hotlink-protected thumbnails are fetched through the extension so they still show. In the side panel, the grid follows the active tab and page loads automatically.
+Browse every image on the current page in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape** or **domain**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a light or dark checkerboard. In the side panel, the grid follows the active tab and page loads automatically.
 
 ### ⌨️ Keyboard & Selection
 - Shift-click selects a range, Ctrl/⌘-click toggles a single image

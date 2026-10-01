@@ -215,6 +215,15 @@
   "titleHideDupes": {
     "message": "Скрыть дубликаты"
   },
+  "titleTransparency": {
+    "message": "Фон прозрачности: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Сменить вид"
   },

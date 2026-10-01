@@ -61,6 +61,10 @@ body.popup #tab-images.view{padding-bottom:80px}
 .field-inline .select{width:auto}
 .filters-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:4px;border-top:1px dashed var(--line)}
 .dims{display:flex;align-items:center;gap:6px}
+/* Width | lock | height: both fields share the card width. */
+.dims-split{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}
+.dims-split .dim{gap:8px;min-width:0}
+.dims-split .dim .input-num{flex:1;width:auto;min-width:0}
 .dims-x{color:var(--text-3);font-weight:600}
 .dims .input-num{width:72px}
 
@@ -69,6 +73,10 @@ body.popup #tab-images.view{padding-bottom:80px}
 .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--r-pill);border:1px solid var(--line-strong);background:var(--bg-elev);font-size:12px;font-weight:650;color:var(--text-2);font-variant-numeric:tabular-nums;transition:all .15s;flex:none}
 .chip:hover{color:var(--text);border-color:var(--accent-line)}
 .chip[aria-pressed="true"]{color:var(--accent-text);border-color:var(--accent-line);background:var(--accent-soft)}
+.chip-icon{width:28px;padding:0;justify-content:center}
+/* Transparency background: follows the theme unless the viewer picks light or dark. */
+.app.app[data-checker="light"]{--checker:repeating-conic-gradient(#d9d9e3 0 25%,#f6f6fa 0 50%) 0 0/14px 14px}
+.app.app[data-checker="dark"]{--checker:repeating-conic-gradient(#15151d 0 25%,#22222d 0 50%) 0 0/14px 14px}
 
 .new-banner{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:10px;padding:8px 12px;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-text);font-size:12px;font-weight:650;text-align:start;animation:viewIn .25s var(--ease)}
 .new-banner-cta{margin-inline-start:auto;text-decoration:underline;text-underline-offset:2px}

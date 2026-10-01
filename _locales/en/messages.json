@@ -213,6 +213,16 @@
   "titleHideDupes": {
     "message": "Hide duplicates"
   },
+  "titleTransparency": {
+    "message": "Transparency background: $MODE$",
+    "description": "Tooltip of the button that switches the checkerboard behind transparent images",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Toggle layout"
   },

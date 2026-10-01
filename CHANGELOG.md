@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Transparency background switch** in the image grid (automatic, light or dark), so dark icons stay visible on the dark theme and light ones on the light theme.
 - **New logo**: a continuous image frame that opens into an export arrow, on the brand gradient tile. Vector sources, usage rules and a light/dark wordmark live in `docs/brand`, with three cuts (Master, Compact for 32/48 px, Micro for 16 px), a 128 px store icon with the Web Store's 16 px padding, and `npm run build:icons` to re-render the PNG set.
 - **Redesigned interface** for the popup, side panel and editor: new design system (light/dark/auto), segmented tabs, collapsible filters, image cards with hover actions, floating selection bar, skeleton loading, toasts and an SVG icon set. System fonts only, no network.
 - **Three grid layouts** (grid, compact, list), search that also matches alt text, and a filter indicator with one-click reset.
@@ -27,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
 
 ### Fixed
+- Inline SVG icons keep the colours the page paints them with (currentColor and CSS fills) instead of turning black.
+- The "new images" banner counts only images the panel has not listed yet, instead of every re-render on the page.
+- Editor: the crop size and the output size use the same rounding, so they no longer differ by one pixel; with the ratio locked, typing one crop side fills in the other.
 - "Original" downloads now keep the exact source bytes instead of re-encoding through the canvas. SVGs are no longer saved as PNG data with a `.svg` extension, GIFs keep their animation and JPEGs are not recompressed.
 - Saved files are named after the format actually produced. AVIF requests (not encodable by Chrome's canvas) fall back to WebP and are saved as `.webp` instead of `.avif`; the crop editor no longer writes PNG data to `.avif` files.
 - Batch downloads no longer open one Save As dialog and one notification per image, and now report how many images failed.

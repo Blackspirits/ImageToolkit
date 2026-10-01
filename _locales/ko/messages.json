@@ -214,6 +214,15 @@
   "titleHideDupes": {
     "message": "중복 숨기기"
   },
+  "titleTransparency": {
+    "message": "투명 영역 배경: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "레이아웃 전환"
   },

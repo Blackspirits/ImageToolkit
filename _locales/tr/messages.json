@@ -215,6 +215,15 @@
   "titleHideDupes": {
     "message": "Kopyaları gizle"
   },
+  "titleTransparency": {
+    "message": "Saydamlık arka planı: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Düzeni değiştir"
   },

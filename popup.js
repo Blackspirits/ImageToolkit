@@ -30,6 +30,7 @@ const state = {
   sort: 'pixels',
   previewSrc: '',
   newImages: 0,
+  checker: 'auto',
   tool: { src: '', name: '', ratio: 0, size: 0 },
   cards: new Map(),
 };
@@ -236,6 +237,7 @@ let scanToken = 0;
 function initImages() {
   const ui = readUiState();
   setLayout(ui.layout || '2col', false);
+  setChecker(ui.checker || 'auto', false);
   setFiltersOpen(!!ui.filtersOpen);
 
   ['filter-type', 'filter-layout', 'filter-domain'].forEach((id) => $(id).addEventListener('change', applyFilters));
@@ -272,6 +274,11 @@ function initImages() {
 
   $('btn-select-all').addEventListener('click', toggleSelectAll);
 
+  $('btn-checker').addEventListener('click', () => {
+    const order = ['auto', 'light', 'dark'];
+    setChecker(order[(order.indexOf(state.checker) + 1) % order.length]);
+  });
+
   document.querySelectorAll('[data-layout]').forEach((btn) => btn.addEventListener('click', () => setLayout(btn.dataset.layout)));
 
   const grid = $('image-grid');
@@ -305,6 +312,20 @@ function setLayout(layout, persist = true) {
   grid.classList.remove('grid-2col', 'grid-compact', 'grid-list');
   grid.classList.add(`grid-${state.layout}`);
   if (persist) writeUiState({ layout: state.layout });
+}
+
+// Black icons vanish on the dark checkerboard and white ones on the light one: let the viewer switch.
+function setChecker(mode, persist = true) {
+  state.checker = ['light', 'dark'].includes(mode) ? mode : 'auto';
+  const app = document.querySelector('.app');
+  if (state.checker === 'auto') delete app.dataset.checker;
+  else app.dataset.checker = state.checker;
+  const label = t('titleTransparency', [t({ auto: 'themeAuto', light: 'themeLight', dark: 'themeDark' }[state.checker])]);
+  const btn = $('btn-checker');
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('aria-pressed', String(state.checker !== 'auto'));
+  if (persist) writeUiState({ checker: state.checker });
 }
 
 function showSkeleton() {

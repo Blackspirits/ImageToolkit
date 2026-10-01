@@ -215,6 +215,15 @@
   "titleHideDupes": {
     "message": "Ukryj duplikaty"
   },
+  "titleTransparency": {
+    "message": "Tło przezroczystości: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Zmień układ"
   },

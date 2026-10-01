@@ -215,6 +215,15 @@
   "titleHideDupes": {
     "message": "Duplicaten verbergen"
   },
+  "titleTransparency": {
+    "message": "Achtergrond voor transparantie: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Weergave wisselen"
   },

@@ -100,7 +100,7 @@ function initCropper(img) {
     toggleDragModeOnDblclick: true,
     wheelZoomRatio: 0.08,
     crop(event) {
-      const w = Math.round(event.detail.width), h = Math.round(event.detail.height);
+      const { w, h } = roundedSize(event.detail);
       if (document.activeElement !== $('crop-w')) $('crop-w').value = w;
       if (document.activeElement !== $('crop-h')) $('crop-h').value = h;
       if (!editor.outputManual) { $('out-w').value = w; $('out-h').value = h; }
@@ -147,6 +147,12 @@ function maximizeCropBox(ratio) {
   cropper.setCropBoxData({ left: canvas.left + (canvas.width - width) / 2, top: canvas.top + (canvas.height - height) / 2, width, height });
 }
 
+// Same rounding as cropper.getData(true) (edges, not width), so every size shown matches.
+function roundedSize(d) {
+  const x = Math.round(d.x), y = Math.round(d.y);
+  return { w: Math.round(d.x + d.width) - x, h: Math.round(d.y + d.height) - y };
+}
+
 function cropRatio() {
   const d = editor.cropper?.getData();
   return d && d.width && d.height ? d.width / d.height : 0;
@@ -172,6 +178,15 @@ function initControls() {
     editor.cropper.setData({ x: (image.naturalWidth - cw) / 2, y: (image.naturalHeight - ch) / 2, width: cw, height: ch });
   }));
   ['crop-w', 'crop-h'].forEach((id) => $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-apply-dims').click(); }));
+  // With the ratio locked, typing one side of the crop fills in the other.
+  $('crop-w').addEventListener('input', () => {
+    const ratio = editor.locked && cropRatio(), w = parseInt($('crop-w').value, 10);
+    if (ratio && w > 0) $('crop-h').value = Math.round(w / ratio);
+  });
+  $('crop-h').addEventListener('input', () => {
+    const ratio = editor.locked && cropRatio(), h = parseInt($('crop-h').value, 10);
+    if (ratio && h > 0) $('crop-w').value = Math.round(h * ratio);
+  });
 
   // Output size: typing one side keeps the crop's proportions.
   $('out-w').addEventListener('input', () => {

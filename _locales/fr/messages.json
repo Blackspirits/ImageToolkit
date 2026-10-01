@@ -214,6 +214,15 @@
   "titleHideDupes": {
     "message": "Masquer les doublons"
   },
+  "titleTransparency": {
+    "message": "Fond des transparences : $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Changer la disposition"
   },

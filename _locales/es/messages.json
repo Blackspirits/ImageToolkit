@@ -216,6 +216,15 @@
   "titleHideDupes": {
     "message": "Ocultar duplicados"
   },
+  "titleTransparency": {
+    "message": "Fondo de transparencias: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Cambiar diseño"
   },

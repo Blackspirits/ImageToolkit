@@ -215,6 +215,15 @@
   "titleHideDupes": {
     "message": "Сховати дублікати"
   },
+  "titleTransparency": {
+    "message": "Фон прозорості: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "Змінити макет"
   },

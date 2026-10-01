@@ -214,6 +214,15 @@
   "titleHideDupes": {
     "message": "隱藏重複"
   },
+  "titleTransparency": {
+    "message": "透明背景：$MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "切換佈局"
   },

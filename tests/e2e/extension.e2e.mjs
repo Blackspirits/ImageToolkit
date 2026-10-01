@@ -49,6 +49,8 @@ const FIXTURES = {
   // Mislabelled responses: an SVG sent as text/plain, and an HTML error page behind a .jpg URL.
   'plain.svg': Buffer.from('<?xml version="1.0"?>\n<!-- icon -->\n<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8"/></svg>'),
   'fake.jpg': Buffer.from('<!doctype html><title>Not found</title><p>Sorry'),
+  // Icons painted by the page: currentColor (red from <body>) and a CSS-class fill (green).
+  'icons.html': Buffer.from('<!doctype html><title>i</title><style>.ic{fill:#00ff00}</style><body style="color:rgb(255,0,0)"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M0 0h24v24H0z"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M0 0h24v24H0z"/></svg></body>'),
   'page.html': Buffer.from('<!doctype html><title>t</title><body><img src="anim.gif"><img src="logo.svg"><img src="photo.png" srcset="photo.png 1x, wide.png 2x"><div style="position:fixed;inset:0 auto auto 0;width:50px;height:50px;background:url(wide.png)"></div><a href="javascript:alert(1)//x.png">x</a></body>'),
 };
 const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', html: 'text/html' };
@@ -465,5 +467,54 @@ test('editor: "Custom" after a fixed preset lets the output follow the crop agai
   await editor.evaluate(() => editor.cropper.setData({ x: 0, y: 0, width: 32, height: 18 }));
   const out = [await editor.inputValue('#out-w'), await editor.inputValue('#out-h')].map(Number);
   assert.ok(Math.abs(out[0] / out[1] - 32 / 18) < 0.1, `output ${out} does not follow crop 32×18`);
+  await editor.close();
+});
+
+test('inline SVG icons keep the colours the page paints them with', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'icons.html');
+  const tabId = await sw.evaluate(async (url) => (await chrome.tabs.query({ url })).at(0).id, base + 'icons.html');
+  const { images } = await send({ action: 'collectImages', tabId });
+  const svgs = images.filter((i) => i.src.startsWith('data:image/svg+xml'))
+    .map((i) => Buffer.from(i.src.split(',')[1], 'base64').toString('utf8'));
+  assert.equal(svgs.length, 2);
+  assert.ok(svgs.some((m) => /color:\s*rgb\(255, 0, 0\)/.test(m)), 'currentColor icon lost its colour');
+  assert.ok(svgs.some((m) => m.includes('fill="rgb(0, 255, 0)"')), 'CSS fill was not kept');
+  await page.close();
+});
+
+test('the "new images" banner counts only images the panel has not seen', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  const tabId = await sw.evaluate(async (url) => (await chrome.tabs.query({ url })).at(0).id, base + 'page.html');
+  await ui.evaluate(() => {
+    window.__newImages = 0;
+    chrome.runtime.onMessage.addListener((m) => { if (m.action === 'newImagesAvailable') window.__newImages += m.count; });
+  });
+  await send({ action: 'collectImages', tabId });
+  await page.evaluate((base) => {
+    // Re-renders of known images, then one image the panel has never seen (twice).
+    document.body.append(document.querySelector('img').cloneNode(true));
+    document.querySelector('img[src="photo.png"]').setAttribute('src', 'photo.png');
+    for (let i = 0; i < 2; i++) { const img = new Image(); img.src = base + 'noext'; document.body.append(img); }
+  }, base);
+  await waitFor(() => ui.evaluate(() => window.__newImages > 0));
+  await new Promise((r) => setTimeout(r, 1200));
+  assert.equal(await ui.evaluate(() => window.__newImages), 1);
+  await page.close();
+});
+
+test('editor: crop and output sizes use the same rounding', async () => {
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const [data, shown] = await editor.evaluate(async () => {
+    editor.cropper.setData({ x: 0.6, y: 0.4, width: 20.8, height: 10.3 });
+    await new Promise((r) => setTimeout(r, 50));
+    const d = editor.cropper.getData(true);
+    const v = (id) => Number(document.getElementById(id).value);
+    return [[d.width, d.height], [v('crop-w'), v('crop-h'), v('out-w'), v('out-h')]];
+  });
+  assert.deepEqual(shown, [...data, ...data]);
   await editor.close();
 });

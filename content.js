@@ -20,7 +20,9 @@
     if (sender.id !== chrome.runtime.id) return false;
 
     if (message.action === 'getImages') {
-      sendResponse(collectImages());
+      const images = collectImages();
+      known = new Set(images.map((img) => keyOf(img.src)));
+      sendResponse(images);
       startObserver();
       return false;
     }
@@ -84,7 +86,14 @@
 
     function addSvgElement(node) {
       try {
-        const markup = new XMLSerializer().serializeToString(node);
+        // Icons usually paint with currentColor or a CSS fill; outside the page both fall back
+        // to black. Bake the colours the page actually uses into the copy.
+        const clone = node.cloneNode(true);
+        const cs = getComputedStyle(node);
+        clone.style.color = cs.color;
+        if (!node.hasAttribute('fill') && cs.fill) clone.setAttribute('fill', cs.fill);
+        if (!node.hasAttribute('stroke') && cs.stroke && cs.stroke !== 'none') clone.setAttribute('stroke', cs.stroke);
+        const markup = new XMLSerializer().serializeToString(clone);
         if (markup.length <= 50) return; // skip trivial SVGs
         const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(markup)));
         let w = parseInt(node.getAttribute('width'), 10) || 0;
@@ -167,6 +176,24 @@
   let idleTimer = null;
   let newImageCount = 0;
   let debounceTimer = null;
+  let known = new Set();
+
+  // Same identity collectImages() uses, so a re-render of a known image is not "new".
+  function keyOf(rawSrc) {
+    const src = String(rawSrc || '').trim();
+    if (!src) return '';
+    if (src.startsWith('data:')) return 'data:' + src.length + ':' + src.slice(-64);
+    try { return new URL(src, document.baseURI).href; } catch { return ''; }
+  }
+
+  function countNew(img) {
+    const src = img.currentSrc || img.src || '';
+    if (src.startsWith('data:') && (!src.startsWith('data:image/') || src.length < 100)) return 0; // as in collectImages
+    const key = keyOf(src);
+    if (!key || known.has(key) || (!key.startsWith('data:') && !isAllowedImageSrc(key))) return 0;
+    known.add(key);
+    return 1;
+  }
 
   function startObserver() {
     clearTimeout(idleTimer);
@@ -177,13 +204,13 @@
       let found = 0;
       for (const m of mutations) {
         if (m.type === 'attributes') {
-          if (m.target?.tagName === 'IMG') found++;
+          if (m.target?.tagName === 'IMG') found += countNew(m.target);
           continue;
         }
         for (const added of m.addedNodes) {
           if (added.nodeType !== 1) continue;
-          if (added.tagName === 'IMG') found++;
-          else found += added.querySelectorAll?.('img').length || 0;
+          if (added.tagName === 'IMG') found += countNew(added);
+          else added.querySelectorAll?.('img').forEach((img) => { found += countNew(img); });
         }
       }
       if (!found) return;

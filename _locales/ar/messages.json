@@ -214,6 +214,15 @@
   "titleHideDupes": {
     "message": "إخفاء المكررة"
   },
+  "titleTransparency": {
+    "message": "خلفية الشفافية: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
+  },
   "titleToggleLayout": {
     "message": "تبديل التخطيط"
   },

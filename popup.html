@@ -155,6 +155,7 @@
           <span class="statusbar-host" id="scan-host"></span>
           <span class="spacer"></span>
           <button id="btn-hide-dupes" class="chip" aria-pressed="false" data-i18n-title="titleHideDupes" title="Hide duplicates"><svg class="i i-sm"><use href="#i-layers"/></svg><span id="dup-count">0</span></button>
+          <button id="btn-checker" class="chip chip-icon" title="Transparency background"><svg class="i i-sm"><use href="#i-contrast"/></svg></button>
           <div class="segmented segmented-icons" role="group" data-i18n-title="titleToggleLayout" title="Toggle layout">
             <button class="seg active" data-layout="2col" aria-pressed="true" aria-label="Grid"><svg class="i i-sm"><use href="#i-grid"/></svg></button>
             <button class="seg" data-layout="compact" aria-pressed="false" aria-label="Compact"><svg class="i i-sm"><use href="#i-grid-small"/></svg></button>
@@ -218,7 +219,7 @@
 
         <div class="card">
           <h3 class="card-title"><span class="card-icon card-icon-cyan"><svg class="i"><use href="#i-resize"/></svg></span><span data-i18n="resizeTitle">Resize</span></h3>
-          <div class="dims">
+          <div class="dims dims-split">
             <label class="dim"><span data-i18n="placeholderWidth">W</span><input type="number" id="resize-url-w" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
             <button id="resize-url-lock" class="icon-btn lock active" aria-pressed="true" data-i18n-title="titleLockRatio" title="Lock ratio"><svg class="i i-sm"><use href="#i-lock"/></svg></button>
             <label class="dim"><span data-i18n="placeholderHeight">H</span><input type="number" id="resize-url-h" class="input input-num" min="1" max="16384" inputmode="numeric"></label>

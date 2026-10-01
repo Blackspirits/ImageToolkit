@@ -38,6 +38,8 @@ test('output formats map to real MIME types and labels', () => {
   assert.equal(core.formatFromMime('image/webp'), 'webp');
   assert.equal(core.extensionFor('jpeg'), 'jpg');
   assert.equal(core.formatLabel('jpeg'), 'JPG');
+  assert.equal(core.formatLabel('webp'), 'WebP');
+  assert.equal(core.formatLabel('avif'), 'AVIF');
 });
 
 test('isAllowedImageSrc only accepts fetchable schemes', () => {
