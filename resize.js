@@ -7,7 +7,7 @@
 'use strict';
 
 const { i18n, ui, handoff } = ITK;
-const { toast, send, call, flashError, withBusy, blobToDataUrl } = ui;
+const { toast, send, flashError, withBusy, blobToDataUrl } = ui;
 const t = i18n.t;
 const $ = (id) => document.getElementById(id);
 
@@ -17,6 +17,7 @@ const editor = {
   hasAlpha: false,
   locked: false,
   outputManual: false,
+  outputAnchor: 'w',   // the output side the user typed last; the other follows the crop's ratio
   settings: {},
 };
 
@@ -104,6 +105,7 @@ function initCropper(img) {
       if (document.activeElement !== $('crop-w')) $('crop-w').value = w;
       if (document.activeElement !== $('crop-h')) $('crop-h').value = h;
       if (!editor.outputManual) { $('out-w').value = w; $('out-h').value = h; }
+      else followCropRatio(event.detail.width / event.detail.height);
       const info = $('crop-info');
       info.hidden = false;
       info.textContent = `${w} × ${h}`;
@@ -111,18 +113,28 @@ function initCropper(img) {
   });
 }
 
+function makeCanvas(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
 function detectAlpha(img) {
   try {
-    const canvas = document.createElement('canvas');
-    const scale = Math.min(1, 200 / Math.max(img.naturalWidth, img.naturalHeight));
-    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    for (let i = 3; i < data.length; i += 4) if (data[i] < 250) return true;
-  } catch {}
-  return false;
+    return ITK.hasTransparency(img, img.naturalWidth, img.naturalHeight, makeCanvas);
+  } catch {
+    return false; // tainted canvas (host refused CORS)
+  }
+}
+
+// A manual output size keeps the side the user typed and gives the other side the crop's
+// proportions, so the saved image is exactly the size shown and is never stretched.
+function followCropRatio(ratio) {
+  if (!(ratio > 0)) return;
+  const w = parseInt($('out-w').value, 10), h = parseInt($('out-h').value, 10);
+  if (editor.outputAnchor === 'h' && h > 0) $('out-w').value = Math.max(1, Math.round(h * ratio));
+  else if (w > 0) $('out-h').value = Math.max(1, Math.round(w / ratio));
 }
 
 // ---------- Controls ----------
@@ -191,15 +203,13 @@ function initControls() {
   // Output size: typing one side keeps the crop's proportions.
   $('out-w').addEventListener('input', () => {
     editor.outputManual = true;
-    const ratio = cropRatio();
-    const w = parseInt($('out-w').value, 10);
-    if (ratio && w > 0) $('out-h').value = Math.round(w / ratio);
+    editor.outputAnchor = 'w';
+    followCropRatio(cropRatio());
   });
   $('out-h').addEventListener('input', () => {
     editor.outputManual = true;
-    const ratio = cropRatio();
-    const h = parseInt($('out-h').value, 10);
-    if (ratio && h > 0) $('out-w').value = Math.round(h * ratio);
+    editor.outputAnchor = 'h';
+    followCropRatio(cropRatio());
   });
 
   document.querySelectorAll('[data-preset]').forEach((btn) => btn.addEventListener('click', need(() => {
@@ -229,6 +239,7 @@ function initControls() {
     $('out-w').value = w;
     $('out-h').value = h;
     editor.outputManual = true;
+    editor.outputAnchor = 'w';
   })));
 
   document.querySelectorAll('[data-preset-ratio]').forEach((btn) => btn.addEventListener('click', need(() => {
@@ -265,19 +276,10 @@ function currentFormat() {
 
 function initFooter() {
   const group = $('resize-format');
-  const select = (value) => {
-    group.querySelectorAll('.seg').forEach((seg) => {
-      const on = seg.dataset.value === value;
-      seg.classList.toggle('active', on);
-      seg.setAttribute('aria-checked', String(on));
-    });
-    $('quality-row').hidden = value === 'png';
-  };
-  select(editor.settings.defaultFormat || 'webp');
-  group.addEventListener('click', (e) => {
-    const seg = e.target.closest('.seg');
-    if (seg) select(seg.dataset.value);
-  });
+  const showQuality = (value) => { $('quality-row').hidden = value === 'png'; };
+  ui.setRadio(group, editor.settings.defaultFormat || 'webp');
+  ui.initRadioGroup(group, showQuality);
+  showQuality(currentFormat());
 
   const range = $('resize-quality');
   const paint = () => {
@@ -292,20 +294,25 @@ function initFooter() {
   $('btn-copy').addEventListener('click', () => withBusy($('btn-copy'), copy));
 }
 
+// The canvas is exactly the size shown in "Output size". Cropper's own sizing keeps the
+// crop's aspect ratio and may return something smaller, so the crop is taken at its native
+// resolution and scaled into a canvas of the requested size.
 function croppedCanvas(format) {
   const data = editor.cropper.getData(true);
   const width = parseInt($('out-w').value, 10) || data.width;
   const height = parseInt($('out-h').value, 10) || data.height;
   ITK.checkOutputSize(width, height);
-  const canvas = editor.cropper.getCroppedCanvas({
-    width,
-    height,
-    imageSmoothingEnabled: true,
-    imageSmoothingQuality: 'high',
-    // JPEG has no alpha channel; anything else keeps transparency.
-    fillColor: format === 'jpeg' ? '#ffffff' : 'transparent',
-  });
-  if (!canvas) throw new Error(t('errorSaveFailed'));
+  // JPEG has no alpha channel; anything else keeps transparency.
+  const fillColor = format === 'jpeg' ? '#ffffff' : 'transparent';
+  const source = editor.cropper.getCroppedCanvas({ imageSmoothingEnabled: true, imageSmoothingQuality: 'high', fillColor });
+  if (!source) throw new Error(t('errorSaveFailed'));
+  if (source.width === width && source.height === height) return source;
+  const canvas = makeCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  if (format === 'jpeg') { ctx.fillStyle = fillColor; ctx.fillRect(0, 0, width, height); }
+  ctx.drawImage(source, 0, 0, width, height);
   return canvas;
 }
 
@@ -337,15 +344,7 @@ async function save() {
       format, cropWidth: width, cropHeight: height,
       subfolder: s.subfolder, filenamePattern: s.filenamePattern, filenamePrefix: s.filenamePrefix,
     });
-    // Data URLs survive this window closing; huge files use a blob URL (messages cap at 64 MB).
-    let url;
-    if (blob.size < 48 * 1024 * 1024) {
-      url = await blobToDataUrl(blob);
-    } else {
-      url = URL.createObjectURL(blob);
-      setTimeout(() => URL.revokeObjectURL(url), 120000);
-    }
-    const res = await call({ action: 'downloadBlob', dataUrl: url, filename, saveAs: s.saveAs !== false });
+    const res = await ui.saveBlob(blob, filename, s.saveAs !== false);
     if (res.cancelled) return;
     toast(`${t('notifSavedAs', [ITK.formatLabel(format)])} · ${width} × ${height} · ${ITK.formatBytes(blob.size)}`);
   } catch (err) {

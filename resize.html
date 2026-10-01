@@ -159,13 +159,13 @@
 
         <footer class="sidebar-foot">
           <div class="foot-row">
-            <span class="foot-label" data-i18n="formatLabel">Format</span>
-            <div class="segmented segmented-block" id="resize-format" role="radiogroup">
+            <span class="foot-label" id="format-label" data-i18n="formatLabel">Format</span>
+            <div class="segmented segmented-block" id="resize-format" role="radiogroup" aria-labelledby="format-label">
               <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg active" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" role="radio">AVIF</button>
             </div>
           </div>
           <div class="foot-row" id="quality-row">
-            <span class="foot-label" data-i18n="settingQuality">Default Quality</span>
+            <label class="foot-label" for="resize-quality" data-i18n="qualityLabel">Quality</label>
             <div class="quality"><input type="range" id="resize-quality" class="range" min="10" max="100" value="85"><output id="resize-quality-value" class="value">85%</output></div>
           </div>
           <div class="foot-actions">

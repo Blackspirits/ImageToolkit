@@ -62,14 +62,6 @@
   "scanning": {
     "message": "扫描中..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ 张图片",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "处理中"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "默认ZIP"
   },
-  "newImagesDetected": {
-    "message": "发现新图片"
-  },
   "rescan": {
     "message": "刷新"
   },
@@ -449,7 +438,13 @@
     "message": "仅在以原始格式下载时生效"
   },
   "settingSubfolderNote": {
-    "message": "关闭\"询问保存位置\"时效果最佳"
+    "message": "关闭“$OPTION$”时效果最佳",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "向左旋转"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "已省略部分图片：此页面图片过多或包含超大的内嵌图片。"
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP 文件过大（最大 $SIZE$）。请少选一些图片，或不使用 ZIP 下载。",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "每边最大 $MAX$ 像素。",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "自动（浏览器）"
+  },
+  "qualityLabel": {
+    "message": "质量"
+  },
+  "newImagesOne": {
+    "message": "新增 $COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "新增 $COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "网格"
+  },
+  "layoutCompact": {
+    "message": "紧凑网格"
+  },
+  "layoutList": {
+    "message": "列表"
+  },
+  "clearSource": {
+    "message": "移除图片"
+  },
+  "close": {
+    "message": "关闭"
+  },
+  "previousImage": {
+    "message": "上一张"
+  },
+  "nextImage": {
+    "message": "下一张"
+  },
+  "downloadZip": {
+    "message": "以 ZIP 下载"
   }
 }

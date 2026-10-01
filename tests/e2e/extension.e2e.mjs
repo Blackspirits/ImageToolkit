@@ -40,6 +40,31 @@ function png(width, height, rgba = [255, 0, 0, 255]) {
   return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
 }
 
+// Opaque PNG with a small fully transparent square (an alpha detail a sampled check misses).
+function pngWithHole(size, hole) {
+  const chunk = (type, data) => {
+    const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+    const body = Buffer.concat([Buffer.from(type), data]);
+    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([len, body, crc]);
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4);
+  ihdr[8] = 8; ihdr[9] = 6;
+  const stride = size * 4 + 1;
+  const raw = Buffer.alloc(stride * size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const p = y * stride + 1 + x * 4;
+      const inHole = x >= hole.x && x < hole.x + hole.size && y >= hole.y && y < hole.y + hole.size;
+      raw[p] = 200; raw[p + 1] = 60; raw[p + 2] = 40; raw[p + 3] = inHole ? 0 : 255;
+    }
+  }
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+
+const MiB = 1024 * 1024;
+
 const FIXTURES = {
   'anim.gif': Buffer.from('R0lGODlhAQABAIAAAP///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAAACwAAAAAAQABAAACAkQBACH5BAkKAAAALAAAAAABAAEAAAICTAEAOw==', 'base64'),
   'logo.svg': Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="red"/></svg>'),
@@ -49,8 +74,20 @@ const FIXTURES = {
   // Mislabelled responses: an SVG sent as text/plain, and an HTML error page behind a .jpg URL.
   'plain.svg': Buffer.from('<?xml version="1.0"?>\n<!-- icon -->\n<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8"/></svg>'),
   'fake.jpg': Buffer.from('<!doctype html><title>Not found</title><p>Sorry'),
-  // Icons painted by the page: currentColor (red from <body>) and a CSS-class fill (green).
-  'icons.html': Buffer.from('<!doctype html><title>i</title><style>.ic{fill:#00ff00}</style><body style="color:rgb(255,0,0)"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M0 0h24v24H0z"/></svg><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M0 0h24v24H0z"/></svg></body>'),
+  // Icons painted by the page: currentColor (red from <body>), a CSS-class fill (green), a
+  // Material-style icon whose viewBox is 960 units but which renders at 24 px, and a hidden
+  // sprite sheet (not an image).
+  'icons.html': Buffer.from('<!doctype html><title>i</title><style>.ic{fill:#00ff00}.mat{width:24px;height:24px}</style><body style="color:rgb(255,0,0)">'
+    + '<svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M0 0h24v24H0z"/></svg>'
+    + '<svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M0 0h24v24H0z"/></svg>'
+    + '<svg id="mat" class="mat" viewBox="0 -960 960 960"><path fill="#333" d="M0 -960h960v960H0z"/></svg>'
+    + '<svg style="display:none"><symbol id="s" viewBox="0 0 10 10"><path d="M0 0h10v10H0z"/></symbol></svg></body>'),
+  // Inline images built in the page: one larger than a scan item, then enough to pass the
+  // scan's total budget.
+  'heavy.html': Buffer.from('<!doctype html><title>h</title><body><script>'
+    + 'const add=(mb,i)=>{const img=new Image();img.alt="h"+i;img.src="data:image/png;base64,"+String.fromCharCode(65+i).repeat(mb*1024*1024);document.body.append(img)};'
+    + 'add(9,0);for(let i=1;i<=5;i++)add(6,i);</script></body>'),
+  'holey.png': pngWithHole(2000, { x: 1000, y: 700, size: 4 }),
   'page.html': Buffer.from('<!doctype html><title>t</title><body><img src="anim.gif"><img src="logo.svg"><img src="photo.png" srcset="photo.png 1x, wide.png 2x"><div style="position:fixed;inset:0 auto auto 0;width:50px;height:50px;background:url(wide.png)"></div><a href="javascript:alert(1)//x.png">x</a></body>'),
 };
 const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', html: 'text/html' };
@@ -59,6 +96,7 @@ const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html' };
 let server, base, ctx, sw, id, ui;
 const hits = new Map(); // GET requests per path, to check that work is not repeated
 let hugeBytesSent = 0;   // bytes the "huge" endpoint managed to push before the client hung up
+const traffic = { nolenBytes: 0, nolenGets: 0, hotBytes: 0, hotGets: 0 };
 
 async function send(message) {
   return ui.evaluate((m) => chrome.runtime.sendMessage(m), message);
@@ -94,6 +132,42 @@ before(async () => {
       };
       res.on('close', () => res.destroy());
       pump();
+      return;
+    }
+    // 1 MiB images whose server never says how big they are (no Content-Length, no ranges).
+    if (name.startsWith('nolen/')) {
+      // A 1-byte range answer whose total is unknown ("bytes 0-0/*"): no size from headers.
+      if (req.headers.range) {
+        res.writeHead(206, { 'content-type': 'image/png', 'content-range': 'bytes 0-0/*', 'cache-control': 'no-store' });
+        res.write(Buffer.alloc(1));
+        res.end();
+        return;
+      }
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      if (req.method === 'HEAD') { res.end(); return; }
+      traffic.nolenGets++;
+      const chunk = Buffer.alloc(64 * 1024);
+      let left = 16;
+      const pump = () => {
+        while (!res.destroyed && left > 0) {
+          left--;
+          traffic.nolenBytes += chunk.length;
+          if (!res.write(chunk)) { res.once('drain', pump); return; }
+        }
+        if (!res.destroyed) res.end();
+      };
+      res.on('close', () => res.destroy());
+      pump();
+      return;
+    }
+    // Hotlink-protected 1 MiB images: <img> loads are refused, extension fetches are served.
+    if (name.startsWith('hot/')) {
+      if (req.headers['sec-fetch-dest'] === 'image') { res.writeHead(403); res.end(); return; }
+      const body = Buffer.concat([FIXTURES['wide.png'], Buffer.alloc(MiB - FIXTURES['wide.png'].length)]);
+      // Only whole-body downloads count (size probes use HEAD / 1-byte ranges).
+      if (req.method === 'GET' && !req.headers.range) { traffic.hotGets++; traffic.hotBytes += body.length; }
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store', 'content-length': body.length });
+      res.end(body);
       return;
     }
     // Refuses <img> loads (like hotlink protection) but serves fetches.
@@ -477,7 +551,7 @@ test('inline SVG icons keep the colours the page paints them with', async () => 
   const { images } = await send({ action: 'collectImages', tabId });
   const svgs = images.filter((i) => i.src.startsWith('data:image/svg+xml'))
     .map((i) => Buffer.from(i.src.split(',')[1], 'base64').toString('utf8'));
-  assert.equal(svgs.length, 2);
+  assert.equal(svgs.length, 3);
   assert.ok(svgs.some((m) => /color:\s*rgb\(255, 0, 0\)/.test(m)), 'currentColor icon lost its colour');
   assert.ok(svgs.some((m) => m.includes('fill="rgb(0, 255, 0)"')), 'CSS fill was not kept');
   await page.close();
@@ -517,4 +591,272 @@ test('editor: crop and output sizes use the same rounding', async () => {
   });
   assert.deepEqual(shown, [...data, ...data]);
   await editor.close();
+});
+
+// ---------- Release hardening ----------
+const countDownloadsAll = () => sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
+const tabIdOf = (url) => sw.evaluate(async (u) => (await chrome.tabs.query({ url: u })).at(0).id, url);
+
+test('scan payload is bounded: an oversized inline image is skipped and the total stays in budget', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'heavy.html');
+  const { images, truncated } = await send({ action: 'collectImages', tabId: await tabIdOf(base + 'heavy.html') });
+  const inline = images.filter((i) => i.src.startsWith('data:'));
+  const limits = await ui.evaluate(() => ({ item: ITK.SCAN_MAX_ITEM_CHARS, total: ITK.SCAN_MAX_TOTAL_CHARS }));
+  assert.equal(truncated, true);
+  assert.ok(!inline.some((i) => i.alt === 'h0'), 'the 9 MiB image is larger than one scan item');
+  assert.ok(inline.every((i) => i.src.length <= limits.item));
+  assert.ok(inline.reduce((n, i) => n + i.src.length, 0) <= limits.total);
+  assert.ok(inline.length >= 3 && inline.length < 5, `kept ${inline.length} of the 6 MiB images`);
+  await page.close();
+});
+
+test('size probing has one byte budget for all images of a request', async () => {
+  traffic.nolenBytes = 0; traffic.nolenGets = 0;
+  const urls = Array.from({ length: 60 }, (_, i) => `${base}nolen/${i}.png`);
+  const sizes = await send({ action: 'probeImageSizes', urls });
+  // Without the budget every body would be read: 60 GETs, 60 MiB.
+  assert.ok(traffic.nolenBytes < 20 * MiB, `read ${(traffic.nolenBytes / MiB).toFixed(1)} MiB`);
+  assert.ok(traffic.nolenGets < 30, `${traffic.nolenGets} body downloads`);
+  assert.ok(Object.values(sizes).every((v) => v === MiB), 'sizes that were measured are right');
+});
+
+test('hotlink fallback for previews and dimensions has a per-scan budget, reset by a new scan', async () => {
+  // The panel's own first scan must be over, or it would reset the budget mid-test.
+  await waitFor(() => ui.evaluate(() => document.getElementById('grid-loading').hidden));
+  traffic.hotBytes = 0; traffic.hotGets = 0;
+  await ui.evaluate((b) => {
+    resetViaExtension();
+    // Known file sizes: no size probes, so every whole-body GET is a preview/dimension fallback.
+    setImages(Array.from({ length: 80 }, (_, i) => ({ src: `${b}hot/${i}.png`, width: 0, height: 0, fileSize: 1 })));
+  }, base);
+  const limits = await ui.evaluate(() => ({ ...LIMITS }));
+  // Settled = the budget is spent, or nothing new for 2 s.
+  let last = -1, since = Date.now();
+  await waitFor(async () => {
+    if (traffic.hotGets !== last) { last = traffic.hotGets; since = Date.now(); }
+    return traffic.hotGets >= limits.fallbackFetches || (last > 0 && Date.now() - since > 2000);
+  }, 30000);
+  await new Promise((r) => setTimeout(r, 1500)); // anything over budget would arrive now
+  assert.ok(traffic.hotGets <= limits.fallbackFetches, `${traffic.hotGets} fallback downloads`);
+  assert.ok(traffic.hotBytes <= limits.fallbackBytes, `${(traffic.hotBytes / MiB).toFixed(1)} MiB`);
+  assert.equal(await ui.evaluate(() => viaExtensionBudget.fetches <= 0 || viaExtensionBudget.bytes <= 0), true);
+  await ui.evaluate(() => { resetViaExtension(); setImages([]); });
+  assert.equal(await ui.evaluate(() => viaExtension.size), 0);
+});
+
+test('ZIP refuses an oversized selection before and during the batch, with no download', async () => {
+  const before = await countDownloadsAll();
+  await ui.evaluate((b) => {
+    LIMITS.zipBytes = 50; // smaller than the first file
+    document.getElementById('toasts').replaceChildren();
+    switchTab('images');
+    setImages(['photo.png', 'wide.png', 'anim.gif'].map((n) => ({ src: b + n, width: 10, height: 10, fileSize: 0 })));
+    state.images.forEach((i) => state.selected.add(i.src));
+  }, base);
+  await ui.evaluate(() => batchDownload(true));
+  assert.match(await ui.textContent('#toasts'), /ZIP/);
+  // Known sizes already over the limit: refused without processing anything.
+  const processed = hits.get('photo.png') || 0;
+  await ui.evaluate(() => { document.getElementById('toasts').replaceChildren(); state.images.forEach((i) => { i.fileSize = 1000; }); return batchDownload(true); });
+  assert.match(await ui.textContent('#toasts'), /ZIP/);
+  assert.equal(hits.get('photo.png') || 0, processed);
+  assert.equal(await countDownloadsAll(), before);
+  await ui.evaluate(() => { LIMITS.zipBytes = 256 * 1024 * 1024; state.selected.clear(); setImages([]); });
+});
+
+test('large outputs skip the base64 message and still download completely', async () => {
+  const result = await ui.evaluate(async () => {
+    const small = await ITK.ui.saveBlob(new Blob([new Uint8Array(1024)], { type: 'application/zip' }), 'small-test.zip', false);
+    const big = await ITK.ui.saveBlob(new Blob([new Uint8Array(37 * 1024 * 1024)], { type: 'application/zip' }), 'big-test.zip', false);
+    return { small: small.via, big: big.via, id: big.downloadId };
+  });
+  assert.deepEqual([result.small, result.big], ['data', 'blob']);
+  const item = await waitFor(() => sw.evaluate(async (id) => {
+    const [d] = await chrome.downloads.search({ id });
+    return d && d.state !== 'in_progress' ? d : null;
+  }, result.id), 20000);
+  assert.equal(item.state, 'complete');
+  assert.equal(item.fileSize, 37 * MiB);
+});
+
+test('a 24 px icon with a 960-unit viewBox is 24×24, not 960×960, and is not "large"', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'icons.html');
+  const { images } = await send({ action: 'collectImages', tabId: await tabIdOf(base + 'icons.html') });
+  const svgs = images.filter((i) => i.src.startsWith('data:image/svg+xml'));
+  assert.equal(svgs.length, 3, 'three visible icons; the hidden sprite sheet is not an image');
+  assert.ok(svgs.every((i) => i.width === 24 && i.height === 24), JSON.stringify(svgs.map((i) => [i.width, i.height])));
+  const material = svgs.find((i) => Buffer.from(i.src.split(',')[1], 'base64').toString().includes('-960'));
+  assert.match(Buffer.from(material.src.split(',')[1], 'base64').toString(), /width="24" height="24"/);
+  const inLarge = await ui.evaluate((list) => {
+    setImages(list);
+    document.getElementById('filter-size').value = 'large';
+    applyFilters();
+    const n = state.filtered.length;
+    document.getElementById('filter-size').value = 'all';
+    applyFilters();
+    setImages([]);
+    return n;
+  }, svgs);
+  assert.equal(inLarge, 0);
+  await page.close();
+});
+
+test('sizes over the limit are refused at the privileged boundary, with zero downloads', async () => {
+  const before = await countDownloadsAll();
+  const saved = await send({ action: 'processAndSave', imageUrl: base + 'photo.png', instructions: { format: 'png', width: 20000, saveAs: false, silent: true } });
+  assert.match(saved.error || '', /too large/);
+  const cropped = await send({ action: 'processAndReturnData', imageUrl: base + 'photo.png', instructions: { format: 'png', cropWidth: 20000, cropHeight: 500 } });
+  assert.match(cropped.error || '', /too large/);
+  assert.equal(await countDownloadsAll(), before);
+});
+
+test('editor: a manual output size follows the crop shape and the canvas matches the fields', async () => {
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const run = (steps) => editor.evaluate(async (steps) => {
+    const out = [];
+    for (const step of steps) {
+      if (step.crop) editor.cropper.setData(step.crop);
+      if (step.preset) document.querySelector(`[data-preset="${step.preset}"]`).click();
+      if (step.unlock) document.getElementById('btn-lock').click();
+      if (step.type) { const f = document.getElementById(step.type[0]); f.value = String(step.type[1]); f.dispatchEvent(new Event('input')); }
+      await new Promise((r) => setTimeout(r, 30));
+    }
+    const shown = [+document.getElementById('out-w').value, +document.getElementById('out-h').value];
+    const canvas = croppedCanvas('png');
+    out.push(shown, [canvas.width, canvas.height]);
+    return out;
+  }, steps);
+  // Typed width, then a square crop: the height follows, and the file is exactly that size.
+  let [shown, canvas] = await run([{ crop: { x: 0, y: 0, width: 32, height: 18 } }, { type: ['out-w', 16] }, { crop: { x: 0, y: 0, width: 20, height: 20 } }]);
+  assert.deepEqual(shown, [16, 16]);
+  assert.deepEqual(canvas, shown);
+  // Typed height keeps the height.
+  [shown, canvas] = await run([{ type: ['out-h', 10] }, { crop: { x: 0, y: 0, width: 40, height: 20 } }]);
+  assert.deepEqual(shown, [20, 10]);
+  assert.deepEqual(canvas, shown);
+  // Fixed preset, then unlock and reshape the crop: width kept, height follows, no stretch.
+  [shown, canvas] = await run([{ preset: '1080x1080' }, { unlock: true }, { crop: { x: 0, y: 0, width: 40, height: 20 } }]);
+  assert.deepEqual(shown, [1080, 540]);
+  assert.deepEqual(canvas, shown);
+  await editor.close();
+});
+
+test('area capture: a crop failure reports an error and never opens the whole screenshot', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  await page.bringToFront();
+  const editors = () => ctx.pages().filter((p) => p.url().includes('resize.html')).length;
+  const before = editors();
+  for (const rect of [{ x: 1e6, y: 1e6, width: 50, height: 50 }, { x: 0, y: 0, width: NaN, height: 10 }]) {
+    const result = await sw.evaluate(async ({ url, rect }) => {
+      const [tab] = await chrome.tabs.query({ url });
+      const [injection] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (r) => new Promise((resolve) => chrome.runtime.sendMessage({ action: 'captureSelection', rect: r }, resolve)),
+        args: [rect],
+      });
+      return injection.result;
+    }, { url: base + 'page.html', rect });
+    assert.ok(result?.error, JSON.stringify(result));
+  }
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(editors(), before);
+  await page.close();
+});
+
+test('upgrade: the 2.3.5 editor hand-off key is removed, idempotently', async () => {
+  const left = await sw.evaluate(async () => {
+    await chrome.storage.local.set({ _resizeImageUrl: 'data:image/png;base64,AAAA', keep: 1 });
+    await cleanupLegacyStorage();
+    await cleanupLegacyStorage();
+    const r = await chrome.storage.local.get(null);
+    await chrome.storage.local.remove('keep');
+    return r;
+  });
+  assert.equal(left._resizeImageUrl, undefined);
+  assert.equal(left.keep, 1);
+});
+
+test('advisor: a new source hides the previous figures at once and the old answer never shows', async () => {
+  await ui.evaluate(() => switchTab('tools'));
+  await ui.evaluate((u) => setToolSource(u, 'a.png'), base + 'photo.png?delay=600');
+  await waitFor(() => ui.evaluate(() => !document.getElementById('format-advisor').hidden));
+  // B loads slowly, so its own analysis starts late; A must already be gone.
+  ui.evaluate((u) => setToolSource(u, 'b.png'), base + 'wide.png?delay=1500');
+  await new Promise((r) => setTimeout(r, 50));
+  const midway = await ui.evaluate(() => ({ hidden: document.getElementById('format-advisor').hidden, bars: document.getElementById('advisor-sizes').children.length }));
+  assert.deepEqual(midway, { hidden: true, bars: 0 });
+  await new Promise((r) => setTimeout(r, 900)); // A's analysis would have finished by now
+  assert.equal(await ui.evaluate(() => document.getElementById('advisor-sizes').children.length), 0);
+  await waitFor(() => ui.evaluate(() => document.getElementById('advisor-sizes').children.length > 0), 15000);
+  await ui.evaluate(() => clearToolSource());
+});
+
+test('radio groups: named, one Tab stop, arrows change the option', async () => {
+  await ui.evaluate(() => switchTab('tools'));
+  const info = await ui.evaluate(async () => {
+    const group = document.getElementById('convert-format');
+    const label = document.getElementById(group.getAttribute('aria-labelledby'))?.textContent.trim();
+    const stops = () => [...group.querySelectorAll('[role="radio"]')].filter((r) => r.tabIndex === 0).map((r) => r.dataset.value);
+    const before = stops();
+    group.querySelector('[tabindex="0"]').focus();
+    return { label, before };
+  });
+  assert.ok(info.label);
+  assert.equal(info.before.length, 1);
+  await ui.keyboard.press('ArrowRight');
+  const after = await ui.evaluate(() => {
+    const group = document.getElementById('convert-format');
+    const checked = [...group.querySelectorAll('[aria-checked="true"]')].map((r) => r.dataset.value);
+    return { checked, focused: document.activeElement.dataset.value, stops: [...group.querySelectorAll('[tabindex="0"]')].length };
+  });
+  assert.equal(after.checked.length, 1);
+  assert.equal(after.focused, after.checked[0]);
+  assert.notEqual(after.checked[0], info.before[0]);
+  assert.equal(after.stops, 1);
+});
+
+test('the image grid is one Tab stop with arrow-key navigation inside it', async () => {
+  await ui.evaluate((b) => { switchTab('images'); setImages(Array.from({ length: 60 }, (_, i) => ({ src: `${b}photo.png?n=${i}`, width: 30, height: 20 }))); }, base);
+  const stops = await ui.evaluate(() => [...document.querySelectorAll('#image-grid [tabindex]')].filter((n) => n.tabIndex >= 0).length);
+  assert.equal(stops, 1);
+  await ui.evaluate(() => document.querySelector('#image-grid .gcard[tabindex="0"]').focus());
+  await ui.keyboard.press('ArrowRight');
+  const moved = await ui.evaluate(() => ({ idx: [...document.getElementById('image-grid').children].indexOf(document.activeElement), stops: document.querySelectorAll('#image-grid [tabindex="0"]').length }));
+  assert.deepEqual(moved, { idx: 1, stops: 1 });
+  await ui.keyboard.press('Tab');
+  assert.equal(await ui.evaluate(() => document.getElementById('image-grid').contains(document.activeElement)), false);
+  await ui.evaluate(() => setImages([]));
+});
+
+test('live observer: inline SVG, inline-style backgrounds and <picture> sources count as new', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  const tabId = await tabIdOf(base + 'page.html');
+  await ui.evaluate(() => {
+    window.__observed = 0;
+    chrome.runtime.onMessage.addListener((m) => { if (m.action === 'newImagesAvailable') window.__observed += m.count; });
+  });
+  await send({ action: 'collectImages', tabId });
+  await page.evaluate((b) => {
+    document.body.insertAdjacentHTML('beforeend',
+      '<svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="teal"/></svg>'
+      + `<div style="width:40px;height:40px;background-image:url(${b}hotlink.png)"></div>`
+      + `<picture><source srcset="${b}noext"><img src="${b}photo.png"></picture>`);
+  }, base);
+  await waitFor(() => ui.evaluate(() => window.__observed > 0));
+  await new Promise((r) => setTimeout(r, 1200));
+  assert.equal(await ui.evaluate(() => window.__observed), 3);
+  await page.close();
+});
+
+test('transparency in a small area of a large image is detected', async () => {
+  const holey = await send({ action: 'analyzeFormats', imageUrl: base + 'holey.png' });
+  assert.equal(holey.hasAlpha, true);
+  const opaque = await send({ action: 'analyzeFormats', imageUrl: base + 'photo.png' });
+  assert.equal(opaque.hasAlpha, false);
 });

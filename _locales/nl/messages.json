@@ -63,14 +63,6 @@
   "scanning": {
     "message": "Zoeken..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ afbeeldingen",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Verwerken"
   },
@@ -347,9 +339,6 @@
   "settingZipDefault": {
     "message": "ZIP standaard"
   },
-  "newImagesDetected": {
-    "message": "nieuwe afbeeldingen gevonden"
-  },
   "rescan": {
     "message": "Vernieuwen"
   },
@@ -450,7 +439,13 @@
     "message": "Geldt alleen bij downloaden in Origineel formaat"
   },
   "settingSubfolderNote": {
-    "message": "Werkt het beste met 'Vraag opslaglocatie' uitgeschakeld"
+    "message": "Werkt het beste met '$OPTION$' uitgeschakeld",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Links draaien"
@@ -553,5 +548,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Sommige afbeeldingen zijn weggelaten: deze pagina bevat te veel of zeer grote ingesloten afbeeldingen."
+  },
+  "errorZipTooLarge": {
+    "message": "De ZIP zou te groot worden (max. $SIZE$). Selecteer minder afbeeldingen of download ze zonder ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Maximaal $MAX$ px per zijde.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatisch (browser)"
+  },
+  "qualityLabel": {
+    "message": "Kwaliteit"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nieuwe afbeelding gevonden",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ nieuwe afbeeldingen gevonden",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ afbeelding",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ afbeeldingen",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Raster"
+  },
+  "layoutCompact": {
+    "message": "Compact raster"
+  },
+  "layoutList": {
+    "message": "Lijst"
+  },
+  "clearSource": {
+    "message": "Afbeelding verwijderen"
+  },
+  "close": {
+    "message": "Sluiten"
+  },
+  "previousImage": {
+    "message": "Vorige afbeelding"
+  },
+  "nextImage": {
+    "message": "Volgende afbeelding"
+  },
+  "downloadZip": {
+    "message": "Downloaden als ZIP"
   }
 }

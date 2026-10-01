@@ -62,14 +62,6 @@
   "scanning": {
     "message": "Đang tìm..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ hình ảnh",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Đang xử lý"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "ZIP mặc định"
   },
-  "newImagesDetected": {
-    "message": "ảnh mới được tìm thấy"
-  },
   "rescan": {
     "message": "Làm mới"
   },
@@ -449,7 +438,13 @@
     "message": "Chỉ áp dụng khi tải xuống ở định dạng Gốc"
   },
   "settingSubfolderNote": {
-    "message": "Hoạt động tốt nhất khi tắt 'Hỏi vị trí lưu'"
+    "message": "Hoạt động tốt nhất khi tắt '$OPTION$'",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Xoay trái"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Một số hình ảnh đã bị bỏ qua: trang này có quá nhiều hình ảnh hoặc hình ảnh nhúng rất lớn."
+  },
+  "errorZipTooLarge": {
+    "message": "Tệp ZIP sẽ quá lớn (tối đa $SIZE$). Hãy chọn ít hình ảnh hơn hoặc tải xuống không dùng ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Tối đa $MAX$ px mỗi cạnh.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Tự động (trình duyệt)"
+  },
+  "qualityLabel": {
+    "message": "Chất lượng"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ hình ảnh mới",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ hình ảnh mới",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ hình ảnh",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ hình ảnh",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Lưới"
+  },
+  "layoutCompact": {
+    "message": "Lưới thu gọn"
+  },
+  "layoutList": {
+    "message": "Danh sách"
+  },
+  "clearSource": {
+    "message": "Gỡ hình ảnh"
+  },
+  "close": {
+    "message": "Đóng"
+  },
+  "previousImage": {
+    "message": "Hình trước"
+  },
+  "nextImage": {
+    "message": "Hình tiếp theo"
+  },
+  "downloadZip": {
+    "message": "Tải xuống dạng ZIP"
   }
 }

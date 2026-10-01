@@ -29,10 +29,19 @@ const state = {
   layout: '2col',
   sort: 'pixels',
   previewSrc: '',
+  focusSrc: '',      // the grid's single Tab stop (roving tabindex)
   newImages: 0,
   checker: 'auto',
   tool: { src: '', name: '', ratio: 0, size: 0 },
   cards: new Map(),
+};
+
+// Per-scan budgets. Kept in one object so tests can lower them.
+const LIMITS = {
+  fallbackFetches: 40,                    // images fetched through the extension (hotlink fallback)
+  fallbackBytes: 48 * 1024 * 1024,        // ...and their bytes together
+  fallbackItemBytes: 8 * 1024 * 1024,     // a preview never needs more than this per image
+  zipBytes: 256 * 1024 * 1024,            // all files of one ZIP together
 };
 
 function readUiState() {
@@ -76,22 +85,13 @@ function applyTheme(theme = 'auto') {
   setSegmented($('setting-theme'), theme);
 }
 
-// ---------- Segmented controls ----------
+// ---------- Segmented controls (ARIA radio groups) ----------
 function setSegmented(group, value) {
-  group?.querySelectorAll('.seg').forEach((seg) => {
-    const on = seg.dataset.value === value;
-    seg.classList.toggle('active', on);
-    seg.setAttribute('aria-checked', String(on));
-  });
+  if (group) ui.setRadio(group, value);
 }
 
 function onSegmented(group, handler) {
-  group.addEventListener('click', (e) => {
-    const seg = e.target.closest('.seg');
-    if (!seg || !group.contains(seg)) return;
-    setSegmented(group, seg.dataset.value);
-    handler(seg.dataset.value);
-  });
+  ui.initRadioGroup(group, handler);
 }
 
 function segmentedValue(group) {
@@ -103,6 +103,8 @@ function segmentedValue(group) {
 // ============================================================
 function localize() {
   i18n.apply();
+  // Names the option it depends on, in the current language, so the two never drift apart.
+  $('subfolder-note').textContent = t('settingSubfolderNote', [t('settingSaveAs')]);
   if (/Mac|iPhone|iPad/.test(navigator.platform)) $('drop-hint').textContent = t('pasteHint').replace(/Ctrl\+/g, '⌘');
 }
 
@@ -137,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function onRuntimeMessage(msg) {
   if (msg?.action !== 'newImagesAvailable' || msg.tabId !== state.tabId || !(msg.count > 0)) return;
   state.newImages += msg.count;
-  $('new-images-text').textContent = `+${state.newImages} ${t('newImagesDetected')}`;
+  $('new-images-text').textContent = i18n.plural(state.newImages, 'newImagesOne', 'newImagesOther');
   $('new-images-banner').hidden = false;
 }
 
@@ -284,6 +286,7 @@ function initImages() {
   const grid = $('image-grid');
   grid.addEventListener('click', onGridClick);
   grid.addEventListener('keydown', onGridKeydown);
+  grid.addEventListener('focusin', (e) => { if (e.target.classList?.contains('gcard')) setRovingCard(e.target); });
 }
 
 function setFiltersOpen(open) {
@@ -346,7 +349,9 @@ async function scan({ keepSelection = false } = {}) {
   const res = await send({ action: 'collectImages', tabId: state.tabId });
   if (token !== scanToken) return;
   if (!keepSelection) state.selected.clear();
+  resetViaExtension();
   setImages(res?.images || [], res?.error);
+  if (res?.truncated) toast(t('scanTruncated'), 'info');
 }
 
 function setImages(list, error) {
@@ -484,6 +489,18 @@ function renderGrid(animate) {
   });
   grid.replaceChildren(...nodes);
   if (animate) nodes.slice(0, 24).forEach((node, i) => { node.style.animationDelay = `${i * 18}ms`; });
+  // Roving tabindex: the grid is one Tab stop, arrows move inside it.
+  const current = nodes.find((n) => n.dataset.src === state.focusSrc) || nodes[0];
+  nodes.forEach((n) => { n.tabIndex = n === current ? 0 : -1; });
+}
+
+function setRovingCard(card) {
+  if (!card) return;
+  if (state.focusSrc !== card.dataset.src) {
+    $('image-grid').querySelectorAll('.gcard[tabindex="0"]').forEach((n) => { if (n !== card) n.tabIndex = -1; });
+  }
+  card.tabIndex = 0;
+  state.focusSrc = card.dataset.src;
 }
 
 function createCard(img) {
@@ -504,14 +521,16 @@ function createCard(img) {
   const badges = el('div', { class: 'gbadges' });
 
   const acts = el('div', { class: 'gacts' }, [
-    el('button', { class: 'gact', 'data-act': 'copy', title: t('copyImage'), 'aria-label': t('copyImage') }, icon('copy')),
-    el('button', { class: 'gact', 'data-act': 'download', title: t('titleDownloadAs'), 'aria-label': t('titleDownloadAs') }, icon('download')),
-    el('button', { class: 'gact gact-extra', 'data-act': 'open', title: t('titleOpenTab'), 'aria-label': t('titleOpenTab') }, icon('external')),
-    el('button', { class: 'gact gact-extra', 'data-act': 'lens', title: t('titleSearchSimilar'), 'aria-label': t('titleSearchSimilar') }, icon('lens')),
+    // Pointer shortcuts only: the keyboard reaches the same actions in the preview (Enter),
+    // so each card stays a single Tab stop instead of five.
+    el('button', { class: 'gact', 'data-act': 'copy', tabindex: '-1', title: t('copyImage'), 'aria-label': t('copyImage') }, icon('copy')),
+    el('button', { class: 'gact', 'data-act': 'download', tabindex: '-1', title: t('titleDownloadAs'), 'aria-label': t('titleDownloadAs') }, icon('download')),
+    el('button', { class: 'gact gact-extra', 'data-act': 'open', tabindex: '-1', title: t('titleOpenTab'), 'aria-label': t('titleOpenTab') }, icon('external')),
+    el('button', { class: 'gact gact-extra', 'data-act': 'lens', tabindex: '-1', title: t('titleSearchSimilar'), 'aria-label': t('titleSearchSimilar') }, icon('lens')),
   ]);
 
   const info = el('div', { class: 'ginfo' }, [el('div', { class: 'gname' }), el('div', { class: 'gmeta' })]);
-  return el('div', { class: 'gcard', role: 'listitem', tabindex: '0', 'data-src': img.src }, [thumb, check, badges, acts, info]);
+  return el('div', { class: 'gcard', role: 'listitem', tabindex: '-1', 'data-src': img.src }, [thumb, check, badges, acts, info]);
 }
 
 function updateCard(card, img) {
@@ -540,9 +559,19 @@ function updateCard(card, img) {
 // Hotlink-protected images fail inside the extension page; fetch them through the
 // service worker (with the site's cookies), a few at a time and at most once per URL.
 // Thumbnails and dimension probing share the same result.
-const viaExtension = new Map();
-const viaExtensionQueue = [];
+// The cache and its budget belong to one scan: a new scan (another page or tab) starts
+// empty, so the side panel never accumulates previews across a browsing session.
+let viaExtension = new Map();
+let viaExtensionQueue = [];
 let viaExtensionActive = 0;
+let viaExtensionBudget = { fetches: LIMITS.fallbackFetches, bytes: LIMITS.fallbackBytes };
+
+function resetViaExtension() {
+  viaExtensionQueue.forEach(({ resolve }) => resolve(null));
+  viaExtension = new Map();
+  viaExtensionQueue = [];
+  viaExtensionBudget = { fetches: LIMITS.fallbackFetches, bytes: LIMITS.fallbackBytes };
+}
 
 function fetchViaExtension(src) {
   if (src.startsWith('data:')) return Promise.resolve(src);
@@ -558,9 +587,16 @@ function fetchViaExtension(src) {
 function pumpViaExtension() {
   while (viaExtensionActive < 4 && viaExtensionQueue.length) {
     const { src, resolve } = viaExtensionQueue.shift();
+    const budget = viaExtensionBudget;
+    if (budget.fetches <= 0 || budget.bytes <= 0) { resolve(null); continue; }
+    budget.fetches--;
     viaExtensionActive++;
-    send({ action: 'fetchAsDataUrl', imageUrl: src })
-      .then((res) => resolve(res?.dataUrl || null), () => resolve(null))
+    const maxBytes = Math.min(LIMITS.fallbackItemBytes, budget.bytes);
+    send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes })
+      .then((res) => {
+        budget.bytes -= res?.size || 0;
+        resolve(res?.dataUrl || null);
+      }, () => resolve(null))
       .finally(() => { viaExtensionActive--; pumpViaExtension(); });
   }
 }
@@ -668,7 +704,7 @@ function updateSelectionUI() {
   $('btn-select-all').setAttribute('aria-label', t('titleSelectAll'));
   $('btn-select-all').title = t('titleSelectAll');
   const shown = state.filtered.length, total = state.images.length;
-  $('grid-count').textContent = t('imagesFound', [String(shown)]) + (shown < total ? ` / ${total}` : '');
+  $('grid-count').textContent = i18n.plural(shown, 'imagesFoundOne', 'imagesFoundOther') + (shown < total ? ` / ${total}` : '');
   $('action-bar-count').textContent = String(n);
   updateActionBar();
   syncHighlights();
@@ -802,6 +838,9 @@ let batchRunning = false;
 async function batchDownload(zip) {
   const items = state.images.filter((i) => state.selected.has(i.src));
   if (!items.length || batchRunning) return;
+  // Sizes already known from the page are enough to refuse an oversized ZIP up front.
+  const zipTooLarge = () => toast(t('errorZipTooLarge', [ITK.formatBytes(LIMITS.zipBytes)]), 'error');
+  if (zip && items.reduce((sum, i) => sum + (i.fileSize || 0), 0) > LIMITS.zipBytes) { zipTooLarge(); return; }
   batchRunning = true;
 
   const format = $('action-format').value;
@@ -814,6 +853,8 @@ async function batchDownload(zip) {
 
   const files = [];
   let failed = 0;
+  let zipBytes = 0;
+  let overLimit = false;
   for (let i = 0; i < items.length; i++) {
     count.textContent = `${i + 1}/${items.length}`;
     label.textContent = zip ? t('preparingZip') : t('processing');
@@ -822,11 +863,27 @@ async function batchDownload(zip) {
     ins.saveAs = false;
     try {
       const r = await call({ action: zip ? 'processAndReturnData' : 'processAndSave', imageUrl: items[i].src, instructions: ins });
-      if (zip) files.push({ name: zipEntryName(items[i].src, r.format, i), dataUrl: r.dataUrl });
+      if (zip) {
+        // Keep bytes, not base64 (a third smaller), and stop before the archive gets too big.
+        const bytes = new Uint8Array(await (await fetch(r.dataUrl)).arrayBuffer());
+        zipBytes += bytes.byteLength;
+        if (zipBytes > LIMITS.zipBytes) { overLimit = true; break; }
+        files.push({ name: zipEntryName(items[i].src, r.format, i), bytes });
+      }
     } catch {
       failed++;
     }
     fill.style.width = `${Math.round(((i + 1) / items.length) * 100)}%`;
+  }
+
+  if (overLimit) {
+    files.length = 0;
+    zipTooLarge();
+    buttons.forEach((b) => { b.disabled = false; });
+    batchRunning = false;
+    progress.hidden = true;
+    updateActionBar();
+    return;
   }
 
   if (zip && files.length) {
@@ -863,17 +920,10 @@ function zipEntryName(url, format, i) {
 
 async function downloadZip(files) {
   const zip = new JSZip();
-  for (const f of files) zip.file(f.name, f.dataUrl.slice(f.dataUrl.indexOf(',') + 1), { base64: true });
+  for (const f of files) zip.file(f.name, f.bytes);
   const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/zip' });
-  const filename = `imagetoolkit-${Date.now()}.zip`;
-  // A data URL outlives this page (the popup may close while Save As is open), but
-  // extension messages are capped at 64 MB, so very large archives use a blob URL.
-  if (blob.size < 48 * 1024 * 1024) {
-    return call({ action: 'downloadBlob', dataUrl: await blobToDataUrl(blob), filename, saveAs: true });
-  }
-  const url = URL.createObjectURL(blob);
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-  return call({ action: 'downloadBlob', dataUrl: url, filename, saveAs: true });
+  files.length = 0; // the archive holds the bytes now
+  return ui.saveBlob(blob, `imagetoolkit-${Date.now()}.zip`, true);
 }
 
 // ============================================================
@@ -1087,7 +1137,7 @@ function loadToolFile(file) {
 }
 
 function clearToolSource() {
-  advisorToken++;
+  resetAdvisor();
   toolToken++;
   toolReader?.abort();
   state.tool = { src: '', name: '', ratio: 0, size: 0 };
@@ -1095,7 +1145,6 @@ function clearToolSource() {
   $('tool-url-input').value = '';
   $('resize-url-w').value = '';
   $('resize-url-h').value = '';
-  $('format-advisor').hidden = true;
 }
 
 function loadDimensions(src) {
@@ -1108,8 +1157,19 @@ function loadDimensions(src) {
   });
 }
 
+// The advisor belongs to one source: a new source hides the old figures and cancels the old
+// analysis right away, before the new one starts (which waits for dimensions and size).
+function resetAdvisor() {
+  advisorToken++;
+  $('format-advisor').hidden = true;
+  $('advisor-recommendation').textContent = '';
+  $('advisor-sizes').replaceChildren();
+  send({ action: 'cancelAnalysis' });
+}
+
 async function setToolSource(src, name, size = 0) {
   const token = ++toolToken;
+  resetAdvisor();
   if (!src.startsWith('data:')) toolReader?.abort();
   const stale = () => token !== toolToken;
   state.tool = { src, name, ratio: 0, size };
@@ -1169,6 +1229,13 @@ async function resizeTool() {
   const width = parseInt($('resize-url-w').value, 10);
   const height = parseInt($('resize-url-h').value, 10);
   if (!(width >= 1)) { flashError($('resize-url-w')); return; }
+  // Over the limit is an error, never a silent "save the original" (the background refuses it too).
+  const over = [[width, 'resize-url-w'], [height, 'resize-url-h']].find(([v]) => v > ITK.MAX_SIDE);
+  if (over) {
+    flashError($(over[1]));
+    toast(t('errorMaxSide', [String(ITK.MAX_SIDE)]), 'error');
+    return;
+  }
 
   const ins = { format: state.settings.defaultFormat || 'webp', quality: state.settings.defaultQuality / 100, silent: true };
   if (!isLocked() && height >= 1) {

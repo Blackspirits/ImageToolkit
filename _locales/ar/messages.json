@@ -62,14 +62,6 @@
   "scanning": {
     "message": "جاري البحث..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ صور",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "جاري المعالجة"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "ZIP افتراضياً"
   },
-  "newImagesDetected": {
-    "message": "صور جديدة تم العثور عليها"
-  },
   "rescan": {
     "message": "تحديث"
   },
@@ -449,7 +438,13 @@
     "message": "ينطبق فقط عند التنزيل بالتنسيق الأصلي"
   },
   "settingSubfolderNote": {
-    "message": "يعمل بشكل أفضل مع تعطيل 'طلب موقع الحفظ'"
+    "message": "يعمل بشكل أفضل عند تعطيل '$OPTION$'",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "تدوير لليسار"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "تم استبعاد بعض الصور: تحتوي هذه الصفحة على عدد كبير جدًا من الصور أو صور مضمنة كبيرة جدًا."
+  },
+  "errorZipTooLarge": {
+    "message": "سيكون ملف ZIP كبيرًا جدًا (الحد الأقصى $SIZE$). حدد صورًا أقل أو نزّلها دون ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "الحد الأقصى $MAX$ بكسل لكل جانب.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "تلقائي (المتصفح)"
+  },
+  "qualityLabel": {
+    "message": "الجودة"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ صورة جديدة",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "صور جديدة: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ صورة",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "الصور: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "شبكة"
+  },
+  "layoutCompact": {
+    "message": "شبكة مضغوطة"
+  },
+  "layoutList": {
+    "message": "قائمة"
+  },
+  "clearSource": {
+    "message": "إزالة الصورة"
+  },
+  "close": {
+    "message": "إغلاق"
+  },
+  "previousImage": {
+    "message": "الصورة السابقة"
+  },
+  "nextImage": {
+    "message": "الصورة التالية"
+  },
+  "downloadZip": {
+    "message": "تنزيل كملف ZIP"
   }
 }

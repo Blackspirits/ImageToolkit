@@ -65,14 +65,6 @@
   "scanning": {
     "message": "Procurando..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ imagens",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "filterAll": {
     "message": "Todos os tipos"
   },
@@ -116,7 +108,7 @@
     "message": "Comportamento de Redimensionamento"
   },
   "settingCrop": {
-    "message": "Recorte Central"
+    "message": "Recorte central"
   },
   "settingFit": {
     "message": "Ajustar (Letterbox)"
@@ -314,13 +306,13 @@
     "message": "Atraso na captura"
   },
   "downloadOptions": {
-    "message": "Opções de Download"
+    "message": "Opções de download"
   },
   "settingSubfolder": {
     "message": "Subpasta"
   },
   "settingSubfolderHint": {
-    "message": "ex: imagens/"
+    "message": "ex.: imagens/"
   },
   "settingFilename": {
     "message": "Nome do arquivo"
@@ -345,9 +337,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP por padrão"
-  },
-  "newImagesDetected": {
-    "message": "novas imagens encontradas"
   },
   "rescan": {
     "message": "Atualizar"
@@ -449,7 +438,13 @@
     "message": "Aplica-se apenas ao baixar no formato Original"
   },
   "settingSubfolderNote": {
-    "message": "Funciona melhor com 'Pedir localização' desativado"
+    "message": "Funciona melhor com \"$OPTION$\" desativado",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Girar para a esquerda"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Algumas imagens ficaram de fora: esta página tem imagens demais ou imagens incorporadas muito grandes."
+  },
+  "errorZipTooLarge": {
+    "message": "O ZIP ficaria grande demais (máx. $SIZE$). Selecione menos imagens ou baixe-as sem ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Máximo de $MAX$ px por lado.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automático (navegador)"
+  },
+  "qualityLabel": {
+    "message": "Qualidade"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nova imagem encontrada",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ novas imagens encontradas",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ imagem",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ imagens",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Grade"
+  },
+  "layoutCompact": {
+    "message": "Grade compacta"
+  },
+  "layoutList": {
+    "message": "Lista"
+  },
+  "clearSource": {
+    "message": "Remover imagem"
+  },
+  "close": {
+    "message": "Fechar"
+  },
+  "previousImage": {
+    "message": "Imagem anterior"
+  },
+  "nextImage": {
+    "message": "Próxima imagem"
+  },
+  "downloadZip": {
+    "message": "Baixar como ZIP"
   }
 }

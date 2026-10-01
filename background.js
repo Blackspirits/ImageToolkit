@@ -12,7 +12,6 @@ const t = i18n.t;
 
 // ---------- Constants ----------
 const MENU_FORMATS = ['png', 'jpg', 'webp', 'avif'];
-const OUTPUT_FORMATS = new Set(['png', 'jpeg', 'webp', 'avif']);
 const MAX_FETCH_BYTES = ITK.MAX_IMAGE_BYTES;
 const EDITOR_WINDOW = { type: 'popup', width: 1440, height: 920 };
 
@@ -73,7 +72,14 @@ async function buildContextMenus() {
   add({ id: 'action-capture-visible', title: t('captureVisible'), contexts: ['action'] });
 }
 
+// 2.3.5 and earlier passed the image to the editor through chrome.storage.local and only
+// removed it once the editor loaded it; IndexedDB handoff replaced that. Safe to run repeatedly.
+function cleanupLegacyStorage() {
+  return chrome.storage.local.remove('_resizeImageUrl').catch(() => {});
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
+  await cleanupLegacyStorage();
   const { settings } = await chrome.storage.sync.get('settings');
   if (!settings) await chrome.storage.sync.set({ settings: DEFAULT_SETTINGS });
   await buildContextMenus();
@@ -85,6 +91,7 @@ async function initializeExtensionRuntime() {
   const settings = await loadSettingsAndLocale();
   applySidePanelBehavior(settings);
   handoff.prune().catch(() => {});
+  cleanupLegacyStorage();
 }
 
 initializeExtensionRuntime().catch(() => {});
@@ -158,16 +165,19 @@ const handlers = {
   processAndSave: (msg) => processAndSave(msg.imageUrl, msg.instructions, null),
 
   processAndReturnData: (msg) => {
-    const instructions = sanitizeInstructions(msg.instructions);
+    const instructions = ITK.sanitizeInstructions(msg.instructions);
     return instructions.passthrough ? fetchOriginal(msg.imageUrl) : processImage(msg.imageUrl, instructions);
   },
 
   // Keyed by the calling document, so one window never cancels another's analysis.
-  analyzeFormats: (msg, sender) => analyzeFormats(msg.imageUrl, sender.documentId || sender.url || 'default'),
+  analyzeFormats: (msg, sender) => analyzeFormats(msg.imageUrl, analysisKey(sender)),
+  cancelAnalysis: (msg, sender) => { analysisControllers.get(analysisKey(sender))?.abort(); return { success: true }; },
 
+  // `maxBytes` lets previews and metadata ask for less than a full-size download.
   fetchAsDataUrl: async (msg) => {
-    const blob = await fetchImageBlob(msg.imageUrl);
-    return { dataUrl: await blobToDataUrl(blob) };
+    const maxBytes = Math.min(MAX_FETCH_BYTES, Math.max(1, Number(msg.maxBytes) || MAX_FETCH_BYTES));
+    const blob = await fetchImageBlob(msg.imageUrl, { maxBytes });
+    return { dataUrl: await blobToDataUrl(blob), size: blob.size };
   },
 
   downloadBlob: (msg) => {
@@ -175,7 +185,7 @@ const handlers = {
     const isAllowedUrl = url.startsWith('blob:') || /^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url);
     if (!isAllowedUrl) return { error: 'Unsupported download URL' };
     const filename = ITK.sanitizeFilename(msg.filename || 'download', true) || 'download';
-    return triggerDownload(url, filename, msg.saveAs !== false).then((id) => (id == null ? { cancelled: true } : { success: true }));
+    return triggerDownload(url, filename, msg.saveAs !== false).then((id) => (id == null ? { cancelled: true } : { success: true, downloadId: id }));
   },
 
   collectImages: (msg) => collectImages(msg.tabId),
@@ -226,8 +236,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function collectImages(tabId) {
   if (!Number.isInteger(tabId)) return { images: [], error: 'noTab' };
 
-  let images = await requestImages(tabId);
-  if (images) return { images };
+  let result = await requestImages(tabId);
+  if (result) return result;
 
   try {
     await chrome.scripting.executeScript({ target: { tabId }, files: ['lib/core.js', 'content.js'] });
@@ -235,14 +245,16 @@ async function collectImages(tabId) {
     return { images: [], error: 'restricted' };
   }
 
-  images = await requestImages(tabId);
-  return { images: images || [] };
+  return (await requestImages(tabId)) || { images: [] };
 }
 
 function requestImages(tabId) {
   return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, { action: 'getImages' }, (images) => {
-      resolve(chrome.runtime.lastError ? null : (images || []));
+    chrome.tabs.sendMessage(tabId, { action: 'getImages' }, (response) => {
+      if (chrome.runtime.lastError || !response) { resolve(null); return; }
+      // { images, truncated } — a bare array is accepted for scanners injected by older builds.
+      const images = Array.isArray(response) ? response : (Array.isArray(response.images) ? response.images : []);
+      resolve({ images, truncated: !!response.truncated });
     });
   });
 }
@@ -318,7 +330,7 @@ function tooLarge(bytes) {
   return new Error(`Image too large (${bytes > 0 ? ITK.formatBytes(bytes) : `> ${ITK.formatBytes(MAX_FETCH_BYTES)}`})`);
 }
 
-async function fetchImageBlob(imageUrl, { signal } = {}) {
+async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES } = {}) {
   if (!ITK.isAllowedImageSrc(String(imageUrl || ''))) throw new Error('Unsupported image URL');
 
   let response;
@@ -332,12 +344,12 @@ async function fetchImageBlob(imageUrl, { signal } = {}) {
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
   const declared = ITK.parseSizeFromHeaders(response.headers);
-  if (declared > MAX_FETCH_BYTES) {
+  if (declared > maxBytes) {
     response.body?.cancel().catch(() => {});
     throw tooLarge(declared);
   }
 
-  const blob = await readBodyCapped(response, MAX_FETCH_BYTES);
+  const blob = await readBodyCapped(response, maxBytes);
   if (!blob.size) throw new Error('Empty response');
   return blob;
 }
@@ -394,33 +406,6 @@ async function fetchOriginal(imageUrl) {
 }
 
 // ---------- Processing ----------
-function toBoundedInt(value) {
-  const n = Math.round(Number(value));
-  return Number.isFinite(n) && n >= 1 && n <= ITK.MAX_SIDE ? n : undefined;
-}
-
-// Messages are untrusted input: keep only known fields with sane values.
-function sanitizeInstructions(raw) {
-  const ins = raw && typeof raw === 'object' ? raw : {};
-  const out = {};
-  if (ins.passthrough) out.passthrough = true;
-  const format = ins.format === 'jpg' ? 'jpeg' : ins.format;
-  out.format = OUTPUT_FORMATS.has(format) ? format : 'png';
-  if (ins.quality != null) out.quality = Math.min(1, Math.max(0.1, Number(ins.quality) || 0.85));
-  for (const key of ['width', 'height', 'resizeWidth', 'cropWidth', 'cropHeight']) {
-    const value = toBoundedInt(ins[key]);
-    if (value) out[key] = value;
-  }
-  if (ins.fitMode) out.fitMode = true;
-  if (typeof ins.saveAs === 'boolean') out.saveAs = ins.saveAs;
-  if (ins.silent) out.silent = true;
-  if (/^#[0-9a-f]{6}$/i.test(ins.jpgBackground || '')) out.jpgBackground = ins.jpgBackground;
-  for (const key of ['subfolder', 'filenamePattern', 'filenamePrefix']) {
-    if (typeof ins[key] === 'string') out[key] = ins[key].slice(0, 120);
-  }
-  return out;
-}
-
 async function processImage(imageUrl, instructions) {
   const blob = await fetchImageBlob(imageUrl);
   const dataUrl = await blobToDataUrl(blob);
@@ -431,6 +416,7 @@ async function processImage(imageUrl, instructions) {
 // Format Advisor: one download and one decode, then every format is encoded from
 // the same bitmap. A newer request from the same document aborts the older download.
 const analysisControllers = new Map();
+const analysisKey = (sender) => sender.documentId || sender.url || 'default';
 
 async function analyzeFormats(imageUrl, contextKey) {
   analysisControllers.get(contextKey)?.abort();
@@ -452,8 +438,9 @@ async function analyzeFormats(imageUrl, contextKey) {
 }
 
 async function processAndSave(imageUrl, rawInstructions, settings) {
-  const instructions = sanitizeInstructions(rawInstructions);
+  let instructions = { silent: !!rawInstructions?.silent };
   try {
+    instructions = ITK.sanitizeInstructions(rawInstructions);
     if (!settings) settings = await loadSettingsAndLocale();
     if (instructions.quality == null) instructions.quality = settings.defaultQuality / 100;
     if (!instructions.jpgBackground) instructions.jpgBackground = settings.jpgBackground || '#FFFFFF';
@@ -584,13 +571,23 @@ function captureTab(windowId) {
   });
 }
 
-async function captureSelection(tab, rect) {
-  if (tab?.windowId == null || !rect) return { error: 'noTab' };
+// The rectangle comes from a content script: only finite, positive sizes are accepted.
+function validCaptureRect(rect) {
+  const values = [rect?.x, rect?.y, rect?.width, rect?.height].map(Number);
+  if (!values.every(Number.isFinite)) return null;
+  const [x, y, width, height] = values;
+  return width >= 1 && height >= 1 && x >= 0 && y >= 0 ? { x, y, width, height } : null;
+}
+
+async function captureSelection(tab, rawRect) {
+  if (tab?.windowId == null) return { error: 'noTab' };
   try {
+    const rect = validCaptureRect(rawRect);
+    if (!rect) throw new Error('Invalid selection');
     const dataUrl = await captureTab(tab.windowId);
-    const cropped = await offscreenRequest({ action: 'offscreen-crop', dataUrl, rect }, 15000)
-      .then((r) => r.dataUrl || dataUrl)
-      .catch(() => dataUrl);
+    // Never fall back to the whole screenshot: the user asked for one area only.
+    const { dataUrl: cropped } = await offscreenRequest({ action: 'offscreen-crop', dataUrl, rect }, 15000);
+    if (!cropped || !cropped.startsWith('data:image/')) throw new Error('Crop failed');
     await openEditor(cropped);
     return { success: true };
   } catch (err) {
@@ -661,7 +658,10 @@ function showSaveNotification(originalSize, newSize, format) {
 const PROBE_TYPE_LIMIT = 30;
 const PROBE_SIZE_LIMIT = 100;
 const PROBE_CACHE_MAX = 500;
-const PROBE_BODY_CAP = 25 * 1024 * 1024;
+// Metadata only: when a server sends no length, count at most this much of one body, and at
+// most PROBE_BODY_BUDGET across all images of one request. Past either, the size stays unknown.
+const PROBE_BODY_CAP = 2 * 1024 * 1024;
+const PROBE_BODY_BUDGET = 8 * 1024 * 1024;
 const typeProbeCache = new Map();
 const sizeProbeCache = new Map();
 
@@ -686,8 +686,9 @@ async function probeImageTypes(urls) {
 
 async function probeImageSizes(urls) {
   const out = {};
+  const budget = { bytes: PROBE_BODY_BUDGET };
   await ITK.mapLimit(probeableUrls(urls, PROBE_SIZE_LIMIT), 6, async (url) => {
-    if (!sizeProbeCache.has(url)) rememberProbe(sizeProbeCache, url, await probeRemoteSize(url));
+    if (!sizeProbeCache.has(url)) rememberProbe(sizeProbeCache, url, await probeRemoteSize(url, budget));
     if (sizeProbeCache.has(url)) out[url] = sizeProbeCache.get(url);
   });
   return out;
@@ -718,18 +719,19 @@ async function probeType(url) {
   return null;
 }
 
-async function probeRemoteSize(url) {
+async function probeRemoteSize(url, budget) {
   for (const init of [{ method: 'HEAD' }, { headers: { Range: 'bytes=0-0' } }]) {
     try {
       const size = ITK.parseSizeFromHeaders((await fetchHeaders(url, init)).headers);
       if (size > 0) return size;
     } catch {}
   }
-  return countBodyBytes(url, PROBE_BODY_CAP, 8000);
+  if (budget.bytes <= 0) return 0;
+  return countBodyBytes(url, PROBE_BODY_CAP, 8000, budget);
 }
 
 // Last resort for servers that send no length: stream and count, with a byte and time cap.
-async function countBodyBytes(url, cap, timeoutMs) {
+async function countBodyBytes(url, cap, timeoutMs, budget) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -743,7 +745,8 @@ async function countBodyBytes(url, cap, timeoutMs) {
       const { done, value } = await reader.read();
       if (done) return total;
       total += value.byteLength;
-      if (total > cap) return 0;
+      budget.bytes -= value.byteLength;
+      if (total > cap || budget.bytes < 0) return 0;
     }
   } catch {
     return 0;

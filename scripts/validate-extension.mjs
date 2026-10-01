@@ -92,6 +92,8 @@ function checkI18n() {
   const used = new Set();
   for (const [, key] of source.matchAll(/(?:\bt\(|getMessage\(|data-i18n(?:-title|-placeholder|-aria)?=)\s*["']([A-Za-z0-9_]+)/g)) used.add(key);
   for (const [, key] of source.matchAll(/__MSG_(\w+)__/g)) used.add(key);
+  // i18n.plural(count, 'oneKey', 'otherKey')
+  for (const [, one, other] of source.matchAll(/plural\([^,]+,\s*["']([A-Za-z0-9_]+)["'],\s*["']([A-Za-z0-9_]+)["']/g)) { used.add(one); used.add(other); }
   const undefinedKeys = [...used].filter((key) => !(key in reference));
   const unusedKeys = referenceKeys.filter((key) => !used.has(key));
   if (undefinedKeys.length) fail(`i18n keys used but not defined: ${undefinedKeys.join(', ')}`);

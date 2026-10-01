@@ -63,14 +63,6 @@
   "scanning": {
     "message": "Пошук..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ зображень",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Обробка"
   },
@@ -347,9 +339,6 @@
   "settingZipDefault": {
     "message": "ZIP за замовчуванням"
   },
-  "newImagesDetected": {
-    "message": "нових зображень знайдено"
-  },
   "rescan": {
     "message": "Оновити"
   },
@@ -450,7 +439,13 @@
     "message": "Застосовується лише при завантаженні в оригінальному форматі"
   },
   "settingSubfolderNote": {
-    "message": "Краще працює з вимкненим 'Запитувати місце збереження'"
+    "message": "Краще працює з вимкненим «$OPTION$»",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Повернути ліворуч"
@@ -553,5 +548,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Частину зображень пропущено: на сторінці забагато зображень або дуже великі вбудовані зображення."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP буде завеликим (макс. $SIZE$). Виберіть менше зображень або завантажте їх без ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Максимум $MAX$ px на сторону.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Автоматично (браузер)"
+  },
+  "qualityLabel": {
+    "message": "Якість"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ нове зображення",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "Нові зображення: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ зображення",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "Зображень: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Сітка"
+  },
+  "layoutCompact": {
+    "message": "Компактна сітка"
+  },
+  "layoutList": {
+    "message": "Список"
+  },
+  "clearSource": {
+    "message": "Прибрати зображення"
+  },
+  "close": {
+    "message": "Закрити"
+  },
+  "previousImage": {
+    "message": "Попереднє зображення"
+  },
+  "nextImage": {
+    "message": "Наступне зображення"
+  },
+  "downloadZip": {
+    "message": "Завантажити як ZIP"
   }
 }

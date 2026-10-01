@@ -65,14 +65,6 @@
   "scanning": {
     "message": "Recherche..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ image(s) trouvée(s)",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "filterAll": {
     "message": "Tous les types"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "ZIP par défaut"
   },
-  "newImagesDetected": {
-    "message": "nouvelles images trouvées"
-  },
   "rescan": {
     "message": "Rafraîchir"
   },
@@ -449,7 +438,13 @@
     "message": "S'applique uniquement lors du téléchargement au format Original"
   },
   "settingSubfolderNote": {
-    "message": "Fonctionne mieux avec 'Demander l'emplacement' désactivé"
+    "message": "Fonctionne mieux avec « $OPTION$ » désactivé",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Pivoter à gauche"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Certaines images ont été ignorées : cette page contient trop d'images ou des images intégrées très volumineuses."
+  },
+  "errorZipTooLarge": {
+    "message": "Le ZIP serait trop volumineux (max. $SIZE$). Sélectionnez moins d'images ou téléchargez-les sans ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Maximum $MAX$ px par côté.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatique (navigateur)"
+  },
+  "qualityLabel": {
+    "message": "Qualité"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nouvelle image trouvée",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ nouvelles images trouvées",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ image",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ images",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Grille"
+  },
+  "layoutCompact": {
+    "message": "Grille compacte"
+  },
+  "layoutList": {
+    "message": "Liste"
+  },
+  "clearSource": {
+    "message": "Retirer l'image"
+  },
+  "close": {
+    "message": "Fermer"
+  },
+  "previousImage": {
+    "message": "Image précédente"
+  },
+  "nextImage": {
+    "message": "Image suivante"
+  },
+  "downloadZip": {
+    "message": "Télécharger en ZIP"
   }
 }

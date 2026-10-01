@@ -63,14 +63,6 @@
   "scanning": {
     "message": "Поиск..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ изображений",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Обработка"
   },
@@ -347,9 +339,6 @@
   "settingZipDefault": {
     "message": "ZIP по умолчанию"
   },
-  "newImagesDetected": {
-    "message": "новых изображений найдено"
-  },
   "rescan": {
     "message": "Обновить"
   },
@@ -450,7 +439,13 @@
     "message": "Применяется только при скачивании в исходном формате"
   },
   "settingSubfolderNote": {
-    "message": "Лучше работает с отключённым 'Запрашивать место сохранения'"
+    "message": "Лучше работает с отключённым «$OPTION$»",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Повернуть влево"
@@ -553,5 +548,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Часть изображений пропущена: на странице слишком много изображений или очень большие встроенные изображения."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP будет слишком большим (макс. $SIZE$). Выберите меньше изображений или скачайте их без ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Максимум $MAX$ px по стороне.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Автоматически (браузер)"
+  },
+  "qualityLabel": {
+    "message": "Качество"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ новое изображение",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "Новые изображения: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ изображение",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "Изображений: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Сетка"
+  },
+  "layoutCompact": {
+    "message": "Компактная сетка"
+  },
+  "layoutList": {
+    "message": "Список"
+  },
+  "clearSource": {
+    "message": "Убрать изображение"
+  },
+  "close": {
+    "message": "Закрыть"
+  },
+  "previousImage": {
+    "message": "Предыдущее изображение"
+  },
+  "nextImage": {
+    "message": "Следующее изображение"
+  },
+  "downloadZip": {
+    "message": "Скачать как ZIP"
   }
 }

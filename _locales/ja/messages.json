@@ -62,14 +62,6 @@
   "scanning": {
     "message": "検索中..."
   },
-  "imagesFound": {
-    "message": "$COUNT$件の画像",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "処理中"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "ZIPをデフォルトに"
   },
-  "newImagesDetected": {
-    "message": "新しい画像が見つかりました"
-  },
   "rescan": {
     "message": "更新"
   },
@@ -449,7 +438,13 @@
     "message": "オリジナル形式でダウンロード時のみ適用"
   },
   "settingSubfolderNote": {
-    "message": "「保存場所を確認」を無効にすると最適に動作します"
+    "message": "「$OPTION$」をオフにすると最適に動作します",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "左に回転"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "一部の画像を省略しました。このページは画像が多すぎるか、非常に大きな埋め込み画像があります。"
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP が大きすぎます（最大 $SIZE$）。選択する画像を減らすか、ZIP を使わずにダウンロードしてください。",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "1 辺あたり最大 $MAX$ px です。",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "自動（ブラウザー）"
+  },
+  "qualityLabel": {
+    "message": "品質"
+  },
+  "newImagesOne": {
+    "message": "新しい画像 +$COUNT$ 件",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "新しい画像 +$COUNT$ 件",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ 枚の画像",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ 枚の画像",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "グリッド"
+  },
+  "layoutCompact": {
+    "message": "コンパクトグリッド"
+  },
+  "layoutList": {
+    "message": "リスト"
+  },
+  "clearSource": {
+    "message": "画像を削除"
+  },
+  "close": {
+    "message": "閉じる"
+  },
+  "previousImage": {
+    "message": "前の画像"
+  },
+  "nextImage": {
+    "message": "次の画像"
+  },
+  "downloadZip": {
+    "message": "ZIP でダウンロード"
   }
 }

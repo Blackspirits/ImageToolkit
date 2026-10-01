@@ -144,20 +144,19 @@ async function handleCopyText(message) {
 }
 
 // ---------- Helpers ----------
+function makeCanvas(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
 function detectAlpha(img) {
   try {
-    const canvas = document.createElement('canvas');
-    const scale = Math.min(1, 100 / Math.max(img.naturalWidth, img.naturalHeight));
-    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    for (let i = 3; i < data.length; i += 4) {
-      if (data[i] < 250) return true;
-    }
-  } catch {}
-  return false;
+    return ITK.hasTransparency(img, img.naturalWidth, img.naturalHeight, makeCanvas);
+  } catch {
+    return false;
+  }
 }
 
 function loadImage(dataUrl) {
@@ -202,11 +201,12 @@ async function convertBlobToPng(blob) {
 async function handleCrop(message) {
   const { dataUrl, rect } = message;
   const img = await loadImage(dataUrl);
-  // Clamp the selection to the captured bitmap (zoom/DPR rounding can overshoot).
-  const x = Math.max(0, Math.min(img.naturalWidth - 1, Math.round(rect.x)));
-  const y = Math.max(0, Math.min(img.naturalHeight - 1, Math.round(rect.y)));
-  const width = Math.max(1, Math.min(img.naturalWidth - x, Math.round(rect.width)));
-  const height = Math.max(1, Math.min(img.naturalHeight - y, Math.round(rect.height)));
+  const x = Math.round(rect.x), y = Math.round(rect.y);
+  if (!(x >= 0 && y >= 0 && x < img.naturalWidth && y < img.naturalHeight)) throw new Error('Selection outside the captured area');
+  // Clamp the far edges to the captured bitmap (zoom/DPR rounding can overshoot by a pixel).
+  const width = Math.min(img.naturalWidth - x, Math.round(rect.width));
+  const height = Math.min(img.naturalHeight - y, Math.round(rect.height));
+  if (!(width >= 1 && height >= 1)) throw new Error('Empty selection');
 
   const canvas = document.createElement('canvas');
   canvas.width = width;

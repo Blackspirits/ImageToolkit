@@ -65,14 +65,6 @@
   "scanning": {
     "message": "Scanning..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ images",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "filterAll": {
     "message": "All Types"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "ZIP by default"
   },
-  "newImagesDetected": {
-    "message": "new images found"
-  },
   "rescan": {
     "message": "Refresh"
   },
@@ -449,7 +438,13 @@
     "message": "Only applies when downloading as Original format"
   },
   "settingSubfolderNote": {
-    "message": "Works best with 'Ask save location' disabled"
+    "message": "Works best with '$OPTION$' turned off",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Rotate left"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Some images were left out: this page has too many or very large inline images."
+  },
+  "errorZipTooLarge": {
+    "message": "The ZIP would be too large (max $SIZE$). Select fewer images or download them without ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Maximum $MAX$ px per side.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatic (browser)"
+  },
+  "qualityLabel": {
+    "message": "Quality"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ new image found",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ new images found",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ image",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ images",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Grid"
+  },
+  "layoutCompact": {
+    "message": "Compact grid"
+  },
+  "layoutList": {
+    "message": "List"
+  },
+  "clearSource": {
+    "message": "Remove image"
+  },
+  "close": {
+    "message": "Close"
+  },
+  "previousImage": {
+    "message": "Previous image"
+  },
+  "nextImage": {
+    "message": "Next image"
+  },
+  "downloadZip": {
+    "message": "Download as ZIP"
   }
 }

@@ -157,9 +157,9 @@
           <button id="btn-hide-dupes" class="chip" aria-pressed="false" data-i18n-title="titleHideDupes" title="Hide duplicates"><svg class="i i-sm"><use href="#i-layers"/></svg><span id="dup-count">0</span></button>
           <button id="btn-checker" class="chip chip-icon" title="Transparency background"><svg class="i i-sm"><use href="#i-contrast"/></svg></button>
           <div class="segmented segmented-icons" role="group" data-i18n-title="titleToggleLayout" title="Toggle layout">
-            <button class="seg active" data-layout="2col" aria-pressed="true" aria-label="Grid"><svg class="i i-sm"><use href="#i-grid"/></svg></button>
-            <button class="seg" data-layout="compact" aria-pressed="false" aria-label="Compact"><svg class="i i-sm"><use href="#i-grid-small"/></svg></button>
-            <button class="seg" data-layout="list" aria-pressed="false" aria-label="List"><svg class="i i-sm"><use href="#i-list"/></svg></button>
+            <button class="seg active" data-layout="2col" aria-pressed="true" data-i18n-title="layoutGrid" title="Grid"><svg class="i i-sm"><use href="#i-grid"/></svg></button>
+            <button class="seg" data-layout="compact" aria-pressed="false" data-i18n-title="layoutCompact" title="Compact grid"><svg class="i i-sm"><use href="#i-grid-small"/></svg></button>
+            <button class="seg" data-layout="list" aria-pressed="false" data-i18n-title="layoutList" title="List"><svg class="i i-sm"><use href="#i-list"/></svg></button>
           </div>
         </div>
 
@@ -196,13 +196,13 @@
               <span id="tool-preview-name" class="source-name"></span>
               <span id="tool-preview-info" class="source-meta"></span>
             </div>
-            <button id="tool-preview-clear" class="icon-btn" aria-label="Clear"><svg class="i i-sm"><use href="#i-x"/></svg></button>
+            <button id="tool-preview-clear" class="icon-btn" data-i18n-title="clearSource" title="Remove image"><svg class="i i-sm"><use href="#i-x"/></svg></button>
           </div>
         </div>
 
         <div class="card">
-          <h3 class="card-title"><span class="card-icon"><svg class="i"><use href="#i-convert"/></svg></span><span data-i18n="convertTitle">Convert</span></h3>
-          <div class="segmented segmented-block" id="convert-format" role="radiogroup">
+          <h3 class="card-title"><span class="card-icon"><svg class="i"><use href="#i-convert"/></svg></span><span id="convert-title" data-i18n="convertTitle">Convert</span></h3>
+          <div class="segmented segmented-block" id="convert-format" role="radiogroup" aria-labelledby="convert-title">
             <button class="seg" data-value="png" role="radio">PNG</button>
             <button class="seg" data-value="jpeg" role="radio">JPG</button>
             <button class="seg active" data-value="webp" role="radio">WebP</button>
@@ -246,9 +246,9 @@
             <div class="row-ctrl"><input type="range" id="setting-quality" min="10" max="100" step="1" value="85" class="range"><output id="quality-value" class="value">85%</output></div>
           </div>
           <div class="row">
-            <label data-i18n="settingDefaultFormat">Default Format</label>
+            <label id="default-format-label" data-i18n="settingDefaultFormat">Default Format</label>
             <div class="row-ctrl">
-              <div class="segmented" id="setting-default-format" role="radiogroup">
+              <div class="segmented" id="setting-default-format" role="radiogroup" aria-labelledby="default-format-label">
                 <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" role="radio">AVIF</button>
               </div>
             </div>
@@ -258,9 +258,9 @@
             <div class="row-ctrl"><select id="setting-resize-behavior" class="select select-sm"><option value="crop" data-i18n="settingCrop">Center Crop</option><option value="fit" data-i18n="settingFit">Fit (Letterbox)</option></select></div>
           </div>
           <div class="row">
-            <label data-i18n="settingTheme">Theme</label>
+            <label id="theme-label" data-i18n="settingTheme">Theme</label>
             <div class="row-ctrl">
-              <div class="segmented" id="setting-theme" role="radiogroup">
+              <div class="segmented" id="setting-theme" role="radiogroup" aria-labelledby="theme-label">
                 <button class="seg" data-value="auto" role="radio" data-i18n-title="themeAuto" title="Auto (System)"><svg class="i i-sm"><use href="#i-contrast"/></svg></button><button class="seg" data-value="light" role="radio" data-i18n-title="themeLight" title="Light"><svg class="i i-sm"><use href="#i-sun"/></svg></button><button class="seg" data-value="dark" role="radio" data-i18n-title="themeDark" title="Dark"><svg class="i i-sm"><use href="#i-moon"/></svg></button>
               </div>
             </div>
@@ -268,7 +268,7 @@
           <div class="row">
             <label for="setting-language" data-i18n="settingLanguage">Language</label>
             <div class="row-ctrl"><select id="setting-language" class="select select-sm">
-              <option value="auto">Auto (Browser)</option>
+              <option value="auto" data-i18n="langAuto">Automatic (browser)</option>
               <option value="en">English</option>
               <option value="pt_PT">Português (PT)</option>
               <option value="pt_BR">Português (BR)</option>
@@ -310,7 +310,7 @@
             <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-save-as" checked><span></span></label></div>
           </div>
           <div class="row">
-            <div class="row-label"><label for="setting-subfolder" data-i18n="settingSubfolder">Subfolder</label><small data-i18n="settingSubfolderNote">Works best with 'Ask save location' disabled</small></div>
+            <div class="row-label"><label for="setting-subfolder" data-i18n="settingSubfolder">Subfolder</label><small id="subfolder-note">Works best with 'Ask save location' turned off</small></div>
             <div class="row-ctrl"><input type="text" id="setting-subfolder" class="input input-sm" data-i18n-placeholder="settingSubfolderHint" placeholder="e.g. images/" spellcheck="false"></div>
           </div>
           <div class="row">
@@ -353,7 +353,7 @@
         <span class="spacer"></span>
         <select id="action-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
         <button id="action-copy-urls" class="icon-btn icon-btn-boxed" data-i18n-title="copyUrls" title="Copy URLs"><svg class="i i-sm"><use href="#i-link"/></svg></button>
-        <button id="action-zip" class="icon-btn icon-btn-boxed" title="ZIP" aria-label="ZIP"><svg class="i i-sm"><use href="#i-archive"/></svg></button>
+        <button id="action-zip" class="icon-btn icon-btn-boxed" data-i18n-title="downloadZip" title="Download as ZIP"><svg class="i i-sm"><use href="#i-archive"/></svg></button>
         <button id="action-download" class="btn btn-primary btn-sm"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="download">Download</span></button>
       </div>
       <div id="batch-progress" class="progress" hidden>
@@ -371,12 +371,12 @@
             <span id="preview-filename" class="modal-title"></span>
             <span id="preview-meta" class="modal-meta"></span>
           </div>
-          <button id="preview-close" class="icon-btn" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+          <button id="preview-close" class="icon-btn" data-i18n-title="close" title="Close"><svg class="i"><use href="#i-x"/></svg></button>
         </div>
         <div class="modal-stage">
-          <button id="preview-prev" class="stage-nav stage-prev" aria-label="Previous"><svg class="i"><use href="#i-chevron-left"/></svg></button>
+          <button id="preview-prev" class="stage-nav stage-prev" data-i18n-title="previousImage" title="Previous image"><svg class="i"><use href="#i-chevron-left"/></svg></button>
           <img id="preview-img" src="" alt="">
-          <button id="preview-next" class="stage-nav stage-next" aria-label="Next"><svg class="i"><use href="#i-chevron-right"/></svg></button>
+          <button id="preview-next" class="stage-nav stage-next" data-i18n-title="nextImage" title="Next image"><svg class="i"><use href="#i-chevron-right"/></svg></button>
         </div>
         <div class="modal-acts">
           <select id="preview-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>

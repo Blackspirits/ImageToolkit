@@ -63,14 +63,6 @@
   "scanning": {
     "message": "Aranıyor..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ görsel",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "İşleniyor"
   },
@@ -347,9 +339,6 @@
   "settingZipDefault": {
     "message": "ZIP varsayılan"
   },
-  "newImagesDetected": {
-    "message": "yeni resim bulundu"
-  },
   "rescan": {
     "message": "Yenile"
   },
@@ -450,7 +439,13 @@
     "message": "Yalnızca Orijinal formatta indirirken geçerlidir"
   },
   "settingSubfolderNote": {
-    "message": "'Kayıt konumunu sor' devre dışı bırakıldığında en iyi çalışır"
+    "message": "'$OPTION$' kapalıyken en iyi çalışır",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Sola döndür"
@@ -553,5 +548,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Bazı görseller atlandı: bu sayfada çok fazla görsel veya çok büyük gömülü görseller var."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP çok büyük olur (en fazla $SIZE$). Daha az görsel seçin veya ZIP olmadan indirin.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Kenar başına en fazla $MAX$ px.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Otomatik (tarayıcı)"
+  },
+  "qualityLabel": {
+    "message": "Kalite"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ yeni görsel bulundu",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ yeni görsel bulundu",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ görsel",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ görsel",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Izgara"
+  },
+  "layoutCompact": {
+    "message": "Sıkı ızgara"
+  },
+  "layoutList": {
+    "message": "Liste"
+  },
+  "clearSource": {
+    "message": "Görseli kaldır"
+  },
+  "close": {
+    "message": "Kapat"
+  },
+  "previousImage": {
+    "message": "Önceki görsel"
+  },
+  "nextImage": {
+    "message": "Sonraki görsel"
+  },
+  "downloadZip": {
+    "message": "ZIP olarak indir"
   }
 }

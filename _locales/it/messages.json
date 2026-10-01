@@ -63,14 +63,6 @@
   "scanning": {
     "message": "Ricerca..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ immagini",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Elaborazione"
   },
@@ -347,9 +339,6 @@
   "settingZipDefault": {
     "message": "ZIP predefinito"
   },
-  "newImagesDetected": {
-    "message": "nuove immagini trovate"
-  },
   "rescan": {
     "message": "Aggiorna"
   },
@@ -450,7 +439,13 @@
     "message": "Si applica solo al download in formato Originale"
   },
   "settingSubfolderNote": {
-    "message": "Funziona meglio con 'Chiedi posizione' disattivato"
+    "message": "Funziona meglio con «$OPTION$» disattivato",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Ruota a sinistra"
@@ -553,5 +548,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Alcune immagini sono state escluse: questa pagina ha troppe immagini o immagini incorporate molto grandi."
+  },
+  "errorZipTooLarge": {
+    "message": "Lo ZIP sarebbe troppo grande (max $SIZE$). Seleziona meno immagini o scaricale senza ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Massimo $MAX$ px per lato.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatico (browser)"
+  },
+  "qualityLabel": {
+    "message": "Qualità"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nuova immagine trovata",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ nuove immagini trovate",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ immagine",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ immagini",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Griglia"
+  },
+  "layoutCompact": {
+    "message": "Griglia compatta"
+  },
+  "layoutList": {
+    "message": "Elenco"
+  },
+  "clearSource": {
+    "message": "Rimuovi immagine"
+  },
+  "close": {
+    "message": "Chiudi"
+  },
+  "previousImage": {
+    "message": "Immagine precedente"
+  },
+  "nextImage": {
+    "message": "Immagine successiva"
+  },
+  "downloadZip": {
+    "message": "Scarica come ZIP"
   }
 }

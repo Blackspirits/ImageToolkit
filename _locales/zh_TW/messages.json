@@ -62,14 +62,6 @@
   "scanning": {
     "message": "掃描中..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ 張圖片",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "處理中"
   },
@@ -346,9 +338,6 @@
   "settingZipDefault": {
     "message": "預設ZIP"
   },
-  "newImagesDetected": {
-    "message": "發現新圖片"
-  },
   "rescan": {
     "message": "重新整理"
   },
@@ -449,7 +438,13 @@
     "message": "僅在以原始格式下載時生效"
   },
   "settingSubfolderNote": {
-    "message": "關閉「詢問儲存位置」時效果最佳"
+    "message": "關閉「$OPTION$」時效果最佳",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "向左旋轉"
@@ -552,5 +547,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "已省略部分圖片：此頁面圖片過多或包含超大的內嵌圖片。"
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP 檔案過大（上限 $SIZE$）。請少選一些圖片，或不使用 ZIP 下載。",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "每邊最大 $MAX$ 像素。",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "自動（瀏覽器）"
+  },
+  "qualityLabel": {
+    "message": "品質"
+  },
+  "newImagesOne": {
+    "message": "新增 $COUNT$ 張圖片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "新增 $COUNT$ 張圖片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ 張圖片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ 張圖片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "格狀"
+  },
+  "layoutCompact": {
+    "message": "緊湊格狀"
+  },
+  "layoutList": {
+    "message": "清單"
+  },
+  "clearSource": {
+    "message": "移除圖片"
+  },
+  "close": {
+    "message": "關閉"
+  },
+  "previousImage": {
+    "message": "上一張"
+  },
+  "nextImage": {
+    "message": "下一張"
+  },
+  "downloadZip": {
+    "message": "以 ZIP 下載"
   }
 }

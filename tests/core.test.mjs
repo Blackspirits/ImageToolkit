@@ -180,3 +180,45 @@ test('stageSize keeps the image proportions, even for extreme panoramas', () => 
   assert.ok(Math.abs(tall.width / tall.height - 1 / 3) < 0.01);
   assert.ok(tall.height <= 700);
 });
+
+test('message budget: base64 of the largest image fits one message; fitsInMessage marks the boundary', () => {
+  const MiB = 1024 * 1024;
+  assert.ok(core.MAX_MESSAGE_CHARS < 64 * MiB);
+  // An image at the per-image cap still fits one 64 MiB message once base64-encoded.
+  assert.ok(4 * Math.ceil(core.MAX_IMAGE_BYTES / 3) + 1024 < 64 * MiB);
+  // Largest blob whose data URL stays within MAX_MESSAGE_CHARS (≈ 36 MiB).
+  const limit = Math.floor((core.MAX_MESSAGE_CHARS - 128) / 4) * 3;
+  assert.ok(core.fitsInMessage(limit));
+  assert.ok(!core.fitsInMessage(limit + 3));
+  assert.ok(!core.fitsInMessage(48 * MiB), 'the old 48 MiB threshold would overflow a message');
+  assert.ok(core.SCAN_MAX_ITEM_CHARS <= core.SCAN_MAX_TOTAL_CHARS && core.SCAN_MAX_TOTAL_CHARS <= core.MAX_MESSAGE_CHARS);
+});
+
+test('sanitizeInstructions rejects sizes it cannot honour instead of dropping them', () => {
+  assert.deepEqual(core.sanitizeInstructions({ format: 'jpg', width: '800', quality: 0.7 }), { format: 'jpeg', width: 800, quality: 0.7 });
+  assert.deepEqual(core.sanitizeInstructions({ width: '', height: null }), { format: 'png' });
+  assert.throws(() => core.sanitizeInstructions({ width: 20000 }), /too large/);
+  assert.throws(() => core.sanitizeInstructions({ cropWidth: 20000, cropHeight: 500 }), /too large/);
+  assert.throws(() => core.sanitizeInstructions({ resizeWidth: 0 }), /Invalid/);
+  assert.throws(() => core.sanitizeInstructions({ height: 'abc' }), /Invalid/);
+  assert.equal(core.sanitizeInstructions({ width: core.MAX_SIDE }).width, core.MAX_SIDE);
+  // Unknown fields and formats never get through.
+  assert.deepEqual(core.sanitizeInstructions({ format: 'exe', evil: 1 }), { format: 'png' });
+});
+
+test('inline SVG size comes from the rendering or absolute attributes, never the viewBox', () => {
+  assert.deepEqual(core.svgPixelSize({ renderedWidth: 24, renderedHeight: 24, width: '960', height: '960' }), { width: 24, height: 24 });
+  assert.deepEqual(core.svgPixelSize({ width: '48px', height: '32' }), { width: 48, height: 32 });
+  assert.equal(core.svgPixelSize({ width: '100%', height: '1em' }), null);
+  assert.equal(core.svgPixelSize({}), null);
+  assert.equal(core.svgLength(' 12.5px '), 12.5);
+  assert.equal(core.svgLength('2em'), 0);
+});
+
+test('parseSizeFromHeaders reads the full size of a ranged answer, not the slice', () => {
+  const h = (o) => new Map(Object.entries(o));
+  assert.equal(core.parseSizeFromHeaders(h({ 'content-length': '1', 'content-range': 'bytes 0-0/12345' })), 12345);
+  assert.equal(core.parseSizeFromHeaders(h({ 'content-length': '1', 'content-range': 'bytes 0-0/*' })), 0);
+  assert.equal(core.parseSizeFromHeaders(h({ 'content-length': '2048' })), 2048);
+  assert.equal(core.parseSizeFromHeaders(h({})), 0);
+});

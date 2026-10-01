@@ -40,7 +40,9 @@ Right-click any image and save it as **PNG**, **JPG**, **WebP** or **AVIF**. Tra
 **Original** keeps the exact source bytes — GIF animation, SVG vectors and JPEG quality are preserved, and the file extension comes from the real content type, even when the URL has none.
 
 ### 🖼️ Image Grid
-Browse every image on the current page in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape** or **domain**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a light or dark checkerboard. In the side panel, the grid follows the active tab and page loads automatically.
+Browse every image on the current page in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape** or **domain**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a light or dark checkerboard. Inline SVG icons are listed at the size the page shows them, with the page's colours. In the side panel, the grid follows the active tab and page loads automatically.
+
+While the panel is open, new images are announced as they appear: `<img>`, `<picture>` sources, inline SVG and inline-style backgrounds. Images added only through stylesheet classes show up on the next refresh. Images inside frames (`<iframe>`) and `blob:` URLs are not listed.
 
 ### ⌨️ Keyboard & Selection
 - Shift-click selects a range, Ctrl/⌘-click toggles a single image
@@ -131,7 +133,7 @@ ImageToolkit/
 - **Least trust between contexts** — the service worker only accepts privileged messages from extension pages; content scripts can report captures and new images, nothing else
 - **Real formats** — output names follow the format actually produced, and "Original" keeps the source bytes
 - **Clipboard where there is focus** — the panel and editor write to the clipboard directly; context-menu copies are written from the page you right-clicked
-- **Bounded work** — image size, canvas area, probe counts and probe downloads are capped
+- **Bounded work** — image size, canvas area, the scan's message size, probe requests and bytes, preview downloads and ZIP size are all capped, per item and in total
 - **No frameworks** — plain JS/CSS, system fonts, one SVG icon sprite
 
 ---

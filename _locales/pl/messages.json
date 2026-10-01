@@ -63,14 +63,6 @@
   "scanning": {
     "message": "Szukanie..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ obrazów",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Przetwarzanie"
   },
@@ -347,9 +339,6 @@
   "settingZipDefault": {
     "message": "ZIP domyślnie"
   },
-  "newImagesDetected": {
-    "message": "nowych obrazów znaleziono"
-  },
   "rescan": {
     "message": "Odśwież"
   },
@@ -450,7 +439,13 @@
     "message": "Dotyczy tylko pobierania w formacie Oryginalnym"
   },
   "settingSubfolderNote": {
-    "message": "Działa najlepiej z wyłączonym 'Pytaj o lokalizację'"
+    "message": "Działa najlepiej z wyłączonym „$OPTION$”",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Obróć w lewo"
@@ -553,5 +548,92 @@
         "example": "40.00 MB"
       }
     }
+  },
+  "scanTruncated": {
+    "message": "Pominięto część obrazów: ta strona ma zbyt wiele obrazów lub bardzo duże obrazy osadzone."
+  },
+  "errorZipTooLarge": {
+    "message": "Plik ZIP byłby za duży (maks. $SIZE$). Zaznacz mniej obrazów lub pobierz je bez ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Maksymalnie $MAX$ px na bok.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatycznie (przeglądarka)"
+  },
+  "qualityLabel": {
+    "message": "Jakość"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nowy obraz",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "Nowe obrazy: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ obraz",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "Obrazy: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Siatka"
+  },
+  "layoutCompact": {
+    "message": "Kompaktowa siatka"
+  },
+  "layoutList": {
+    "message": "Lista"
+  },
+  "clearSource": {
+    "message": "Usuń obraz"
+  },
+  "close": {
+    "message": "Zamknij"
+  },
+  "previousImage": {
+    "message": "Poprzedni obraz"
+  },
+  "nextImage": {
+    "message": "Następny obraz"
+  },
+  "downloadZip": {
+    "message": "Pobierz jako ZIP"
   }
 }

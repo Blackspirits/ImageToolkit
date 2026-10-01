@@ -10,7 +10,7 @@
   if (window.__imagetoolkitScanner) return;
   window.__imagetoolkitScanner = true;
 
-  const { isAllowedImageSrc, parseSrcset, extractBgUrls } = globalThis.ITK;
+  const { isAllowedImageSrc, parseSrcset, extractBgUrls, svgPixelSize, SCAN_MAX_ITEM_CHARS, SCAN_MAX_TOTAL_CHARS, SCAN_MAX_ITEMS } = globalThis.ITK;
 
   const BG_TAGS = 'div,section,article,aside,header,footer,main,nav,figure,span,a,li,td,th,button,body';
   const LAZY_ATTRS = ['data-src', 'data-lazy-src', 'data-original', 'data-srcset', 'data-lazy-srcset'];
@@ -20,9 +20,9 @@
     if (sender.id !== chrome.runtime.id) return false;
 
     if (message.action === 'getImages') {
-      const images = collectImages();
+      const { images, truncated } = collectImages();
       known = new Set(images.map((img) => keyOf(img.src)));
-      sendResponse(images);
+      sendResponse({ images, truncated });
       startObserver();
       return false;
     }
@@ -35,11 +35,41 @@
     return false;
   });
 
+  // ---------- Inline SVG ----------
+  // Copy of an inline <svg> as a standalone file: the page's colours baked in (icons paint
+  // with currentColor or CSS fills, which fall back to black outside the page) and the size
+  // the page renders it at. The viewBox is only a coordinate system: a 24 px icon commonly
+  // has viewBox="0 -960 960 960". Hidden SVGs without an absolute size (sprites) are skipped.
+  function svgToDataUrl(node) {
+    const rect = node.getBoundingClientRect();
+    const size = svgPixelSize({
+      renderedWidth: rect.width, renderedHeight: rect.height,
+      width: node.getAttribute('width'), height: node.getAttribute('height'),
+    });
+    if (!size) return null;
+    const clone = node.cloneNode(true);
+    const cs = getComputedStyle(node);
+    clone.style.color = cs.color;
+    if (!node.hasAttribute('fill') && cs.fill) clone.setAttribute('fill', cs.fill);
+    if (!node.hasAttribute('stroke') && cs.stroke && cs.stroke !== 'none') clone.setAttribute('stroke', cs.stroke);
+    clone.setAttribute('width', String(size.width));
+    clone.setAttribute('height', String(size.height));
+    const markup = new XMLSerializer().serializeToString(clone);
+    if (markup.length <= 50) return null; // trivial SVGs
+    // Base64 grows by a third; a copy that cannot fit one scan item is not worth encoding.
+    if (markup.length * 4 / 3 > SCAN_MAX_ITEM_CHARS) return { tooLarge: true };
+    return { dataUrl: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(markup))), ...size };
+  }
+
   // ---------- Collection ----------
+  // Everything travels back as one message, so the payload is bounded: one inline image
+  // may take SCAN_MAX_ITEM_CHARS and all entries together SCAN_MAX_TOTAL_CHARS.
   function collectImages() {
     const seen = new Set();
     const results = [];
     const shadowRoots = [];
+    let totalChars = 0;
+    let truncated = false;
 
     // File sizes the page already downloaded (no extra requests).
     const sizeMap = new Map();
@@ -50,21 +80,33 @@
       }
     } catch { /* Performance API not available */ }
 
-    function addImage(rawSrc, width, height, alt) {
+    // False once the budget is spent, so callers can stop early.
+    function fits(src, alt) {
+      if (results.length >= SCAN_MAX_ITEMS) { truncated = true; return false; }
+      const cost = src.length + alt.length;
+      if (src.length > SCAN_MAX_ITEM_CHARS || totalChars + cost > SCAN_MAX_TOTAL_CHARS) { truncated = true; return false; }
+      totalChars += cost;
+      return true;
+    }
+
+    function addImage(rawSrc, width, height, rawAlt) {
       if (!rawSrc) return;
       let src = String(rawSrc).trim();
+      const alt = String(rawAlt || '').slice(0, 300);
       if (src.startsWith('data:')) {
         if (!src.startsWith('data:image/') || src.length < 100) return; // skip non-images and tracking pixels
         const key = 'data:' + src.length + ':' + src.slice(-64);
         if (seen.has(key)) return;
         seen.add(key);
-        results.push({ src, width: width || 0, height: height || 0, alt: alt || '', fileSize: Math.round((src.length - src.indexOf(',') - 1) * 0.75) });
+        if (!fits(src, alt)) return;
+        results.push({ src, width: width || 0, height: height || 0, alt, fileSize: Math.round((src.length - src.indexOf(',') - 1) * 0.75) });
         return;
       }
       try { src = new URL(src, document.baseURI).href; } catch { return; }
       if (!isAllowedImageSrc(src) || seen.has(src)) return;
       seen.add(src);
-      results.push({ src, width: width || 0, height: height || 0, alt: alt || '', fileSize: sizeMap.get(src) || 0 });
+      if (!fits(src, alt)) return;
+      results.push({ src, width: width || 0, height: height || 0, alt, fileSize: sizeMap.get(src) || 0 });
     }
 
     function addImgElement(node) {
@@ -85,25 +127,11 @@
     }
 
     function addSvgElement(node) {
+      if (truncated) return;
       try {
-        // Icons usually paint with currentColor or a CSS fill; outside the page both fall back
-        // to black. Bake the colours the page actually uses into the copy.
-        const clone = node.cloneNode(true);
-        const cs = getComputedStyle(node);
-        clone.style.color = cs.color;
-        if (!node.hasAttribute('fill') && cs.fill) clone.setAttribute('fill', cs.fill);
-        if (!node.hasAttribute('stroke') && cs.stroke && cs.stroke !== 'none') clone.setAttribute('stroke', cs.stroke);
-        const markup = new XMLSerializer().serializeToString(clone);
-        if (markup.length <= 50) return; // skip trivial SVGs
-        const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(markup)));
-        let w = parseInt(node.getAttribute('width'), 10) || 0;
-        let h = parseInt(node.getAttribute('height'), 10) || 0;
-        const viewBox = node.getAttribute('viewBox');
-        if ((!w || !h) && viewBox) {
-          const parts = viewBox.split(/[\s,]+/).map(Number);
-          if (parts.length === 4) { w = parts[2]; h = parts[3]; }
-        }
-        addImage(dataUrl, Math.round(w), Math.round(h), '');
+        const svg = svgToDataUrl(node);
+        if (svg?.tooLarge) { truncated = true; return; }
+        if (svg) addImage(svg.dataUrl, svg.width, svg.height, node.getAttribute('aria-label') || '');
       } catch {}
     }
 
@@ -167,7 +195,7 @@
       if (/\.(jpe?g|png|gif|svg|webp|avif)(\?|#|$)/i.test(a.href)) addImage(a.href, 0, 0, '');
     });
 
-    return results;
+    return { images: results, truncated };
   }
 
   // ---------- Live observer (lazy load / infinite scroll) ----------
@@ -186,13 +214,46 @@
     try { return new URL(src, document.baseURI).href; } catch { return ''; }
   }
 
-  function countNew(img) {
-    const src = img.currentSrc || img.src || '';
+  function countSrc(src) {
+    src = String(src || '').trim();
     if (src.startsWith('data:') && (!src.startsWith('data:image/') || src.length < 100)) return 0; // as in collectImages
     const key = keyOf(src);
     if (!key || known.has(key) || (!key.startsWith('data:') && !isAllowedImageSrc(key))) return 0;
     known.add(key);
     return 1;
+  }
+
+  const countNew = (img) => countSrc(img.currentSrc || img.src);
+  const countSrcset = (srcset) => parseSrcset(srcset).reduce((n, url) => n + countSrc(url), 0);
+  const countInlineBackground = (el) => extractBgUrls(el.style?.backgroundImage).reduce((n, url) => n + countSrc(url), 0);
+
+  function countSvg(svg) {
+    if (svg.namespaceURI !== 'http://www.w3.org/2000/svg' || svg.parentElement?.closest('svg')) return 0;
+    try {
+      const copy = svgToDataUrl(svg);
+      return copy?.dataUrl ? countSrc(copy.dataUrl) : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  // What the live observer recognises without forcing style recalculation: <img>,
+  // <picture><source srcset>, top-level inline <svg> and inline-style backgrounds. Images
+  // that only appear through stylesheet classes are picked up by the next rescan.
+  const OBSERVED = 'img,picture>source[srcset],svg,[style*="url("]';
+  const MAX_NODES_PER_BATCH = 400;
+
+  function countAdded(node) {
+    let found = 0;
+    const nodes = node.matches?.(OBSERVED) ? [node] : [];
+    if (node.querySelectorAll) nodes.push(...[...node.querySelectorAll(OBSERVED)].slice(0, MAX_NODES_PER_BATCH));
+    for (const el of nodes) {
+      if (el.tagName === 'IMG') found += countNew(el);
+      else if (el.tagName === 'SOURCE') found += countSrcset(el.srcset);
+      else if (el.tagName.toLowerCase() === 'svg') found += countSvg(el);
+      if (el.style?.backgroundImage) found += countInlineBackground(el);
+    }
+    return found;
   }
 
   function startObserver() {
@@ -205,12 +266,11 @@
       for (const m of mutations) {
         if (m.type === 'attributes') {
           if (m.target?.tagName === 'IMG') found += countNew(m.target);
+          else if (m.target?.tagName === 'SOURCE' && m.target.parentElement?.tagName === 'PICTURE') found += countSrcset(m.target.srcset);
           continue;
         }
         for (const added of m.addedNodes) {
-          if (added.nodeType !== 1) continue;
-          if (added.tagName === 'IMG') found += countNew(added);
-          else added.querySelectorAll?.('img').forEach((img) => { found += countNew(img); });
+          if (added.nodeType === 1) found += countAdded(added);
         }
       }
       if (!found) return;
