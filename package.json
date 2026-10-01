@@ -1,6 +1,6 @@
 {
   "name": "imagetoolkit",
-  "version": "2.3.5",
+  "version": "2.4.0",
   "private": true,
   "description": "Browser extension to save, convert, resize, capture and inspect images locally.",
   "license": "MIT",

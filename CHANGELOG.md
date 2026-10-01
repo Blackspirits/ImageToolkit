@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
-## [Unreleased]
+## [2.4.0] - 2026-10-01
 
 ### Added
+- **Accessible controls**: segmented choices (format, theme) are proper radio groups with a name, one Tab stop and arrow keys; the image grid is a single Tab stop with arrow-key navigation inside it (card actions stay available in the preview); icon buttons are labelled in every language.
+- The live "new images" notice also recognises inline SVG, `<picture>` sources and inline-style backgrounds added after the scan.
 - **Transparency background switch** in the image grid (automatic, light or dark), so dark icons stay visible on the dark theme and light ones on the light theme.
 - **New logo**: a continuous image frame that opens into an export arrow, on the brand gradient tile. Vector sources, usage rules and a light/dark wordmark live in `docs/brand`, with three cuts (Master, Compact for 32/48 px, Micro for 16 px), a 128 px store icon with the Web Store's 16 px padding, and `npm run build:icons` to re-render the PNG set.
 - **Redesigned interface** for the popup, side panel and editor: new design system (light/dark/auto), segmented tabs, collapsible filters, image cards with hover actions, floating selection bar, skeleton loading, toasts and an SVG icon set. System fonts only, no network.
@@ -28,6 +30,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
 
 ### Fixed
+- Inline SVG icons are listed at the size the page renders them (or their absolute width/height), not at their viewBox: a 24 px icon with `viewBox="0 -960 960 960"` was shown as 960×960, sorted above real photos and counted as "large". Hidden sprite sheets are no longer listed.
+- Resize sizes over 16384 px are refused with an error (in the panel and in the service worker) instead of being dropped, which saved the original image and reported success.
+- Editor: after typing an output size, changing the crop (or unlocking a fixed preset) kept stale numbers and saved a different size; the typed side is now kept, the other follows the crop, and the file is exactly the size shown, never stretched.
+- Area capture no longer falls back to the whole screenshot when cropping fails; it reports the error. Selections are validated.
+- Transparency in a small area of a large image (a few pixels) is detected, so the Format Advisor no longer recommends JPG for it.
+- Size probing reads the full size of ranged (206) answers instead of the 1-byte slice.
+- Format Advisor: a new source hides the previous figures and cancels the previous analysis immediately.
+- Bounded resources: one scan's message (8 MiB per inline image, 24 MiB in total), size probes (2 MiB per image, 8 MiB per batch), preview/dimension downloads (40 images, 48 MiB per scan, reset on every scan) and ZIPs (256 MiB, checked before and during the batch, kept as bytes rather than base64). Downloads larger than ~36 MiB use a blob URL released when Chrome finishes instead of a base64 message.
+- Non-text contrast (WCAG 1.4.11): fields, outlined buttons, chips, switches when off and the selected segment reach 3:1 in both themes; `npm run check:contrast` now checks these pairs and that the controls use them.
+- Upgrades remove the editor hand-off image that 2.3.5 could leave in `chrome.storage.local`.
+- Plurals ("1 image", "1 new image found"), the "Automatic (browser)" language option, the subfolder note naming the real "Ask save location" option, and the editor's "Quality" label are translated in all 18 languages; pt-PT and pt-BR use sentence case and "ex.:".
 - Inline SVG icons keep the colours the page paints them with (currentColor and CSS fills) instead of turning black.
 - The "new images" banner counts only images the panel has not listed yet, instead of every re-render on the page.
 - Editor: the crop size and the output size use the same rounding, so they no longer differ by one pixel; with the ratio locked, typing one crop side fills in the other.
