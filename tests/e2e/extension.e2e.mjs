@@ -105,6 +105,7 @@ const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html', 'mi
 
 let server, base, ctx, sw, id, ui;
 const hits = new Map(); // GET requests per path, to check that work is not repeated
+const fetchHits = new Map(); // the same, without <img> loads (grid thumbnails): extension fetches only
 let hugeBytesSent = 0;   // bytes the "huge" endpoint managed to push before the client hung up
 const traffic = { nolenBytes: 0, nolenGets: 0, hotBytes: 0, hotGets: 0 };
 
@@ -127,6 +128,7 @@ before(async () => {
     const url = new URL(req.url, 'http://x');
     const name = decodeURIComponent(url.pathname.slice(1));
     if (req.method === 'GET') hits.set(name, (hits.get(name) || 0) + 1);
+    if (req.method === 'GET' && req.headers['sec-fetch-dest'] !== 'image') fetchHits.set(name, (fetchHits.get(name) || 0) + 1);
 
     // Endless chunked body without Content-Length: the client must stop reading at its cap.
     if (name === 'huge') {
@@ -706,11 +708,12 @@ test('ZIP refuses an oversized selection before and during the batch, with no do
   }, base);
   await ui.evaluate(() => batchDownload(true));
   assert.match(await ui.textContent('#toasts'), /ZIP/);
-  // Known sizes already over the limit: refused without processing anything.
-  const processed = hits.get('photo.png') || 0;
+  // Known sizes already over the limit: refused without processing anything. Grid thumbnails
+  // of the same URLs may still be loading, so only the extension's own fetches count.
+  const processed = fetchHits.get('photo.png') || 0;
   await ui.evaluate(() => { document.getElementById('toasts').replaceChildren(); state.images.forEach((i) => { i.fileSize = 1000; }); return batchDownload(true); });
   assert.match(await ui.textContent('#toasts'), /ZIP/);
-  assert.equal(hits.get('photo.png') || 0, processed);
+  assert.equal(fetchHits.get('photo.png') || 0, processed);
   assert.equal(await countDownloadsAll(), before);
   await ui.evaluate(() => { LIMITS.zipBytes = 256 * 1024 * 1024; state.selected.clear(); setImages([]); });
 });
