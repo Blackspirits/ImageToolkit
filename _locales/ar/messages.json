@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "احفظ وحوّل وغيّر حجم وانسخ الصور من صفحات الويب. معالجة محلية 100%، بلا تتبّع."
   },
-  "cmdQuickSave": {
-    "message": "حفظ سريع بالتنسيق الافتراضي"
-  },
   "menuParent": {
     "message": "حفظ الصورة بصيغة..."
   },
@@ -64,14 +61,6 @@
   },
   "scanning": {
     "message": "جاري البحث..."
-  },
-  "imagesFound": {
-    "message": "$COUNT$ صور",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
   },
   "processing": {
     "message": "جاري المعالجة"
@@ -160,9 +149,6 @@
   "errorCopyFailed": {
     "message": "فشل النسخ"
   },
-  "errorOnSaving": {
-    "message": "خطأ في حفظ الصورة"
-  },
   "tabImages": {
     "message": "الصور"
   },
@@ -186,9 +172,6 @@
   },
   "originalFormat": {
     "message": "الأصلي"
-  },
-  "resize": {
-    "message": "تغيير الحجم"
   },
   "settingOpenSidePanel": {
     "message": "فتح كلوحة جانبية"
@@ -222,6 +205,15 @@
   },
   "titleHideDupes": {
     "message": "إخفاء المكررة"
+  },
+  "titleTransparency": {
+    "message": "خلفية الشفافية: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "تبديل التخطيط"
@@ -268,12 +260,6 @@
   "outputSize": {
     "message": "الحجم النهائي"
   },
-  "presets": {
-    "message": "إعدادات مسبقة"
-  },
-  "presetFree": {
-    "message": "حر"
-  },
   "applyDimensions": {
     "message": "تطبيق"
   },
@@ -294,9 +280,6 @@
   },
   "openCropTool": {
     "message": "فتح أداة القص"
-  },
-  "lockRatio": {
-    "message": "قفل النسبة"
   },
   "titleCapture": {
     "message": "التقاط منطقة"
@@ -354,9 +337,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP افتراضياً"
-  },
-  "newImagesDetected": {
-    "message": "صور جديدة تم العثور عليها"
   },
   "rescan": {
     "message": "تحديث"
@@ -458,19 +438,13 @@
     "message": "ينطبق فقط عند التنزيل بالتنسيق الأصلي"
   },
   "settingSubfolderNote": {
-    "message": "يعمل بشكل أفضل مع تعطيل 'طلب موقع الحفظ'"
-  },
-  "pTransform": {
-    "message": "تحويل"
-  },
-  "pRotate": {
-    "message": "تدوير"
-  },
-  "pHorizontal": {
-    "message": "أفقي"
-  },
-  "pVertical": {
-    "message": "عمودي"
+    "message": "يعمل بشكل أفضل عند تعطيل '$OPTION$'",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "تدوير لليسار"
@@ -495,5 +469,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "يتطلب Google Lens عنوان URL لصورة بعيدة"
+  },
+  "cmdCaptureArea": {
+    "message": "التقاط منطقة من الصفحة",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "التقاط الجزء المرئي من الصفحة",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "لا يمكن للإضافات الوصول إلى هذه الصفحة (صفحات المتصفح، سوق Chrome الإلكتروني).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "فشل الالتقاط",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "نسخ الصورة",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "نسخ الروابط",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "تم نسخ $COUNT$ رابط",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "أو اضغط Ctrl+V للصق صورة",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "إلغاء التحديد",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "تم حفظ $DONE$ من $TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "عوامل التصفية",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "إعادة ضبط عوامل التصفية",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "مرّر الصفحة لتحميل المزيد من الصور، أو جرّب علامة تبويب أخرى.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "الصورة كبيرة جدًا (الحد الأقصى $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "تم استبعاد بعض الصور: تحتوي هذه الصفحة على عدد كبير جدًا من الصور أو صور مضمنة كبيرة جدًا."
+  },
+  "errorZipTooLarge": {
+    "message": "سيكون ملف ZIP كبيرًا جدًا (الحد الأقصى $SIZE$). حدد صورًا أقل أو نزّلها دون ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "الحد الأقصى $MAX$ بكسل لكل جانب.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "تلقائي (المتصفح)"
+  },
+  "qualityLabel": {
+    "message": "الجودة"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ صورة جديدة",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "صور جديدة: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ صورة",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "الصور: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "شبكة"
+  },
+  "layoutCompact": {
+    "message": "شبكة مضغوطة"
+  },
+  "layoutList": {
+    "message": "قائمة"
+  },
+  "clearSource": {
+    "message": "إزالة الصورة"
+  },
+  "close": {
+    "message": "إغلاق"
+  },
+  "previousImage": {
+    "message": "الصورة السابقة"
+  },
+  "nextImage": {
+    "message": "الصورة التالية"
+  },
+  "downloadZip": {
+    "message": "تنزيل كملف ZIP"
   }
 }

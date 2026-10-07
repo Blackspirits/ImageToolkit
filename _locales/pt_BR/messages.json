@@ -11,10 +11,6 @@
     "message": "Salve, converta (PNG/JPG/WebP/AVIF), redimensione e copie imagens. 100% local, sem rastreamento.",
     "description": "Extension description for the store"
   },
-  "cmdQuickSave": {
-    "message": "Salvar rápido no formato padrão",
-    "description": "Keyboard shortcut description"
-  },
   "menuParent": {
     "message": "Salvar imagem como..."
   },
@@ -69,14 +65,6 @@
   "scanning": {
     "message": "Procurando..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ imagens",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "filterAll": {
     "message": "Todos os tipos"
   },
@@ -97,9 +85,6 @@
   },
   "originalFormat": {
     "message": "Original"
-  },
-  "resize": {
-    "message": "Redimensionar"
   },
   "processing": {
     "message": "Processando"
@@ -123,7 +108,7 @@
     "message": "Comportamento de Redimensionamento"
   },
   "settingCrop": {
-    "message": "Recorte Central"
+    "message": "Recorte central"
   },
   "settingFit": {
     "message": "Ajustar (Letterbox)"
@@ -188,9 +173,6 @@
   "errorCopyFailed": {
     "message": "Falha ao copiar"
   },
-  "errorOnSaving": {
-    "message": "Erro ao salvar imagem"
-  },
   "settingOpenSidePanel": {
     "message": "Abrir como painel lateral"
   },
@@ -223,6 +205,15 @@
   },
   "titleHideDupes": {
     "message": "Esconder duplicadas"
+  },
+  "titleTransparency": {
+    "message": "Fundo das transparências: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "Alternar layout"
@@ -269,12 +260,6 @@
   "outputSize": {
     "message": "Tamanho Final"
   },
-  "presets": {
-    "message": "Predefinições"
-  },
-  "presetFree": {
-    "message": "Livre"
-  },
   "applyDimensions": {
     "message": "Aplicar"
   },
@@ -295,9 +280,6 @@
   },
   "openCropTool": {
     "message": "Abrir ferramenta de corte"
-  },
-  "lockRatio": {
-    "message": "Manter proporção"
   },
   "titleCapture": {
     "message": "Capturar área"
@@ -324,13 +306,13 @@
     "message": "Atraso na captura"
   },
   "downloadOptions": {
-    "message": "Opções de Download"
+    "message": "Opções de download"
   },
   "settingSubfolder": {
     "message": "Subpasta"
   },
   "settingSubfolderHint": {
-    "message": "ex: imagens/"
+    "message": "ex.: imagens/"
   },
   "settingFilename": {
     "message": "Nome do arquivo"
@@ -355,9 +337,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP por padrão"
-  },
-  "newImagesDetected": {
-    "message": "novas imagens encontradas"
   },
   "rescan": {
     "message": "Atualizar"
@@ -459,19 +438,13 @@
     "message": "Aplica-se apenas ao baixar no formato Original"
   },
   "settingSubfolderNote": {
-    "message": "Funciona melhor com 'Pedir localização' desativado"
-  },
-  "pTransform": {
-    "message": "Transformar"
-  },
-  "pRotate": {
-    "message": "Girar"
-  },
-  "pHorizontal": {
-    "message": "Horizontal"
-  },
-  "pVertical": {
-    "message": "Vertical"
+    "message": "Funciona melhor com \"$OPTION$\" desativado",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Girar para a esquerda"
@@ -496,5 +469,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "O Google Lens precisa de um URL de imagem remoto"
+  },
+  "cmdCaptureArea": {
+    "message": "Capturar uma área da página",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Capturar a parte visível",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Extensões não podem acessar esta página (páginas do navegador, Chrome Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Falha na captura",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Copiar imagem",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "Copiar URLs",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ URLs copiadas",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "ou pressione Ctrl+V para colar uma imagem",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Limpar seleção",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$DONE$ de $TOTAL$ salvas",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filtros",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Redefinir filtros",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Role a página para carregar mais imagens ou tente outra aba.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Imagem muito grande (máx. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "Algumas imagens ficaram de fora: esta página tem imagens demais ou imagens incorporadas muito grandes."
+  },
+  "errorZipTooLarge": {
+    "message": "O ZIP ficaria grande demais (máx. $SIZE$). Selecione menos imagens ou baixe-as sem ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Máximo de $MAX$ px por lado.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automático (navegador)"
+  },
+  "qualityLabel": {
+    "message": "Qualidade"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nova imagem encontrada",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ novas imagens encontradas",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ imagem",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ imagens",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Grade"
+  },
+  "layoutCompact": {
+    "message": "Grade compacta"
+  },
+  "layoutList": {
+    "message": "Lista"
+  },
+  "clearSource": {
+    "message": "Remover imagem"
+  },
+  "close": {
+    "message": "Fechar"
+  },
+  "previousImage": {
+    "message": "Imagem anterior"
+  },
+  "nextImage": {
+    "message": "Próxima imagem"
+  },
+  "downloadZip": {
+    "message": "Baixar como ZIP"
   }
 }
