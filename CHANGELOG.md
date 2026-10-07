@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
 
 ### Fixed
+- Context menu "Save as…", "Copy", "Resize" and "Open in editor" work again on images a page builds with its own script (`blob:http(s)://…` URLs), which this release had started refusing with "Unsupported image URL". Only blob URLs of web pages are accepted, only for the image the user acts on; the scanner and every other scheme (`file:`, `javascript:`, `chrome:`, `chrome-extension:`…) stay excluded.
 - Inline SVG icons are listed at the size the page renders them (or their absolute width/height), not at their viewBox: a 24 px icon with `viewBox="0 -960 960 960"` was shown as 960×960, sorted above real photos and counted as "large". Hidden sprite sheets are no longer listed.
 - Resize sizes over 16384 px are refused with an error (in the panel and in the service worker) instead of being dropped, which saved the original image and reported success.
 - Editor: after typing an output size, changing the crop (or unlocking a fixed preset) kept stale numbers and saved a different size; the typed side is now kept, the other follows the crop, and the file is exactly the size shown, never stretched.

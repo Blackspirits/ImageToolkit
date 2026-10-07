@@ -51,6 +51,17 @@ test('isAllowedImageSrc only accepts fetchable schemes', () => {
   assert.ok(!core.isAllowedImageSrc('data:text/html,<b>x</b>'));
 });
 
+test('isFetchableImageSrc adds only blob: URLs of web pages', () => {
+  assert.ok(core.isFetchableImageSrc('https://a.test/x.png'));
+  assert.ok(core.isFetchableImageSrc('data:image/png;base64,AAAA'));
+  assert.ok(core.isFetchableImageSrc('blob:https://a.test/0b1c'));
+  assert.ok(core.isFetchableImageSrc('BLOB:http://127.0.0.1:8080/0b1c'));
+  for (const bad of ['blob:chrome-extension://abc/0b1c', 'blob:null/0b1c', 'blob:file:///x', 'file:///etc/passwd',
+    'javascript:alert(1)//x.png', 'chrome://settings', 'chrome-extension://abc/x.png', 'data:text/html,<b>x</b>', '', ' blob:https://a.test/x']) {
+    assert.ok(!core.isFetchableImageSrc(bad), bad);
+  }
+});
+
 test('parseSrcset keeps commas inside URLs', () => {
   assert.deepEqual(core.parseSrcset('a.jpg 1x, b.jpg 2x'), ['a.jpg', 'b.jpg']);
   assert.deepEqual(core.parseSrcset('a.jpg 1x,b.jpg 2x'), ['a.jpg', 'b.jpg']);

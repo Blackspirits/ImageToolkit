@@ -89,9 +89,19 @@ const FIXTURES = {
     + 'add(9,0);for(let i=1;i<=5;i++)add(6,i);</script></body>'),
   'holey.png': pngWithHole(2000, { x: 1000, y: 700, size: 4 }),
   'page.html': Buffer.from('<!doctype html><title>t</title><body><img src="anim.gif"><img src="logo.svg"><img src="photo.png" srcset="photo.png 1x, wide.png 2x"><div style="position:fixed;inset:0 auto auto 0;width:50px;height:50px;background:url(wide.png)"></div><a href="javascript:alert(1)//x.png">x</a></body>'),
+  // Right-click targets: every way a page can show an image the context menu may be used on.
+  // The page also builds a data: and a blob: copy of a PNG with its own script.
+  'mislabel.png': png(16, 16, [0, 160, 0, 255]),
+  'typed': png(12, 12, [160, 0, 160, 255]),
+  'menu.html': Buffer.from('<!doctype html><title>m</title><body>'
+    + '<img id="png" src="wide.png"><img id="jpg" src="photo.jpg"><img id="typed" src="typed"><img id="octet" src="noext">'
+    + '<img id="mislabel" src="mislabel.png"><img id="cookie" src="auth/cookie.png"><img id="referer" src="ref/guard.png">'
+    + '<img id="data"><img id="blob"><script>fetch("wide.png").then((r) => r.blob()).then((b) => {'
+    + 'document.getElementById("blob").src = URL.createObjectURL(b);'
+    + 'const fr = new FileReader(); fr.onload = () => { document.getElementById("data").src = fr.result; }; fr.readAsDataURL(b); });</script></body>'),
 };
-const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', html: 'text/html' };
-const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html' };
+const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', html: 'text/html' };
+const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html', 'mislabel.png': 'text/plain', typed: 'image/png' };
 
 let server, base, ctx, sw, id, ui;
 const hits = new Map(); // GET requests per path, to check that work is not repeated
@@ -168,6 +178,20 @@ before(async () => {
       if (req.method === 'GET' && !req.headers.range) { traffic.hotGets++; traffic.hotBytes += body.length; }
       res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store', 'content-length': body.length });
       res.end(body);
+      return;
+    }
+    // Needs the session cookie, like an image behind a login.
+    if (name === 'auth/cookie.png') {
+      if (!/(?:^|;\s*)itk=1(?:;|$)/.test(req.headers.cookie || '')) { res.writeHead(401); res.end(); return; }
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      res.end(FIXTURES['wide.png']);
+      return;
+    }
+    // Classic anti-hotlink rule: only requests whose Referer is this site get the image.
+    if (name === 'ref/guard.png') {
+      if (!(req.headers.referer || '').startsWith(base)) { res.writeHead(403); res.end(); return; }
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      res.end(FIXTURES['wide.png']);
       return;
     }
     // Refuses <img> loads (like hotlink protection) but serves fetches.
@@ -260,8 +284,10 @@ test('oversized outputs are rejected with a clear error', async () => {
 });
 
 test('unsupported URL schemes are refused', async () => {
-  const r = await send({ action: 'fetchAsDataUrl', imageUrl: 'file:///etc/hostname' });
-  assert.match(r.error, /Unsupported/);
+  for (const imageUrl of ['file:///etc/hostname', `blob:chrome-extension://${id}/x`, 'javascript:alert(1)//x.png', 'chrome://version']) {
+    const r = await send({ action: 'fetchAsDataUrl', imageUrl });
+    assert.match(r.error, /Unsupported/, imageUrl);
+  }
 });
 
 test('scanner collects images, skips unsafe schemes and survives re-injection', async () => {
@@ -883,4 +909,109 @@ test('transparency in a small area of a large image is detected', async () => {
   assert.equal(holey.hasAlpha, true);
   const opaque = await send({ action: 'analyzeFormats', imageUrl: base + 'photo.png' });
   assert.equal(opaque.hasAlpha, false);
+});
+
+// ---------- Context menu: "Save as PNG/JPG/WebP/AVIF" ----------
+// The native menu cannot be clicked headless, so the real onClicked listener is dispatched
+// with the info Chrome would pass (srcUrl = the image's current URL). Save As is turned off
+// because a file dialog cannot be answered headless.
+let menuPage;
+async function openMenuPage() {
+  if (menuPage) return menuPage;
+  FIXTURES['photo.jpg'] = Buffer.from((await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 48; c.height = 32;
+    const g = c.getContext('2d'); g.fillStyle = '#0080ff'; g.fillRect(0, 0, 48, 32);
+    return c.toDataURL('image/jpeg', 0.9);
+  })).split(',')[1], 'base64');
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  menuPage = await ctx.newPage();
+  await menuPage.goto(base + 'menu.html');
+  await menuPage.waitForFunction(() => [...document.images].every((im) => im.complete && im.naturalWidth > 0));
+  return menuPage;
+}
+
+const MAGIC = {
+  jpeg: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  png: (b) => b.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47])),
+  webp: (b) => b.toString('latin1', 0, 4) === 'RIFF' && b.toString('latin1', 8, 12) === 'WEBP',
+};
+
+async function saveFromMenu(imageId, fmt) {
+  const page = await openMenuPage();
+  const srcUrl = await page.evaluate((i) => document.getElementById(i).currentSrc, imageId);
+  return sw.evaluate(async ({ srcUrl, fmt, pageUrl }) => {
+    const { settings = {} } = await chrome.storage.sync.get('settings');
+    await chrome.storage.sync.set({ settings: { ...settings, saveAs: false, showNotification: true } });
+    const create = chrome.notifications.create;
+    const notes = [];
+    chrome.notifications.create = (...args) => { notes.push(args.find((a) => a && typeof a === 'object').message); };
+    const known = new Set((await chrome.downloads.search({})).map((d) => d.id));
+    try {
+      const [tab] = await chrome.tabs.query({ url: pageUrl });
+      chrome.contextMenus.onClicked.dispatch({ menuItemId: `save-as-${fmt}`, srcUrl, mediaType: 'image', pageUrl, frameId: 0 }, tab);
+      for (let i = 0; i < 100; i++) {
+        const d = (await chrome.downloads.search({})).find((x) => !known.has(x.id) && x.state !== 'in_progress');
+        if (d) return { srcUrl, notes, download: { path: d.filename, state: d.state, error: d.error || null, mime: d.mime } };
+        if (notes.length && !notes.some((n) => /→/.test(n))) return { srcUrl, notes, download: null };
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return { srcUrl, notes, download: null };
+    } finally {
+      chrome.notifications.create = create;
+      await chrome.storage.sync.set({ settings });
+    }
+  }, { srcUrl, fmt, pageUrl: base + 'menu.html' });
+}
+
+async function assertSaved(imageId, fmt, produced) {
+  const r = await saveFromMenu(imageId, fmt);
+  assert.ok(r.download, `${imageId} → ${fmt}: no download (${r.srcUrl.slice(0, 40)}): ${JSON.stringify(r.notes)}`);
+  assert.equal(r.download.state, 'complete', JSON.stringify(r.download));
+  const bytes = fs.readFileSync(r.download.path);
+  assert.ok(MAGIC[produced](bytes), `${imageId} → ${fmt}: the file is not ${produced}`);
+  assert.ok(!r.notes.some((n) => /fail/i.test(n)), JSON.stringify(r.notes));
+}
+
+test('context menu: HTTP PNG → JPG', () => assertSaved('png', 'jpg', 'jpeg'));
+test('context menu: PNG → PNG', () => assertSaved('png', 'png', 'png'));
+test('context menu: PNG → WebP', () => assertSaved('png', 'webp', 'webp'));
+test('context menu: PNG → AVIF falls back to a real WebP file', () => assertSaved('png', 'avif', 'webp'));
+test('context menu: JPEG → PNG', () => assertSaved('jpg', 'png', 'png'));
+test('context menu: data:image/png → JPG', () => assertSaved('data', 'jpg', 'jpeg'));
+test('context menu: an image that needs the site cookie → JPG', () => assertSaved('cookie', 'jpg', 'jpeg'));
+test('context menu: URL without extension but an image MIME → JPG', () => assertSaved('typed', 'jpg', 'jpeg'));
+test('context menu: PNG served as application/octet-stream → JPG', () => assertSaved('octet', 'jpg', 'jpeg'));
+test('context menu: PNG served as text/plain → JPG', () => assertSaved('mislabel', 'jpg', 'jpeg'));
+
+// Images a page builds with its own script have a blob: URL; the extension can read it.
+test('context menu: a blob: image created by the page → JPG', async () => {
+  const page = await openMenuPage();
+  assert.match(await page.evaluate(() => document.getElementById('blob').currentSrc), /^blob:http:\/\//);
+  await assertSaved('blob', 'jpg', 'jpeg');
+});
+
+test('blob: images also copy and open in the editor (same fetch path)', async () => {
+  const page = await openMenuPage();
+  const blobUrl = await page.evaluate(() => document.getElementById('blob').currentSrc);
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base.slice(0, -1) });
+  await page.bringToFront();
+  const copied = await sw.evaluate(async ({ url, image }) => {
+    const [tab] = await chrome.tabs.query({ url });
+    return copyImageUrl(image, tab.id, { showNotification: false });
+  }, { url: base + 'menu.html', image: blobUrl });
+  assert.deepEqual(copied, { success: true });
+  const types = await page.evaluate(async () => (await navigator.clipboard.read()).flatMap((item) => item.types));
+  assert.ok(types.includes('image/png'), `clipboard has ${types}`);
+  // The editor loads its source through this message.
+  const r = await send({ action: 'fetchAsDataUrl', imageUrl: blobUrl });
+  assert.match(r.dataUrl || '', /^data:image\/png;base64,/, JSON.stringify(r).slice(0, 120));
+  assert.equal(r.size, FIXTURES['wide.png'].length);
+});
+
+// Known limitation (same in 2.3.5): the extension's request carries no Referer, so a
+// Referer-based hotlink rule refuses it. It must fail clearly and save nothing.
+test('context menu: a Referer-protected image fails with a clear error and no file', async () => {
+  const r = await saveFromMenu('referer', 'jpg');
+  assert.equal(r.download, null);
+  assert.ok(r.notes.some((n) => /HTTP 403/.test(n)), JSON.stringify(r.notes));
 });

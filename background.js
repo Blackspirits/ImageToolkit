@@ -331,7 +331,7 @@ function tooLarge(bytes) {
 }
 
 async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES } = {}) {
-  if (!ITK.isAllowedImageSrc(String(imageUrl || ''))) throw new Error('Unsupported image URL');
+  if (!ITK.isFetchableImageSrc(String(imageUrl || ''))) throw new Error('Unsupported image URL');
 
   let response;
   try {
