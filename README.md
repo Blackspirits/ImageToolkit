@@ -30,6 +30,9 @@ The mark is a single continuous image frame that opens into an export arrow: fin
 <p align="center">
   <img src="docs/screenshots/editor-dark.png" alt="Editor with crop presets" width="860">
 </p>
+<p align="center">
+  <img src="docs/screenshots/editor-annotate-dark.png" alt="Editor: annotate with boxes, arrows, text, highlight, blur and pixelate" width="860">
+</p>
 
 ## ✨ Features
 
@@ -40,9 +43,11 @@ Right-click any image and save it as **PNG**, **JPG**, **WebP** or **AVIF**. Tra
 **Original** keeps the exact source bytes — GIF animation, SVG vectors and JPEG quality are preserved, and the file extension comes from the real content type, even when the URL has none.
 
 ### 🖼️ Image Grid
-Browse every image on the current page in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape** or **domain**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a light or dark checkerboard. Inline SVG icons are listed at the size the page shows them, with the page's colours. In the side panel, the grid follows the active tab and page loads automatically.
+Browse every image on the current page — **iframes included** — or on **every tab of the window at once**, in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape**, **domain** or **tab**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a light or dark checkerboard. Inline SVG icons are listed at the size the page shows them, with the page's colours. In the side panel, the grid follows the active tab and page loads automatically.
 
-While the panel is open, new images are announced as they appear: `<img>`, `<picture>` sources, inline SVG and inline-style backgrounds. Images added only through stylesheet classes show up on the next refresh. Images inside frames (`<iframe>`) and `blob:` URLs are not listed.
+While the panel is open, new images are announced as they appear: `<img>`, `<picture>` sources, inline SVG and inline-style backgrounds. Images added only through stylesheet classes show up on the next refresh. `blob:` URLs are not listed.
+
+**Load all images** scrolls the page (or the scrolling area of app-like pages) to the end, wakes lazy images, waits for infinite scroll and collects images at every step — so feeds that unload what leaves the screen lose nothing — then puts you back where you were. It has a progress bar and can be stopped.
 
 ### ⌨️ Keyboard & Selection
 - Shift-click selects a range, Ctrl/⌘-click toggles a single image
@@ -51,10 +56,12 @@ While the panel is open, new images are announced as they appear: `<img>`, `<pic
 - In the preview, ← / → browse through the filtered images
 
 ### 📸 Screen Capture
-Capture an **area** (with an optional 3/5/10-second delay) or the **visible page**, straight into the editor. Start it from the panel, by right-clicking the toolbar icon, or with the `Alt+Shift+S` shortcut (customizable in `chrome://extensions/shortcuts`).
+Capture an **area** (with an optional 3/5/10-second delay), the **visible page** or the **full page**, straight into the editor. Full-page captures are stitched locally: fixed headers and chat buttons appear once instead of on every slice, the scrollbar is left out, very tall pages are scaled before being cut, progress shows on the toolbar icon and **Esc** cancels. Start it from the panel, by right-clicking the toolbar icon, or with the `Alt+Shift+S` shortcut (customizable in `chrome://extensions/shortcuts`).
 
 ### ✂️ Editor
 Crop, rotate and flip with presets for aspect ratios, common resolutions, social networks (Instagram, Facebook, YouTube, X, LinkedIn, Pinterest), TMDB and TheTVDB. Pick the output size and format, then **Save** (`Ctrl/⌘ + S`) or **Copy** (`Ctrl/⌘ + C`) the result.
+
+**Annotate** to redact or mark up before saving: **pixelate** (true block averages, nothing readable survives) and **blur** sensitive data, draw **boxes**, **arrows**, **text** (outlined so it reads on any background) and **highlights**, in six colours and three thicknesses, with undo/redo and one-key shortcuts (P B R A T H). Marks scale with the image, and nothing changes until you press Apply.
 
 ### 📋 Copy & Paste
 Copy any image to the clipboard as PNG, ready to paste into Slack, Discord, Figma or any app. Paste an image (or an image URL) anywhere in the panel with **Ctrl/⌘ + V** to open it in Tools, or drag one in from a web page.
@@ -66,12 +73,12 @@ Load an image in Tools and see how large it would be as PNG, JPG and WebP next t
 URL-based heuristic deduplication identifies likely duplicates (same path, different cache-busting params). Duplicates are flagged and can be hidden with one click. It is URL-based, not pixel-based.
 
 ### 📦 Batch Download
-Select images and download them one by one (never one Save As dialog per image) or as a single ZIP, in their original format or converted. Copy all selected URLs in one click.
+Select images and download them one by one (never one Save As dialog per image) or as a single ZIP, in their original format or converted. ZIP entries follow your file name settings and never collide. Copy all selected URLs in one click.
 
 ### ⚙️ Settings
 - Default quality and format, resize behavior (center crop or fit/letterbox)
 - Save As dialog, notifications, side panel or popup
-- Subfolder, file name pattern (original, system or custom prefix), convert-on-download, ZIP by default
+- Subfolder, file name pattern (original, system, custom prefix or a **template** with `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}` and `/` for folders, with a live preview), convert-on-download, ZIP by default
 - Editor presets: show or hide each group (aspect ratios, social media, common sizes, TMDB, TheTVDB) and add up to 24 sizes of your own
 - Optional, off-by-default Google Lens search
 - Auto / light / dark theme and 18 interface languages

@@ -36,15 +36,17 @@ These requests only read data; they are never used to send data anywhere. **Goog
 
 ## Page Content
 
-- **Image scanner** — when you open the panel, a script is injected into the current tab to list its images (URLs, dimensions, alt text). The list stays in the panel; it is never stored or sent anywhere. Very large inline images are left out of the list to keep it fast. While the panel is in use, the script watches the page for newly loaded images and stops after a few idle minutes.
-- **Screen capture** — only when you start a capture (button, toolbar menu, or keyboard shortcut), the visible part of the tab is captured and opened in the editor. Captures are not saved unless you save them.
+- **Image scanner** — when you open the panel, a script is injected into the current tab (and its frames) to list its images (URLs, dimensions, alt text). Only if you choose **All tabs**, the same happens in every web page open in that window; browser pages and sleeping tabs are skipped. The list stays in the panel; it is never stored or sent anywhere. Very large inline images are left out of the list to keep it fast. While the panel is in use, the script watches the page for newly loaded images and stops after a few idle minutes.
+- **Load all images** — only when you click it, the page is scrolled to its end to load lazy images and then scrolled back; nothing is clicked or submitted.
+- **Screen capture** — only when you start a capture (button, toolbar menu, or keyboard shortcut), the visible part of the tab is captured and opened in the editor. A full-page capture scrolls the page, captures it screen by screen and stitches the result locally, temporarily hiding fixed elements, then restores the page. Captures are not saved unless you save them.
+- **Annotations** made in the editor are drawn locally on your copy of the image.
 
 ## Local Storage
 
 - **Settings** are stored with `chrome.storage.sync`, which Chrome may synchronize across your signed-in browsers. ImageToolkit can only read and write its own settings and has no access to your Google Account or other sync data.
 - **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it (and reload it). It is deleted as soon as that editor window closes. As a safety net, any entry older than 30 minutes is never shown again and is removed on the next cleanup pass (at startup or when another image is opened in the editor).
 - **Large downloads** — files too large to pass between the extension's pages in one message (big ZIPs or edited images) are kept briefly in the same IndexedDB store and removed as soon as the download has started.
-- **Interface state** (grid layout, transparency background, whether filters are open) is kept in the extension's local storage.
+- **Interface state** (grid layout, transparency background, whether filters are open, scan scope) is kept in the extension's local storage.
 - **Upgrades** — version 2.3.5 and earlier passed images to the editor through `chrome.storage.local`; any image left there is deleted when the extension updates or starts.
 
 ## Clipboard

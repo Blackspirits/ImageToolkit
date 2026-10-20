@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [2.5.0] - 2026-10-20
+
+### Added
+- **Full-page capture**: scrolls and captures the page screen by screen and stitches it locally. Fixed and sticky elements (headers, chat buttons, cookie bars) appear once instead of on every slice, the scrollbar is left out, animations pause, lazy images load, and the page returns to where you were. Progress shows on the toolbar icon and Esc cancels. Very tall pages are scaled down (to 50%) before being cut. From the panel, the toolbar-icon menu or an assignable shortcut.
+- **Annotate in the editor**: pixelate (true block averages) and blur sensitive data, draw boxes, arrows, outlined text and highlights; six colours, three thicknesses, undo/redo and one-key shortcuts. Works on the image as rotated/flipped and changes nothing until Apply.
+- **Images inside iframes**, same-origin and cross-origin, are listed with the page's own (and outlined there when selected).
+- **All tabs at once**: a scan scope that lists the images of every web page in the window, without duplicates, with a Tab filter. Each image keeps its page's site and title.
+- **Load all images**: scrolls the page (or the scrolling area of app-like pages) to the end, wakes lazy images, waits for infinite scroll and collects images at every step, so feeds that unload old items lose nothing. Progress bar and Stop.
+- **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
+
+### Changed
+- Every screen capture respects Chrome's rate limit (two per second) and retries once when refused.
+- Large images handed to the editor travel as Blobs and are shown through `blob:` URLs, without a base64 copy.
+
 ## [2.4.1] - 2026-10-20
 
 ### Added
