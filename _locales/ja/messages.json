@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "テンプレート"
+  },
+  "settingTemplate": {
+    "message": "ファイル名テンプレート"
+  },
+  "settingTemplateHint": {
+    "message": "変数をクリックすると挿入されます。/ でフォルダーを作成できます。"
+  },
+  "templatePreview": {
+    "message": "例: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "元のファイル名"
+  },
+  "tokSite": {
+    "message": "ページのサイト"
+  },
+  "tokDomain": {
+    "message": "画像のサーバー"
+  },
+  "tokTitle": {
+    "message": "ページのタイトル"
+  },
+  "tokIndex": {
+    "message": "一括処理での番号（001, 002…）"
+  },
+  "tokWidth": {
+    "message": "幅（ピクセル）"
+  },
+  "tokHeight": {
+    "message": "高さ（ピクセル）"
+  },
+  "tokFormat": {
+    "message": "形式（jpg, webp…）"
+  },
+  "tokDate": {
+    "message": "今日の日付（2026-10-20）"
+  },
+  "tokTime": {
+    "message": "現在の時刻（14-05-07）"
   }
 }

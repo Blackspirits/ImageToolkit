@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "قالب"
+  },
+  "settingTemplate": {
+    "message": "قالب الاسم"
+  },
+  "settingTemplateHint": {
+    "message": "انقر على متغيّر لإدراجه. استخدم / لإنشاء مجلدات."
+  },
+  "templatePreview": {
+    "message": "مثال: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "اسم الملف الأصلي"
+  },
+  "tokSite": {
+    "message": "موقع الصفحة"
+  },
+  "tokDomain": {
+    "message": "خادم الصورة"
+  },
+  "tokTitle": {
+    "message": "عنوان الصفحة"
+  },
+  "tokIndex": {
+    "message": "الرقم ضمن الدفعة (001، 002…)"
+  },
+  "tokWidth": {
+    "message": "العرض بالبكسل"
+  },
+  "tokHeight": {
+    "message": "الارتفاع بالبكسل"
+  },
+  "tokFormat": {
+    "message": "الصيغة (jpg، webp…)"
+  },
+  "tokDate": {
+    "message": "تاريخ اليوم (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "الوقت الحالي (14-05-07)"
   }
 }

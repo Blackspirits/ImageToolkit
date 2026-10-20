@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "範本"
+  },
+  "settingTemplate": {
+    "message": "檔名範本"
+  },
+  "settingTemplateHint": {
+    "message": "點擊變數即可插入。使用 / 建立資料夾。"
+  },
+  "templatePreview": {
+    "message": "範例：$NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "原始檔名"
+  },
+  "tokSite": {
+    "message": "頁面所在網站"
+  },
+  "tokDomain": {
+    "message": "圖片所在伺服器"
+  },
+  "tokTitle": {
+    "message": "頁面標題"
+  },
+  "tokIndex": {
+    "message": "批次序號（001、002…）"
+  },
+  "tokWidth": {
+    "message": "寬度（像素）"
+  },
+  "tokHeight": {
+    "message": "高度（像素）"
+  },
+  "tokFormat": {
+    "message": "格式（jpg、webp…）"
+  },
+  "tokDate": {
+    "message": "今天的日期（2026-10-20）"
+  },
+  "tokTime": {
+    "message": "目前時間（14-05-07）"
   }
 }

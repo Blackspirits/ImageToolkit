@@ -679,5 +679,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Шаблон"
+  },
+  "settingTemplate": {
+    "message": "Шаблон назви"
+  },
+  "settingTemplateHint": {
+    "message": "Натисніть змінну, щоб вставити її. Символ / створює теки."
+  },
+  "templatePreview": {
+    "message": "Приклад: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Початкова назва файлу"
+  },
+  "tokSite": {
+    "message": "Сайт сторінки"
+  },
+  "tokDomain": {
+    "message": "Сервер зображення"
+  },
+  "tokTitle": {
+    "message": "Заголовок сторінки"
+  },
+  "tokIndex": {
+    "message": "Номер у пакеті (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Ширина в пікселях"
+  },
+  "tokHeight": {
+    "message": "Висота в пікселях"
+  },
+  "tokFormat": {
+    "message": "Формат (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Сьогоднішня дата (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Поточний час (14-05-07)"
   }
 }

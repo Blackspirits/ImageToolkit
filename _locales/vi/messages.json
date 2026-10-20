@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Mẫu"
+  },
+  "settingTemplate": {
+    "message": "Mẫu tên tệp"
+  },
+  "settingTemplateHint": {
+    "message": "Nhấp vào biến để chèn. Dùng / để tạo thư mục."
+  },
+  "templatePreview": {
+    "message": "Ví dụ: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Tên tệp gốc"
+  },
+  "tokSite": {
+    "message": "Trang web của trang"
+  },
+  "tokDomain": {
+    "message": "Máy chủ của ảnh"
+  },
+  "tokTitle": {
+    "message": "Tiêu đề trang"
+  },
+  "tokIndex": {
+    "message": "Số thứ tự trong lô (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Chiều rộng (pixel)"
+  },
+  "tokHeight": {
+    "message": "Chiều cao (pixel)"
+  },
+  "tokFormat": {
+    "message": "Định dạng (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Ngày hôm nay (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Giờ hiện tại (14-05-07)"
   }
 }

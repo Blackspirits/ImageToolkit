@@ -29,6 +29,7 @@ const DEFAULT_SETTINGS = {
   subfolder: '',
   filenamePattern: 'original',
   filenamePrefix: 'img_',
+  filenameTemplate: '{name}',
   convertOnDl: 'none',
   zipDefault: false,
 };
@@ -133,6 +134,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (id === 'google-lens') { openGoogleLens(imageUrl, tab); return; }
   if (id === 'copy-to-clipboard') { await copyImageUrl(imageUrl, tab?.id, settings); return; }
 
+  // The page the image was saved from, for {site} and {title} in filename templates.
+  let pageHost = '';
+  try { pageHost = new URL(tab?.url || '').hostname; } catch {}
   let instructions = {};
   if (id.startsWith('save-as-')) {
     const fmt = id.replace('save-as-', '');
@@ -141,7 +145,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     instructions = { format: 'jpeg', resizeWidth: 1080 };
   }
 
-  await processAndSave(imageUrl, instructions, settings);
+  await processAndSave(imageUrl, { ...instructions, pageHost, pageTitle: tab?.title || '' }, settings);
 });
 
 chrome.commands.onCommand.addListener(async (command, tab) => {
@@ -440,7 +444,7 @@ async function processAndSave(imageUrl, rawInstructions, settings) {
     if (!settings) settings = await loadSettingsAndLocale();
     if (instructions.quality == null) instructions.quality = settings.defaultQuality / 100;
     if (!instructions.jpgBackground) instructions.jpgBackground = settings.jpgBackground || '#FFFFFF';
-    for (const key of ['subfolder', 'filenamePattern', 'filenamePrefix']) {
+    for (const key of ['subfolder', 'filenamePattern', 'filenamePrefix', 'filenameTemplate']) {
       if (instructions[key] == null) instructions[key] = settings[key];
     }
 
@@ -448,7 +452,12 @@ async function processAndSave(imageUrl, rawInstructions, settings) {
       ? await fetchOriginal(imageUrl)
       : await processImage(imageUrl, instructions);
     // Name the file after the format actually produced (e.g. AVIF falls back to WebP).
-    const filename = ITK.buildFilename(imageUrl, { ...instructions, format: result.format });
+    const filename = ITK.buildFilename(imageUrl, {
+      ...instructions,
+      format: result.format,
+      knownWidth: result.width || instructions.knownWidth,
+      knownHeight: result.height || instructions.knownHeight,
+    });
 
     // Batch downloads pass saveAs: false so they never open one dialog per image.
     const downloadId = await triggerDownload(result.dataUrl, filename, instructions.saveAs ?? settings.saveAs);

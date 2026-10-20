@@ -21,6 +21,7 @@ const state = {
   tabId: null,
   windowId: null,
   host: '',
+  pageTitle: '',
   images: [],
   filtered: [],
   selected: new Set(),
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   state.tabId = tab?.id ?? null;
   state.windowId = tab?.windowId ?? null;
-  setHost(tab?.url);
+  setHost(tab?.url, tab?.title);
   scan();
 
   chrome.runtime.onMessage.addListener(onRuntimeMessage);
@@ -150,18 +151,19 @@ function watchTabs() {
   chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
     if (state.windowId != null && windowId !== state.windowId) return;
     state.tabId = tabId;
-    chrome.tabs.get(tabId).then((tab) => setHost(tab.url)).catch(() => setHost(''));
+    chrome.tabs.get(tabId).then((tab) => setHost(tab.url, tab.title)).catch(() => setHost(''));
     rescan();
   });
   chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
     if (tabId !== state.tabId) return;
-    if (info.url) setHost(info.url);
-    if (info.status === 'complete') { setHost(tab?.url); rescan(); }
+    if (info.url || info.title) setHost(tab?.url, tab?.title);
+    if (info.status === 'complete') { setHost(tab?.url, tab?.title); rescan(); }
   });
 }
 
-function setHost(url) {
+function setHost(url, title = '') {
   try { state.host = url ? new URL(url).hostname : ''; } catch { state.host = ''; }
+  state.pageTitle = title || '';
   $('scan-host').textContent = state.host ? `· ${state.host}` : '';
 }
 
@@ -772,7 +774,8 @@ document.addEventListener('pointerdown', (e) => { if (openMenu && !openMenu.cont
 // ============================================================
 // Downloads
 // ============================================================
-function buildInstructions(format) {
+// `img` and `index` only feed the file name ({width}, {index}…); they never change the image.
+function buildInstructions(format, img = null, index = 0) {
   const s = state.settings;
   let fmt = format;
   // "Convert on download" only applies when the user asked for the original format.
@@ -780,12 +783,19 @@ function buildInstructions(format) {
   // "Original" keeps the exact bytes; the background picks the extension from the real content type.
   const ins = fmt === 'original' ? { passthrough: true } : { format: fmt === 'jpg' ? 'jpeg' : fmt, quality: s.defaultQuality / 100 };
   ins.silent = true;
+  Object.assign(ins, {
+    pageHost: img?.pageHost || state.host,
+    pageTitle: img?.pageTitle || state.pageTitle,
+    knownWidth: img?.width || 0,
+    knownHeight: img?.height || 0,
+    index,
+  });
   return ins;
 }
 
 async function downloadOne(img, format) {
   try {
-    const r = await call({ action: 'processAndSave', imageUrl: img.src, instructions: buildInstructions(format) });
+    const r = await call({ action: 'processAndSave', imageUrl: img.src, instructions: buildInstructions(format, img) });
     if (r.cancelled) return;
     toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + sizeSummary(r));
   } catch (err) {
@@ -880,13 +890,14 @@ async function batchDownload(zip) {
   buttons.forEach((b) => { b.disabled = true; });
 
   const files = [];
+  const zipNames = new Set();
   let failed = 0;
   let zipBytes = 0;
   let overLimit = false;
   for (let i = 0; i < items.length; i++) {
     count.textContent = `${i + 1}/${items.length}`;
     label.textContent = zip ? t('preparingZip') : t('processing');
-    const ins = buildInstructions(format);
+    const ins = buildInstructions(format, items[i], i + 1);
     // One file per image: never open a Save As dialog or a notification for each one.
     ins.saveAs = false;
     try {
@@ -896,7 +907,7 @@ async function batchDownload(zip) {
         const bytes = new Uint8Array(await (await fetch(r.dataUrl)).arrayBuffer());
         zipBytes += bytes.byteLength;
         if (zipBytes > LIMITS.zipBytes) { overLimit = true; break; }
-        files.push({ name: zipEntryName(items[i].src, r.format, i), bytes });
+        files.push({ name: zipEntryName(items[i], ins, r, i + 1, zipNames), bytes });
       }
     } catch {
       failed++;
@@ -937,13 +948,27 @@ async function batchDownload(zip) {
   setTimeout(() => { progress.hidden = true; updateActionBar(); }, 2200);
 }
 
-function zipEntryName(url, format, i) {
-  let base = 'image';
-  try {
-    base = decodeURIComponent(new URL(url).pathname.split('/').pop() || '').replace(/\.[^.]+$/, '') || 'image';
-  } catch {}
-  base = ITK.sanitizeFilename(base).replace(/\s+/g, '_').slice(0, 40) || 'image';
-  return `${String(i + 1).padStart(3, '0')}_${base}.${ITK.extensionFor(format)}`;
+// Entries follow the same naming settings as single downloads (a template may create folders
+// inside the archive). Other patterns keep the selection order visible with a 001_ prefix.
+// A ZIP cannot hold two entries with one name, so later duplicates are numbered.
+function zipEntryName(img, ins, result, index, used) {
+  const s = state.settings;
+  let name = ITK.buildFilename(img.src, {
+    ...ins,
+    filenamePattern: s.filenamePattern,
+    filenamePrefix: s.filenamePrefix,
+    filenameTemplate: s.filenameTemplate,
+    subfolder: '',
+    format: result.format,
+    knownWidth: result.width || img.width,
+    knownHeight: result.height || img.height,
+  });
+  if (s.filenamePattern !== 'template') name = `${String(index).padStart(3, '0')}_${name}`;
+  const dot = name.lastIndexOf('.');
+  let candidate = name;
+  for (let n = 2; used.has(candidate.toLowerCase()); n++) candidate = `${name.slice(0, dot)} (${n})${name.slice(dot)}`;
+  used.add(candidate.toLowerCase());
+  return candidate;
 }
 
 async function downloadZip(files) {
@@ -1334,6 +1359,7 @@ function initSettings() {
   setSegmented($('setting-default-format'), s.defaultFormat || 'webp');
   onSegmented($('setting-default-format'), (value) => {
     saveSettings({ defaultFormat: value });
+    renderTemplatePreview();
     setSegmented($('convert-format'), value);
   });
 
@@ -1358,9 +1384,15 @@ function initSettings() {
   bind('setting-prefix', 'filenamePrefix', ...asValue('img_'));
   bind('setting-convert-dl', 'convertOnDl', ...asValue('none'));
 
-  const prefixRow = () => { $('custom-prefix-row').hidden = $('setting-filename').value !== 'custom'; };
+  bind('setting-template', 'filenameTemplate', ...asValue('{name}'));
+  initTemplateEditor();
+  const prefixRow = () => {
+    $('custom-prefix-row').hidden = $('setting-filename').value !== 'custom';
+    $('template-row').hidden = $('setting-filename').value !== 'template';
+  };
   prefixRow();
   $('setting-filename').addEventListener('change', prefixRow);
+  $('setting-filename').addEventListener('change', renderTemplatePreview);
   $('setting-resize-behavior').addEventListener('change', () => { $('resize-mode').value = $('setting-resize-behavior').value; });
   $('setting-google-lens').addEventListener('change', () => { state.settings.enableGoogleLens = $('setting-google-lens').checked; renderGrid(false); });
 
@@ -1374,7 +1406,55 @@ function initSettings() {
     populateDomains();
     applyFilters();
     renderCustomPresets();
+    renderTemplateTokens();
+    renderTemplatePreview();
   });
+}
+
+// ---------- Filename template ----------
+// Variables are chips that insert themselves at the cursor; the preview shows the exact
+// name a download would get right now (same code as the real download).
+// Literal t('…') calls so the i18n check can see every key in use.
+const tokenLabel = (token) => ({
+  name: t('tokName'), site: t('tokSite'), domain: t('tokDomain'), title: t('tokTitle'), index: t('tokIndex'),
+  width: t('tokWidth'), height: t('tokHeight'), format: t('tokFormat'), date: t('tokDate'), time: t('tokTime'),
+})[token];
+
+function initTemplateEditor() {
+  renderTemplateTokens();
+  $('setting-template').addEventListener('input', renderTemplatePreview);
+  $('setting-subfolder').addEventListener('input', renderTemplatePreview);
+  renderTemplatePreview();
+}
+
+function renderTemplateTokens() {
+  const input = $('setting-template');
+  $('template-tokens').replaceChildren(...ITK.TEMPLATE_TOKENS.map((token) => el('button', {
+    type: 'button', class: 'token', text: `{${token}}`, title: tokenLabel(token), 'aria-label': `{${token}} · ${tokenLabel(token)}`,
+    onclick: () => {
+      const start = input.selectionStart ?? input.value.length, end = input.selectionEnd ?? start;
+      input.setRangeText(`{${token}}`, start, end, 'end');
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('change'));
+    },
+  })));
+}
+
+function renderTemplatePreview() {
+  const name = ITK.buildFilename('https://images.example.com/photos/sunset.jpg', {
+    format: state.settings.defaultFormat || 'webp',
+    filenamePattern: 'template',
+    filenameTemplate: $('setting-template').value || '{name}',
+    subfolder: $('setting-subfolder').value,
+    pageHost: state.host || 'example.com',
+    pageTitle: state.pageTitle || 'Example page',
+    index: 1,
+    knownWidth: 1920,
+    knownHeight: 1080,
+  });
+  const [before, after] = t('templatePreview', ['\uE000']).split('\uE000');
+  $('template-preview').replaceChildren(before || '', el('b', { text: name }), after || '');
 }
 
 // ---------- Editor presets ----------

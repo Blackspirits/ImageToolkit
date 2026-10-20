@@ -257,3 +257,21 @@ test('editor presets: groups default to on, custom presets are validated and cap
   const many = Array.from({ length: 40 }, (_, i) => ({ name: `P${i}`, w: 10, h: 10 }));
   assert.equal(core.sanitizeCustomPresets(many).length, core.MAX_CUSTOM_PRESETS);
 });
+
+test('filename templates: tokens, cleanup and safe paths', () => {
+  const now = new Date(2026, 9, 20, 9, 5, 7).getTime();
+  const name = (template, extra = {}) => core.buildFilename('https://cdn.example.com/a/photo.jpg', { format: 'webp', filenamePattern: 'template', filenameTemplate: template, ...extra }, now);
+  assert.equal(name('{site}/{date}_{name}_{index}', { pageHost: 'news.test', index: 3 }), 'news.test/2026-10-20_photo_003.webp');
+  assert.equal(name('{name}_{index}'), 'photo.webp'); // empty token: no dangling "_"
+  assert.equal(name('{title} - {width}x{height}', { pageTitle: 'A/B: test?', knownWidth: 800, knownHeight: 600 }), 'A-B test - 800x600.webp');
+  assert.equal(name('{domain}/{time}_{format}'), 'cdn.example.com/09-05-07_webp.webp');
+  assert.equal(name('../../{name}'), 'photo.webp');        // never climbs out of Downloads
+  assert.equal(name('{Name}'), 'photo.webp');              // tokens are case-insensitive
+  assert.equal(name('{typo}'), '{typo}.webp');             // unknown tokens stay visible
+  assert.equal(name(''), 'photo.webp');
+  assert.equal(name('{index}', { subfolder: 'imgs' }), 'imgs/photo.webp');
+  assert.equal(core.buildFilename('data:image/png;base64,AAAA', { format: 'png', filenamePattern: 'template', filenameTemplate: '{domain}{name}', sourceName: 'shot.png' }, now), 'shot.png');
+  const ins = core.sanitizeInstructions({ index: 7, knownWidth: '640', knownHeight: -1, pageTitle: 'x'.repeat(300), filenameTemplate: '{name}' });
+  assert.deepEqual([ins.index, ins.knownWidth, ins.knownHeight, ins.pageTitle.length, ins.filenameTemplate], [7, 640, undefined, 120, '{name}']);
+  assert.equal(ins.width, undefined, 'naming hints never resize');
+});

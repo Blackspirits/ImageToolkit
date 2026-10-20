@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "템플릿"
+  },
+  "settingTemplate": {
+    "message": "이름 템플릿"
+  },
+  "settingTemplateHint": {
+    "message": "변수를 클릭하면 삽입됩니다. /로 폴더를 만들 수 있습니다."
+  },
+  "templatePreview": {
+    "message": "예: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "원래 파일 이름"
+  },
+  "tokSite": {
+    "message": "페이지 사이트"
+  },
+  "tokDomain": {
+    "message": "이미지 서버"
+  },
+  "tokTitle": {
+    "message": "페이지 제목"
+  },
+  "tokIndex": {
+    "message": "일괄 처리 번호(001, 002…)"
+  },
+  "tokWidth": {
+    "message": "너비(픽셀)"
+  },
+  "tokHeight": {
+    "message": "높이(픽셀)"
+  },
+  "tokFormat": {
+    "message": "형식(jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "오늘 날짜(2026-10-20)"
+  },
+  "tokTime": {
+    "message": "현재 시간(14-05-07)"
   }
 }

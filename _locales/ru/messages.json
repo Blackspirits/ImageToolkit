@@ -679,5 +679,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Шаблон"
+  },
+  "settingTemplate": {
+    "message": "Шаблон имени"
+  },
+  "settingTemplateHint": {
+    "message": "Нажмите переменную, чтобы вставить её. Символ / создаёт папки."
+  },
+  "templatePreview": {
+    "message": "Пример: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Исходное имя файла"
+  },
+  "tokSite": {
+    "message": "Сайт страницы"
+  },
+  "tokDomain": {
+    "message": "Сервер изображения"
+  },
+  "tokTitle": {
+    "message": "Заголовок страницы"
+  },
+  "tokIndex": {
+    "message": "Номер в пакете (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Ширина в пикселях"
+  },
+  "tokHeight": {
+    "message": "Высота в пикселях"
+  },
+  "tokFormat": {
+    "message": "Формат (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Сегодняшняя дата (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Текущее время (14-05-07)"
   }
 }

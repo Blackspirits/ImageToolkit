@@ -679,5 +679,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Sjabloon"
+  },
+  "settingTemplate": {
+    "message": "Naamsjabloon"
+  },
+  "settingTemplateHint": {
+    "message": "Klik op een variabele om die in te voegen. Gebruik / voor mappen."
+  },
+  "templatePreview": {
+    "message": "Voorbeeld: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Oorspronkelijke bestandsnaam"
+  },
+  "tokSite": {
+    "message": "Site van de pagina"
+  },
+  "tokDomain": {
+    "message": "Server van de afbeelding"
+  },
+  "tokTitle": {
+    "message": "Paginatitel"
+  },
+  "tokIndex": {
+    "message": "Nummer in de reeks (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Breedte in pixels"
+  },
+  "tokHeight": {
+    "message": "Hoogte in pixels"
+  },
+  "tokFormat": {
+    "message": "Formaat (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Datum van vandaag (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Huidige tijd (14-05-07)"
   }
 }

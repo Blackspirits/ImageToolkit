@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "模板"
+  },
+  "settingTemplate": {
+    "message": "文件名模板"
+  },
+  "settingTemplateHint": {
+    "message": "点击变量即可插入。使用 / 创建文件夹。"
+  },
+  "templatePreview": {
+    "message": "示例：$NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "原始文件名"
+  },
+  "tokSite": {
+    "message": "页面所在网站"
+  },
+  "tokDomain": {
+    "message": "图片所在服务器"
+  },
+  "tokTitle": {
+    "message": "页面标题"
+  },
+  "tokIndex": {
+    "message": "批量序号（001、002…）"
+  },
+  "tokWidth": {
+    "message": "宽度（像素）"
+  },
+  "tokHeight": {
+    "message": "高度（像素）"
+  },
+  "tokFormat": {
+    "message": "格式（jpg、webp…）"
+  },
+  "tokDate": {
+    "message": "今天的日期（2026-10-20）"
+  },
+  "tokTime": {
+    "message": "当前时间（14-05-07）"
   }
 }

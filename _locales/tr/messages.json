@@ -679,5 +679,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Şablon"
+  },
+  "settingTemplate": {
+    "message": "Ad şablonu"
+  },
+  "settingTemplateHint": {
+    "message": "Eklemek için bir değişkene tıklayın. Klasör oluşturmak için / kullanın."
+  },
+  "templatePreview": {
+    "message": "Örnek: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Özgün dosya adı"
+  },
+  "tokSite": {
+    "message": "Sayfanın sitesi"
+  },
+  "tokDomain": {
+    "message": "Görselin sunucusu"
+  },
+  "tokTitle": {
+    "message": "Sayfa başlığı"
+  },
+  "tokIndex": {
+    "message": "Toplu işteki sıra (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Piksel cinsinden genişlik"
+  },
+  "tokHeight": {
+    "message": "Piksel cinsinden yükseklik"
+  },
+  "tokFormat": {
+    "message": "Biçim (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Bugünün tarihi (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Şu anki saat (14-05-07)"
   }
 }

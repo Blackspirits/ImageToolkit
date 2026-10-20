@@ -316,7 +316,16 @@
           </div>
           <div class="row">
             <label for="setting-filename" data-i18n="settingFilename">Filename</label>
-            <div class="row-ctrl"><select id="setting-filename" class="select select-sm"><option value="original" data-i18n="fnOriginal">Original name</option><option value="system" data-i18n="fnSystem">System name</option><option value="custom" data-i18n="fnCustom">Custom prefix</option></select></div>
+            <div class="row-ctrl"><select id="setting-filename" class="select select-sm"><option value="original" data-i18n="fnOriginal">Original name</option><option value="system" data-i18n="fnSystem">System name</option><option value="custom" data-i18n="fnCustom">Custom prefix</option><option value="template" data-i18n="fnTemplate">Template</option></select></div>
+          </div>
+          <div id="template-row" class="row row-template" hidden>
+            <div class="template-head">
+              <label for="setting-template" data-i18n="settingTemplate">Name template</label>
+              <small data-i18n="settingTemplateHint">Click a variable to insert it. Use / to create folders.</small>
+            </div>
+            <input type="text" id="setting-template" class="input template-input" placeholder="{name}" spellcheck="false" autocomplete="off">
+            <div class="token-chips" id="template-tokens" role="group" data-i18n-aria="settingTemplate" aria-label="Name template"></div>
+            <p class="template-preview" id="template-preview" aria-live="polite"></p>
           </div>
           <div id="custom-prefix-row" class="row" hidden>
             <label for="setting-prefix" data-i18n="settingPrefix">Prefix</label>

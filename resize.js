@@ -357,7 +357,8 @@ async function save() {
     const s = editor.settings;
     const filename = ITK.buildFilename(/^https?:/i.test(editor.source) ? editor.source : 'https://local/imagetoolkit', {
       format, cropWidth: width, cropHeight: height,
-      subfolder: s.subfolder, filenamePattern: s.filenamePattern, filenamePrefix: s.filenamePrefix,
+      subfolder: s.subfolder, filenamePattern: s.filenamePattern, filenamePrefix: s.filenamePrefix, filenameTemplate: s.filenameTemplate,
+      knownWidth: width, knownHeight: height,
     });
     const res = await ui.saveBlob(blob, filename, s.saveAs !== false);
     if (res.cancelled) return;

@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Template"
+  },
+  "settingTemplate": {
+    "message": "Name template"
+  },
+  "settingTemplateHint": {
+    "message": "Click a variable to insert it. Use / to create folders."
+  },
+  "templatePreview": {
+    "message": "Example: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Original file name"
+  },
+  "tokSite": {
+    "message": "Site of the page"
+  },
+  "tokDomain": {
+    "message": "Server of the image"
+  },
+  "tokTitle": {
+    "message": "Page title"
+  },
+  "tokIndex": {
+    "message": "Number in the batch (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Width in pixels"
+  },
+  "tokHeight": {
+    "message": "Height in pixels"
+  },
+  "tokFormat": {
+    "message": "Format (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Today's date (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Current time (14-05-07)"
   }
 }

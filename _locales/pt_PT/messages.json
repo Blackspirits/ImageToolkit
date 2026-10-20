@@ -678,5 +678,54 @@
         "example": "24"
       }
     }
+  },
+  "fnTemplate": {
+    "message": "Modelo"
+  },
+  "settingTemplate": {
+    "message": "Modelo do nome"
+  },
+  "settingTemplateHint": {
+    "message": "Clica numa variável para a inserir. Usa / para criar pastas."
+  },
+  "templatePreview": {
+    "message": "Exemplo: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Nome original do ficheiro"
+  },
+  "tokSite": {
+    "message": "Site da página"
+  },
+  "tokDomain": {
+    "message": "Servidor da imagem"
+  },
+  "tokTitle": {
+    "message": "Título da página"
+  },
+  "tokIndex": {
+    "message": "Número no lote (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Largura em píxeis"
+  },
+  "tokHeight": {
+    "message": "Altura em píxeis"
+  },
+  "tokFormat": {
+    "message": "Formato (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Data de hoje (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Hora atual (14-05-07)"
   }
 }

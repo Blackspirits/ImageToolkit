@@ -1144,3 +1144,35 @@ test('editor presets: groups can be hidden and your own sizes added, used and re
   assert.ok(restored);
   assert.equal(await ui.isVisible('#custom-presets-empty'), true);
 });
+
+test('filename template: chips insert variables, preview matches, downloads and ZIP use it', async () => {
+  await freshPanel();
+  await ui.evaluate(() => switchTab('settings'));
+  await ui.selectOption('#setting-filename', 'template');
+  assert.equal(await ui.isVisible('#template-row'), true);
+  await ui.fill('#setting-template', 'shots/');
+  await ui.click('#template-tokens .token:has-text("{name}")');
+  await ui.click('#template-tokens .token:has-text("{index}")');
+  assert.equal(await ui.inputValue('#setting-template'), 'shots/{name}{index}');
+  await ui.fill('#setting-template', 'shots/{name}_{width}x{height}_{index}');
+  await ui.dispatchEvent('#setting-template', 'change');
+  assert.match(await ui.textContent('#template-preview'), /shots\/sunset_1920x1080_001\.\w+/);
+  await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) => settings.filenameTemplate === 'shots/{name}_{width}x{height}_{index}')));
+
+  // A single download: real size of the produced image, no index outside a batch.
+  const single = await send({ action: 'processAndSave', imageUrl: base + 'wide.png', instructions: { format: 'png', saveAs: false, silent: true } });
+  assert.equal(single.filename, 'shots/wide_40x20.png');
+
+  // ZIP entries follow the template and never collide.
+  const names = await ui.evaluate((b) => {
+    state.settings.filenamePattern = 'template';
+    state.settings.filenameTemplate = '{name}';
+    const used = new Set();
+    const img = { src: b + 'wide.png', width: 40, height: 20 };
+    return [1, 2].map((i) => zipEntryName(img, buildInstructions('png', img, i), { format: 'png', width: 40, height: 20 }, i, used));
+  }, base);
+  assert.deepEqual(names, ['wide.png', 'wide (2).png']);
+
+  await ui.selectOption('#setting-filename', 'original');
+  await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) => settings.filenamePattern === 'original')));
+});
