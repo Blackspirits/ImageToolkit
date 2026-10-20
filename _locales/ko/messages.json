@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "이미지를 저장, 변환, 크기 조정, 복사하세요. 100% 로컬, 추적 없음."
   },
-  "cmdQuickSave": {
-    "message": "기본 형식으로 빠른 저장"
-  },
   "menuParent": {
     "message": "이미지 저장..."
   },
@@ -64,14 +61,6 @@
   },
   "scanning": {
     "message": "검색 중..."
-  },
-  "imagesFound": {
-    "message": "$COUNT$개 이미지",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
   },
   "processing": {
     "message": "처리 중"
@@ -160,9 +149,6 @@
   "errorCopyFailed": {
     "message": "복사 실패"
   },
-  "errorOnSaving": {
-    "message": "저장 중 오류"
-  },
   "tabImages": {
     "message": "이미지"
   },
@@ -186,9 +172,6 @@
   },
   "originalFormat": {
     "message": "원본"
-  },
-  "resize": {
-    "message": "크기 조정"
   },
   "settingOpenSidePanel": {
     "message": "사이드 패널로 열기"
@@ -222,6 +205,15 @@
   },
   "titleHideDupes": {
     "message": "중복 숨기기"
+  },
+  "titleTransparency": {
+    "message": "투명 영역 배경: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "레이아웃 전환"
@@ -268,12 +260,6 @@
   "outputSize": {
     "message": "출력 크기"
   },
-  "presets": {
-    "message": "프리셋"
-  },
-  "presetFree": {
-    "message": "자유"
-  },
   "applyDimensions": {
     "message": "적용"
   },
@@ -294,9 +280,6 @@
   },
   "openCropTool": {
     "message": "자르기 도구 열기"
-  },
-  "lockRatio": {
-    "message": "비율 잠금"
   },
   "titleCapture": {
     "message": "영역 캡처"
@@ -354,9 +337,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP 기본값"
-  },
-  "newImagesDetected": {
-    "message": "새 이미지 발견"
   },
   "rescan": {
     "message": "새로고침"
@@ -458,19 +438,13 @@
     "message": "원본 형식으로 다운로드할 때만 적용됩니다"
   },
   "settingSubfolderNote": {
-    "message": "'저장 위치 확인'을 비활성화하면 가장 잘 작동합니다"
-  },
-  "pTransform": {
-    "message": "변환"
-  },
-  "pRotate": {
-    "message": "회전"
-  },
-  "pHorizontal": {
-    "message": "수평"
-  },
-  "pVertical": {
-    "message": "수직"
+    "message": "'$OPTION$'을(를) 끄면 가장 잘 작동합니다",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "왼쪽으로 회전"
@@ -495,5 +469,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens에는 원격 이미지 URL이 필요합니다"
+  },
+  "cmdCaptureArea": {
+    "message": "페이지 영역 캡처",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "보이는 영역 캡처",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "확장 프로그램이 이 페이지에 접근할 수 없습니다(브라우저 페이지, Chrome 웹 스토어).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "캡처 실패",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "이미지 복사",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "URL 복사",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "URL $COUNT$개 복사됨",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "또는 Ctrl+V를 눌러 이미지 붙여넣기",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "선택 해제",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$TOTAL$개 중 $DONE$개 저장됨",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "필터",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "필터 초기화",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "페이지를 스크롤해 이미지를 더 불러오거나 다른 탭을 사용해 보세요.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "이미지가 너무 큽니다(최대 $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "일부 이미지를 제외했습니다. 이 페이지에 이미지가 너무 많거나 매우 큰 내장 이미지가 있습니다."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP이 너무 큽니다(최대 $SIZE$). 이미지를 더 적게 선택하거나 ZIP 없이 다운로드하세요.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "한 변당 최대 $MAX$px입니다.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "자동(브라우저)"
+  },
+  "qualityLabel": {
+    "message": "품질"
+  },
+  "newImagesOne": {
+    "message": "새 이미지 +$COUNT$개",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "새 이미지 +$COUNT$개",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "이미지 $COUNT$개",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "이미지 $COUNT$개",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "그리드"
+  },
+  "layoutCompact": {
+    "message": "컴팩트 그리드"
+  },
+  "layoutList": {
+    "message": "목록"
+  },
+  "clearSource": {
+    "message": "이미지 제거"
+  },
+  "close": {
+    "message": "닫기"
+  },
+  "previousImage": {
+    "message": "이전 이미지"
+  },
+  "nextImage": {
+    "message": "다음 이미지"
+  },
+  "downloadZip": {
+    "message": "ZIP으로 다운로드"
   }
 }

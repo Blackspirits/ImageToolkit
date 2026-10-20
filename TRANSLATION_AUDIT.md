@@ -1,32 +1,32 @@
-# Translation Audit — v2.3.4
+# Translation Audit — Unreleased (after v2.3.5)
 
-Total keys: 159  
-Audit date: 2026-04-26
+Total keys: 162  
+Audit date: 2026-09-29
 
 ## Coverage
 
-All 18 locale packs have 159/159 keys present (0 missing).
+All 18 locale packs have 162/162 keys present (0 missing). `npm run validate` enforces key parity, identical placeholders and `$TOKENS$` in every locale, and fails on keys that are defined but unused or used but undefined.
 
-| Locale | Keys | Identical to EN | Breakdown |
-|--------|------|-----------------|-----------|
-| ar | 159 | 2 | 1 brand name, 1 universal |
-| de | 159 | 24 | 2 universal, 22 legitimate loanwords |
-| en | 159 | — | base locale |
-| es | 159 | 15 | 1 universal, 14 legitimate |
-| fr | 159 | 14 | 2 universal, 12 legitimate |
-| it | 159 | 13 | 1 universal, 12 legitimate |
-| ja | 159 | 4 | 1 universal, 3 legitimate |
-| ko | 159 | 4 | 1 universal, 3 legitimate |
-| nl | 159 | 13 | 2 universal, 11 legitimate |
-| pl | 159 | 9 | 1 universal, 8 legitimate |
-| pt_BR | 159 | 13 | 1 universal, 12 legitimate |
-| pt_PT | 159 | 13 | 1 universal, 12 legitimate |
-| ru | 159 | 5 | 1 universal, 4 legitimate |
-| tr | 159 | 12 | 1 universal, 11 legitimate |
-| uk | 159 | 5 | 1 universal, 4 legitimate |
-| vi | 159 | 8 | 1 universal, 7 legitimate |
-| zh_CN | 159 | 2 | 1 brand name, 1 universal |
-| zh_TW | 159 | 2 | 1 brand name, 1 universal |
+| Locale | Keys | Identical to EN |
+|--------|------|-----------------|
+| ar | 162 | 2 |
+| de | 162 | 23 |
+| en | 162 | — |
+| es | 162 | 13 |
+| fr | 162 | 12 |
+| it | 162 | 13 |
+| ja | 162 | 4 |
+| ko | 162 | 4 |
+| nl | 162 | 14 |
+| pl | 162 | 8 |
+| pt_BR | 162 | 11 |
+| pt_PT | 162 | 11 |
+| ru | 162 | 2 |
+| tr | 162 | 9 |
+| uk | 162 | 2 |
+| vi | 162 | 8 |
+| zh_CN | 162 | 2 |
+| zh_TW | 162 | 2 |
 
 ## Why "identical to EN" ≠ "untranslated"
 
@@ -55,6 +55,7 @@ The following items in `resize.html` are **not** routed through `messages.json`:
 
 ## Changelog
 
+- Unreleased: 162 keys. Added 13 keys for the redesigned UI (capture visible page, copy image/URLs, paste hint, filters, batch result, restricted-page and capture errors, empty-state hint, capture shortcut) in all 18 locales. Translated the theme labels that were still in English in ru, uk and tr, and the automatic theme label in pl. Removed 10 unused keys (`cmdQuickSave`, `presets`, `presetFree`, `resize`, `errorOnSaving`, `lockRatio`, `pTransform`, `pRotate`, `pHorizontal`, `pVertical`).
 - v2.3.4: 159 keys. Added Google Lens setting labels, Google Lens disabled warning, inline data URL warning, and clearer privacy/footer wording for optional external actions.
 - v2.3.4: 155 keys. Documentation updated after patch release. Locale override now also applies to background notifications, capture hints, and context menus.
 - v2.3.4-b4: 154 keys (+39 vs v2.0). Added preset labels (19), size filter labels (11), tooltip hints (2), transform tools (7). Removed 3 dead keys. All strings translated in all 18 locales. FR/DE polish: `imagesFound` rewritten. PT: Poster→Cartaz, Cinema→Cinemagraph. Toast dark-mode fix. Converter copy button removed. Resize sidebar compacted. Rotate/flip tools added.

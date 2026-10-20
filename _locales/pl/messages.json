@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Zapisuj, konwertuj, zmieniaj rozmiar i kopiuj obrazy. 100% lokalnie, bez śledzenia."
   },
-  "cmdQuickSave": {
-    "message": "Szybki zapis w domyślnym formacie"
-  },
   "menuParent": {
     "message": "Zapisz obraz jako..."
   },
@@ -66,14 +63,6 @@
   "scanning": {
     "message": "Szukanie..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ obrazów",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Przetwarzanie"
   },
@@ -111,7 +100,7 @@
     "message": "Motyw"
   },
   "themeAuto": {
-    "message": "Auto (System)"
+    "message": "Automatycznie (systemowy)"
   },
   "themeLight": {
     "message": "Jasny"
@@ -161,9 +150,6 @@
   "errorCopyFailed": {
     "message": "Kopiowanie nie powiodło się"
   },
-  "errorOnSaving": {
-    "message": "Błąd zapisu obrazu"
-  },
   "tabImages": {
     "message": "Obrazy"
   },
@@ -187,9 +173,6 @@
   },
   "originalFormat": {
     "message": "Oryginał"
-  },
-  "resize": {
-    "message": "Zmień rozmiar"
   },
   "settingOpenSidePanel": {
     "message": "Otwórz jako panel boczny"
@@ -223,6 +206,15 @@
   },
   "titleHideDupes": {
     "message": "Ukryj duplikaty"
+  },
+  "titleTransparency": {
+    "message": "Tło przezroczystości: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "Zmień układ"
@@ -269,12 +261,6 @@
   "outputSize": {
     "message": "Rozmiar wyjściowy"
   },
-  "presets": {
-    "message": "Predefiniowane"
-  },
-  "presetFree": {
-    "message": "Dowolny"
-  },
   "applyDimensions": {
     "message": "Zastosuj"
   },
@@ -295,9 +281,6 @@
   },
   "openCropTool": {
     "message": "Otwórz narzędzie przycinania"
-  },
-  "lockRatio": {
-    "message": "Zablokuj proporcje"
   },
   "titleCapture": {
     "message": "Przechwyć obszar"
@@ -355,9 +338,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP domyślnie"
-  },
-  "newImagesDetected": {
-    "message": "nowych obrazów znaleziono"
   },
   "rescan": {
     "message": "Odśwież"
@@ -459,19 +439,13 @@
     "message": "Dotyczy tylko pobierania w formacie Oryginalnym"
   },
   "settingSubfolderNote": {
-    "message": "Działa najlepiej z wyłączonym 'Pytaj o lokalizację'"
-  },
-  "pTransform": {
-    "message": "Przekształć"
-  },
-  "pRotate": {
-    "message": "Obróć"
-  },
-  "pHorizontal": {
-    "message": "Poziomo"
-  },
-  "pVertical": {
-    "message": "Pionowo"
+    "message": "Działa najlepiej z wyłączonym „$OPTION$”",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Obróć w lewo"
@@ -496,5 +470,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens wymaga zdalnego adresu URL obrazu"
+  },
+  "cmdCaptureArea": {
+    "message": "Przechwyć obszar strony",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Przechwyć widoczną część",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Rozszerzenia nie mają dostępu do tej strony (strony przeglądarki, Chrome Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Przechwytywanie nie powiodło się",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Kopiuj obraz",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "Kopiuj adresy URL",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "Skopiowano adresy URL: $COUNT$",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "lub naciśnij Ctrl+V, aby wkleić obraz",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Wyczyść zaznaczenie",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "Zapisano $DONE$ z $TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filtry",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Resetuj filtry",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Przewiń stronę, aby wczytać więcej obrazów, lub spróbuj innej karty.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Obraz jest za duży (maks. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "Pominięto część obrazów: ta strona ma zbyt wiele obrazów lub bardzo duże obrazy osadzone."
+  },
+  "errorZipTooLarge": {
+    "message": "Plik ZIP byłby za duży (maks. $SIZE$). Zaznacz mniej obrazów lub pobierz je bez ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Maksymalnie $MAX$ px na bok.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatycznie (przeglądarka)"
+  },
+  "qualityLabel": {
+    "message": "Jakość"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ nowy obraz",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "Nowe obrazy: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ obraz",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "Obrazy: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Siatka"
+  },
+  "layoutCompact": {
+    "message": "Kompaktowa siatka"
+  },
+  "layoutList": {
+    "message": "Lista"
+  },
+  "clearSource": {
+    "message": "Usuń obraz"
+  },
+  "close": {
+    "message": "Zamknij"
+  },
+  "previousImage": {
+    "message": "Poprzedni obraz"
+  },
+  "nextImage": {
+    "message": "Następny obraz"
+  },
+  "downloadZip": {
+    "message": "Pobierz jako ZIP"
   }
 }
