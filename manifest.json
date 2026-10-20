@@ -47,6 +47,9 @@
         "mac": "Alt+Shift+S"
       },
       "description": "__MSG_cmdCaptureArea__"
+    },
+    "capture-full-page": {
+      "description": "__MSG_cmdCaptureFullPage__"
     }
   }
 }

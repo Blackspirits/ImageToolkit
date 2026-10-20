@@ -207,6 +207,12 @@ function initHeader() {
     if (VIEW_MODE === 'popup') window.close();
   });
 
+  $('btn-capture-full').addEventListener('click', async () => {
+    toast(t('captureFullRunning'), 'info');
+    const res = await send({ action: 'captureFullPage', tabId: state.tabId });
+    if (res?.error === 'restricted') toast(t('errorRestrictedPage'), 'error');
+  });
+
   $('btn-capture-visible').addEventListener('click', async () => {
     const res = await send({ action: 'captureVisible', tabId: state.tabId });
     if (res?.error) toast(t('errorRestrictedPage'), 'error');

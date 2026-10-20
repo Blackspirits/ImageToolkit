@@ -789,5 +789,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "Przechwyć całą stronę"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Przechwyć całą stronę"
+  },
+  "captureFullRunning": {
+    "message": "Przechwytywanie całej strony… nie zamykaj tej karty (Esc na stronie anuluje)"
+  },
+  "fullPageCut": {
+    "message": "Strona jest bardzo długa: zrzut kończy się na $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

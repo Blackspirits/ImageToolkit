@@ -51,7 +51,8 @@ function showStatus(message, isError = false) {
 // ---------- Loading ----------
 // Remote images are fetched through the service worker so the canvas is never tainted.
 async function resolveSource(source) {
-  if (source instanceof Blob) return blobToDataUrl(source);
+  // A Blob (full-page capture) is shown through a blob: URL: no base64 copy of a tall page.
+  if (source instanceof Blob) return URL.createObjectURL(source);
   if (source.startsWith('data:')) return source;
   const res = await send({ action: 'fetchAsDataUrl', imageUrl: source });
   if (res?.dataUrl) return res.dataUrl;
@@ -79,7 +80,7 @@ async function loadImage(source) {
   }, { once: true });
   img.addEventListener('error', () => showStatus(t('errorNoImage'), true), { once: true });
   const src = await resolveSource(source);
-  if (!src.startsWith('data:')) img.crossOrigin = 'anonymous';
+  if (!/^(data|blob):/.test(src)) img.crossOrigin = 'anonymous';
   img.src = src;
 }
 

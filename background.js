@@ -71,6 +71,7 @@ async function buildContextMenus() {
   // Right-click on the toolbar icon
   add({ id: 'action-capture-area', title: t('titleCapture'), contexts: ['action'] });
   add({ id: 'action-capture-visible', title: t('captureVisible'), contexts: ['action'] });
+  add({ id: 'action-capture-full', title: t('captureFullPage'), contexts: ['action'] });
 }
 
 // 2.3.5 and earlier passed the image to the editor through chrome.storage.local and only
@@ -123,6 +124,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   if (id === 'action-capture-area') { startCapture(tab?.id).catch(() => {}); return; }
   if (id === 'action-capture-visible') { captureVisible(tab?.id).catch(() => {}); return; }
+  if (id === 'action-capture-full') { captureFullPage(tab?.id).catch(() => {}); return; }
 
   const imageUrl = info.srcUrl;
   if (!imageUrl) {
@@ -150,6 +152,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 chrome.commands.onCommand.addListener(async (command, tab) => {
   if (command === 'capture-area') startCapture(tab?.id).catch(() => {});
+  if (command === 'capture-full-page') captureFullPage(tab?.id).catch(() => {});
 });
 
 // ---------- Message Handler ----------
@@ -201,6 +204,7 @@ const handlers = {
 
   startCapture: (msg) => startCapture(msg.tabId, msg.delay),
   captureVisible: (msg) => captureVisible(msg.tabId),
+  captureFullPage: (msg) => captureFullPage(msg.tabId),
   openEditor: (msg) => openEditor(msg.imageUrl).then(() => ({ success: true })),
 
   copyDataUrlToClipboard: (msg) => offscreenRequest({ action: 'offscreen-copy', imageDataUrl: msg.dataUrl }, 15000),
@@ -808,6 +812,129 @@ async function captureVisible(tabId) {
   }
 }
 
+// ---------- Full-page capture ----------
+// Scrolls the page one screen at a time, captures each screen and stitches them in the
+// offscreen document, which hands the result to the editor through IndexedDB (no base64).
+// Fixed and sticky elements (headers, chat buttons, cookie bars) appear once, in the first
+// screen, instead of on every slice. The scrollbar is cropped off, the reader's position is
+// restored, progress shows on the toolbar icon and Esc in the page cancels.
+const FULLPAGE_MAX_HEIGHT = 16384; // device pixels; taller pages are scaled down (to 50%), then cut
+const CAPTURE_INTERVAL_MS = 550;   // Chrome allows two captureVisibleTab calls per second
+let fullPageBusy = false;
+
+async function captureFullPage(tabId) {
+  if (!Number.isInteger(tabId)) return { error: 'noTab' };
+  if (fullPageBusy) return { error: 'busy' };
+  fullPageBusy = true;
+  const run = (func, args = []) => chrome.scripting.executeScript({ target: { tabId }, func, args }).then(([r]) => r?.result);
+  let session = null;
+  let prepared = false;
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    const page = await run(fullPagePrepare).catch(() => null);
+    if (!page) throw Object.assign(new Error('restricted'), { restricted: true });
+    prepared = true;
+
+    const dpr = page.dpr;
+    const fullHeight = Math.round(page.scrollHeight * dpr);
+    const scale = Math.max(0.5, Math.min(1, FULLPAGE_MAX_HEIGHT / fullHeight));
+    const width = Math.max(1, Math.round(page.clientWidth * dpr * scale));
+    const height = Math.max(1, Math.min(FULLPAGE_MAX_HEIGHT, Math.round(fullHeight * scale)));
+    const truncated = Math.round(fullHeight * scale) > FULLPAGE_MAX_HEIGHT;
+    session = (await offscreenRequest({ action: 'fullpage-begin', width, height }, 15000)).session;
+
+    const positions = [];
+    for (let y = 0; y < page.scrollHeight; y += page.clientHeight) positions.push(y);
+    let lastCapture = 0;
+    for (let i = 0; i < positions.length; i++) {
+      const at = await run(fullPageScroll, [positions[i], i > 0]);
+      if (!at || at.cancelled) return { cancelled: true };
+      const wait = CAPTURE_INTERVAL_MS - (Date.now() - lastCapture);
+      if (wait > 0) await sleep(wait);
+      const shot = await captureTab(tab.windowId);
+      lastCapture = Date.now();
+      await offscreenRequest({
+        action: 'fullpage-draw', session, dataUrl: shot,
+        crop: { width: Math.round(page.clientWidth * dpr), height: Math.round(page.clientHeight * dpr) },
+        y: Math.round(at.y * dpr * scale), scale,
+      }, 15000);
+      if (at.y + page.clientHeight >= page.scrollHeight) break;
+      const pct = Math.round(((i + 1) / positions.length) * 100);
+      chrome.action.setBadgeText({ tabId, text: `${pct}%` }).catch(() => {});
+    }
+    const { key } = await offscreenRequest({ action: 'fullpage-end', session }, 60000);
+    session = null;
+    await run(fullPageRestore).catch(() => {});
+    prepared = false;
+    await openEditorWithKey(key);
+    if (truncated) {
+      await loadSettingsAndLocale();
+      notify(t('fullPageCut', [String(Math.round(FULLPAGE_MAX_HEIGHT / dpr / scale))]));
+    }
+    return { success: true, width, height, truncated };
+  } catch (err) {
+    await loadSettingsAndLocale();
+    notify(err.restricted ? t('errorRestrictedPage') : `${t('errorCaptureFailed')}: ${err.message}`, { error: true });
+    return { error: err.restricted ? 'restricted' : err.message };
+  } finally {
+    if (session) offscreenRequest({ action: 'fullpage-cancel', session }, 5000).catch(() => {});
+    if (prepared) await run(fullPageRestore).catch(() => {});
+    chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {});
+    fullPageBusy = false;
+  }
+}
+
+// The three functions below run inside the page (isolated world). Each must be self-contained.
+function fullPagePrepare() {
+  const root = document.scrollingElement || document.documentElement;
+  const style = document.createElement('style');
+  style.id = 'imagetoolkit-fullpage-style';
+  // Instant scrolling; nothing animated in while a slice is taken.
+  style.textContent = 'html,body{scroll-behavior:auto!important}*,*::before,*::after{transition:none!important;animation-play-state:paused!important;caret-color:transparent!important}';
+  (document.head || document.documentElement).appendChild(style);
+  window.__imagetoolkitFullPage = { x: scrollX, y: scrollY, cancelled: false, hidden: [] };
+  window.__imagetoolkitFullPageKey = (e) => { if (e.key === 'Escape') window.__imagetoolkitFullPage.cancelled = true; };
+  addEventListener('keydown', window.__imagetoolkitFullPageKey, true);
+  document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
+  return {
+    dpr: devicePixelRatio || 1,
+    clientWidth: root.clientWidth,   // without the vertical scrollbar
+    clientHeight: root.clientHeight, // without a horizontal scrollbar
+    scrollHeight: Math.max(root.scrollHeight, document.body?.scrollHeight || 0),
+  };
+}
+
+async function fullPageScroll(y, hideFloating) {
+  const state = window.__imagetoolkitFullPage;
+  if (!state || state.cancelled) return { cancelled: true };
+  if (hideFloating && !state.floatingHidden) {
+    state.floatingHidden = true;
+    for (const el of document.querySelectorAll('body *')) {
+      const position = getComputedStyle(el).position;
+      if (position !== 'fixed' && position !== 'sticky') continue;
+      state.hidden.push([el, el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
+      el.style.setProperty('visibility', 'hidden', 'important');
+    }
+  }
+  window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  await new Promise((r) => setTimeout(r, 150)); // lazy images and late layout
+  return { y: scrollY, cancelled: state.cancelled };
+}
+
+function fullPageRestore() {
+  const state = window.__imagetoolkitFullPage;
+  document.getElementById('imagetoolkit-fullpage-style')?.remove();
+  if (window.__imagetoolkitFullPageKey) removeEventListener('keydown', window.__imagetoolkitFullPageKey, true);
+  if (!state) return;
+  for (const [el, value, priority] of state.hidden) {
+    if (value) el.style.setProperty('visibility', value, priority);
+    else el.style.removeProperty('visibility');
+  }
+  window.scrollTo({ top: state.y, left: state.x, behavior: 'instant' });
+  delete window.__imagetoolkitFullPage;
+}
+
 // ---------- Editor Window ----------
 // The handed-off image (a screenshot can be private) only lives as long as its editor
 // window, reloads included. The window → key map is in session storage so it survives a
@@ -816,7 +943,10 @@ const editorKeyName = (windowId) => `editor:${windowId}`;
 
 async function openEditor(imageUrl) {
   if (!imageUrl) return;
-  const key = await handoff.put(imageUrl);
+  await openEditorWithKey(await handoff.put(imageUrl));
+}
+
+async function openEditorWithKey(key) {
   const win = await chrome.windows.create({ url: `resize.html?key=${encodeURIComponent(key)}`, ...EDITOR_WINDOW, focused: true });
   if (win?.id != null) await chrome.storage.session.set({ [editorKeyName(win.id)]: key }).catch(() => {});
 }

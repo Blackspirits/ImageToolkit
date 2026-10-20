@@ -789,5 +789,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "Снимок всей страницы"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Сделать снимок всей страницы"
+  },
+  "captureFullRunning": {
+    "message": "Снимаем всю страницу… не закрывайте вкладку (Esc на странице отменяет)"
+  },
+  "fullPageCut": {
+    "message": "Страница очень длинная: снимок обрывается на $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

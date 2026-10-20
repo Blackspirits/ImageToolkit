@@ -789,5 +789,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "Volledige pagina vastleggen"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Volledige pagina vastleggen"
+  },
+  "captureFullRunning": {
+    "message": "Volledige pagina wordt vastgelegd… houd dit tabblad open (Esc op de pagina annuleert)"
+  },
+  "fullPageCut": {
+    "message": "De pagina is erg lang: de opname stopt bij $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

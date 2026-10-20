@@ -788,5 +788,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "전체 페이지 캡처"
+  },
+  "cmdCaptureFullPage": {
+    "message": "전체 페이지 캡처"
+  },
+  "captureFullRunning": {
+    "message": "전체 페이지 캡처 중… 이 탭을 열어 두세요(페이지에서 Esc로 취소)"
+  },
+  "fullPageCut": {
+    "message": "페이지가 너무 길어 $PX$px에서 캡처가 끝납니다.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

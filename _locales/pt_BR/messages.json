@@ -788,5 +788,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "Capturar a página inteira"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Capturar a página inteira"
+  },
+  "captureFullRunning": {
+    "message": "Capturando a página inteira… mantenha esta aba aberta (Esc na página cancela)"
+  },
+  "fullPageCut": {
+    "message": "A página é muito longa: a captura para em $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

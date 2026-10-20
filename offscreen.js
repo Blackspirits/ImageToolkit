@@ -16,6 +16,10 @@ const OFFSCREEN_HANDLERS = {
   'offscreen-copy-text': (message) => handleCopyText(message).then(() => ({ copied: true })),
   'offscreen-crop': (message) => handleCrop(message).then((dataUrl) => ({ dataUrl })),
   'offscreen-object-url': (message) => objectUrlFromHandoff(message.key),
+  'fullpage-begin': async (message) => fullPageBegin(message),
+  'fullpage-draw': (message) => fullPageDraw(message),
+  'fullpage-end': (message) => fullPageEnd(message),
+  'fullpage-cancel': async (message) => { fullPages.delete(message.session); return { success: true }; },
   'offscreen-revoke': async (message) => { revokeObjectUrl(message.url); return { success: true }; },
 };
 
@@ -197,6 +201,39 @@ async function convertBlobToPng(blob) {
   canvas.height = img.naturalHeight;
   canvas.getContext('2d').drawImage(img, 0, 0);
   return canvasToBlob(canvas, 'image/png');
+}
+
+// ---------- Full-page capture ----------
+// One canvas per capture; slices are drawn as they arrive, so no message ever carries more
+// than one screen. The finished PNG goes straight to the handoff store for the editor.
+const fullPages = new Map();
+
+function fullPageBegin({ width, height }) {
+  if (!(width >= 1 && height >= 1) || width > 16384 || height > 16384) throw new Error('Invalid capture size');
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const session = crypto.randomUUID();
+  fullPages.set(session, canvas);
+  return { session };
+}
+
+async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
+  const canvas = fullPages.get(session);
+  if (!canvas) throw new Error('Capture expired');
+  const img = await loadImage(dataUrl);
+  const w = Math.min(crop.width, img.naturalWidth), h = Math.min(crop.height, img.naturalHeight);
+  canvas.getContext('2d').drawImage(img, 0, 0, w, h, 0, y, Math.round(w * scale), Math.round(h * scale));
+  return { success: true };
+}
+
+async function fullPageEnd({ session }) {
+  const canvas = fullPages.get(session);
+  if (!canvas) throw new Error('Capture expired');
+  fullPages.delete(session);
+  const blob = await canvasToBlob(canvas, 'image/png');
+  canvas.width = canvas.height = 0; // free the pixels now
+  return { key: await ITK.handoff.put(blob) };
 }
 
 // ---------- Large downloads ----------

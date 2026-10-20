@@ -1283,3 +1283,38 @@ test('all tabs of a window: merged, tagged with their page, browser pages skippe
   await ui.evaluate(() => setScope('tab', false));
   await sw.evaluate((id) => chrome.windows.remove(id), win.id);
 });
+
+test('full-page capture: slices in order, fixed header only once, scrollbar off, position restored', async () => {
+  FIXTURES['long.html'] = Buffer.from('<!doctype html><title>long</title><style>body{margin:0}div.b{height:600px}</style><body>'
+    + '<header style="position:fixed;top:0;left:0;right:0;height:40px;background:#000"></header>'
+    + ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'].map((c) => `<div class="b" style="background:${c}"></div>`).join('') + '</body>');
+  const page = await ctx.newPage();
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.goto(base + 'long.html');
+  await page.evaluate(() => window.scrollTo(0, 250));
+  await page.bringToFront();
+  const tabId = await tabIdOf(base + 'long.html');
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId });
+  assert.equal(res.success, true, JSON.stringify(res));
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const { dpr, clientWidth } = await page.evaluate(() => ({ dpr: devicePixelRatio, clientWidth: document.documentElement.clientWidth }));
+  const probe = await editor.evaluate(async (dpr) => {
+    const img = document.getElementById('cropper-img');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
+    return { w: img.naturalWidth, h: img.naturalHeight, src: img.src.slice(0, 5), header: at(20), band1: at(300), seam: at(615), band2: at(900), band3: at(1500), band4: at(2100), band5: at(2990) };
+  }, dpr);
+  assert.equal(probe.src, 'blob:');
+  assert.equal(probe.w, Math.round(clientWidth * dpr));
+  assert.equal(probe.h, Math.round(3000 * dpr));
+  assert.deepEqual([probe.header, probe.band1, probe.seam, probe.band2, probe.band3, probe.band4, probe.band5],
+    ['0,0,0', '255,0,0', '0,255,0', '0,255,0', '0,0,255', '255,255,0', '255,0,255']);
+  assert.equal(await page.evaluate(() => scrollY), 250);
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('header')).visibility), 'visible');
+  await editor.close();
+  await page.close();
+});

@@ -788,5 +788,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "擷取整個頁面"
+  },
+  "cmdCaptureFullPage": {
+    "message": "擷取整個頁面"
+  },
+  "captureFullRunning": {
+    "message": "正在擷取整個頁面…請保持此分頁開啟（在頁面中按 Esc 取消）"
+  },
+  "fullPageCut": {
+    "message": "頁面過長：擷取在 $PX$ 像素處截止。",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

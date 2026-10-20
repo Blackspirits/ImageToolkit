@@ -788,5 +788,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "Chụp toàn bộ trang"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Chụp toàn bộ trang"
+  },
+  "captureFullRunning": {
+    "message": "Đang chụp toàn bộ trang… hãy giữ tab này mở (nhấn Esc trên trang để hủy)"
+  },
+  "fullPageCut": {
+    "message": "Trang quá dài: ảnh chụp dừng ở $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }

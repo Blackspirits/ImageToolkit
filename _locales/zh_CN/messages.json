@@ -788,5 +788,23 @@
         "example": "2"
       }
     }
+  },
+  "captureFullPage": {
+    "message": "截取整个页面"
+  },
+  "cmdCaptureFullPage": {
+    "message": "截取整个页面"
+  },
+  "captureFullRunning": {
+    "message": "正在截取整个页面…请保持此标签页打开（在页面中按 Esc 取消）"
+  },
+  "fullPageCut": {
+    "message": "页面过长：截图在 $PX$ 像素处截止。",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
   }
 }
