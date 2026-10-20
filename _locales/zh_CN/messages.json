@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "保存、转换、调整大小并复制图片。100% 本地处理，无跟踪。"
   },
-  "cmdQuickSave": {
-    "message": "以默认格式快速保存"
-  },
   "menuParent": {
     "message": "图片另存为..."
   },
@@ -64,14 +61,6 @@
   },
   "scanning": {
     "message": "扫描中..."
-  },
-  "imagesFound": {
-    "message": "$COUNT$ 张图片",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
   },
   "processing": {
     "message": "处理中"
@@ -160,9 +149,6 @@
   "errorCopyFailed": {
     "message": "复制失败"
   },
-  "errorOnSaving": {
-    "message": "保存图片时出错"
-  },
   "tabImages": {
     "message": "图片"
   },
@@ -186,9 +172,6 @@
   },
   "originalFormat": {
     "message": "原始格式"
-  },
-  "resize": {
-    "message": "调整大小"
   },
   "settingOpenSidePanel": {
     "message": "以侧边栏打开"
@@ -222,6 +205,15 @@
   },
   "titleHideDupes": {
     "message": "隐藏重复"
+  },
+  "titleTransparency": {
+    "message": "透明背景：$MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "切换布局"
@@ -268,12 +260,6 @@
   "outputSize": {
     "message": "输出尺寸"
   },
-  "presets": {
-    "message": "预设"
-  },
-  "presetFree": {
-    "message": "自由"
-  },
   "applyDimensions": {
     "message": "应用"
   },
@@ -294,9 +280,6 @@
   },
   "openCropTool": {
     "message": "打开裁剪工具"
-  },
-  "lockRatio": {
-    "message": "锁定比例"
   },
   "titleCapture": {
     "message": "截取区域"
@@ -354,9 +337,6 @@
   },
   "settingZipDefault": {
     "message": "默认ZIP"
-  },
-  "newImagesDetected": {
-    "message": "发现新图片"
   },
   "rescan": {
     "message": "刷新"
@@ -458,19 +438,13 @@
     "message": "仅在以原始格式下载时生效"
   },
   "settingSubfolderNote": {
-    "message": "关闭\"询问保存位置\"时效果最佳"
-  },
-  "pTransform": {
-    "message": "变换"
-  },
-  "pRotate": {
-    "message": "旋转"
-  },
-  "pHorizontal": {
-    "message": "水平"
-  },
-  "pVertical": {
-    "message": "垂直"
+    "message": "关闭“$OPTION$”时效果最佳",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "向左旋转"
@@ -495,5 +469,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens 需要远程图片 URL"
+  },
+  "cmdCaptureArea": {
+    "message": "截取页面区域",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "截取可见部分",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "扩展程序无法访问此页面（浏览器页面、Chrome 应用商店）。",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "截图失败",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "复制图片",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "复制网址",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "已复制 $COUNT$ 个网址",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "或按 Ctrl+V 粘贴图片",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "取消选择",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "已保存 $DONE$/$TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "筛选",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "重置筛选",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "滚动页面以加载更多图片，或尝试其他标签页。",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "图片过大（最大 $SIZE$）",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "已省略部分图片：此页面图片过多或包含超大的内嵌图片。"
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP 文件过大（最大 $SIZE$）。请少选一些图片，或不使用 ZIP 下载。",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "每边最大 $MAX$ 像素。",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "自动（浏览器）"
+  },
+  "qualityLabel": {
+    "message": "质量"
+  },
+  "newImagesOne": {
+    "message": "新增 $COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "新增 $COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ 张图片",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "网格"
+  },
+  "layoutCompact": {
+    "message": "紧凑网格"
+  },
+  "layoutList": {
+    "message": "列表"
+  },
+  "clearSource": {
+    "message": "移除图片"
+  },
+  "close": {
+    "message": "关闭"
+  },
+  "previousImage": {
+    "message": "上一张"
+  },
+  "nextImage": {
+    "message": "下一张"
+  },
+  "downloadZip": {
+    "message": "以 ZIP 下载"
   }
 }

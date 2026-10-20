@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Bilder speichern, konvertieren, skalieren und kopieren. 100% lokal, ohne Tracking."
   },
-  "cmdQuickSave": {
-    "message": "Schnellspeichern im Standardformat"
-  },
   "menuParent": {
     "message": "Bild speichern als...",
     "description": "Parent context menu title"
@@ -66,14 +63,6 @@
   },
   "scanning": {
     "message": "Suche..."
-  },
-  "imagesFound": {
-    "message": "$COUNT$ Bild(er) gefunden",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
   },
   "processing": {
     "message": "Verarbeitung"
@@ -162,9 +151,6 @@
   "errorCopyFailed": {
     "message": "Kopieren fehlgeschlagen"
   },
-  "errorOnSaving": {
-    "message": "Fehler beim Speichern"
-  },
   "tabImages": {
     "message": "Bilder"
   },
@@ -188,9 +174,6 @@
   },
   "originalFormat": {
     "message": "Original"
-  },
-  "resize": {
-    "message": "Größe ändern"
   },
   "settingOpenSidePanel": {
     "message": "Als Seitenpanel öffnen"
@@ -224,6 +207,15 @@
   },
   "titleHideDupes": {
     "message": "Duplikate ausblenden"
+  },
+  "titleTransparency": {
+    "message": "Transparenz-Hintergrund: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "Layout wechseln"
@@ -270,12 +262,6 @@
   "outputSize": {
     "message": "Ausgabegröße"
   },
-  "presets": {
-    "message": "Voreinstellungen"
-  },
-  "presetFree": {
-    "message": "Frei"
-  },
   "applyDimensions": {
     "message": "Anwenden"
   },
@@ -296,9 +282,6 @@
   },
   "openCropTool": {
     "message": "Zuschneidewerkzeug öffnen"
-  },
-  "lockRatio": {
-    "message": "Verhältnis sperren"
   },
   "titleCapture": {
     "message": "Bereich erfassen"
@@ -356,9 +339,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP als Standard"
-  },
-  "newImagesDetected": {
-    "message": "neue Bilder gefunden"
   },
   "rescan": {
     "message": "Aktualisieren"
@@ -460,19 +440,13 @@
     "message": "Gilt nur beim Download im Originalformat"
   },
   "settingSubfolderNote": {
-    "message": "Funktioniert am besten mit deaktiviertem 'Speicherort abfragen'"
-  },
-  "pTransform": {
-    "message": "Transformieren"
-  },
-  "pRotate": {
-    "message": "Drehen"
-  },
-  "pHorizontal": {
-    "message": "Horizontal"
-  },
-  "pVertical": {
-    "message": "Vertikal"
+    "message": "Funktioniert am besten mit deaktiviertem „$OPTION$“",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Nach links drehen"
@@ -497,5 +471,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens benötigt eine entfernte Bild-URL"
+  },
+  "cmdCaptureArea": {
+    "message": "Einen Bereich der Seite erfassen",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Sichtbaren Bereich erfassen",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Erweiterungen haben keinen Zugriff auf diese Seite (Browser-Seiten, Chrome Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Aufnahme fehlgeschlagen",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Bild kopieren",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "URLs kopieren",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "$COUNT$ URLs kopiert",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "oder Strg+V drücken, um ein Bild einzufügen",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Auswahl aufheben",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "$DONE$ von $TOTAL$ gespeichert",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Filter",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Filter zurücksetzen",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Seite scrollen, um weitere Bilder zu laden, oder einen anderen Tab versuchen.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Bild zu groß (max. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "Einige Bilder wurden ausgelassen: Diese Seite enthält zu viele oder sehr große eingebettete Bilder."
+  },
+  "errorZipTooLarge": {
+    "message": "Das ZIP wäre zu groß (max. $SIZE$). Weniger Bilder auswählen oder ohne ZIP herunterladen.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Maximal $MAX$ px pro Seite.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Automatisch (Browser)"
+  },
+  "qualityLabel": {
+    "message": "Qualität"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ neues Bild gefunden",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "+$COUNT$ neue Bilder gefunden",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ Bild",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "$COUNT$ Bilder",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Raster"
+  },
+  "layoutCompact": {
+    "message": "Kompaktes Raster"
+  },
+  "layoutList": {
+    "message": "Liste"
+  },
+  "clearSource": {
+    "message": "Bild entfernen"
+  },
+  "close": {
+    "message": "Schließen"
+  },
+  "previousImage": {
+    "message": "Vorheriges Bild"
+  },
+  "nextImage": {
+    "message": "Nächstes Bild"
+  },
+  "downloadZip": {
+    "message": "Als ZIP herunterladen"
   }
 }

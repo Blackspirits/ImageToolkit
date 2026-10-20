@@ -3,239 +3,398 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
   <title data-i18n="extShortName">ImageToolkit</title>
+  <link rel="stylesheet" href="lib/ui.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
+  <!-- Icon sprite (Lucide-style, 24px grid) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m21.6 5.4-3-3a1 1 0 0 0-1.4 0L2.4 17.2a1 1 0 0 0 0 1.4l3 3a1 1 0 0 0 1.4 0L21.6 6.8a1 1 0 0 0 0-1.4Z"/><path d="m14 7 3 3"/><path d="M5 6v4M19 14v4M10 2v2M7 8H3M21 16h-4M11 3H9"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-check-square" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2.5"/><path d="M4 16a2 2 0 0 1-1-1.7V5a2 2 0 0 1 2-2h9.3A2 2 0 0 1 16 4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></symbol>
+    <symbol id="i-grid-small" viewBox="0 0 24 24"><rect x="3" y="3" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="3" width="4.5" height="4.5" rx="1"/><rect x="16.5" y="3" width="4.5" height="4.5" rx="1"/><rect x="3" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="3" y="16.5" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1"/><rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="6" rx="1.5"/><rect x="3" y="14" width="6" height="6" rx="1.5"/><path d="M13 6h8M13 9h5M13 16h8M13 19h5"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7.5" y="7.5" width="9" height="9" rx="1.5"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2.5"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+    <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-lens" viewBox="0 0 24 24"><path d="M3 8V6a3 3 0 0 1 3-3h2M16 3h2a3 3 0 0 1 3 3v2M21 16v2a3 3 0 0 1-3 3h-2M8 21H6a3 3 0 0 1-3-3v-2"/><circle cx="12" cy="12" r="3.5"/></symbol>
+    <symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.8 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-convert" viewBox="0 0 24 24"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></symbol>
+    <symbol id="i-resize" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5A5.5 5.5 0 1 0 7.5 11.5c.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.8-1.2"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1.5"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9 15.5h6"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z"/><path d="M19 3v4M21 5h-4M5 17v4M7 19H3"/></symbol>
+  </svg>
+
   <div class="app" id="app">
+    <!-- ====== HEADER ====== -->
     <header class="header">
-      <div class="header-brand">
-        <img src="icons/icon32.png" alt="" class="header-logo">
-        <div>
-          <h1 class="header-title" data-i18n="extShortName">ImageToolkit</h1>
-          <p class="header-sub" data-i18n="popupSubtitle">Convert · Download · Resize · Optimize</p>
+      <div class="brand">
+        <img src="icons/icon48.png" alt="" class="brand-logo" width="30" height="30">
+        <div class="brand-text">
+          <h1 class="brand-title" data-i18n="extShortName">ImageToolkit</h1>
+          <p class="brand-sub" id="brand-sub" data-i18n="popupSubtitle">Convert · Download · Resize · Optimize</p>
         </div>
       </div>
-      <div class="header-right">
-        <a href="https://ko-fi.com/blackspirits" target="_blank" rel="noopener" class="btn-hdr kofi-link" data-i18n-title="titleKofi" title="Support on Ko-fi"><img src="icons/kofi.gif" alt="Ko-fi" class="kofi-icon"></a>
-        <button id="btn-theme" class="btn-hdr" data-i18n-title="titleToggleTheme" title="Toggle theme"><svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
+      <div class="header-actions">
+        <div class="split" role="group">
+          <button id="btn-capture" class="icon-btn" data-i18n-title="titleCapture" title="Capture area"><svg class="i"><use href="#i-scan"/></svg></button>
+          <button id="btn-capture-visible" class="icon-btn" data-i18n-title="captureVisible" title="Capture visible page"><svg class="i"><use href="#i-monitor"/></svg></button>
+          <label class="delay-select" data-i18n-title="titleCaptureDelay" title="Capture delay">
+            <svg class="i i-sm"><use href="#i-timer"/></svg>
+            <select id="capture-delay" data-i18n-aria="titleCaptureDelay" aria-label="Capture delay">
+              <option value="0">0s</option><option value="3">3s</option><option value="5">5s</option><option value="10">10s</option>
+            </select>
+          </label>
+        </div>
+        <button id="btn-theme" class="icon-btn" data-i18n-title="titleToggleTheme" title="Toggle theme"><svg class="i"><use id="theme-icon" href="#i-contrast"/></svg></button>
+        <a href="https://ko-fi.com/blackspirits" target="_blank" rel="noopener" class="icon-btn icon-btn-heart" data-i18n-title="titleKofi" title="Support on Ko-fi"><svg class="i"><use href="#i-heart"/></svg></a>
       </div>
     </header>
 
-    <nav class="tabs">
-      <button class="tab active" data-tab="images" data-i18n="tabImages">Images</button>
-      <button class="tab" data-tab="tools" data-i18n="tabTools">Tools</button>
-      <button class="tab" data-tab="settings" data-i18n="tabSettings">Settings</button>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" role="tab" id="tab-btn-images" aria-controls="tab-images" aria-selected="true" data-tab="images"><svg class="i i-sm"><use href="#i-image"/></svg><span data-i18n="tabImages">Images</span><span class="tab-badge" id="tab-count"></span></button>
+      <button class="tab" role="tab" id="tab-btn-tools" aria-controls="tab-tools" aria-selected="false" data-tab="tools"><svg class="i i-sm"><use href="#i-wand"/></svg><span data-i18n="tabTools">Tools</span></button>
+      <button class="tab" role="tab" id="tab-btn-settings" aria-controls="tab-settings" aria-selected="false" data-tab="settings"><svg class="i i-sm"><use href="#i-settings"/></svg><span data-i18n="tabSettings">Settings</span></button>
     </nav>
 
-    <!-- ====== IMAGES ====== -->
-    <section id="tab-images" class="tab-content active">
-      <div class="toolbar">
-        <!-- Row 1: count + tools -->
-        <div class="trow">
-          <button id="btn-refresh" class="tbtn" data-i18n-title="titleRefresh" title="Refresh"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button>
-          <span id="grid-count" class="tcount">0</span>
-          <div class="tspacer"></div>
-          <button id="btn-select-all" class="tbtn" data-i18n-title="titleSelectAll" title="Select all"><svg id="sel-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></button>
-          <button id="btn-hide-dupes" class="tbtn" data-i18n-title="titleHideDupes" title="Hide duplicates"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="8" y="2" width="14" height="14" rx="2"/><rect x="2" y="8" width="14" height="14" rx="2"/></svg></button>
-          <button id="btn-layout" class="tbtn" data-i18n-title="titleToggleLayout" title="Toggle layout"><svg id="layout-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-          <button id="btn-capture" class="tbtn" data-i18n-title="titleCapture" title="Capture area"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h2"/><path d="M4 16v2a2 2 0 002 2h2"/><path d="M16 4h2a2 2 0 012 2v2"/><path d="M16 20h2a2 2 0 002-2v-2"/></svg></button>
-          <select id="capture-delay" class="tsel tsel-mini" data-i18n-title="titleCaptureDelay" title="Capture delay">
-            <option value="0">0s</option><option value="3">3s</option><option value="5">5s</option>
-          </select>
-          <select id="sort-order" class="tsel">
-            <option value="pixels" data-i18n="sortPixels">Pixel size</option>
-            <option value="position" data-i18n="sortPosition">Position</option>
-          </select>
+    <main class="views">
+      <!-- ====== IMAGES ====== -->
+      <section id="tab-images" class="view active" role="tabpanel" aria-labelledby="tab-btn-images">
+        <div class="toolbar">
+          <div class="search">
+            <svg class="i i-sm search-icon"><use href="#i-search"/></svg>
+            <input type="search" id="filter-url" data-i18n-placeholder="filterByUrl" placeholder="Filter by URL or filename..." autocomplete="off" spellcheck="false">
+            <kbd class="search-kbd">/</kbd>
+          </div>
+          <button id="btn-filters" class="icon-btn icon-btn-boxed" data-i18n-title="filters" title="Filters" aria-expanded="false" aria-controls="filters-panel"><svg class="i"><use href="#i-sliders"/></svg><span class="dot" id="filters-dot" hidden></span></button>
+          <button id="btn-refresh" class="icon-btn icon-btn-boxed" data-i18n-title="titleRefresh" title="Refresh"><svg class="i"><use href="#i-refresh"/></svg></button>
         </div>
-        <!-- Row 2: filters with labels (all on one line) -->
-        <div class="trow trow-filters">
-          <label class="tlabel" data-i18n="labelType">Type:</label>
-          <select id="filter-type" class="tsel">
-            <option value="all" data-i18n="filterAll">All</option>
-            <option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option>
-            <option value="gif">GIF</option><option value="svg">SVG</option><option value="avif">AVIF</option>
-            <option value="bmp">BMP</option><option value="tiff">TIFF</option><option value="ico">ICO</option>
-            <option value="other" data-i18n="filterOther">Other</option>
-          </select>
-          <label class="tlabel" data-i18n="labelSize">Size:</label>
-          <select id="filter-size" class="tsel">
-            <option value="all" data-i18n="filterAny">Any</option>
-            <option value="small" data-i18n="filterSmallLabel">Small</option>
-            <option value="medium" data-i18n="filterMediumLabel">Medium</option>
-            <option value="large" data-i18n="filterLargeLabel">Large</option>
-            <option value="xlarge" data-i18n="filterXLargeLabel">Extra Large</option>
-            <option value="atleast" data-i18n="filterAtLeast">At least…</option>
-          </select>
-          <label class="tlabel" data-i18n="labelLayout">Layout:</label>
-          <select id="filter-layout" class="tsel">
-            <option value="all" data-i18n="filterAll">All</option>
-            <option value="wide" data-i18n="filterWide">Wide</option>
-            <option value="tall" data-i18n="filterTall">Tall</option>
-            <option value="square" data-i18n="filterSquare">Square</option>
-          </select>
-          <label class="tlabel" data-i18n="labelDomain">Domain:</label>
-          <select id="filter-domain" class="tsel tsel-grow">
-            <option value="all" data-i18n="filterAll">All</option>
-          </select>
-        </div>
-        <!-- Row 2b: At least size (shown when "At least" selected) -->
-        <div id="atleast-row" class="trow" style="display:none">
-          <label class="tlabel" data-i18n="filterAtLeast">At least</label>
-          <input type="number" id="atleast-w" class="tinput tinput-num" placeholder="W" min="0" max="99999" style="width:60px">
-          <span class="tlabel" style="width:auto">×</span>
-          <input type="number" id="atleast-h" class="tinput tinput-num" placeholder="H" min="0" max="99999" style="width:60px">
-          <button id="btn-save-size" class="tbtn" data-i18n-title="saveSizeSelection" title="Save size selection"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg></button>
-        </div>
-        <div class="trow">
-          <input type="text" id="filter-url" class="tinput" data-i18n-placeholder="filterByUrl" placeholder="Filter by URL or filename...">
-        </div>
-      </div>
 
-      <div id="new-images-banner" class="new-banner" style="display:none">
-        <span id="new-images-text"></span>
-        <button id="btn-rescan" class="btn btn-sm" data-i18n="rescan">Refresh</button>
-      </div>
-      <div id="grid-loading" class="grid-empty"><div class="spinner"></div><p data-i18n="scanning">Scanning...</p></div>
-      <div id="grid-empty" class="grid-empty" style="display:none"><p data-i18n="noImagesFound">No images found</p><button id="btn-retry" class="btn btn-sm" data-i18n="tryAgain">Try again</button></div>
-      <div id="image-grid" class="grid grid-2col"></div>
-      <div id="batch-progress" class="card" style="display:none">
-        <div class="prog-head"><span id="progress-text" data-i18n="processing">Processing...</span><span id="progress-count">0/0</span></div>
-        <div class="prog-bar"><div id="progress-fill" class="prog-fill"></div></div>
-      </div>
-    </section>
-
-    <!-- ====== TOOLS ====== -->
-    <section id="tab-tools" class="tab-content">
-      <!-- Drop zone + URL input -->
-      <div class="card">
-        <div id="drop-zone" class="drop-zone">
-          <div class="drop-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V8"/><path d="M8.5 11.5 12 8l3.5 3.5"/><path d="M4 16.5v1a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 17.5v-1"/><path d="M4 8.5V6.8A2.8 2.8 0 0 1 6.8 4h3l1.8 2h5.4A2.8 2.8 0 0 1 20 8.8v-.3"/></svg></div>
-          <p class="drop-text" data-i18n="dropOrPaste">Drop an image here or paste a URL below</p>
-          <input type="file" id="file-input" accept="image/*" style="display:none">
+        <div id="filters-panel" class="filters" hidden>
+          <label class="field"><span data-i18n="labelType">Type:</span>
+            <select id="filter-type" class="select">
+              <option value="all" data-i18n="filterAll">All</option>
+              <option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option>
+              <option value="gif">GIF</option><option value="svg">SVG</option><option value="avif">AVIF</option>
+              <option value="bmp">BMP</option><option value="tiff">TIFF</option><option value="ico">ICO</option>
+              <option value="other" data-i18n="filterOther">Other</option>
+            </select>
+          </label>
+          <label class="field"><span data-i18n="labelSize">Size:</span>
+            <select id="filter-size" class="select">
+              <option value="all" data-i18n="filterAny">Any</option>
+              <option value="small" data-i18n="filterSmallLabel">Small</option>
+              <option value="medium" data-i18n="filterMediumLabel">Medium</option>
+              <option value="large" data-i18n="filterLargeLabel">Large</option>
+              <option value="xlarge" data-i18n="filterXLargeLabel">Extra Large</option>
+              <option value="atleast" data-i18n="filterAtLeast">At least…</option>
+            </select>
+          </label>
+          <label class="field"><span data-i18n="labelLayout">Layout:</span>
+            <select id="filter-layout" class="select">
+              <option value="all" data-i18n="filterAny">Any</option>
+              <option value="wide" data-i18n="filterWide">Wide</option>
+              <option value="tall" data-i18n="filterTall">Tall</option>
+              <option value="square" data-i18n="filterSquare">Square</option>
+            </select>
+          </label>
+          <label class="field"><span data-i18n="labelDomain">Domain:</span>
+            <select id="filter-domain" class="select"><option value="all" data-i18n="filterAny">Any</option></select>
+          </label>
+          <div id="atleast-row" class="field field-wide" hidden>
+            <span data-i18n="filterAtLeast">At least…</span>
+            <div class="dims">
+              <input type="number" id="atleast-w" class="input input-num" data-i18n-placeholder="placeholderWidth" placeholder="W" min="0" max="99999" inputmode="numeric">
+              <span class="dims-x">×</span>
+              <input type="number" id="atleast-h" class="input input-num" data-i18n-placeholder="placeholderHeight" placeholder="H" min="0" max="99999" inputmode="numeric">
+              <button id="btn-save-size" class="btn btn-ghost btn-sm" data-i18n="saveSizeSelection">Save size selection</button>
+            </div>
+          </div>
+          <div class="filters-foot field-wide">
+            <label class="field field-inline"><svg class="i i-sm"><use href="#i-list"/></svg>
+              <select id="sort-order" class="select select-sm">
+                <option value="pixels" data-i18n="sortPixels">Pixel size</option>
+                <option value="position" data-i18n="sortPosition">Position</option>
+              </select>
+            </label>
+            <button id="btn-reset-filters" class="link-btn" data-i18n="resetFilters">Reset filters</button>
+          </div>
         </div>
-        <div class="row-gap mt8">
-          <input type="text" id="tool-url-input" data-i18n-placeholder="pasteUrlPlaceholder" placeholder="Paste image URL here..." class="tinput" style="flex:1">
-        </div>
-        <!-- Preview of loaded image -->
-        <div id="tool-preview" class="tool-preview" style="display:none">
-          <img id="tool-preview-img" src="" alt="">
-          <span id="tool-preview-info" class="muted"></span>
-          <button id="tool-preview-clear" class="tbtn">✕</button>
-        </div>
-      </div>
 
-      <!-- Convert -->
-      <div class="card">
-        <h3 class="card-title card-title-line"><svg class="card-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7h9"/><path d="M13 3l4 4-4 4"/><path d="M17 17H8"/><path d="M11 13l-4 4 4 4"/></svg><span data-i18n="convertTitle">Convert</span></h3>
-        <div class="row-gap">
-          <select id="url-format-select" class="tsel tsel-grow"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp" selected>WebP</option><option value="avif">AVIF</option></select>
-          <button id="btn-convert-url" class="btn btn-accent" data-i18n="convertAndSave">Convert &amp; Save</button>
+        <div class="statusbar">
+          <button id="btn-select-all" class="chip" aria-pressed="false"><svg class="i i-sm"><use href="#i-check-square"/></svg><span id="grid-count">0</span></button>
+          <span class="statusbar-host" id="scan-host"></span>
+          <span class="spacer"></span>
+          <button id="btn-hide-dupes" class="chip" aria-pressed="false" data-i18n-title="titleHideDupes" title="Hide duplicates"><svg class="i i-sm"><use href="#i-layers"/></svg><span id="dup-count">0</span></button>
+          <button id="btn-checker" class="chip chip-icon" title="Transparency background"><svg class="i i-sm"><use href="#i-contrast"/></svg></button>
+          <div class="segmented segmented-icons" role="group" data-i18n-title="titleToggleLayout" title="Toggle layout">
+            <button class="seg active" data-layout="2col" aria-pressed="true" data-i18n-title="layoutGrid" title="Grid"><svg class="i i-sm"><use href="#i-grid"/></svg></button>
+            <button class="seg" data-layout="compact" aria-pressed="false" data-i18n-title="layoutCompact" title="Compact grid"><svg class="i i-sm"><use href="#i-grid-small"/></svg></button>
+            <button class="seg" data-layout="list" aria-pressed="false" data-i18n-title="layoutList" title="List"><svg class="i i-sm"><use href="#i-list"/></svg></button>
+          </div>
         </div>
-      </div>
-      <div class="card" id="format-advisor" style="display:none">
-        <h3 class="card-title card-title-line"><svg class="card-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 18.5c.5-1.5-.2-2.2-1.1-3C7.1 14.4 6 13.2 6 11a6 6 0 1 1 12 0c0 2.2-1.1 3.4-2.4 4.5-.9.8-1.6 1.5-1.1 3"/><path d="M9 21h6"/><path d="M10 8.5a2 2 0 0 1 4 0c0 .8-.3 1.3-.9 1.8-.6.5-1.1 1-1.1 1.7"/><path d="M12 15.9h.01"/></svg><span data-i18n="formatAdvisor">Format Advisor</span></h3>
-        <p id="advisor-recommendation" class="muted"></p>
-        <div id="advisor-sizes" class="advisor-grid"></div>
-      </div>
 
-      <!-- Resize -->
-      <div class="card">
-        <h3 class="card-title card-title-line"><svg class="card-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 15v5h-5"/><path d="M8 8 4 4"/><path d="M16 16l4 4"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/><path d="M16 8l4-4"/><path d="M8 16l-4 4"/></svg><span data-i18n="resizeTitle">Resize</span></h3>
-        <div class="row-gap">
-          <input type="number" id="resize-url-w" class="tinput tinput-num" data-i18n-placeholder="placeholderWidth" placeholder="W" min="1" max="10000">
-          <span class="muted">×</span>
-          <input type="number" id="resize-url-h" class="tinput tinput-num" data-i18n-placeholder="placeholderHeight" placeholder="H" min="1" max="10000">
-          <label class="toggle toggle-sm"><input type="checkbox" id="resize-url-lock" checked><span class="toggle-track"></span></label>
-          <span class="muted" style="font-size:10px" data-i18n="lockRatio">Lock ratio</span>
-          <button id="btn-resize-url" class="btn btn-accent" data-i18n="resizeAndSave">Resize &amp; Save</button>
+        <button id="new-images-banner" class="new-banner" hidden>
+          <svg class="i i-sm"><use href="#i-sparkles"/></svg><span id="new-images-text"></span><span class="new-banner-cta" data-i18n="rescan">Refresh</span>
+        </button>
+
+        <div id="grid-loading" class="grid grid-2col" aria-busy="true" role="status" data-i18n-aria="scanning" aria-label="Scanning..."></div>
+        <div id="grid-empty" class="empty" hidden>
+          <div class="empty-art"><svg class="i"><use href="#i-image"/></svg></div>
+          <p class="empty-title" id="empty-title" data-i18n="noImagesFound">No images found</p>
+          <p class="empty-hint" id="empty-hint" data-i18n="noImagesHint">Scroll the page to load more images, or try another tab.</p>
+          <button id="btn-retry" class="btn btn-ghost btn-sm"><svg class="i i-sm"><use href="#i-refresh"/></svg><span data-i18n="tryAgain">Try again</span></button>
         </div>
-        <div class="row-gap mt8">
-          <button id="btn-open-crop" class="btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 2v14a2 2 0 002 2h14"/><path d="M18 22V8a2 2 0 00-2-2H2"/></svg> <span data-i18n="openCropTool">Crop &amp; Adjust</span></button>
+        <div id="image-grid" class="grid grid-2col" role="list"></div>
+      </section>
+
+      <!-- ====== TOOLS ====== -->
+      <section id="tab-tools" class="view" role="tabpanel" aria-labelledby="tab-btn-tools">
+        <div class="card">
+          <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
+            <div class="drop-art"><svg class="i"><use href="#i-upload"/></svg></div>
+            <p class="drop-title" data-i18n="dropOrPaste">Drop an image here or paste a URL below</p>
+            <p class="drop-hint" id="drop-hint" data-i18n="pasteHint">or press Ctrl+V to paste an image</p>
+            <input type="file" id="file-input" accept="image/*" hidden>
+          </div>
+          <div class="input-icon mt10">
+            <svg class="i i-sm"><use href="#i-link"/></svg>
+            <input type="url" id="tool-url-input" class="input" data-i18n-placeholder="pasteUrlPlaceholder" placeholder="Paste image URL here..." spellcheck="false">
+          </div>
+          <div id="tool-preview" class="source" hidden>
+            <img id="tool-preview-img" src="" alt="">
+            <div class="source-text">
+              <span id="tool-preview-name" class="source-name"></span>
+              <span id="tool-preview-info" class="source-meta"></span>
+            </div>
+            <button id="tool-preview-clear" class="icon-btn" data-i18n-title="clearSource" title="Remove image"><svg class="i i-sm"><use href="#i-x"/></svg></button>
+          </div>
         </div>
-      </div>
-    </section>
 
-    <!-- ====== SETTINGS ====== -->
-    <section id="tab-settings" class="tab-content">
-      <div class="card">
-        <h3 class="card-title card-title-line"><svg class="card-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6Z"/></svg><span data-i18n="settingsTitle">Preferences</span></h3>
-        <div class="srow"><label data-i18n="settingQuality">Default Quality</label><div class="sctrl"><input type="range" id="setting-quality" min="10" max="100" value="85" class="range"><span id="quality-value" class="accent-val">85%</span></div></div>
-        <div class="srow"><label data-i18n="settingDefaultFormat">Default Format</label><div class="sctrl"><select id="setting-default-format" class="tsel"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp" selected>WebP</option><option value="avif">AVIF</option></select></div></div>
-        <div class="srow"><label data-i18n="settingResizeBehavior">Resize Behavior</label><div class="sctrl"><select id="setting-resize-behavior" class="tsel"><option value="crop" data-i18n="settingCrop">Center Crop</option><option value="fit" data-i18n="settingFit">Fit (Letterbox)</option></select></div></div>
-        <div class="srow"><label data-i18n="settingSaveAs">Ask save location</label><div class="sctrl"><label class="toggle"><input type="checkbox" id="setting-save-as" checked><span class="toggle-track"></span></label></div></div>
-        <div class="srow"><label data-i18n="settingShowNotif">Show save notification</label><div class="sctrl"><label class="toggle"><input type="checkbox" id="setting-show-notif" checked><span class="toggle-track"></span></label></div></div>
-        <div class="srow"><label data-i18n="settingOpenSidePanel">Open as Side Panel</label><div class="sctrl"><label class="toggle"><input type="checkbox" id="setting-open-sidepanel" checked><span class="toggle-track"></span></label></div></div>
-        <div class="srow"><label data-i18n="settingGoogleLens" data-i18n-title="settingGoogleLensHint" title="Allows user-triggered Google Lens searches for image URLs">Google Lens search</label><div class="sctrl"><label class="toggle"><input type="checkbox" id="setting-google-lens" checked><span class="toggle-track"></span></label></div></div>
-        <div class="srow"><label data-i18n="settingTheme">Theme</label><div class="sctrl"><select id="setting-theme" class="tsel"><option value="auto" data-i18n="themeAuto">Auto (System)</option><option value="light" data-i18n="themeLight">Light</option><option value="dark" data-i18n="themeDark">Dark</option></select></div></div>
-        <div class="srow"><label data-i18n="settingLanguage">Language</label><div class="sctrl"><select id="setting-language" class="tsel">
-          <option value="auto">Auto (Browser)</option>
-          <option value="en">English</option>
-          <option value="pt_PT">Português (PT)</option>
-          <option value="pt_BR">Português (BR)</option>
-          <option value="fr">Français</option>
-          <option value="es">Español</option>
-          <option value="de">Deutsch</option>
-          <option value="it">Italiano</option>
-          <option value="nl">Nederlands</option>
-          <option value="pl">Polski</option>
-          <option value="tr">Türkçe</option>
-          <option value="ru">Русский</option>
-          <option value="uk">Українська</option>
-          <option value="ar">العربية</option>
-          <option value="ja">日本語</option>
-          <option value="ko">한국어</option>
-          <option value="zh_CN">中文 (简体)</option>
-          <option value="zh_TW">中文 (繁體)</option>
-          <option value="vi">Tiếng Việt</option>
-        </select></div></div>
-      </div>
+        <div class="card">
+          <h3 class="card-title"><span class="card-icon"><svg class="i"><use href="#i-convert"/></svg></span><span id="convert-title" data-i18n="convertTitle">Convert</span></h3>
+          <div class="segmented segmented-block" id="convert-format" role="radiogroup" aria-labelledby="convert-title">
+            <button class="seg" data-value="png" role="radio">PNG</button>
+            <button class="seg" data-value="jpeg" role="radio">JPG</button>
+            <button class="seg active" data-value="webp" role="radio">WebP</button>
+            <button class="seg" data-value="avif" role="radio">AVIF</button>
+          </div>
+          <button id="btn-convert-url" class="btn btn-primary btn-block mt10"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="convertAndSave">Convert &amp; Save</span></button>
+        </div>
 
-      <!-- Download Options -->
-      <div class="card">
-        <h3 class="card-title card-title-line"><svg class="card-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg><span data-i18n="downloadOptions">Download Options</span></h3>
-        <div class="srow"><label data-i18n="settingSubfolder" data-i18n-title="settingSubfolderNote" title="Works best with 'Ask save location' disabled">Subfolder</label><div class="sctrl"><input type="text" id="setting-subfolder" class="tinput" style="width:140px" data-i18n-placeholder="settingSubfolderHint" placeholder="e.g. images/"></div></div>
-        <div class="srow"><label data-i18n="settingFilename">Filename</label><div class="sctrl"><select id="setting-filename" class="tsel"><option value="original" data-i18n="fnOriginal">Original name</option><option value="system" data-i18n="fnSystem">System name</option><option value="custom" data-i18n="fnCustom">Custom prefix</option></select></div></div>
-        <div id="custom-prefix-row" class="srow" style="display:none"><label data-i18n="settingPrefix">Prefix</label><div class="sctrl"><input type="text" id="setting-prefix" class="tinput" style="width:140px" placeholder="img_"></div></div>
-        <div class="srow"><label data-i18n="settingConvertOnDl" data-i18n-title="settingConvertOnDlHint" title="Only applies when downloading as Original format">Convert on download</label><div class="sctrl"><select id="setting-convert-dl" class="tsel"><option value="none" data-i18n="settingNone">None</option><option value="jpeg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select></div></div>
-        <div class="srow"><label data-i18n="settingZipDefault">ZIP by default</label><div class="sctrl"><label class="toggle"><input type="checkbox" id="setting-zip-default"><span class="toggle-track"></span></label></div></div>
-      </div>
+        <div class="card" id="format-advisor" hidden>
+          <h3 class="card-title"><span class="card-icon card-icon-amber"><svg class="i"><use href="#i-bulb"/></svg></span><span data-i18n="formatAdvisor">Format Advisor</span></h3>
+          <p id="advisor-recommendation" class="muted"></p>
+          <div id="advisor-sizes" class="bars"></div>
+        </div>
 
-      <div class="card card-footer">
-        <p>🔒 <span data-i18n="localProcessing">100% Local Processing</span></p>
-        <p class="muted" data-i18n="noTracking">No login. No tracking. External actions only run when clicked.</p>
-        <p class="muted" id="version-text">v2.2.0</p>
-        <p class="muted">by <a href="https://blackspirits.github.io" target="_blank" rel="noopener">BlackSpirits</a></p>
-        <p class="mt8"><a href="https://ko-fi.com/blackspirits" target="_blank" rel="noopener" class="btn btn-sm kofi-donate"><img src="icons/kofi.gif" alt="" class="kofi-icon-sm"> <span data-i18n="donate">Donate</span></a></p>
-      </div>
-    </section>
+        <div class="card">
+          <h3 class="card-title"><span class="card-icon card-icon-cyan"><svg class="i"><use href="#i-resize"/></svg></span><span data-i18n="resizeTitle">Resize</span></h3>
+          <div class="dims dims-split">
+            <label class="dim"><span data-i18n="placeholderWidth">W</span><input type="number" id="resize-url-w" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
+            <button id="resize-url-lock" class="icon-btn lock active" aria-pressed="true" data-i18n-title="titleLockRatio" title="Lock ratio"><svg class="i i-sm"><use href="#i-lock"/></svg></button>
+            <label class="dim"><span data-i18n="placeholderHeight">H</span><input type="number" id="resize-url-h" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
+          </div>
+          <label id="resize-mode-row" class="field field-inline mt10" hidden><span data-i18n="settingResizeBehavior">Resize Behavior</span>
+            <select id="resize-mode" class="select select-sm">
+              <option value="crop" data-i18n="settingCrop">Center Crop</option>
+              <option value="fit" data-i18n="settingFit">Fit (Letterbox)</option>
+            </select>
+          </label>
+          <div class="btn-row mt10">
+            <button id="btn-resize-url" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="resizeAndSave">Resize &amp; Save</span></button>
+            <button id="btn-open-crop" class="btn btn-ghost"><svg class="i i-sm"><use href="#i-crop"/></svg><span data-i18n="openCropTool">Open Crop Tool</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== SETTINGS ====== -->
+      <section id="tab-settings" class="view" role="tabpanel" aria-labelledby="tab-btn-settings">
+        <div class="card">
+          <h3 class="card-title"><span class="card-icon"><svg class="i"><use href="#i-settings"/></svg></span><span data-i18n="settingsTitle">Preferences</span></h3>
+          <div class="row">
+            <label for="setting-quality" data-i18n="settingQuality">Default Quality</label>
+            <div class="row-ctrl"><input type="range" id="setting-quality" min="10" max="100" step="1" value="85" class="range"><output id="quality-value" class="value">85%</output></div>
+          </div>
+          <div class="row">
+            <label id="default-format-label" data-i18n="settingDefaultFormat">Default Format</label>
+            <div class="row-ctrl">
+              <div class="segmented" id="setting-default-format" role="radiogroup" aria-labelledby="default-format-label">
+                <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" role="radio">AVIF</button>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <label for="setting-resize-behavior" data-i18n="settingResizeBehavior">Resize Behavior</label>
+            <div class="row-ctrl"><select id="setting-resize-behavior" class="select select-sm"><option value="crop" data-i18n="settingCrop">Center Crop</option><option value="fit" data-i18n="settingFit">Fit (Letterbox)</option></select></div>
+          </div>
+          <div class="row">
+            <label id="theme-label" data-i18n="settingTheme">Theme</label>
+            <div class="row-ctrl">
+              <div class="segmented" id="setting-theme" role="radiogroup" aria-labelledby="theme-label">
+                <button class="seg" data-value="auto" role="radio" data-i18n-title="themeAuto" title="Auto (System)"><svg class="i i-sm"><use href="#i-contrast"/></svg></button><button class="seg" data-value="light" role="radio" data-i18n-title="themeLight" title="Light"><svg class="i i-sm"><use href="#i-sun"/></svg></button><button class="seg" data-value="dark" role="radio" data-i18n-title="themeDark" title="Dark"><svg class="i i-sm"><use href="#i-moon"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <label for="setting-language" data-i18n="settingLanguage">Language</label>
+            <div class="row-ctrl"><select id="setting-language" class="select select-sm">
+              <option value="auto" data-i18n="langAuto">Automatic (browser)</option>
+              <option value="en">English</option>
+              <option value="pt_PT">Português (PT)</option>
+              <option value="pt_BR">Português (BR)</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+              <option value="de">Deutsch</option>
+              <option value="it">Italiano</option>
+              <option value="nl">Nederlands</option>
+              <option value="pl">Polski</option>
+              <option value="tr">Türkçe</option>
+              <option value="ru">Русский</option>
+              <option value="uk">Українська</option>
+              <option value="ar">العربية</option>
+              <option value="ja">日本語</option>
+              <option value="ko">한국어</option>
+              <option value="zh_CN">中文 (简体)</option>
+              <option value="zh_TW">中文 (繁體)</option>
+              <option value="vi">Tiếng Việt</option>
+            </select></div>
+          </div>
+          <div class="row">
+            <label for="setting-open-sidepanel" data-i18n="settingOpenSidePanel">Open as Side Panel</label>
+            <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-open-sidepanel" checked><span></span></label></div>
+          </div>
+          <div class="row">
+            <label for="setting-show-notif" data-i18n="settingShowNotif">Show save notification</label>
+            <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-show-notif" checked><span></span></label></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><label for="setting-google-lens" data-i18n="settingGoogleLens">Google Lens search</label><small data-i18n="settingGoogleLensHint">Allows user-triggered Google Lens searches for image URLs</small></div>
+            <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-google-lens"><span></span></label></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><span class="card-icon card-icon-cyan"><svg class="i"><use href="#i-download"/></svg></span><span data-i18n="downloadOptions">Download Options</span></h3>
+          <div class="row">
+            <label for="setting-save-as" data-i18n="settingSaveAs">Ask save location</label>
+            <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-save-as" checked><span></span></label></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><label for="setting-subfolder" data-i18n="settingSubfolder">Subfolder</label><small id="subfolder-note">Works best with 'Ask save location' turned off</small></div>
+            <div class="row-ctrl"><input type="text" id="setting-subfolder" class="input input-sm" data-i18n-placeholder="settingSubfolderHint" placeholder="e.g. images/" spellcheck="false"></div>
+          </div>
+          <div class="row">
+            <label for="setting-filename" data-i18n="settingFilename">Filename</label>
+            <div class="row-ctrl"><select id="setting-filename" class="select select-sm"><option value="original" data-i18n="fnOriginal">Original name</option><option value="system" data-i18n="fnSystem">System name</option><option value="custom" data-i18n="fnCustom">Custom prefix</option></select></div>
+          </div>
+          <div id="custom-prefix-row" class="row" hidden>
+            <label for="setting-prefix" data-i18n="settingPrefix">Prefix</label>
+            <div class="row-ctrl"><input type="text" id="setting-prefix" class="input input-sm" placeholder="img_" spellcheck="false"></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><label for="setting-convert-dl" data-i18n="settingConvertOnDl">Convert on download</label><small data-i18n="settingConvertOnDlHint">Only applies when downloading as Original format</small></div>
+            <div class="row-ctrl"><select id="setting-convert-dl" class="select select-sm"><option value="none" data-i18n="settingNone">None</option><option value="jpeg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select></div>
+          </div>
+          <div class="row">
+            <label for="setting-zip-default" data-i18n="settingZipDefault">ZIP by default</label>
+            <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-zip-default"><span></span></label></div>
+          </div>
+        </div>
+
+        <div class="card about">
+          <img src="icons/logo128.png" alt="" class="about-logo" width="52" height="52">
+          <div class="about-name"><span data-i18n="extShortName">ImageToolkit</span> <span class="about-version" id="version-text"></span></div>
+          <p class="about-badge"><svg class="i i-sm"><use href="#i-shield"/></svg><span data-i18n="localProcessing">100% Local Processing</span></p>
+          <p class="muted" data-i18n="noTracking">No login. No tracking. External actions only run when clicked.</p>
+          <p class="about-shortcut" id="shortcut-row" hidden><svg class="i i-sm"><use href="#i-keyboard"/></svg><span data-i18n="titleCapture">Capture area</span><kbd id="shortcut-key"></kbd></p>
+          <div class="about-links">
+            <a href="https://blackspirits.github.io" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">BlackSpirits</a>
+            <a href="https://ko-fi.com/blackspirits" target="_blank" rel="noopener" class="btn btn-ghost btn-sm btn-heart"><svg class="i i-sm"><use href="#i-heart"/></svg><span data-i18n="donate">Donate</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
 
     <!-- ====== ACTION BAR ====== -->
-    <div id="action-bar" class="action-bar" style="display:none">
-      <span class="action-label"><span id="action-bar-count">0</span> <span data-i18n="selected">selected</span></span>
-      <div class="action-btns">
-        <select id="action-format" class="tsel"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
-        <button id="action-download" class="btn btn-accent btn-sm" data-i18n="download">Download</button>
-        <button id="action-zip" class="btn btn-sm">ZIP</button>
+    <div id="action-bar" class="action-bar" hidden>
+      <div class="action-bar-inner">
+        <button id="action-clear" class="icon-btn" data-i18n-title="clearSelection" title="Clear selection"><svg class="i i-sm"><use href="#i-x"/></svg></button>
+        <span class="action-count"><svg class="i i-sm"><use href="#i-check"/></svg><strong id="action-bar-count">0</strong><span class="action-count-label" data-i18n="selected">selected</span></span>
+        <span class="spacer"></span>
+        <select id="action-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
+        <button id="action-copy-urls" class="icon-btn icon-btn-boxed" data-i18n-title="copyUrls" title="Copy URLs"><svg class="i i-sm"><use href="#i-link"/></svg></button>
+        <button id="action-zip" class="icon-btn icon-btn-boxed" data-i18n-title="downloadZip" title="Download as ZIP"><svg class="i i-sm"><use href="#i-archive"/></svg></button>
+        <button id="action-download" class="btn btn-primary btn-sm"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="download">Download</span></button>
+      </div>
+      <div id="batch-progress" class="progress" hidden>
+        <div class="progress-head"><span id="progress-text" data-i18n="processing">Processing</span><span id="progress-count">0/0</span></div>
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
       </div>
     </div>
 
     <!-- ====== PREVIEW ====== -->
-    <div id="preview-modal" class="modal" style="display:none">
-      <div class="modal-bg" id="preview-backdrop"></div>
+    <div id="preview-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="preview-filename">
+      <div class="modal-backdrop" id="preview-backdrop"></div>
       <div class="modal-box">
-        <div class="modal-head"><span id="preview-filename" class="modal-title">image.jpg</span><button id="preview-close" class="tbtn">✕</button></div>
-        <div class="modal-img"><img id="preview-img" src="" alt=""></div>
-        <div class="modal-meta"><span id="preview-dimensions">0 × 0</span><span id="preview-type" class="tag">JPG</span></div>
+        <div class="modal-head">
+          <div class="modal-titles">
+            <span id="preview-filename" class="modal-title"></span>
+            <span id="preview-meta" class="modal-meta"></span>
+          </div>
+          <button id="preview-close" class="icon-btn" data-i18n-title="close" title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="modal-stage">
+          <button id="preview-prev" class="stage-nav stage-prev" data-i18n-title="previousImage" title="Previous image"><svg class="i"><use href="#i-chevron-left"/></svg></button>
+          <img id="preview-img" src="" alt="">
+          <button id="preview-next" class="stage-nav stage-next" data-i18n-title="nextImage" title="Next image"><svg class="i"><use href="#i-chevron-right"/></svg></button>
+        </div>
         <div class="modal-acts">
-          <select id="preview-format" class="tsel"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
-          <button id="preview-download" class="btn btn-accent btn-sm" data-i18n="download">Download</button>
-          <button id="preview-copy" class="btn btn-sm" data-i18n="copyClipboard">Copy</button>
-          <button id="preview-resize" class="btn btn-sm" data-i18n="resize">Resize</button>
+          <select id="preview-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
+          <button id="preview-download" class="btn btn-primary btn-sm"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="download">Download</span></button>
+          <span class="spacer"></span>
+          <button id="preview-copy" class="icon-btn icon-btn-boxed" data-i18n-title="copyImage" title="Copy image"><svg class="i i-sm"><use href="#i-copy"/></svg></button>
+          <button id="preview-resize" class="icon-btn icon-btn-boxed" data-i18n-title="openCropTool" title="Open Crop Tool"><svg class="i i-sm"><use href="#i-crop"/></svg></button>
+          <button id="preview-open" class="icon-btn icon-btn-boxed" data-i18n-title="titleOpenTab" title="Open in new tab"><svg class="i i-sm"><use href="#i-external"/></svg></button>
+          <button id="preview-lens" class="icon-btn icon-btn-boxed" data-i18n-title="titleSearchSimilar" title="Search similar (Google Lens)"><svg class="i i-sm"><use href="#i-lens"/></svg></button>
         </div>
       </div>
     </div>
+
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
   </div>
+  <script src="lib/core.js"></script>
+  <script src="lib/i18n.js"></script>
+  <script src="lib/ui.js"></script>
   <script src="lib/jszip.min.js"></script>
   <script src="popup.js"></script>
 </body>

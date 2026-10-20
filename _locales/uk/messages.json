@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Зберігайте, конвертуйте, змінюйте розмір і копіюйте зображення. 100% локально, без трекінгу."
   },
-  "cmdQuickSave": {
-    "message": "Швидке збереження у форматі за замовчуванням"
-  },
   "menuParent": {
     "message": "Зберегти зображення як..."
   },
@@ -66,14 +63,6 @@
   "scanning": {
     "message": "Пошук..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ зображень",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Обробка"
   },
@@ -108,16 +97,16 @@
     "message": "Показувати сповіщення"
   },
   "settingTheme": {
-    "message": "Theme"
+    "message": "Тема"
   },
   "themeAuto": {
     "message": "Авто (Система)"
   },
   "themeLight": {
-    "message": "Light"
+    "message": "Світла"
   },
   "themeDark": {
-    "message": "Dark"
+    "message": "Темна"
   },
   "localProcessing": {
     "message": "100% локальна обробка"
@@ -161,9 +150,6 @@
   "errorCopyFailed": {
     "message": "Помилка копіювання"
   },
-  "errorOnSaving": {
-    "message": "Помилка при збереженні"
-  },
   "tabImages": {
     "message": "Зображення"
   },
@@ -187,9 +173,6 @@
   },
   "originalFormat": {
     "message": "Оригінал"
-  },
-  "resize": {
-    "message": "Змінити розмір"
   },
   "settingOpenSidePanel": {
     "message": "Відкрити як бічну панель"
@@ -223,6 +206,15 @@
   },
   "titleHideDupes": {
     "message": "Сховати дублікати"
+  },
+  "titleTransparency": {
+    "message": "Фон прозорості: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "Змінити макет"
@@ -269,12 +261,6 @@
   "outputSize": {
     "message": "Розмір виводу"
   },
-  "presets": {
-    "message": "Пресети"
-  },
-  "presetFree": {
-    "message": "Вільний"
-  },
   "applyDimensions": {
     "message": "Застосувати"
   },
@@ -295,9 +281,6 @@
   },
   "openCropTool": {
     "message": "Відкрити інструмент обрізки"
-  },
-  "lockRatio": {
-    "message": "Зафіксувати"
   },
   "titleCapture": {
     "message": "Захопити область"
@@ -355,9 +338,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP за замовчуванням"
-  },
-  "newImagesDetected": {
-    "message": "нових зображень знайдено"
   },
   "rescan": {
     "message": "Оновити"
@@ -459,19 +439,13 @@
     "message": "Застосовується лише при завантаженні в оригінальному форматі"
   },
   "settingSubfolderNote": {
-    "message": "Краще працює з вимкненим 'Запитувати місце збереження'"
-  },
-  "pTransform": {
-    "message": "Перетворити"
-  },
-  "pRotate": {
-    "message": "Повернути"
-  },
-  "pHorizontal": {
-    "message": "По горизонт."
-  },
-  "pVertical": {
-    "message": "По вертик."
+    "message": "Краще працює з вимкненим «$OPTION$»",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Повернути ліворуч"
@@ -496,5 +470,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Google Lens потрібен віддалений URL зображення"
+  },
+  "cmdCaptureArea": {
+    "message": "Захопити область сторінки",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Захопити видиму частину",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Розширення не мають доступу до цієї сторінки (сторінки браузера, Chrome Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Помилка захоплення",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Копіювати зображення",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "Копіювати URL",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "Скопійовано URL: $COUNT$",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "або натисніть Ctrl+V, щоб вставити зображення",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Зняти виділення",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "Збережено $DONE$ з $TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Фільтри",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Скинути фільтри",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Прокрутіть сторінку, щоб завантажити більше зображень, або спробуйте іншу вкладку.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Зображення завелике (макс. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "Частину зображень пропущено: на сторінці забагато зображень або дуже великі вбудовані зображення."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP буде завеликим (макс. $SIZE$). Виберіть менше зображень або завантажте їх без ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Максимум $MAX$ px на сторону.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Автоматично (браузер)"
+  },
+  "qualityLabel": {
+    "message": "Якість"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ нове зображення",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "Нові зображення: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ зображення",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "Зображень: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Сітка"
+  },
+  "layoutCompact": {
+    "message": "Компактна сітка"
+  },
+  "layoutList": {
+    "message": "Список"
+  },
+  "clearSource": {
+    "message": "Прибрати зображення"
+  },
+  "close": {
+    "message": "Закрити"
+  },
+  "previousImage": {
+    "message": "Попереднє зображення"
+  },
+  "nextImage": {
+    "message": "Наступне зображення"
+  },
+  "downloadZip": {
+    "message": "Завантажити як ZIP"
   }
 }

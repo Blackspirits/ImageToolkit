@@ -6,6 +6,93 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [2.4.0] - 2026-10-01
+
+### Added
+- **Accessible controls**: segmented choices (format, theme) are proper radio groups with a name, one Tab stop and arrow keys; the image grid is a single Tab stop with arrow-key navigation inside it (card actions stay available in the preview); icon buttons are labelled in every language.
+- The live "new images" notice also recognises inline SVG, `<picture>` sources and inline-style backgrounds added after the scan.
+- **Transparency background switch** in the image grid (automatic, light or dark), so dark icons stay visible on the dark theme and light ones on the light theme.
+- **New logo**: a continuous image frame that opens into an export arrow, on the brand gradient tile. Vector sources, usage rules and a light/dark wordmark live in `docs/brand`, with three cuts (Master, Compact for 32/48 px, Micro for 16 px), a 128 px store icon with the Web Store's 16 px padding, and `npm run build:icons` to re-render the PNG set.
+- **Redesigned interface** for the popup, side panel and editor: new design system (light/dark/auto), segmented tabs, collapsible filters, image cards with hover actions, floating selection bar, skeleton loading, toasts and an SVG icon set. System fonts only, no network.
+- **Three grid layouts** (grid, compact, list), search that also matches alt text, and a filter indicator with one-click reset.
+- **Keyboard support**: arrow-key navigation, Enter to preview, Space to select, Shift-click ranges, Ctrl/⌘-click toggles, `/` to search, Ctrl/⌘+A to select all, Esc to clear; ← / → to browse in the preview.
+- **Preview navigation** between the filtered images, with copy, edit, open and Google Lens actions.
+- **Copy image** from any card, the preview and the editor; **Copy URLs** for the whole selection.
+- **Paste to open**: Ctrl/⌘+V with an image or image URL loads it in Tools; images can also be dragged in from web pages.
+- **Capture visible page**, a 10-second capture delay, capture actions on the toolbar icon's right-click menu, and a working `Alt+Shift+S` shortcut for area capture.
+- The side panel **follows the active tab** and rescans after page loads.
+- **Editor**: floating transform bar, sticky footer (format, quality, Copy, Save), collapsible preset sections, exact crop sizes, proportional output size, `Ctrl/⌘+S` / `Ctrl/⌘+C`, and a fixed Instagram Story preset (1080×1920).
+- **Format Advisor** shows the original size next to PNG/JPG/WebP as bars and preselects the best format.
+- Hotlink-protected thumbnails are loaded through the extension instead of showing a broken image.
+- Google Lens appears in the image right-click menu when enabled.
+- Right-to-left layout for Arabic and correct `lang` for screen readers.
+- Colour contrast meets WCAG AA for every text/background token pair in both themes (secondary text on every surface, status colours on their tinted backgrounds, white on the primary button and badges), enforced in CI by `npm run check:contrast`.
+- `npm test` (unit), `npm run test:e2e` (Playwright, real extension), `npm run build` (reproducible Web Store ZIP) and a GitHub Actions workflow.
+
+### Fixed
+- Context menu "Save as…", "Copy", "Resize" and "Open in editor" work again on images a page builds with its own script (`blob:http(s)://…` URLs), which this release had started refusing with "Unsupported image URL". Only blob URLs of web pages are accepted, only for the image the user acts on; the scanner and every other scheme (`file:`, `javascript:`, `chrome:`, `chrome-extension:`…) stay excluded.
+- Inline SVG icons are listed at the size the page renders them (or their absolute width/height), not at their viewBox: a 24 px icon with `viewBox="0 -960 960 960"` was shown as 960×960, sorted above real photos and counted as "large". Hidden sprite sheets are no longer listed.
+- Resize sizes over 16384 px are refused with an error (in the panel and in the service worker) instead of being dropped, which saved the original image and reported success.
+- Editor: after typing an output size, changing the crop (or unlocking a fixed preset) kept stale numbers and saved a different size; the typed side is now kept, the other follows the crop, and the file is exactly the size shown, never stretched.
+- Area capture no longer falls back to the whole screenshot when cropping fails; it reports the error. Selections are validated.
+- Transparency in a small area of a large image (a few pixels) is detected, so the Format Advisor no longer recommends JPG for it.
+- Size probing reads the full size of ranged (206) answers instead of the 1-byte slice.
+- Format Advisor: a new source hides the previous figures and cancels the previous analysis immediately.
+- Bounded resources: one scan's message (8 MiB per inline image, 24 MiB in total), size probes (2 MiB per image, 8 MiB per batch), preview/dimension downloads (40 images, 48 MiB per scan, reserved before each download starts so parallel downloads cannot exceed it, reset on every scan) and ZIPs (256 MiB, checked before and during the batch, kept as bytes rather than base64).
+- Files saved from the editor and ZIP archives larger than ~36 MiB are handed to Chrome as a blob URL, released when the download finishes, instead of a base64 message. Images converted by the service worker are capped at 40 MiB, whose base64 (~53 MiB) still fits one 64 MiB message.
+- Non-text contrast (WCAG 1.4.11): fields, outlined buttons, chips, switches when off and the selected segment reach 3:1 in both themes; `npm run check:contrast` now checks these pairs and that the controls use them.
+- Upgrades remove the editor hand-off image that 2.3.5 could leave in `chrome.storage.local`.
+- Plurals ("1 image", "1 new image found"), the "Automatic (browser)" language option, the subfolder note naming the real "Ask save location" option, and the editor's "Quality" label are translated in all 18 languages; pt-PT and pt-BR use sentence case and "ex.:".
+- Inline SVG icons keep the colours the page paints them with (currentColor and CSS fills) instead of turning black.
+- The "new images" banner counts only images the panel has not listed yet, instead of every re-render on the page.
+- Editor: the crop size and the output size use the same rounding, so they no longer differ by one pixel; with the ratio locked, typing one crop side fills in the other.
+- "Original" downloads now keep the exact source bytes instead of re-encoding through the canvas. SVGs are no longer saved as PNG data with a `.svg` extension, GIFs keep their animation and JPEGs are not recompressed.
+- Saved files are named after the format actually produced. AVIF requests (not encodable by Chrome's canvas) fall back to WebP and are saved as `.webp` instead of `.avif`; the crop editor no longer writes PNG data to `.avif` files.
+- Batch downloads no longer open one Save As dialog and one notification per image, and now report how many images failed.
+- Changing any setting no longer erases the saved "at least" size filter.
+- Copying an image from the right-click menu now puts a real PNG on the clipboard (it used to depend on a document that never has focus).
+- Large screenshots no longer fail silently when opened in the editor (IndexedDB handoff instead of the 10 MB `storage.local`), and several editor windows no longer overwrite each other's image.
+- The "Resize Behavior" setting (crop/fit) is now applied in Tools; fit mode keeps transparency instead of painting black bars.
+- The editor no longer overflows the window and the Save button is always visible.
+- Card actions are no longer clipped in the grid; dark-theme text colours are applied consistently.
+- Scanning or capturing browser pages now shows a clear message instead of doing nothing.
+- The capture overlay is removed from the screen before the screenshot is taken, the selection keeps tracking outside the window, and it is clamped to the captured bitmap.
+- Background images on `position: fixed` elements are found; `javascript:`, `file:` and `blob:` URLs are no longer listed; srcset URLs containing commas are parsed correctly.
+- Re-injecting the scanner no longer throws or duplicates listeners; the page observer stops when idle.
+- Size probing no longer downloads whole files without limit.
+- Long non-Latin filenames (e.g. Japanese) are no longer reduced to `image`.
+- "Saved as" messages now show the real output format; substitutions containing `$` are no longer mangled.
+- Download options (subfolder, file name pattern) now also apply to right-click saves.
+- A failed offscreen document creation no longer blocks every later conversion until the browser restarts.
+- The Format Advisor downloads and decodes the image once for all formats (it used to fetch it three times), and a newer image supersedes a pending analysis.
+- Downloads that Chrome does not start are reported as errors, and closing the Save As dialog no longer shows "Saved".
+- The preview acts on the image it shows, even if late size probes re-sort the grid underneath it.
+- "Custom" in the editor lets the output size follow the crop again after a fixed-size preset (it used to stretch the new crop).
+- Quick successive setting changes no longer overwrite each other.
+- In Tools, a slow earlier image (URL or file) can no longer replace a newer one.
+- The Format Advisor in one window no longer cancels another window's analysis; a new request in the same window aborts the old download.
+- Hotlink-protected images get their dimensions (and thumbnails) through the extension, so size filters no longer hide them.
+- Closing Save As for a ZIP ends quietly instead of reporting success.
+- Downloads without Content-Length stop at the 40 MB cap instead of being read in full first; encoded results and local files over the cap are refused before being expanded to base64.
+- Shift-click ranges use the anchor image, not a position that filtering may have changed.
+- The editor stage keeps the image proportions for extreme panoramas.
+- Tabs follow the WAI-ARIA pattern (arrow keys, roving tabindex), the preview dialog traps focus and makes the background inert, and selection state is exposed on a real checkbox.
+- "Original" detects SVG by its content, so SVGs served as `text/plain` or XML are saved correctly; other unknown types fall back to the URL extension, while HTML error pages are still refused.
+
+### Changed
+- Google Lens is now opt-in (off by default).
+- Oversized outputs (more than 16384 px per side or 100 MP) and inputs above 40 MB are rejected with a clear error.
+- Shared code moved to `lib/` (`core.js`, `i18n.js`, `ui.js`, `ui.css`, `handoff.js`); the validator now also checks file references, placeholders, unused and undefined i18n keys, and version parity.
+
+### Security
+- The background service worker and offscreen document only accept privileged messages from extension pages; content scripts are limited to the capture and new-images notifications.
+- Instructions received by the service worker are validated (formats, sizes, quality, colours).
+- The sender check no longer depends only on `MessageSender.url` (an optional field): it falls back to `origin`, and refuses anything it cannot prove is an extension page.
+
+### Removed
+- The unused `activeTab` permission (covered by the existing host permission).
+- The Ko-fi GIF (replaced by an icon) and unused i18n keys.
+
 ## [2.3.5] - 2026-04-27
 
 ### Fixed

@@ -10,9 +10,6 @@
   "extDescription": {
     "message": "Сохраняйте, конвертируйте, меняйте размер и копируйте изображения. 100% локально, без трекинга."
   },
-  "cmdQuickSave": {
-    "message": "Быстрое сохранение в формате по умолчанию"
-  },
   "menuParent": {
     "message": "Сохранить изображение как..."
   },
@@ -66,14 +63,6 @@
   "scanning": {
     "message": "Поиск..."
   },
-  "imagesFound": {
-    "message": "$COUNT$ изображений",
-    "placeholders": {
-      "COUNT": {
-        "content": "$1"
-      }
-    }
-  },
   "processing": {
     "message": "Обработка"
   },
@@ -108,16 +97,16 @@
     "message": "Показывать уведомление"
   },
   "settingTheme": {
-    "message": "Theme"
+    "message": "Тема"
   },
   "themeAuto": {
     "message": "Авто (Система)"
   },
   "themeLight": {
-    "message": "Light"
+    "message": "Светлая"
   },
   "themeDark": {
-    "message": "Dark"
+    "message": "Тёмная"
   },
   "localProcessing": {
     "message": "100% локальная обработка"
@@ -161,9 +150,6 @@
   "errorCopyFailed": {
     "message": "Ошибка копирования"
   },
-  "errorOnSaving": {
-    "message": "Ошибка при сохранении"
-  },
   "tabImages": {
     "message": "Картинки"
   },
@@ -187,9 +173,6 @@
   },
   "originalFormat": {
     "message": "Оригинал"
-  },
-  "resize": {
-    "message": "Изменить размер"
   },
   "settingOpenSidePanel": {
     "message": "Открыть как боковую панель"
@@ -223,6 +206,15 @@
   },
   "titleHideDupes": {
     "message": "Скрыть дубликаты"
+  },
+  "titleTransparency": {
+    "message": "Фон прозрачности: $MODE$",
+    "placeholders": {
+      "MODE": {
+        "content": "$1",
+        "example": "Auto"
+      }
+    }
   },
   "titleToggleLayout": {
     "message": "Сменить вид"
@@ -269,12 +261,6 @@
   "outputSize": {
     "message": "Размер вывода"
   },
-  "presets": {
-    "message": "Предустановки"
-  },
-  "presetFree": {
-    "message": "Свободно"
-  },
   "applyDimensions": {
     "message": "Применить"
   },
@@ -295,9 +281,6 @@
   },
   "openCropTool": {
     "message": "Открыть инструмент обрезки"
-  },
-  "lockRatio": {
-    "message": "Зафиксировать"
   },
   "titleCapture": {
     "message": "Захватить область"
@@ -355,9 +338,6 @@
   },
   "settingZipDefault": {
     "message": "ZIP по умолчанию"
-  },
-  "newImagesDetected": {
-    "message": "новых изображений найдено"
   },
   "rescan": {
     "message": "Обновить"
@@ -459,19 +439,13 @@
     "message": "Применяется только при скачивании в исходном формате"
   },
   "settingSubfolderNote": {
-    "message": "Лучше работает с отключённым 'Запрашивать место сохранения'"
-  },
-  "pTransform": {
-    "message": "Преобразовать"
-  },
-  "pRotate": {
-    "message": "Повернуть"
-  },
-  "pHorizontal": {
-    "message": "По горизонт."
-  },
-  "pVertical": {
-    "message": "По вертик."
+    "message": "Лучше работает с отключённым «$OPTION$»",
+    "placeholders": {
+      "OPTION": {
+        "content": "$1",
+        "example": "Ask save location"
+      }
+    }
   },
   "pRotateLeft": {
     "message": "Повернуть влево"
@@ -496,5 +470,170 @@
   },
   "googleLensNeedsUrl": {
     "message": "Для Google Lens нужен удалённый URL изображения"
+  },
+  "cmdCaptureArea": {
+    "message": "Захватить область страницы",
+    "description": "Keyboard shortcut description"
+  },
+  "captureVisible": {
+    "message": "Захватить видимую часть",
+    "description": "Button/menu: screenshot of the visible part of the tab"
+  },
+  "errorRestrictedPage": {
+    "message": "Расширения не имеют доступа к этой странице (страницы браузера, Chrome Web Store).",
+    "description": "Shown when the current tab cannot be scanned or captured"
+  },
+  "errorCaptureFailed": {
+    "message": "Ошибка захвата",
+    "description": "Screenshot error prefix"
+  },
+  "copyImage": {
+    "message": "Копировать изображение",
+    "description": "Button: copy image to clipboard"
+  },
+  "copyUrls": {
+    "message": "Копировать URL",
+    "description": "Button: copy the selected image URLs"
+  },
+  "urlsCopied": {
+    "message": "Скопировано URL: $COUNT$",
+    "description": "Toast after copying URLs",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "pasteHint": {
+    "message": "или нажмите Ctrl+V, чтобы вставить изображение",
+    "description": "Drop zone hint"
+  },
+  "clearSelection": {
+    "message": "Снять выделение",
+    "description": "Button: deselect all images"
+  },
+  "batchResult": {
+    "message": "Сохранено $DONE$ из $TOTAL$",
+    "description": "Batch download result",
+    "placeholders": {
+      "DONE": {
+        "content": "$1",
+        "example": "9"
+      },
+      "TOTAL": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "filters": {
+    "message": "Фильтры",
+    "description": "Button: show/hide filters"
+  },
+  "resetFilters": {
+    "message": "Сбросить фильтры",
+    "description": "Button: clear all filters"
+  },
+  "noImagesHint": {
+    "message": "Прокрутите страницу, чтобы загрузить больше изображений, или попробуйте другую вкладку.",
+    "description": "Empty state hint"
+  },
+  "errorTooLarge": {
+    "message": "Изображение слишком большое (макс. $SIZE$)",
+    "description": "Shown when a local image exceeds the size limit",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "40.00 MB"
+      }
+    }
+  },
+  "scanTruncated": {
+    "message": "Часть изображений пропущена: на странице слишком много изображений или очень большие встроенные изображения."
+  },
+  "errorZipTooLarge": {
+    "message": "ZIP будет слишком большим (макс. $SIZE$). Выберите меньше изображений или скачайте их без ZIP.",
+    "placeholders": {
+      "SIZE": {
+        "content": "$1",
+        "example": "256.00 MB"
+      }
+    }
+  },
+  "errorMaxSide": {
+    "message": "Максимум $MAX$ px по стороне.",
+    "placeholders": {
+      "MAX": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "langAuto": {
+    "message": "Автоматически (браузер)"
+  },
+  "qualityLabel": {
+    "message": "Качество"
+  },
+  "newImagesOne": {
+    "message": "+$COUNT$ новое изображение",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "newImagesOther": {
+    "message": "Новые изображения: +$COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOne": {
+    "message": "$COUNT$ изображение",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "imagesFoundOther": {
+    "message": "Изображений: $COUNT$",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "layoutGrid": {
+    "message": "Сетка"
+  },
+  "layoutCompact": {
+    "message": "Компактная сетка"
+  },
+  "layoutList": {
+    "message": "Список"
+  },
+  "clearSource": {
+    "message": "Убрать изображение"
+  },
+  "close": {
+    "message": "Закрыть"
+  },
+  "previousImage": {
+    "message": "Предыдущее изображение"
+  },
+  "nextImage": {
+    "message": "Следующее изображение"
+  },
+  "downloadZip": {
+    "message": "Скачать как ZIP"
   }
 }
