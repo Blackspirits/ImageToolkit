@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Anotar"
+  },
+  "annotateHint": {
+    "message": "Anotar: desfocar, pixelizar, caixas, setas, texto"
+  },
+  "toolPixelate": {
+    "message": "Pixelizar"
+  },
+  "toolBlur": {
+    "message": "Desfocar"
+  },
+  "toolBox": {
+    "message": "Caixa"
+  },
+  "toolArrow": {
+    "message": "Seta"
+  },
+  "toolText": {
+    "message": "Texto"
+  },
+  "toolHighlight": {
+    "message": "Destacar"
+  },
+  "annotColor": {
+    "message": "Cor"
+  },
+  "annotSize": {
+    "message": "Espessura"
+  },
+  "sizeFine": {
+    "message": "Fina"
+  },
+  "sizeMedium": {
+    "message": "Média"
+  },
+  "sizeThick": {
+    "message": "Grossa"
+  },
+  "undo": {
+    "message": "Desfazer"
+  },
+  "redo": {
+    "message": "Refazer"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "textPlaceholder": {
+    "message": "Digite e pressione Enter"
   }
 }

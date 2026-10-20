@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Annoter"
+  },
+  "annotateHint": {
+    "message": "Annoter : flouter, pixeliser, cadres, flèches, texte"
+  },
+  "toolPixelate": {
+    "message": "Pixeliser"
+  },
+  "toolBlur": {
+    "message": "Flouter"
+  },
+  "toolBox": {
+    "message": "Cadre"
+  },
+  "toolArrow": {
+    "message": "Flèche"
+  },
+  "toolText": {
+    "message": "Texte"
+  },
+  "toolHighlight": {
+    "message": "Surligner"
+  },
+  "annotColor": {
+    "message": "Couleur"
+  },
+  "annotSize": {
+    "message": "Épaisseur"
+  },
+  "sizeFine": {
+    "message": "Fin"
+  },
+  "sizeMedium": {
+    "message": "Moyen"
+  },
+  "sizeThick": {
+    "message": "Épais"
+  },
+  "undo": {
+    "message": "Annuler"
+  },
+  "redo": {
+    "message": "Rétablir"
+  },
+  "cancel": {
+    "message": "Annuler"
+  },
+  "textPlaceholder": {
+    "message": "Saisissez puis appuyez sur Entrée"
   }
 }

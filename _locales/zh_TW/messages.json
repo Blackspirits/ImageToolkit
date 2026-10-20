@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "標註"
+  },
+  "annotateHint": {
+    "message": "標註：模糊、馬賽克、方框、箭頭、文字"
+  },
+  "toolPixelate": {
+    "message": "馬賽克"
+  },
+  "toolBlur": {
+    "message": "模糊"
+  },
+  "toolBox": {
+    "message": "方框"
+  },
+  "toolArrow": {
+    "message": "箭頭"
+  },
+  "toolText": {
+    "message": "文字"
+  },
+  "toolHighlight": {
+    "message": "螢光筆"
+  },
+  "annotColor": {
+    "message": "顏色"
+  },
+  "annotSize": {
+    "message": "粗細"
+  },
+  "sizeFine": {
+    "message": "細"
+  },
+  "sizeMedium": {
+    "message": "中"
+  },
+  "sizeThick": {
+    "message": "粗"
+  },
+  "undo": {
+    "message": "復原"
+  },
+  "redo": {
+    "message": "重做"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "textPlaceholder": {
+    "message": "輸入後按 Enter"
   }
 }

@@ -96,3 +96,27 @@ details.panel:not([open]) .chev{transform:rotate(-90deg)}
 
 /* File sizes and dimensions keep their own direction inside RTL layouts */
 .pill,.value{direction:ltr;unicode-bidi:isolate}
+
+/* ---------- Annotate ---------- */
+.annot-layer{position:absolute;inset:0;z-index:20;background:var(--checker);animation:annotIn .18s}
+@keyframes annotIn{from{opacity:0}}
+.annot-scroll{position:absolute;inset:0;overflow:auto;display:flex;padding:24px 24px 96px}
+.annot-board{position:relative;margin:auto;flex:none;box-shadow:0 18px 50px -18px rgba(0,0,0,.55);border-radius:2px}
+.annot-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.annot-overlay{cursor:crosshair;touch-action:none}
+.annot-overlay[data-tool="text"]{cursor:text}
+.annot-bar{gap:4px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100% - 32px)}
+/* While annotating, crop and save wait: they would act on the image without the marks. */
+.app.annotating .sidebar,.app.annotating .topbar-info{opacity:.45;pointer-events:none;filter:saturate(.6);transition:opacity .2s}
+.annot-group{display:flex;align-items:center;gap:2px}
+.annot-tool.active{color:var(--accent-text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent-line)}
+.annot-color{width:22px;height:22px;margin:0 2px;border-radius:50%;background:var(--swatch);box-shadow:0 0 0 1px var(--control-line),inset 0 0 0 1px rgba(0,0,0,.15);transition:transform .12s,box-shadow .12s}
+.annot-color:hover{transform:scale(1.12)}
+.annot-color.active{box-shadow:0 0 0 2px var(--bg-elev),0 0 0 4px var(--accent)}
+.annot-size{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:var(--text-2)}
+.annot-size i{width:var(--d);height:var(--d);border-radius:50%;background:currentColor}
+.annot-size:hover{background:var(--bg-hover);color:var(--text)}
+.annot-size.active{color:var(--accent-text);background:var(--accent-soft)}
+.annot-bar .icon-btn:disabled{opacity:.35;pointer-events:none}
+.annot-text{position:absolute;min-width:140px;transform:translateY(-2px);padding:2px 6px;border:1.5px dashed var(--accent);border-radius:6px;background:rgba(255,255,255,.85);font-weight:700;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;outline:none}
+.app.dark .annot-text{background:rgba(20,20,30,.85)}

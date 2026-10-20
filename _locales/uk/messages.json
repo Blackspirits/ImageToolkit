@@ -807,5 +807,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Позначки"
+  },
+  "annotateHint": {
+    "message": "Позначки: розмиття, пікселізація, рамки, стрілки, текст"
+  },
+  "toolPixelate": {
+    "message": "Пікселізація"
+  },
+  "toolBlur": {
+    "message": "Розмиття"
+  },
+  "toolBox": {
+    "message": "Рамка"
+  },
+  "toolArrow": {
+    "message": "Стрілка"
+  },
+  "toolText": {
+    "message": "Текст"
+  },
+  "toolHighlight": {
+    "message": "Виділення"
+  },
+  "annotColor": {
+    "message": "Колір"
+  },
+  "annotSize": {
+    "message": "Товщина"
+  },
+  "sizeFine": {
+    "message": "Тонка"
+  },
+  "sizeMedium": {
+    "message": "Середня"
+  },
+  "sizeThick": {
+    "message": "Товста"
+  },
+  "undo": {
+    "message": "Скасувати"
+  },
+  "redo": {
+    "message": "Повторити"
+  },
+  "cancel": {
+    "message": "Скасувати"
+  },
+  "textPlaceholder": {
+    "message": "Введіть текст і натисніть Enter"
   }
 }

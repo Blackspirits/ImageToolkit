@@ -807,5 +807,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Annota"
+  },
+  "annotateHint": {
+    "message": "Annota: sfoca, pixella, riquadri, frecce, testo"
+  },
+  "toolPixelate": {
+    "message": "Pixella"
+  },
+  "toolBlur": {
+    "message": "Sfoca"
+  },
+  "toolBox": {
+    "message": "Riquadro"
+  },
+  "toolArrow": {
+    "message": "Freccia"
+  },
+  "toolText": {
+    "message": "Testo"
+  },
+  "toolHighlight": {
+    "message": "Evidenzia"
+  },
+  "annotColor": {
+    "message": "Colore"
+  },
+  "annotSize": {
+    "message": "Spessore"
+  },
+  "sizeFine": {
+    "message": "Sottile"
+  },
+  "sizeMedium": {
+    "message": "Media"
+  },
+  "sizeThick": {
+    "message": "Spessa"
+  },
+  "undo": {
+    "message": "Annulla"
+  },
+  "redo": {
+    "message": "Ripeti"
+  },
+  "cancel": {
+    "message": "Annulla"
+  },
+  "textPlaceholder": {
+    "message": "Scrivi e premi Invio"
   }
 }

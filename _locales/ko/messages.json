@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "주석"
+  },
+  "annotateHint": {
+    "message": "주석: 흐림, 모자이크, 상자, 화살표, 텍스트"
+  },
+  "toolPixelate": {
+    "message": "모자이크"
+  },
+  "toolBlur": {
+    "message": "흐림"
+  },
+  "toolBox": {
+    "message": "상자"
+  },
+  "toolArrow": {
+    "message": "화살표"
+  },
+  "toolText": {
+    "message": "텍스트"
+  },
+  "toolHighlight": {
+    "message": "강조"
+  },
+  "annotColor": {
+    "message": "색상"
+  },
+  "annotSize": {
+    "message": "두께"
+  },
+  "sizeFine": {
+    "message": "얇게"
+  },
+  "sizeMedium": {
+    "message": "보통"
+  },
+  "sizeThick": {
+    "message": "굵게"
+  },
+  "undo": {
+    "message": "실행 취소"
+  },
+  "redo": {
+    "message": "다시 실행"
+  },
+  "cancel": {
+    "message": "취소"
+  },
+  "textPlaceholder": {
+    "message": "입력 후 Enter"
   }
 }

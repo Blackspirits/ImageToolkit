@@ -807,5 +807,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Пометки"
+  },
+  "annotateHint": {
+    "message": "Пометки: размытие, пикселизация, рамки, стрелки, текст"
+  },
+  "toolPixelate": {
+    "message": "Пикселизация"
+  },
+  "toolBlur": {
+    "message": "Размытие"
+  },
+  "toolBox": {
+    "message": "Рамка"
+  },
+  "toolArrow": {
+    "message": "Стрелка"
+  },
+  "toolText": {
+    "message": "Текст"
+  },
+  "toolHighlight": {
+    "message": "Выделение"
+  },
+  "annotColor": {
+    "message": "Цвет"
+  },
+  "annotSize": {
+    "message": "Толщина"
+  },
+  "sizeFine": {
+    "message": "Тонкая"
+  },
+  "sizeMedium": {
+    "message": "Средняя"
+  },
+  "sizeThick": {
+    "message": "Толстая"
+  },
+  "undo": {
+    "message": "Отменить"
+  },
+  "redo": {
+    "message": "Повторить"
+  },
+  "cancel": {
+    "message": "Отмена"
+  },
+  "textPlaceholder": {
+    "message": "Введите текст и нажмите Enter"
   }
 }

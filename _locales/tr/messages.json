@@ -807,5 +807,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Açıklama ekle"
+  },
+  "annotateHint": {
+    "message": "Açıklama: bulanıklaştır, pikselleştir, kutu, ok, metin"
+  },
+  "toolPixelate": {
+    "message": "Pikselleştir"
+  },
+  "toolBlur": {
+    "message": "Bulanıklaştır"
+  },
+  "toolBox": {
+    "message": "Kutu"
+  },
+  "toolArrow": {
+    "message": "Ok"
+  },
+  "toolText": {
+    "message": "Metin"
+  },
+  "toolHighlight": {
+    "message": "Vurgula"
+  },
+  "annotColor": {
+    "message": "Renk"
+  },
+  "annotSize": {
+    "message": "Kalınlık"
+  },
+  "sizeFine": {
+    "message": "İnce"
+  },
+  "sizeMedium": {
+    "message": "Orta"
+  },
+  "sizeThick": {
+    "message": "Kalın"
+  },
+  "undo": {
+    "message": "Geri al"
+  },
+  "redo": {
+    "message": "Yinele"
+  },
+  "cancel": {
+    "message": "İptal"
+  },
+  "textPlaceholder": {
+    "message": "Yazın ve Enter'a basın"
   }
 }

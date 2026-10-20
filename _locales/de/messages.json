@@ -808,5 +808,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Markieren"
+  },
+  "annotateHint": {
+    "message": "Markieren: Weichzeichnen, Verpixeln, Rahmen, Pfeile, Text"
+  },
+  "toolPixelate": {
+    "message": "Verpixeln"
+  },
+  "toolBlur": {
+    "message": "Weichzeichnen"
+  },
+  "toolBox": {
+    "message": "Rahmen"
+  },
+  "toolArrow": {
+    "message": "Pfeil"
+  },
+  "toolText": {
+    "message": "Text"
+  },
+  "toolHighlight": {
+    "message": "Hervorheben"
+  },
+  "annotColor": {
+    "message": "Farbe"
+  },
+  "annotSize": {
+    "message": "Stärke"
+  },
+  "sizeFine": {
+    "message": "Fein"
+  },
+  "sizeMedium": {
+    "message": "Mittel"
+  },
+  "sizeThick": {
+    "message": "Dick"
+  },
+  "undo": {
+    "message": "Rückgängig"
+  },
+  "redo": {
+    "message": "Wiederholen"
+  },
+  "cancel": {
+    "message": "Abbrechen"
+  },
+  "textPlaceholder": {
+    "message": "Text eingeben, dann Eingabe"
   }
 }

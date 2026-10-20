@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Chú thích"
+  },
+  "annotateHint": {
+    "message": "Chú thích: làm mờ, làm nhòe điểm ảnh, khung, mũi tên, chữ"
+  },
+  "toolPixelate": {
+    "message": "Làm nhòe điểm ảnh"
+  },
+  "toolBlur": {
+    "message": "Làm mờ"
+  },
+  "toolBox": {
+    "message": "Khung"
+  },
+  "toolArrow": {
+    "message": "Mũi tên"
+  },
+  "toolText": {
+    "message": "Chữ"
+  },
+  "toolHighlight": {
+    "message": "Tô sáng"
+  },
+  "annotColor": {
+    "message": "Màu"
+  },
+  "annotSize": {
+    "message": "Độ dày"
+  },
+  "sizeFine": {
+    "message": "Mảnh"
+  },
+  "sizeMedium": {
+    "message": "Vừa"
+  },
+  "sizeThick": {
+    "message": "Dày"
+  },
+  "undo": {
+    "message": "Hoàn tác"
+  },
+  "redo": {
+    "message": "Làm lại"
+  },
+  "cancel": {
+    "message": "Hủy"
+  },
+  "textPlaceholder": {
+    "message": "Nhập rồi nhấn Enter"
   }
 }

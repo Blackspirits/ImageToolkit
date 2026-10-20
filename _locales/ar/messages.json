@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "تعليقات توضيحية"
+  },
+  "annotateHint": {
+    "message": "تعليقات: تمويه، بكسلة، مربعات، أسهم، نص"
+  },
+  "toolPixelate": {
+    "message": "بكسلة"
+  },
+  "toolBlur": {
+    "message": "تمويه"
+  },
+  "toolBox": {
+    "message": "مربع"
+  },
+  "toolArrow": {
+    "message": "سهم"
+  },
+  "toolText": {
+    "message": "نص"
+  },
+  "toolHighlight": {
+    "message": "تمييز"
+  },
+  "annotColor": {
+    "message": "اللون"
+  },
+  "annotSize": {
+    "message": "السُّمك"
+  },
+  "sizeFine": {
+    "message": "رفيع"
+  },
+  "sizeMedium": {
+    "message": "متوسط"
+  },
+  "sizeThick": {
+    "message": "عريض"
+  },
+  "undo": {
+    "message": "تراجع"
+  },
+  "redo": {
+    "message": "إعادة"
+  },
+  "cancel": {
+    "message": "إلغاء"
+  },
+  "textPlaceholder": {
+    "message": "اكتب ثم اضغط Enter"
   }
 }

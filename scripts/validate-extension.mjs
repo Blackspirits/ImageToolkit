@@ -8,8 +8,8 @@ const args = new Set(process.argv.slice(2));
 const jsOnly = args.has('--js-only');
 const i18nOnly = args.has('--i18n-only');
 
-const JS_FILES = ['background.js', 'content.js', 'offscreen.js', 'popup.js', 'resize.js', 'capture.js', 'lib/core.js', 'lib/i18n.js', 'lib/ui.js', 'lib/handoff.js'];
-const I18N_SOURCES = ['background.js', 'capture.js', 'popup.js', 'resize.js', 'popup.html', 'resize.html', 'manifest.json'];
+const JS_FILES = ['background.js', 'content.js', 'offscreen.js', 'popup.js', 'resize.js', 'capture.js', 'lib/core.js', 'lib/i18n.js', 'lib/ui.js', 'lib/handoff.js', 'lib/annotate.js'];
+const I18N_SOURCES = ['background.js', 'capture.js', 'popup.js', 'resize.js', 'lib/annotate.js', 'popup.html', 'resize.html', 'manifest.json'];
 
 const errors = [];
 const fail = (message) => errors.push(message);

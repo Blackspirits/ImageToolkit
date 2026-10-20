@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Annotate"
+  },
+  "annotateHint": {
+    "message": "Annotate: blur, pixelate, boxes, arrows, text"
+  },
+  "toolPixelate": {
+    "message": "Pixelate"
+  },
+  "toolBlur": {
+    "message": "Blur"
+  },
+  "toolBox": {
+    "message": "Box"
+  },
+  "toolArrow": {
+    "message": "Arrow"
+  },
+  "toolText": {
+    "message": "Text"
+  },
+  "toolHighlight": {
+    "message": "Highlight"
+  },
+  "annotColor": {
+    "message": "Colour"
+  },
+  "annotSize": {
+    "message": "Thickness"
+  },
+  "sizeFine": {
+    "message": "Fine"
+  },
+  "sizeMedium": {
+    "message": "Medium"
+  },
+  "sizeThick": {
+    "message": "Thick"
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "redo": {
+    "message": "Redo"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "textPlaceholder": {
+    "message": "Type, then press Enter"
   }
 }

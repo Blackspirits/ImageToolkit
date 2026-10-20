@@ -808,5 +808,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Anotar"
+  },
+  "annotateHint": {
+    "message": "Anotar: desenfocar, pixelar, cuadros, flechas, texto"
+  },
+  "toolPixelate": {
+    "message": "Pixelar"
+  },
+  "toolBlur": {
+    "message": "Desenfocar"
+  },
+  "toolBox": {
+    "message": "Cuadro"
+  },
+  "toolArrow": {
+    "message": "Flecha"
+  },
+  "toolText": {
+    "message": "Texto"
+  },
+  "toolHighlight": {
+    "message": "Resaltar"
+  },
+  "annotColor": {
+    "message": "Color"
+  },
+  "annotSize": {
+    "message": "Grosor"
+  },
+  "sizeFine": {
+    "message": "Fino"
+  },
+  "sizeMedium": {
+    "message": "Medio"
+  },
+  "sizeThick": {
+    "message": "Grueso"
+  },
+  "undo": {
+    "message": "Deshacer"
+  },
+  "redo": {
+    "message": "Rehacer"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "textPlaceholder": {
+    "message": "Escribe y pulsa Intro"
   }
 }

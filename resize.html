@@ -11,6 +11,15 @@
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-annotate" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-tool-pixelate" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/></symbol>
+    <symbol id="i-tool-blur" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="2.5 2.5"/><circle cx="12" cy="12" r="4.5"/></symbol>
+    <symbol id="i-tool-box" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/></symbol>
+    <symbol id="i-tool-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5"/><path d="M9 5h10v10"/></symbol>
+    <symbol id="i-tool-text" viewBox="0 0 24 24"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></symbol>
+    <symbol id="i-tool-highlight" viewBox="0 0 24 24"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
     <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
     <symbol id="i-flip-h" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7 3 12l5 5V7Z"/><path d="M16 7l5 5-5 5V7Z" stroke-dasharray="2 2.2"/></symbol>
     <symbol id="i-flip-v" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8l5-5 5 5H7Z"/><path d="M7 16l5 5 5-5H7Z" stroke-dasharray="2 2.2"/></symbol>
@@ -55,6 +64,8 @@
           <button class="icon-btn" id="btn-rotate-left" data-i18n-title="pRotateLeft" title="Rotate left"><svg class="i"><use href="#i-rotate"/></svg></button>
           <button class="icon-btn" id="btn-flip-h" data-i18n-title="pFlipH" title="Flip horizontal"><svg class="i"><use href="#i-flip-h"/></svg></button>
           <button class="icon-btn" id="btn-flip-v" data-i18n-title="pFlipV" title="Flip vertical"><svg class="i"><use href="#i-flip-v"/></svg></button>
+          <span class="tool-sep"></span>
+          <button class="icon-btn" id="btn-annotate" data-i18n-title="annotateHint" title="Annotate: blur, pixelate, boxes, arrows, text"><svg class="i"><use href="#i-annotate"/></svg></button>
           <span class="tool-sep"></span>
           <button class="icon-btn" id="btn-reset" data-i18n-title="resetCrop" title="Reset"><svg class="i"><use href="#i-reset"/></svg></button>
           <div class="bg-group" id="bg-group" role="group" data-i18n-aria="bgPreview" aria-label="Background Preview" hidden>
@@ -186,6 +197,7 @@
   <script src="lib/i18n.js"></script>
   <script src="lib/ui.js"></script>
   <script src="lib/handoff.js"></script>
+  <script src="lib/annotate.js"></script>
   <script src="lib/cropper.min.js"></script>
   <script src="resize.js"></script>
 </body>

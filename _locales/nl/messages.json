@@ -807,5 +807,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Aantekenen"
+  },
+  "annotateHint": {
+    "message": "Aantekenen: vervagen, pixeleren, kaders, pijlen, tekst"
+  },
+  "toolPixelate": {
+    "message": "Pixeleren"
+  },
+  "toolBlur": {
+    "message": "Vervagen"
+  },
+  "toolBox": {
+    "message": "Kader"
+  },
+  "toolArrow": {
+    "message": "Pijl"
+  },
+  "toolText": {
+    "message": "Tekst"
+  },
+  "toolHighlight": {
+    "message": "Markeren"
+  },
+  "annotColor": {
+    "message": "Kleur"
+  },
+  "annotSize": {
+    "message": "Dikte"
+  },
+  "sizeFine": {
+    "message": "Dun"
+  },
+  "sizeMedium": {
+    "message": "Middel"
+  },
+  "sizeThick": {
+    "message": "Dik"
+  },
+  "undo": {
+    "message": "Ongedaan maken"
+  },
+  "redo": {
+    "message": "Opnieuw"
+  },
+  "cancel": {
+    "message": "Annuleren"
+  },
+  "textPlaceholder": {
+    "message": "Typ en druk op Enter"
   }
 }

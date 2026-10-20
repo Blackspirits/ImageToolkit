@@ -1318,3 +1318,78 @@ test('full-page capture: slices in order, fixed header only once, scrollbar off,
   await editor.close();
   await page.close();
 });
+
+test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on a rotated image', async () => {
+  // 200×100: a fine black/white checker on the left half, plain red on the right.
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 200; c.height = 100;
+    const x = c.getContext('2d');
+    x.fillStyle = '#ff0000'; x.fillRect(100, 0, 100, 100);
+    for (let i = 0; i < 100; i += 2) for (let j = 0; j < 100; j += 2) { x.fillStyle = (i + j) % 4 ? '#000' : '#fff'; x.fillRect(i, j, 2, 2); }
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), dataUrl);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.setViewportSize({ width: 1200, height: 800 });
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-rotate-left'); // annotations work on the image as it is now oriented
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  const canvasSize = await editor.evaluate(() => { const c = document.querySelector('.annot-canvas'); return [c.width, c.height]; });
+  assert.deepEqual(canvasSize, [100, 200]);
+
+  // Drag helper in image pixels.
+  const drag = async (x1, y1, x2, y2) => {
+    const box = await editor.locator('.annot-overlay').boundingBox();
+    const at = (x, y) => [box.x + (x / 100) * box.width, box.y + (y / 200) * box.height];
+    await editor.mouse.move(...at(x1, y1));
+    await editor.mouse.down();
+    await editor.mouse.move(...at(x2, y2), { steps: 4 });
+    await editor.mouse.up();
+  };
+  const pixel = (x, y) => editor.evaluate(([x, y]) => [...document.querySelector('.annot-canvas').getContext('2d').getImageData(x, y, 1, 1).data.slice(0, 3)], [x, y]);
+  // After rotating left, the checker (formerly the left half) is the bottom half.
+  const variance = () => editor.evaluate(() => {
+    const d = document.querySelector('.annot-canvas').getContext('2d').getImageData(20, 120, 40, 40).data;
+    let min = 255, max = 0;
+    for (let i = 0; i < d.length; i += 4) { min = Math.min(min, d[i]); max = Math.max(max, d[i]); }
+    return max - min;
+  });
+  assert.equal(await variance(), 255);
+  await editor.keyboard.press('p');
+  await drag(10, 110, 90, 190);
+  assert.ok(await variance() < 60, 'the checker is pixelated');
+  await editor.keyboard.press('r');
+  await editor.click('.annot-color[data-color="#3b82f6"]');
+  await drag(10, 10, 90, 90);
+  const edge = await pixel(10, 50);
+  assert.ok(edge[2] > 180 && edge[0] < 120, `box edge is blue: ${edge}`);
+  await editor.keyboard.press('Control+z');
+  assert.deepEqual(await pixel(10, 50), [255, 0, 0]);
+  await editor.keyboard.press('Control+y');
+  assert.ok((await pixel(10, 50))[2] > 180);
+  // Text: click, type, Enter.
+  await editor.keyboard.press('t');
+  const box = await editor.locator('.annot-overlay').boundingBox();
+  await editor.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.3);
+  await editor.locator('.annot-text').fill('Hi');
+  await editor.keyboard.press('Enter');
+  assert.equal(await editor.locator('.annot-text').count(), 0);
+
+  await editor.click('.annot-bar .btn-primary'); // Apply
+  await editor.waitForSelector('.annot-layer', { state: 'detached' });
+  await waitFor(() => editor.evaluate(() => document.getElementById('cropper-img').src.startsWith('blob:')));
+  const result = await waitFor(() => editor.evaluate(() => {
+    const img = document.getElementById('cropper-img');
+    return img.naturalWidth === 100 && editor.cropper.ready ? { w: img.naturalWidth, h: img.naturalHeight, rotate: editor.cropper.getData().rotate } : null;
+  }));
+  assert.deepEqual(result, { w: 100, h: 200, rotate: 0 });
+  assert.match(await editor.textContent('#info-text'), /100 × 200/);
+  // Saving still works on the annotated image.
+  const countPng = () => sw.evaluate(() => chrome.downloads.search({ mime: 'image/png' }).then((d) => d.length));
+  const before = await countPng();
+  await editor.evaluate(async () => { document.querySelector('#resize-format [data-value="png"]').click(); await save(); });
+  await waitFor(async () => (await countPng()) > before);
+  await editor.close();
+});

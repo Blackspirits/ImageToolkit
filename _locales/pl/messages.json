@@ -807,5 +807,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "Adnotacje"
+  },
+  "annotateHint": {
+    "message": "Adnotacje: rozmycie, pikselizacja, ramki, strzałki, tekst"
+  },
+  "toolPixelate": {
+    "message": "Pikselizuj"
+  },
+  "toolBlur": {
+    "message": "Rozmyj"
+  },
+  "toolBox": {
+    "message": "Ramka"
+  },
+  "toolArrow": {
+    "message": "Strzałka"
+  },
+  "toolText": {
+    "message": "Tekst"
+  },
+  "toolHighlight": {
+    "message": "Wyróżnij"
+  },
+  "annotColor": {
+    "message": "Kolor"
+  },
+  "annotSize": {
+    "message": "Grubość"
+  },
+  "sizeFine": {
+    "message": "Cienka"
+  },
+  "sizeMedium": {
+    "message": "Średnia"
+  },
+  "sizeThick": {
+    "message": "Gruba"
+  },
+  "undo": {
+    "message": "Cofnij"
+  },
+  "redo": {
+    "message": "Ponów"
+  },
+  "cancel": {
+    "message": "Anuluj"
+  },
+  "textPlaceholder": {
+    "message": "Wpisz i naciśnij Enter"
   }
 }

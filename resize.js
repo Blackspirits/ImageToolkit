@@ -153,6 +153,51 @@ function applyPresetSettings() {
     ui.el('button', { class: 'chip-btn', 'data-preset': `${p.w}x${p.h}`, title: `${p.name} · ${p.w}×${p.h}`, text: p.name })));
 }
 
+// ---------- Annotate ----------
+// The image as currently rotated/flipped, at full resolution (the crop is left for later).
+function orientedCanvas() {
+  const img = $('cropper-img');
+  const { rotate = 0, scaleX = 1, scaleY = 1 } = editor.cropper.getData();
+  const turn = ((Math.round(rotate / 90) * 90) % 360 + 360) % 360;
+  const w = img.naturalWidth, h = img.naturalHeight;
+  const swap = turn === 90 || turn === 270;
+  const canvas = makeCanvas(swap ? h : w, swap ? w : h);
+  const ctx = canvas.getContext('2d');
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((turn * Math.PI) / 180);
+  ctx.scale(scaleX, scaleY);
+  ctx.drawImage(img, -w / 2, -h / 2);
+  return canvas;
+}
+
+// Marks are baked into a new image that replaces the one being edited; the crop box and
+// output size start again from it (rotation and flips are already part of it).
+async function annotate() {
+  let base;
+  try {
+    base = orientedCanvas();
+    base.getContext('2d').getImageData(0, 0, 1, 1); // a host that refused CORS taints the canvas
+  } catch {
+    toast(t('errorSaveFailed'), 'error');
+    return;
+  }
+  $('btn-annotate').blur();
+  $('app').classList.add('annotating');
+  const blob = await ITK.annotate.open({ host: document.querySelector('.stage'), base });
+  $('app').classList.remove('annotating');
+  if (!blob) return;
+  const url = URL.createObjectURL(blob);
+  const img = $('cropper-img');
+  img.addEventListener('ready', () => {
+    editor.outputManual = false;
+    clearPresetActive();
+    if (editor.previousUrl) URL.revokeObjectURL(editor.previousUrl);
+    editor.previousUrl = url;
+    $('info-text').textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+  }, { once: true });
+  editor.cropper.replace(url);
+}
+
 // ---------- Controls ----------
 function setLocked(locked) {
   editor.locked = locked;
@@ -269,6 +314,7 @@ function initControls() {
   })));
 
   $('btn-rotate-left').addEventListener('click', need(() => editor.cropper.rotate(-90)));
+  $('btn-annotate').addEventListener('click', need(annotate));
   $('btn-flip-h').addEventListener('click', need(() => editor.cropper.scaleX(-(editor.cropper.getData().scaleX || 1))));
   $('btn-flip-v').addEventListener('click', need(() => editor.cropper.scaleY(-(editor.cropper.getData().scaleY || 1))));
   $('btn-reset').addEventListener('click', need(() => {
@@ -384,6 +430,7 @@ function initKeyboard() {
   document.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
     const mod = e.ctrlKey || e.metaKey;
+    if ($('app').classList.contains('annotating')) return; // the annotate layer owns the keyboard
     if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); $('btn-save').click(); return; }
     if (mod && e.key.toLowerCase() === 'c' && !typing && !getSelection().toString()) { e.preventDefault(); $('btn-copy').click(); }
   });

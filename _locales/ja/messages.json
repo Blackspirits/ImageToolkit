@@ -806,5 +806,56 @@
         "example": "16384"
       }
     }
+  },
+  "annotate": {
+    "message": "注釈"
+  },
+  "annotateHint": {
+    "message": "注釈: ぼかし・モザイク・枠・矢印・テキスト"
+  },
+  "toolPixelate": {
+    "message": "モザイク"
+  },
+  "toolBlur": {
+    "message": "ぼかし"
+  },
+  "toolBox": {
+    "message": "枠"
+  },
+  "toolArrow": {
+    "message": "矢印"
+  },
+  "toolText": {
+    "message": "テキスト"
+  },
+  "toolHighlight": {
+    "message": "ハイライト"
+  },
+  "annotColor": {
+    "message": "色"
+  },
+  "annotSize": {
+    "message": "太さ"
+  },
+  "sizeFine": {
+    "message": "細い"
+  },
+  "sizeMedium": {
+    "message": "普通"
+  },
+  "sizeThick": {
+    "message": "太い"
+  },
+  "undo": {
+    "message": "元に戻す"
+  },
+  "redo": {
+    "message": "やり直す"
+  },
+  "cancel": {
+    "message": "キャンセル"
+  },
+  "textPlaceholder": {
+    "message": "入力して Enter"
   }
 }
