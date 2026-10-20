@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "No more images to load on this page"
+  },
+  "scopeLabel": {
+    "message": "Scan"
+  },
+  "scopeTab": {
+    "message": "This tab"
+  },
+  "scopeWindow": {
+    "message": "All tabs"
+  },
+  "labelTab": {
+    "message": "Tab:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ tabs",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Tabs not read: $COUNT$ (browser pages or sleeping tabs)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

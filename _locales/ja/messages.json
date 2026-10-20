@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "このページで読み込める画像はもうありません"
+  },
+  "scopeLabel": {
+    "message": "スキャン対象"
+  },
+  "scopeTab": {
+    "message": "このタブ"
+  },
+  "scopeWindow": {
+    "message": "すべてのタブ"
+  },
+  "labelTab": {
+    "message": "タブ:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ 個のタブ",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ 個のタブ",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "読み取れなかったタブ: $COUNT$（ブラウザーのページまたはスリープ中のタブ）",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

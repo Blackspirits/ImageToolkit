@@ -750,5 +750,44 @@
   },
   "autoScrollNothing": {
     "message": "На этой странице больше нечего загружать"
+  },
+  "scopeLabel": {
+    "message": "Сканировать"
+  },
+  "scopeTab": {
+    "message": "Эта вкладка"
+  },
+  "scopeWindow": {
+    "message": "Все вкладки"
+  },
+  "labelTab": {
+    "message": "Вкладка:"
+  },
+  "tabsOne": {
+    "message": "Вкладок: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "Вкладок: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Не прочитано вкладок: $COUNT$ (страницы браузера или спящие вкладки)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

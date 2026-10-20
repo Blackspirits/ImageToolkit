@@ -750,5 +750,44 @@
   },
   "autoScrollNothing": {
     "message": "Bu sayfada yüklenecek başka görsel yok"
+  },
+  "scopeLabel": {
+    "message": "Tara"
+  },
+  "scopeTab": {
+    "message": "Bu sekme"
+  },
+  "scopeWindow": {
+    "message": "Tüm sekmeler"
+  },
+  "labelTab": {
+    "message": "Sekme:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ sekme",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ sekme",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Okunamayan sekmeler: $COUNT$ (tarayıcı sayfaları veya uyku modundaki sekmeler)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

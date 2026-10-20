@@ -1252,3 +1252,34 @@ test('images inside iframes are listed, same-origin and cross-origin, and outlin
   await waitFor(() => frame.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length === 0));
   await page.close();
 });
+
+test('all tabs of a window: merged, tagged with their page, browser pages skipped, tab filter', async () => {
+  const win = await sw.evaluate(async (urls) => {
+    const w = await chrome.windows.create({ url: urls, focused: false });
+    return { id: w.id, tabs: w.tabs.map((t) => t.id) };
+  }, [base + 'page.html', base + 'frames.html', base + 'feed.html', 'chrome://version']);
+  await waitFor(() => sw.evaluate(async (id) => (await chrome.tabs.query({ windowId: id })).every((t) => t.status === 'complete'), win.id), 10000);
+
+  const res = await send({ action: 'collectWindowImages', windowId: win.id });
+  assert.equal(res.tabs, 3);
+  assert.equal(res.skipped, 1);
+  const bySrc = new Map(res.images.map((i) => [i.src, i]));
+  assert.ok(bySrc.has(base + 'anim.gif'), 'page.html');
+  assert.ok(bySrc.has(base + 'photo.png?top=1'), 'frames.html');
+  assert.ok(bySrc.has(base + 'photo.png?feed=0'), 'feed.html');
+  assert.equal(bySrc.get(base + 'photo.png?top=1').pageTitle, 'frames');
+  assert.equal(bySrc.get(base + 'photo.png?top=1').pageHost, '127.0.0.1');
+  assert.equal(new Set(res.images.map((i) => i.src)).size, res.images.length, 'no duplicates across tabs');
+
+  // The panel: switch scope, then filter one tab.
+  await freshPanel();
+  await ui.evaluate(async (windowId) => { state.windowId = windowId; setScope('window', false); await scan(); }, win.id);
+  assert.equal(await ui.isVisible('#filter-tab-field', { strict: false }) || await ui.evaluate(() => !document.getElementById('filter-tab-field').hidden), true);
+  assert.equal(await ui.locator('#filter-tab option').count(), 4); // Any + 3 tabs
+  const feedTab = await ui.evaluate(() => [...document.querySelectorAll('#filter-tab option')].find((o) => o.textContent.startsWith('f ('))?.value);
+  await ui.evaluate((v) => { const s = document.getElementById('filter-tab'); s.value = v; s.dispatchEvent(new Event('change')); }, feedTab);
+  assert.ok(await ui.evaluate(() => state.filtered.length > 0 && state.filtered.every((i) => i.pageTitle === 'f')));
+  assert.match(await ui.textContent('#scan-host'), /3/);
+  await ui.evaluate(() => setScope('tab', false));
+  await sw.evaluate((id) => chrome.windows.remove(id), win.id);
+});

@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "لا توجد صور أخرى لتحميلها في هذه الصفحة"
+  },
+  "scopeLabel": {
+    "message": "الفحص"
+  },
+  "scopeTab": {
+    "message": "علامة التبويب هذه"
+  },
+  "scopeWindow": {
+    "message": "كل علامات التبويب"
+  },
+  "labelTab": {
+    "message": "علامة التبويب:"
+  },
+  "tabsOne": {
+    "message": "علامات التبويب: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "علامات التبويب: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "علامات تبويب لم تُقرأ: $COUNT$ (صفحات المتصفح أو علامات تبويب نائمة)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

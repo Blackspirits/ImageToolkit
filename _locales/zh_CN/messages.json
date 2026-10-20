@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "此页面没有更多可加载的图片"
+  },
+  "scopeLabel": {
+    "message": "扫描范围"
+  },
+  "scopeTab": {
+    "message": "当前标签页"
+  },
+  "scopeWindow": {
+    "message": "所有标签页"
+  },
+  "labelTab": {
+    "message": "标签页："
+  },
+  "tabsOne": {
+    "message": "$COUNT$ 个标签页",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ 个标签页",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "未读取的标签页：$COUNT$（浏览器页面或休眠的标签页）",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

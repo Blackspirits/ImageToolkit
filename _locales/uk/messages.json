@@ -750,5 +750,44 @@
   },
   "autoScrollNothing": {
     "message": "На цій сторінці більше нічого завантажувати"
+  },
+  "scopeLabel": {
+    "message": "Сканувати"
+  },
+  "scopeTab": {
+    "message": "Ця вкладка"
+  },
+  "scopeWindow": {
+    "message": "Усі вкладки"
+  },
+  "labelTab": {
+    "message": "Вкладка:"
+  },
+  "tabsOne": {
+    "message": "Вкладок: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "Вкладок: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Не прочитано вкладок: $COUNT$ (сторінки браузера або приспані вкладки)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

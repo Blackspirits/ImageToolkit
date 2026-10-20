@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "此頁面沒有更多可載入的圖片"
+  },
+  "scopeLabel": {
+    "message": "掃描範圍"
+  },
+  "scopeTab": {
+    "message": "目前分頁"
+  },
+  "scopeWindow": {
+    "message": "所有分頁"
+  },
+  "labelTab": {
+    "message": "分頁："
+  },
+  "tabsOne": {
+    "message": "$COUNT$ 個分頁",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ 個分頁",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "未讀取的分頁：$COUNT$（瀏覽器頁面或休眠中的分頁）",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

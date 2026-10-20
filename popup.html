@@ -104,6 +104,15 @@
         </div>
 
         <div id="filters-panel" class="filters" hidden>
+          <div class="field field-wide">
+            <span id="scope-label" data-i18n="scopeLabel">Scan</span>
+            <div class="segmented segmented-block" id="scan-scope" role="radiogroup" aria-labelledby="scope-label">
+              <button class="seg active" data-value="tab" role="radio" data-i18n="scopeTab">This tab</button><button class="seg" data-value="window" role="radio" data-i18n="scopeWindow">All tabs</button>
+            </div>
+          </div>
+          <label class="field field-wide" id="filter-tab-field" hidden><span data-i18n="labelTab">Tab:</span>
+            <select id="filter-tab" class="select"><option value="all" data-i18n="filterAny">Any</option></select>
+          </label>
           <label class="field"><span data-i18n="labelType">Type:</span>
             <select id="filter-type" class="select">
               <option value="all" data-i18n="filterAll">All types</option>

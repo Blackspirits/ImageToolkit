@@ -195,6 +195,7 @@ const handlers = {
   downloadHandoff: (msg) => downloadHandoff(String(msg.key || ''), msg.filename, msg.saveAs !== false),
 
   collectImages: (msg) => collectImages(msg.tabId),
+  collectWindowImages: (msg) => collectWindowImages(msg.windowId),
   autoScroll: (msg) => autoScroll(msg.tabId),
   stopAutoScroll: (msg) => stopAutoScroll(msg.tabId),
 
@@ -215,7 +216,7 @@ const handlers = {
     chrome.runtime.sendMessage({ action: 'autoScrollProgressUpdate', tabId: sender.tab?.id, pct }).catch(() => {});
   },
   newImagesDetected: (msg, sender) => {
-    chrome.runtime.sendMessage({ action: 'newImagesAvailable', tabId: sender.tab?.id, count: msg.count || 0 }).catch(() => {});
+    chrome.runtime.sendMessage({ action: 'newImagesAvailable', tabId: sender.tab?.id, windowId: sender.tab?.windowId, count: msg.count || 0 }).catch(() => {});
   },
 };
 
@@ -265,6 +266,27 @@ async function collectImages(tabId) {
   }).catch(() => []);
   scans.sort((a, b) => (a.frameId === 0 ? -1 : b.frameId === 0 ? 1 : a.frameId - b.frameId));
   return mergeScans(scans.map((s) => s.result).filter(Boolean));
+}
+
+// Every web page open in one window, a few tabs at a time. Each image keeps its tab and that
+// page's site and title (for the tab filter and for {site}/{title} in file names). Browser
+// pages and tabs Chrome has put to sleep are skipped and counted.
+async function collectWindowImages(windowId) {
+  if (!Number.isInteger(windowId)) return { images: [], error: 'noTab' };
+  const tabs = await chrome.tabs.query({ windowId });
+  const targets = tabs.filter((tab) => /^https?:/i.test(tab.url || '') && !tab.discarded);
+  let skipped = tabs.length - targets.length;
+  const scans = [];
+  await ITK.mapLimit(targets, 3, async (tab) => {
+    const result = await collectImages(tab.id);
+    if (result.error) { skipped++; return; }
+    let pageHost = '';
+    try { pageHost = new URL(tab.url).hostname; } catch {}
+    const pageTitle = String(tab.title || '').slice(0, 120);
+    scans.push({ index: tab.index, truncated: result.truncated, images: result.images.map((img) => ({ ...img, tabId: tab.id, pageHost, pageTitle })) });
+  });
+  scans.sort((a, b) => a.index - b.index);
+  return { ...mergeScans(scans), tabs: scans.length, skipped };
 }
 
 // Union by URL across frames (or auto-scroll snapshots), within the scan's size budget.

@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "Não há mais imagens para carregar nesta página"
+  },
+  "scopeLabel": {
+    "message": "Analisar"
+  },
+  "scopeTab": {
+    "message": "Este separador"
+  },
+  "scopeWindow": {
+    "message": "Todos os separadores"
+  },
+  "labelTab": {
+    "message": "Separador:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ separador",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ separadores",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Separadores não lidos: $COUNT$ (páginas do navegador ou separadores em suspensão)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

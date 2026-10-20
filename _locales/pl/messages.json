@@ -750,5 +750,44 @@
   },
   "autoScrollNothing": {
     "message": "Na tej stronie nie ma więcej obrazów do wczytania"
+  },
+  "scopeLabel": {
+    "message": "Skanuj"
+  },
+  "scopeTab": {
+    "message": "Ta karta"
+  },
+  "scopeWindow": {
+    "message": "Wszystkie karty"
+  },
+  "labelTab": {
+    "message": "Karta:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ karta",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "Karty: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Nieodczytane karty: $COUNT$ (strony przeglądarki lub uśpione karty)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

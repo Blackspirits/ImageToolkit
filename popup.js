@@ -33,6 +33,8 @@ const state = {
   focusSrc: '',      // the grid's single Tab stop (roving tabindex)
   newImages: 0,
   autoScrolling: false,
+  scope: 'tab',      // 'tab' | 'window' (every tab of this window)
+  scanInfo: '',
   checker: 'auto',
   tool: { src: '', name: '', ratio: 0, size: 0 },
   cards: new Map(),
@@ -144,7 +146,8 @@ function onRuntimeMessage(msg) {
     setAutoScrollUI(true, msg.pct);
     return;
   }
-  if (msg?.action !== 'newImagesAvailable' || msg.tabId !== state.tabId || !(msg.count > 0)) return;
+  if (msg?.action !== 'newImagesAvailable' || !(msg.count > 0)) return;
+  if (state.scope === 'window' ? msg.windowId !== state.windowId : msg.tabId !== state.tabId) return;
   state.newImages += msg.count;
   $('new-images-text').textContent = i18n.plural(state.newImages, 'newImagesOne', 'newImagesOther');
   $('new-images-banner').hidden = false;
@@ -153,13 +156,20 @@ function onRuntimeMessage(msg) {
 // The side panel stays open across tabs: follow the active tab and page loads.
 function watchTabs() {
   const rescan = debounce(() => scan(), 350);
+  const rescanWindow = debounce(() => scan({ keepSelection: true }), 1200);
   chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
     if (state.windowId != null && windowId !== state.windowId) return;
     state.tabId = tabId;
     chrome.tabs.get(tabId).then((tab) => setHost(tab.url, tab.title)).catch(() => setHost(''));
-    rescan();
+    // With every tab in view, switching tabs changes nothing in the list.
+    if (state.scope !== 'window') rescan();
   });
   chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+    if (state.scope === 'window') {
+      if (tab?.windowId === state.windowId && info.status === 'complete') rescanWindow();
+      if (tabId === state.tabId && (info.url || info.title)) setHost(tab?.url, tab?.title);
+      return;
+    }
     if (tabId !== state.tabId) return;
     if (info.url || info.title) setHost(tab?.url, tab?.title);
     if (info.status === 'complete') { setHost(tab?.url, tab?.title); rescan(); }
@@ -169,7 +179,12 @@ function watchTabs() {
 function setHost(url, title = '') {
   try { state.host = url ? new URL(url).hostname : ''; } catch { state.host = ''; }
   state.pageTitle = title || '';
-  $('scan-host').textContent = state.host ? `· ${state.host}` : '';
+  updateScanHost();
+}
+
+function updateScanHost() {
+  const text = state.scope === 'window' ? state.scanInfo : state.host;
+  $('scan-host').textContent = text ? `· ${text}` : '';
 }
 
 // ============================================================
@@ -250,7 +265,9 @@ function initImages() {
   setChecker(ui.checker || 'auto', false);
   setFiltersOpen(!!ui.filtersOpen);
 
-  ['filter-type', 'filter-layout', 'filter-domain'].forEach((id) => $(id).addEventListener('change', applyFilters));
+  ['filter-type', 'filter-layout', 'filter-domain', 'filter-tab'].forEach((id) => $(id).addEventListener('change', applyFilters));
+  onSegmented($('scan-scope'), (value) => setScope(value));
+  setScope(ui.scope, false);
   $('filter-size').addEventListener('change', () => {
     $('atleast-row').hidden = $('filter-size').value !== 'atleast';
     applyFilters();
@@ -306,7 +323,7 @@ function setFiltersOpen(open) {
 }
 
 function resetFilters() {
-  ['filter-type', 'filter-size', 'filter-layout', 'filter-domain'].forEach((id) => { $(id).value = 'all'; });
+  ['filter-type', 'filter-size', 'filter-layout', 'filter-domain', 'filter-tab'].forEach((id) => { $(id).value = 'all'; });
   $('filter-url').value = '';
   $('atleast-row').hidden = true;
   state.hideDups = false;
@@ -371,9 +388,13 @@ async function toggleAutoScroll() {
     toast(t(res?.error === 'restricted' ? 'errorRestrictedPage' : 'errorNoImage'), 'error');
     return;
   }
-  setImages(res.images || []);
-  if (res.truncated) toast(t('scanTruncated'), 'info');
-  const added = (res.images || []).filter((i) => !before.has(i.src)).length;
+  if (state.scope === 'window') {
+    await scan({ keepSelection: true });
+  } else {
+    setImages(res.images || []);
+    if (res.truncated) toast(t('scanTruncated'), 'info');
+  }
+  const added = state.images.filter((i) => !before.has(i.src)).length;
   toast(added ? i18n.plural(added, 'newImagesOne', 'newImagesOther') : t('autoScrollNothing'), added ? 'success' : 'info');
 }
 
@@ -393,12 +414,28 @@ async function scan({ keepSelection = false } = {}) {
   $('new-images-banner').hidden = true;
   state.newImages = 0;
 
-  const res = await send({ action: 'collectImages', tabId: state.tabId });
+  const windowScope = state.scope === 'window';
+  const res = windowScope
+    ? await send({ action: 'collectWindowImages', windowId: state.windowId })
+    : await send({ action: 'collectImages', tabId: state.tabId });
   if (token !== scanToken) return;
   if (!keepSelection) state.selected.clear();
   resetViaExtension();
+  state.scanInfo = windowScope ? i18n.plural(res?.tabs || 0, 'tabsOne', 'tabsOther') : '';
+  updateScanHost();
   setImages(res?.images || [], res?.error);
   if (res?.truncated) toast(t('scanTruncated'), 'info');
+  if (windowScope && res?.skipped > 0) toast(t('tabsSkipped', [String(res.skipped)]), 'info');
+}
+
+function setScope(scope, rescan = true) {
+  state.scope = scope === 'window' ? 'window' : 'tab';
+  setSegmented($('scan-scope'), state.scope);
+  $('filter-tab-field').hidden = state.scope !== 'window';
+  $('filter-tab').value = 'all';
+  writeUiState({ scope: state.scope });
+  updateScanHost();
+  if (rescan) scan();
 }
 
 function setImages(list, error) {
@@ -419,6 +456,9 @@ function setImages(list, error) {
       isDuplicate,
       index,
       thumb: '',
+      tabId: img.tabId ?? null,
+      pageHost: img.pageHost || '',
+      pageTitle: img.pageTitle || '',
     };
     updateDerived(item);
     return item;
@@ -444,6 +484,7 @@ function setImages(list, error) {
   $('grid-empty').hidden = true;
   $('image-grid').hidden = false;
   populateDomains();
+  populateTabs();
   applyFilters({ animate: true });
   probeTypes();
   probeFileSizes();
@@ -474,9 +515,29 @@ function populateDomains() {
   select.value = counts.has(current) ? current : 'all';
 }
 
+// Tab filter (all-tabs scope): one entry per tab, named after its page, in tab order.
+function populateTabs() {
+  const select = $('filter-tab');
+  const current = select.value;
+  const tabs = new Map();
+  for (const img of state.images) {
+    if (img.tabId == null) continue;
+    const entry = tabs.get(img.tabId) || { label: img.pageTitle || img.pageHost || String(img.tabId), n: 0 };
+    entry.n++;
+    tabs.set(img.tabId, entry);
+  }
+  const options = [el('option', { value: 'all', text: t('filterAny') })];
+  for (const [tabId, { label, n }] of tabs) {
+    const short = label.length > 34 ? label.slice(0, 32) + '…' : label;
+    options.push(el('option', { value: String(tabId), text: `${short} (${n})` }));
+  }
+  select.replaceChildren(...options);
+  select.value = tabs.has(Number(current)) ? current : 'all';
+}
+
 function activeFilterCount() {
   let n = 0;
-  for (const id of ['filter-type', 'filter-size', 'filter-layout', 'filter-domain']) if ($(id).value !== 'all') n++;
+  for (const id of ['filter-type', 'filter-size', 'filter-layout', 'filter-domain', 'filter-tab']) if ($(id).value !== 'all') n++;
   return n;
 }
 
@@ -485,6 +546,7 @@ function matchesFilters(img) {
   const size = $('filter-size').value;
   const shape = $('filter-layout').value;
   const domain = $('filter-domain').value;
+  const tab = $('filter-tab').value;
   const query = $('filter-url').value.trim().toLowerCase();
 
   if (state.hideDups && img.isDuplicate) return false;
@@ -506,6 +568,7 @@ function matchesFilters(img) {
   }
   if (shape !== 'all' && img.shape !== shape) return false;
   if (domain !== 'all' && img.domain !== domain) return false;
+  if (tab !== 'all' && String(img.tabId) !== tab) return false;
   if (query && !img.src.toLowerCase().includes(query) && !img.name.toLowerCase().includes(query) && !img.alt.toLowerCase().includes(query)) return false;
   return true;
 }

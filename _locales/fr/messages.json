@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "Plus aucune image à charger sur cette page"
+  },
+  "scopeLabel": {
+    "message": "Analyser"
+  },
+  "scopeTab": {
+    "message": "Cet onglet"
+  },
+  "scopeWindow": {
+    "message": "Tous les onglets"
+  },
+  "labelTab": {
+    "message": "Onglet :"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ onglet",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ onglets",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Onglets non lus : $COUNT$ (pages du navigateur ou onglets en veille)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

@@ -750,5 +750,44 @@
   },
   "autoScrollNothing": {
     "message": "Geen extra afbeeldingen op deze pagina"
+  },
+  "scopeLabel": {
+    "message": "Scannen"
+  },
+  "scopeTab": {
+    "message": "Dit tabblad"
+  },
+  "scopeWindow": {
+    "message": "Alle tabbladen"
+  },
+  "labelTab": {
+    "message": "Tabblad:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ tabblad",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ tabbladen",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Niet gelezen tabbladen: $COUNT$ (browserpagina's of slapende tabbladen)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

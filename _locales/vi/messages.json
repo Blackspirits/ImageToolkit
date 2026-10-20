@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "Không còn ảnh nào để tải trên trang này"
+  },
+  "scopeLabel": {
+    "message": "Quét"
+  },
+  "scopeTab": {
+    "message": "Tab này"
+  },
+  "scopeWindow": {
+    "message": "Tất cả tab"
+  },
+  "labelTab": {
+    "message": "Tab:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Tab không đọc được: $COUNT$ (trang của trình duyệt hoặc tab đang ngủ)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

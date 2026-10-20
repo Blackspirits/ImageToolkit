@@ -750,5 +750,44 @@
   },
   "autoScrollNothing": {
     "message": "Nessun'altra immagine da caricare in questa pagina"
+  },
+  "scopeLabel": {
+    "message": "Analizza"
+  },
+  "scopeTab": {
+    "message": "Questa scheda"
+  },
+  "scopeWindow": {
+    "message": "Tutte le schede"
+  },
+  "labelTab": {
+    "message": "Scheda:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ scheda",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ schede",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Schede non lette: $COUNT$ (pagine del browser o schede sospese)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

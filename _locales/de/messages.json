@@ -751,5 +751,44 @@
   },
   "autoScrollNothing": {
     "message": "Keine weiteren Bilder auf dieser Seite"
+  },
+  "scopeLabel": {
+    "message": "Durchsuchen"
+  },
+  "scopeTab": {
+    "message": "Dieser Tab"
+  },
+  "scopeWindow": {
+    "message": "Alle Tabs"
+  },
+  "labelTab": {
+    "message": "Tab:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ Tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ Tabs",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Nicht gelesene Tabs: $COUNT$ (Browserseiten oder schlafende Tabs)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

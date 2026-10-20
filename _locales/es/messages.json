@@ -751,5 +751,44 @@
   },
   "autoScrollNothing": {
     "message": "No hay más imágenes que cargar en esta página"
+  },
+  "scopeLabel": {
+    "message": "Analizar"
+  },
+  "scopeTab": {
+    "message": "Esta pestaña"
+  },
+  "scopeWindow": {
+    "message": "Todas las pestañas"
+  },
+  "labelTab": {
+    "message": "Pestaña:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ pestaña",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ pestañas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Pestañas no leídas: $COUNT$ (páginas del navegador o pestañas en suspensión)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }

@@ -749,5 +749,44 @@
   },
   "autoScrollNothing": {
     "message": "Não há mais imagens para carregar nesta página"
+  },
+  "scopeLabel": {
+    "message": "Analisar"
+  },
+  "scopeTab": {
+    "message": "Esta aba"
+  },
+  "scopeWindow": {
+    "message": "Todas as abas"
+  },
+  "labelTab": {
+    "message": "Aba:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ aba",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ abas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Abas não lidas: $COUNT$ (páginas do navegador ou abas suspensas)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
   }
 }
