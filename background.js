@@ -413,7 +413,7 @@ async function autoScrollPage(budgetMs, maxItems, maxChars) {
     }
     scrollTo(Math.min(max, top() + Math.round(viewHeight() * 0.85)), isPage ? scrollX : scroller.scrollLeft);
     steps++;
-    await frame();
+    await Promise.race([frame(), sleep(120)]); // no frames in a hidden tab
     await sleep(220);
     take();
     const pct = Math.round((100 * top()) / Math.max(1, scroller.scrollHeight - viewHeight()));
@@ -763,14 +763,29 @@ async function startCapture(tabId, delaySeconds = 0) {
   return { success: true };
 }
 
-function captureTab(windowId) {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
-      const error = chrome.runtime.lastError;
-      if (error || !dataUrl) reject(new Error(error?.message || 'Capture failed'));
-      else resolve(dataUrl);
+// Chrome allows two captureVisibleTab calls per second for the whole extension, so every
+// capture (area, visible, full page) is spaced from the previous one, and a call refused for
+// that quota is tried again once.
+const CAPTURE_INTERVAL_MS = 550;
+let lastCaptureAt = 0;
+
+async function captureTab(windowId, retry = true) {
+  const wait = lastCaptureAt + CAPTURE_INTERVAL_MS - Date.now();
+  if (wait > 0) await sleep(wait);
+  lastCaptureAt = Date.now();
+  try {
+    return await new Promise((resolve, reject) => {
+      chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
+        const error = chrome.runtime.lastError;
+        if (error || !dataUrl) reject(new Error(error?.message || 'Capture failed'));
+        else resolve(dataUrl);
+      });
     });
-  });
+  } catch (err) {
+    if (!retry || !/MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND/.test(err.message)) throw err;
+    await sleep(CAPTURE_INTERVAL_MS * 2);
+    return captureTab(windowId, false);
+  }
 }
 
 // The rectangle comes from a content script: only finite, positive sizes are accepted.
@@ -819,7 +834,6 @@ async function captureVisible(tabId) {
 // screen, instead of on every slice. The scrollbar is cropped off, the reader's position is
 // restored, progress shows on the toolbar icon and Esc in the page cancels.
 const FULLPAGE_MAX_HEIGHT = 16384; // device pixels; taller pages are scaled down (to 50%), then cut
-const CAPTURE_INTERVAL_MS = 550;   // Chrome allows two captureVisibleTab calls per second
 let fullPageBusy = false;
 
 async function captureFullPage(tabId) {
@@ -830,37 +844,43 @@ async function captureFullPage(tabId) {
   let session = null;
   let prepared = false;
   try {
-    const tab = await chrome.tabs.get(tabId);
+    let tab = await chrome.tabs.get(tabId);
+    // Only the active tab of a window can be captured.
+    if (!tab.active) tab = await chrome.tabs.update(tabId, { active: true });
     const page = await run(fullPagePrepare).catch(() => null);
     if (!page) throw Object.assign(new Error('restricted'), { restricted: true });
     prepared = true;
 
-    const dpr = page.dpr;
-    const fullHeight = Math.round(page.scrollHeight * dpr);
+    // The first screenshot gives the real pixel scale and visible height: with page zoom or an
+    // emulated viewport they differ from devicePixelRatio and clientHeight, and trusting those
+    // would leave gaps between slices.
+    const shoot = async (y, hideFloating) => {
+      const at = await run(fullPageScroll, [y, hideFloating]);
+      if (!at || at.cancelled) return null;
+      return { at, dataUrl: await captureTab(tab.windowId) };
+    };
+    const first = await shoot(0, false);
+    if (!first) return { cancelled: true };
+    const size = await offscreenRequest({ action: 'image-size', dataUrl: first.dataUrl }, 15000);
+    const px = size.width / page.innerWidth;                         // device pixels per CSS pixel
+    const viewHeight = Math.max(1, Math.min(page.clientHeight, Math.floor(size.height / px)));
+    const fullHeight = Math.round(page.scrollHeight * px);
     const scale = Math.max(0.5, Math.min(1, FULLPAGE_MAX_HEIGHT / fullHeight));
-    const width = Math.max(1, Math.round(page.clientWidth * dpr * scale));
+    const width = Math.max(1, Math.round(page.clientWidth * px * scale));
     const height = Math.max(1, Math.min(FULLPAGE_MAX_HEIGHT, Math.round(fullHeight * scale)));
     const truncated = Math.round(fullHeight * scale) > FULLPAGE_MAX_HEIGHT;
     session = (await offscreenRequest({ action: 'fullpage-begin', width, height }, 15000)).session;
+    const crop = { width: Math.round(page.clientWidth * px), height: Math.round(viewHeight * px) };
 
-    const positions = [];
-    for (let y = 0; y < page.scrollHeight; y += page.clientHeight) positions.push(y);
-    let lastCapture = 0;
-    for (let i = 0; i < positions.length; i++) {
-      const at = await run(fullPageScroll, [positions[i], i > 0]);
-      if (!at || at.cancelled) return { cancelled: true };
-      const wait = CAPTURE_INTERVAL_MS - (Date.now() - lastCapture);
-      if (wait > 0) await sleep(wait);
-      const shot = await captureTab(tab.windowId);
-      lastCapture = Date.now();
-      await offscreenRequest({
-        action: 'fullpage-draw', session, dataUrl: shot,
-        crop: { width: Math.round(page.clientWidth * dpr), height: Math.round(page.clientHeight * dpr) },
-        y: Math.round(at.y * dpr * scale), scale,
-      }, 15000);
-      if (at.y + page.clientHeight >= page.scrollHeight) break;
-      const pct = Math.round(((i + 1) / positions.length) * 100);
-      chrome.action.setBadgeText({ tabId, text: `${pct}%` }).catch(() => {});
+    const steps = Math.ceil(page.scrollHeight / viewHeight);
+    let slice = first;
+    for (let i = 0; slice; i++) {
+      await offscreenRequest({ action: 'fullpage-draw', session, dataUrl: slice.dataUrl, crop, y: Math.round(slice.at.y * px * scale), scale }, 15000);
+      // Done at the end of the page, or where a very tall capture is cut.
+      if (slice.at.y + viewHeight >= page.scrollHeight || (slice.at.y + viewHeight) * px * scale >= height) break;
+      chrome.action.setBadgeText({ tabId, text: `${Math.round(((i + 1) / steps) * 100)}%` }).catch(() => {});
+      slice = await shoot(slice.at.y + viewHeight, true);
+      if (!slice) return { cancelled: true };
     }
     const { key } = await offscreenRequest({ action: 'fullpage-end', session }, 60000);
     session = null;
@@ -869,7 +889,7 @@ async function captureFullPage(tabId) {
     await openEditorWithKey(key);
     if (truncated) {
       await loadSettingsAndLocale();
-      notify(t('fullPageCut', [String(Math.round(FULLPAGE_MAX_HEIGHT / dpr / scale))]));
+      notify(t('fullPageCut', [String(Math.round(FULLPAGE_MAX_HEIGHT / px / scale))]));
     }
     return { success: true, width, height, truncated };
   } catch (err) {
@@ -897,7 +917,7 @@ function fullPagePrepare() {
   addEventListener('keydown', window.__imagetoolkitFullPageKey, true);
   document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
   return {
-    dpr: devicePixelRatio || 1,
+    innerWidth,                      // CSS width the screenshot covers (scrollbar included)
     clientWidth: root.clientWidth,   // without the vertical scrollbar
     clientHeight: root.clientHeight, // without a horizontal scrollbar
     scrollHeight: Math.max(root.scrollHeight, document.body?.scrollHeight || 0),
@@ -917,7 +937,8 @@ async function fullPageScroll(y, hideFloating) {
     }
   }
   window.scrollTo({ top: y, left: 0, behavior: 'instant' });
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  // Two frames so the new position is painted; frames never come in a hidden tab, hence the cap.
+  await Promise.race([new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))), new Promise((r) => setTimeout(r, 120))]);
   await new Promise((r) => setTimeout(r, 150)); // lazy images and late layout
   return { y: scrollY, cancelled: state.cancelled };
 }

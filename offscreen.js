@@ -16,6 +16,7 @@ const OFFSCREEN_HANDLERS = {
   'offscreen-copy-text': (message) => handleCopyText(message).then(() => ({ copied: true })),
   'offscreen-crop': (message) => handleCrop(message).then((dataUrl) => ({ dataUrl })),
   'offscreen-object-url': (message) => objectUrlFromHandoff(message.key),
+  'image-size': async (message) => { const img = await loadImage(message.dataUrl); return { width: img.naturalWidth, height: img.naturalHeight }; },
   'fullpage-begin': async (message) => fullPageBegin(message),
   'fullpage-draw': (message) => fullPageDraw(message),
   'fullpage-end': (message) => fullPageEnd(message),
