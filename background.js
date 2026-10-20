@@ -182,19 +182,15 @@ const handlers = {
 
   downloadBlob: (msg) => {
     const url = typeof msg.dataUrl === 'string' ? msg.dataUrl : '';
-    const isAllowedUrl = url.startsWith('blob:') || /^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url);
-    if (!isAllowedUrl) return { error: 'Unsupported download URL' };
+    if (!/^data:(image\/[a-z0-9.+-]+|application\/zip);/i.test(url)) return { error: 'Unsupported download URL' };
     const filename = ITK.sanitizeFilename(msg.filename || 'download', true) || 'download';
     return triggerDownload(url, filename, msg.saveAs !== false).then((id) => (id == null ? { cancelled: true } : { success: true, downloadId: id }));
   },
 
+  // Files too large for one message: the page parked them in the handoff store.
+  downloadHandoff: (msg) => downloadHandoff(String(msg.key || ''), msg.filename, msg.saveAs !== false),
+
   collectImages: (msg) => collectImages(msg.tabId),
-  highlightImages: (msg) => {
-    if (Number.isInteger(msg.tabId)) {
-      chrome.tabs.sendMessage(msg.tabId, { action: 'highlightImages', urls: msg.urls || [] }).catch(() => {});
-    }
-    return { success: true };
-  },
 
   startCapture: (msg) => startCapture(msg.tabId, msg.delay),
   captureVisible: (msg) => captureVisible(msg.tabId),
@@ -517,6 +513,39 @@ async function pagePngToClipboard(base64) {
 }
 
 // ---------- Downloads ----------
+// blob: URLs served by the offscreen document, per download, released once it ends. If the
+// service worker restarts in between, the offscreen document's own timer releases them.
+const offscreenObjectUrls = new Map();
+
+function releaseObjectUrl(url) {
+  offscreenRequest({ action: 'offscreen-revoke', url }, 5000).catch(() => {});
+}
+
+async function downloadHandoff(key, rawFilename, saveAs) {
+  const filename = ITK.sanitizeFilename(rawFilename || 'download', true) || 'download';
+  const { url } = await offscreenRequest({ action: 'offscreen-object-url', key });
+  let downloadId;
+  try {
+    downloadId = await triggerDownload(url, filename, saveAs);
+  } catch (err) {
+    releaseObjectUrl(url);
+    throw err;
+  }
+  if (downloadId == null) {
+    releaseObjectUrl(url);
+    return { cancelled: true };
+  }
+  offscreenObjectUrls.set(downloadId, url);
+  return { success: true, downloadId };
+}
+
+chrome.downloads.onChanged.addListener((delta) => {
+  const url = offscreenObjectUrls.get(delta.id);
+  if (!url || !['complete', 'interrupted'].includes(delta.state?.current)) return;
+  offscreenObjectUrls.delete(delta.id);
+  releaseObjectUrl(url);
+});
+
 // Resolves with the download id once Chrome has accepted the download, or with null
 // when the user closed the Save As dialog. Anything else is an error.
 function triggerDownload(url, filename, saveAs = true) {
@@ -611,11 +640,25 @@ async function captureVisible(tabId) {
 }
 
 // ---------- Editor Window ----------
+// The handed-off image (a screenshot can be private) only lives as long as its editor
+// window, reloads included. The window → key map is in session storage so it survives a
+// service worker restart; the 30-minute prune stays as a safety net.
+const editorKeyName = (windowId) => `editor:${windowId}`;
+
 async function openEditor(imageUrl) {
   if (!imageUrl) return;
   const key = await handoff.put(imageUrl);
-  await chrome.windows.create({ url: `resize.html?key=${encodeURIComponent(key)}`, ...EDITOR_WINDOW, focused: true });
+  const win = await chrome.windows.create({ url: `resize.html?key=${encodeURIComponent(key)}`, ...EDITOR_WINDOW, focused: true });
+  if (win?.id != null) await chrome.storage.session.set({ [editorKeyName(win.id)]: key }).catch(() => {});
 }
+
+chrome.windows.onRemoved.addListener(async (windowId) => {
+  const name = editorKeyName(windowId);
+  const { [name]: key } = await chrome.storage.session.get(name).catch(() => ({}));
+  if (!key) return;
+  await chrome.storage.session.remove(name).catch(() => {});
+  await handoff.remove(key).catch(() => {});
+});
 
 function openGoogleLens(imageUrl, tab) {
   if (!/^https?:/i.test(imageUrl)) {

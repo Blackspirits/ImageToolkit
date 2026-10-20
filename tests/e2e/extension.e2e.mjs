@@ -1018,3 +1018,69 @@ test('context menu: a Referer-protected image fails with a clear error and no fi
   assert.equal(r.download, null);
   assert.ok(r.notes.some((n) => /HTTP 403/.test(n)), JSON.stringify(r.notes));
 });
+
+// ---------- 2.4.1 ----------
+
+test('page outlines follow the panel: gone when it moves to another tab or closes', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  const tabId = await tabIdOf(base + 'page.html');
+  const outlined = () => page.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length);
+  const styled = () => page.evaluate(() => !!document.getElementById('imagetoolkit-highlight-style'));
+
+  const panel = await ctx.newPage();
+  await panel.goto(`chrome-extension://${id}/popup.html`);
+  await panel.waitForSelector('#image-grid', { state: 'attached' });
+  const select = () => panel.evaluate(async ({ tabId, src }) => {
+    state.tabId = tabId;
+    await scan();
+    state.selected.add(src);
+    updateSelectionUI();
+  }, { tabId, src: base + 'photo.png' });
+
+  await select();
+  await waitFor(async () => (await outlined()) === 1);
+  // The panel follows another tab: the page it left is cleaned up.
+  await panel.evaluate(() => { state.tabId = -1; updateSelectionUI(); });
+  await waitFor(async () => (await outlined()) === 0 && !(await styled()));
+
+  await select();
+  await waitFor(async () => (await outlined()) === 1);
+  await panel.close();
+  await waitFor(async () => (await outlined()) === 0 && !(await styled()));
+  await page.close();
+});
+
+test('closing the editor window forgets the handed-off image', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const key = new URL(editor.url()).searchParams.get('key');
+  assert.equal(await sw.evaluate((k) => ITK.handoff.get(k), key), base + 'wide.png');
+  await editor.close();
+  await waitFor(() => sw.evaluate((k) => ITK.handoff.get(k).then((v) => v == null), key));
+});
+
+test('a large download completes even when the page that started it closes at once', async () => {
+  const page = await ctx.newPage();
+  await page.goto(`chrome-extension://${id}/popup.html`);
+  await page.waitForSelector('#image-grid', { state: 'attached' });
+  const res = await page.evaluate(() => ITK.ui.saveBlob(new Blob([new Uint8Array(37 * 1024 * 1024)], { type: 'application/zip' }), 'closing-test.zip', false));
+  assert.equal(res.via, 'blob');
+  await page.close();
+  const item = await waitFor(() => sw.evaluate(async (downloadId) => {
+    const [d] = await chrome.downloads.search({ id: downloadId });
+    return d && d.state !== 'in_progress' ? d : null;
+  }, res.downloadId), 20000);
+  assert.equal(item.state, 'complete');
+  assert.equal(item.fileSize, 37 * MiB);
+  // The file was taken out of the handoff store once the offscreen document picked it up.
+  assert.equal(await sw.evaluate(() => new Promise((resolve) => {
+    const req = indexedDB.open('imagetoolkit');
+    req.onsuccess = () => {
+      const all = req.result.transaction('handoff').objectStore('handoff').getAll();
+      all.onsuccess = () => { resolve(all.result.filter((e) => e.value instanceof Blob).length); req.result.close(); };
+    };
+  })), 0);
+});

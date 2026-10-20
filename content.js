@@ -26,13 +26,15 @@
       startObserver();
       return false;
     }
-
-    if (message.action === 'highlightImages') {
-      highlightImages(message.urls || []);
-      sendResponse({ success: true });
-      return false;
-    }
     return false;
+  });
+
+  // The panel outlines its selection over a port. The port disconnects when the panel closes
+  // or moves to another tab, and the outlines go with it.
+  chrome.runtime.onConnect.addListener((port) => {
+    if (port.name !== 'imagetoolkit-highlight' || port.sender?.id !== chrome.runtime.id) return;
+    port.onMessage.addListener((msg) => highlightImages(Array.isArray(msg?.urls) ? msg.urls : []));
+    port.onDisconnect.addListener(() => highlightImages([]));
   });
 
   // ---------- Inline SVG ----------
@@ -302,6 +304,14 @@
   const HIGHLIGHT_STYLE_ID = 'imagetoolkit-highlight-style';
 
   function highlightImages(selectedUrls) {
+    if (!selectedUrls.length) {
+      // Nothing selected: leave the page exactly as it was.
+      document.getElementById(HIGHLIGHT_STYLE_ID)?.remove();
+      const clear = (root) => root.querySelectorAll(`[${HIGHLIGHT_ATTR}]`).forEach((img) => img.removeAttribute(HIGHLIGHT_ATTR));
+      clear(document);
+      forEachShadowRoot(clear);
+      return;
+    }
     if (!document.getElementById(HIGHLIGHT_STYLE_ID)) {
       const style = document.createElement('style');
       style.id = HIGHLIGHT_STYLE_ID;
@@ -326,10 +336,14 @@
     };
 
     document.querySelectorAll('img').forEach(toggle);
+    forEachShadowRoot((root) => root.querySelectorAll('img').forEach(toggle));
+  }
+
+  function forEachShadowRoot(fn) {
     const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_ELEMENT, null);
     let node;
     while ((node = walker.nextNode())) {
-      if (node.shadowRoot) node.shadowRoot.querySelectorAll('img').forEach(toggle);
+      if (node.shadowRoot) fn(node.shadowRoot);
     }
   }
 })();

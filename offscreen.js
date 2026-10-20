@@ -1,7 +1,7 @@
 // ============================================================
 // ImageToolkit – Offscreen Engine
 // Canvas-based conversion · Resize · Crop · Clipboard fallback
-// Requires lib/core.js.
+// Requires lib/core.js and lib/handoff.js.
 // ============================================================
 
 'use strict';
@@ -15,6 +15,8 @@ const OFFSCREEN_HANDLERS = {
   'offscreen-copy': (message) => handleCopy(message).then(() => ({ copied: true })),
   'offscreen-copy-text': (message) => handleCopyText(message).then(() => ({ copied: true })),
   'offscreen-crop': (message) => handleCrop(message).then((dataUrl) => ({ dataUrl })),
+  'offscreen-object-url': (message) => objectUrlFromHandoff(message.key),
+  'offscreen-revoke': async (message) => { revokeObjectUrl(message.url); return { success: true }; },
 };
 
 chrome.runtime.onMessage.addListener((message, sender) => {
@@ -195,6 +197,28 @@ async function convertBlobToPng(blob) {
   canvas.height = img.naturalHeight;
   canvas.getContext('2d').drawImage(img, 0, 0);
   return canvasToBlob(canvas, 'image/png');
+}
+
+// ---------- Large downloads ----------
+// Serves a file a page parked in the handoff store as a blob: URL owned by this document, which
+// lives on after that page closes. Released when the download ends, or after 30 minutes at most.
+const OBJECT_URL_MAX_AGE_MS = 30 * 60 * 1000;
+const objectUrls = new Map(); // url → safety timer
+
+async function objectUrlFromHandoff(key) {
+  const blob = await ITK.handoff.get(key);
+  await ITK.handoff.remove(key).catch(() => {});
+  if (!(blob instanceof Blob)) throw new Error('Download source not found');
+  const url = URL.createObjectURL(blob);
+  objectUrls.set(url, setTimeout(() => revokeObjectUrl(url), OBJECT_URL_MAX_AGE_MS));
+  return { url };
+}
+
+function revokeObjectUrl(url) {
+  if (!objectUrls.has(url)) return;
+  clearTimeout(objectUrls.get(url));
+  objectUrls.delete(url);
+  URL.revokeObjectURL(url);
 }
 
 // ---------- Screenshot Crop ----------

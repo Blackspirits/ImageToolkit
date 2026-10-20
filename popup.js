@@ -1,6 +1,6 @@
 // ============================================================
 // ImageToolkit – Popup & Side Panel UI
-// Requires lib/core.js, lib/i18n.js and lib/jszip.min.js.
+// Requires lib/core.js, lib/i18n.js, lib/ui.js, lib/handoff.js and lib/jszip.min.js.
 // ============================================================
 
 'use strict';
@@ -713,8 +713,31 @@ function updateSelectionUI() {
   syncHighlights();
 }
 
+// The page outlines the selected images only while this port is open. Chrome disconnects it
+// when the panel closes, and moving to another tab disconnects it on purpose, so a page never
+// keeps outlines from a panel that is gone.
+let highlightPort = null;
+
 const syncHighlights = debounce(() => {
-  if (state.tabId != null) send({ action: 'highlightImages', tabId: state.tabId, urls: [...state.selected] });
+  const urls = [...state.selected];
+  if (highlightPort && highlightPort.tabId !== state.tabId) {
+    highlightPort.port.disconnect();
+    highlightPort = null;
+  }
+  if (!highlightPort) {
+    if (!urls.length || state.tabId == null) return;
+    const port = chrome.tabs.connect(state.tabId, { name: 'imagetoolkit-highlight' });
+    port.onDisconnect.addListener(() => {
+      void chrome.runtime.lastError; // no scanner in that tab (yet), or the page navigated away
+      if (highlightPort?.port === port) highlightPort = null;
+    });
+    highlightPort = { tabId: state.tabId, port };
+  }
+  try {
+    highlightPort.port.postMessage({ urls });
+  } catch {
+    highlightPort = null;
+  }
 }, 120);
 
 // ---------- Download menu ----------
