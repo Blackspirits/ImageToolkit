@@ -33,6 +33,7 @@ body.sidepanel .app{height:100vh}
 .delay-select{position:relative;display:flex;align-items:center;gap:2px;height:28px;padding:0 4px 0 6px;border-left:1px solid var(--line);color:var(--text-2);cursor:pointer}
 .delay-select select{appearance:none;border:0;background:transparent;font-size:11px;font-weight:650;font-variant-numeric:tabular-nums;cursor:pointer;padding:0 2px;color:var(--text-2)}
 .delay-select select:focus-visible{box-shadow:var(--ring)}
+@supports (appearance:base-select){.delay-select select{appearance:base-select;min-height:0}}
 
 /* ---------- Tabs (segmented) ---------- */
 .tabs{display:flex;gap:2px;margin:0 14px 10px;padding:3px;border-radius:var(--r-md);background:var(--bg-sunken);border:1px solid var(--line)}
@@ -222,6 +223,21 @@ body.sidepanel .app{height:100vh}
 .row-label{display:flex;flex-direction:column;gap:1px;min-width:0}
 .row-label small{font-size:11px;color:var(--text-3);line-height:1.35}
 .row-ctrl{display:flex;align-items:center;gap:8px;flex:none}
+
+.card-hint{font-size:11.5px;color:var(--text-3);margin:-6px 0 4px}
+.presets-mine{padding-top:10px;border-top:1px solid var(--line)}
+.presets-title{font-size:12.5px;font-weight:650;margin-bottom:8px}
+.preset-list{list-style:none;display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.preset-list:empty{display:none}
+.preset-item{display:flex;align-items:center;gap:8px;height:34px;padding:0 4px 0 10px;border-radius:var(--r-sm);background:var(--bg-sunken);border:1px solid var(--line)}
+.preset-name{flex:1;min-width:0;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;unicode-bidi:plaintext}
+.preset-size{font-size:11.5px;color:var(--text-2);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.preset-item .icon-btn{width:28px;height:28px}
+.preset-item .icon-btn:hover{color:var(--danger);background:var(--danger-soft)}
+#custom-presets-empty{margin-bottom:8px}
+.preset-form{display:grid;grid-template-columns:minmax(0,1fr) 64px auto 64px auto;align-items:center;gap:6px}
+.preset-form .input{width:100%;min-width:0}
+.preset-form .btn{width:30px;padding:0}
 
 .about{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px}
 .about-logo{filter:drop-shadow(0 8px 14px rgba(90,84,240,.45));margin-bottom:4px}

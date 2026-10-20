@@ -240,3 +240,20 @@ test('parseSizeFromHeaders reads the full size of a ranged answer, not the slice
   assert.equal(core.parseSizeFromHeaders(h({ 'content-length': '2048' })), 2048);
   assert.equal(core.parseSizeFromHeaders(h({})), 0);
 });
+
+test('editor presets: groups default to on, custom presets are validated and capped', () => {
+  assert.equal(core.presetGroupEnabled({}, 'tmdb'), true);
+  assert.equal(core.presetGroupEnabled({ presetGroups: { tmdb: false } }, 'tmdb'), false);
+  assert.equal(core.presetGroupEnabled({ presetGroups: { tmdb: false } }, 'social'), true);
+  assert.deepEqual(core.sanitizeCustomPresets(null), []);
+  assert.deepEqual(core.sanitizeCustomPresets([
+    { name: '  Blog  ', w: 1200, h: '630' },
+    { name: '', w: 10, h: 10 },
+    { name: 'Too big', w: 20000, h: 10 },
+    { name: 'Zero', w: 0, h: 10 },
+    { name: 'x'.repeat(40), w: 1, h: 1 },
+    'junk',
+  ]), [{ name: 'Blog', w: 1200, h: 630 }, { name: 'x'.repeat(24), w: 1, h: 1 }]);
+  const many = Array.from({ length: 40 }, (_, i) => ({ name: `P${i}`, w: 10, h: 10 }));
+  assert.equal(core.sanitizeCustomPresets(many).length, core.MAX_CUSTOM_PRESETS);
+});

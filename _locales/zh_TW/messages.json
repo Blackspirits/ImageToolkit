@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "以 ZIP 下載"
+  },
+  "editorPresets": {
+    "message": "編輯器預設"
+  },
+  "editorPresetsHint": {
+    "message": "選擇編輯器中顯示的群組，並新增你自己的尺寸。"
+  },
+  "presetMine": {
+    "message": "我的預設"
+  },
+  "presetsEmpty": {
+    "message": "你還沒有自己的預設。"
+  },
+  "presetName": {
+    "message": "名稱"
+  },
+  "presetWidth": {
+    "message": "寬度"
+  },
+  "presetHeight": {
+    "message": "高度"
+  },
+  "presetAdd": {
+    "message": "新增預設"
+  },
+  "presetRemove": {
+    "message": "移除 $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "最多可儲存 $COUNT$ 個預設。",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

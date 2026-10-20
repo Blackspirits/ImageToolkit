@@ -636,5 +636,49 @@
   },
   "downloadZip": {
     "message": "Als ZIP herunterladen"
+  },
+  "editorPresets": {
+    "message": "Editor-Vorlagen"
+  },
+  "editorPresetsHint": {
+    "message": "Festlegen, welche Gruppen der Editor zeigt, und eigene Größen hinzufügen."
+  },
+  "presetMine": {
+    "message": "Eigene Vorlagen"
+  },
+  "presetsEmpty": {
+    "message": "Noch keine eigenen Vorlagen."
+  },
+  "presetName": {
+    "message": "Name"
+  },
+  "presetWidth": {
+    "message": "Breite"
+  },
+  "presetHeight": {
+    "message": "Höhe"
+  },
+  "presetAdd": {
+    "message": "Vorlage hinzufügen"
+  },
+  "presetRemove": {
+    "message": "$NAME$ entfernen",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Bis zu $COUNT$ Vorlagen möglich.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

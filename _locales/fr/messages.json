@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "Télécharger en ZIP"
+  },
+  "editorPresets": {
+    "message": "Préréglages de l'éditeur"
+  },
+  "editorPresetsHint": {
+    "message": "Choisissez les groupes affichés dans l'éditeur et ajoutez vos propres tailles."
+  },
+  "presetMine": {
+    "message": "Mes préréglages"
+  },
+  "presetsEmpty": {
+    "message": "Aucun préréglage personnel pour l'instant."
+  },
+  "presetName": {
+    "message": "Nom"
+  },
+  "presetWidth": {
+    "message": "Largeur"
+  },
+  "presetHeight": {
+    "message": "Hauteur"
+  },
+  "presetAdd": {
+    "message": "Ajouter un préréglage"
+  },
+  "presetRemove": {
+    "message": "Supprimer $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Vous pouvez enregistrer jusqu'à $COUNT$ préréglages.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

@@ -635,5 +635,49 @@
   },
   "downloadZip": {
     "message": "Pobierz jako ZIP"
+  },
+  "editorPresets": {
+    "message": "Ustawienia wstępne edytora"
+  },
+  "editorPresetsHint": {
+    "message": "Wybierz grupy widoczne w edytorze i dodaj własne rozmiary."
+  },
+  "presetMine": {
+    "message": "Moje ustawienia wstępne"
+  },
+  "presetsEmpty": {
+    "message": "Nie masz jeszcze własnych ustawień wstępnych."
+  },
+  "presetName": {
+    "message": "Nazwa"
+  },
+  "presetWidth": {
+    "message": "Szerokość"
+  },
+  "presetHeight": {
+    "message": "Wysokość"
+  },
+  "presetAdd": {
+    "message": "Dodaj ustawienie wstępne"
+  },
+  "presetRemove": {
+    "message": "Usuń $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Możesz zapisać do $COUNT$ ustawień wstępnych.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initImages();
   initTools();
   initSettings();
+  initPresetSettings();
   initPreview();
   initActionBar();
   initKeyboard();
@@ -1372,7 +1373,60 @@ function initSettings() {
     state.cards.clear();
     populateDomains();
     applyFilters();
+    renderCustomPresets();
   });
+}
+
+// ---------- Editor presets ----------
+// Which built-in groups the editor shows, and the sizes the user adds. Saved with the other
+// settings (so they sync); the editor reads them when it opens.
+function initPresetSettings() {
+  document.querySelectorAll('[data-preset-group]').forEach((input) => {
+    const group = input.dataset.presetGroup;
+    input.checked = ITK.presetGroupEnabled(state.settings, group);
+    input.addEventListener('change', () => {
+      saveSettings({ presetGroups: { ...(state.settings.presetGroups || {}), [group]: input.checked } });
+    });
+  });
+
+  $('preset-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('preset-name').value.trim();
+    const w = Number($('preset-w').value), h = Number($('preset-h').value);
+    const validSide = (n) => Number.isInteger(n) && n >= 1 && n <= ITK.MAX_SIDE;
+    if (!name) { flashError($('preset-name')); return; }
+    if (!validSide(w)) { flashError($('preset-w')); return; }
+    if (!validSide(h)) { flashError($('preset-h')); return; }
+    const list = ITK.sanitizeCustomPresets(state.settings.customPresets);
+    if (list.length >= ITK.MAX_CUSTOM_PRESETS) {
+      toast(t('presetLimit', [String(ITK.MAX_CUSTOM_PRESETS)]), 'error');
+      return;
+    }
+    saveSettings({ customPresets: [...list, { name: name.slice(0, ITK.MAX_PRESET_NAME), w, h }] });
+    $('preset-form').reset();
+    renderCustomPresets();
+    $('preset-name').focus();
+  });
+  renderCustomPresets();
+}
+
+function renderCustomPresets() {
+  const list = ITK.sanitizeCustomPresets(state.settings.customPresets);
+  $('custom-presets-empty').hidden = list.length > 0;
+  $('custom-presets').replaceChildren(...list.map((preset, index) => {
+    const label = t('presetRemove', [preset.name]);
+    return el('li', { class: 'preset-item' }, [
+      el('span', { class: 'preset-name', text: preset.name, title: preset.name }),
+      el('span', { class: 'preset-size', text: `${preset.w} × ${preset.h}` }),
+      el('button', {
+        type: 'button', class: 'icon-btn', title: label, 'aria-label': label,
+        onclick: () => {
+          saveSettings({ customPresets: list.filter((_, i) => i !== index) });
+          renderCustomPresets();
+        },
+      }, icon('x')),
+    ]);
+  }));
 }
 
 function showAbout() {

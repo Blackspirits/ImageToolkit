@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "ZIP으로 다운로드"
+  },
+  "editorPresets": {
+    "message": "편집기 프리셋"
+  },
+  "editorPresetsHint": {
+    "message": "편집기에 표시할 그룹을 선택하고 나만의 크기를 추가하세요."
+  },
+  "presetMine": {
+    "message": "내 프리셋"
+  },
+  "presetsEmpty": {
+    "message": "아직 직접 만든 프리셋이 없습니다."
+  },
+  "presetName": {
+    "message": "이름"
+  },
+  "presetWidth": {
+    "message": "너비"
+  },
+  "presetHeight": {
+    "message": "높이"
+  },
+  "presetAdd": {
+    "message": "프리셋 추가"
+  },
+  "presetRemove": {
+    "message": "$NAME$ 삭제",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "프리셋은 최대 $COUNT$개까지 저장할 수 있습니다.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

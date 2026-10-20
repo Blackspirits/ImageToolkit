@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   i18n.apply();
 
   initFooter();
+  applyPresetSettings();
   initControls();
   initKeyboard();
 
@@ -135,6 +136,20 @@ function followCropRatio(ratio) {
   const w = parseInt($('out-w').value, 10), h = parseInt($('out-h').value, 10);
   if (editor.outputAnchor === 'h' && h > 0) $('out-w').value = Math.max(1, Math.round(h * ratio));
   else if (w > 0) $('out-h').value = Math.max(1, Math.round(w / ratio));
+}
+
+// ---------- Presets ----------
+// Groups switched off in Settings are hidden; the user's own sizes come first. Runs before
+// initControls(), which wires every [data-preset] button, the user's ones included.
+function applyPresetSettings() {
+  const s = editor.settings;
+  document.querySelectorAll('details.panel[data-group]').forEach((panel) => {
+    panel.hidden = !ITK.presetGroupEnabled(s, panel.dataset.group);
+  });
+  const mine = ITK.sanitizeCustomPresets(s.customPresets);
+  $('custom-presets-panel').hidden = !mine.length;
+  $('custom-presets').replaceChildren(...mine.map((p) =>
+    ui.el('button', { class: 'chip-btn', 'data-preset': `${p.w}x${p.h}`, title: `${p.name} · ${p.w}×${p.h}`, text: p.name })));
 }
 
 // ---------- Controls ----------

@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "Tải xuống dạng ZIP"
+  },
+  "editorPresets": {
+    "message": "Cài đặt sẵn của trình chỉnh sửa"
+  },
+  "editorPresetsHint": {
+    "message": "Chọn nhóm hiển thị trong trình chỉnh sửa và thêm kích thước của riêng bạn."
+  },
+  "presetMine": {
+    "message": "Cài đặt sẵn của tôi"
+  },
+  "presetsEmpty": {
+    "message": "Bạn chưa có cài đặt sẵn riêng nào."
+  },
+  "presetName": {
+    "message": "Tên"
+  },
+  "presetWidth": {
+    "message": "Chiều rộng"
+  },
+  "presetHeight": {
+    "message": "Chiều cao"
+  },
+  "presetAdd": {
+    "message": "Thêm cài đặt sẵn"
+  },
+  "presetRemove": {
+    "message": "Xóa $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Bạn có thể lưu tối đa $COUNT$ cài đặt sẵn.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

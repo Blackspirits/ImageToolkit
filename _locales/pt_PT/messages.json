@@ -216,7 +216,7 @@
     }
   },
   "titleToggleLayout": {
-    "message": "Alternar layout"
+    "message": "Alternar disposição"
   },
   "resizeAndSave": {
     "message": "Redimensionar e guardar"
@@ -249,16 +249,16 @@
     "message": "Doar"
   },
   "bgPreview": {
-    "message": "Pré-visualizar Fundo"
+    "message": "Pré-visualizar fundo"
   },
   "bgTransparent": {
     "message": "Transparente"
   },
   "cropArea": {
-    "message": "Área de Recorte"
+    "message": "Área de recorte"
   },
   "outputSize": {
-    "message": "Tamanho Final"
+    "message": "Tamanho final"
   },
   "applyDimensions": {
     "message": "Aplicar"
@@ -291,7 +291,7 @@
     "message": "Branco"
   },
   "bgGray": {
-    "message": "Cinza"
+    "message": "Cinzento"
   },
   "bgBlack": {
     "message": "Preto"
@@ -357,7 +357,7 @@
     "message": "Grande (500–1199px)"
   },
   "filterXLargeLabel": {
-    "message": "Extra Grande (≥ 1200px)"
+    "message": "Extra grande (≥ 1200px)"
   },
   "filterAtLeast": {
     "message": "Pelo menos…"
@@ -372,10 +372,10 @@
     "message": "Proporção"
   },
   "presetCommon": {
-    "message": "Tamanhos Comuns"
+    "message": "Tamanhos comuns"
   },
   "presetSocial": {
-    "message": "Redes Sociais"
+    "message": "Redes sociais"
   },
   "pOriginal": {
     "message": "Original"
@@ -456,7 +456,7 @@
     "message": "Inverter verticalmente"
   },
   "captureHint": {
-    "message": "Desenhe um retângulo para capturar · ESC para cancelar"
+    "message": "Desenha um retângulo para capturar · Esc para cancelar"
   },
   "settingGoogleLens": {
     "message": "Pesquisa Google Lens"
@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "Transferir como ZIP"
+  },
+  "editorPresets": {
+    "message": "Predefinições do editor"
+  },
+  "editorPresetsHint": {
+    "message": "Escolhe que grupos o editor mostra e adiciona os teus próprios tamanhos."
+  },
+  "presetMine": {
+    "message": "As minhas predefinições"
+  },
+  "presetsEmpty": {
+    "message": "Ainda não tens predefinições tuas."
+  },
+  "presetName": {
+    "message": "Nome"
+  },
+  "presetWidth": {
+    "message": "Largura"
+  },
+  "presetHeight": {
+    "message": "Altura"
+  },
+  "presetAdd": {
+    "message": "Adicionar predefinição"
+  },
+  "presetRemove": {
+    "message": "Remover $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Podes guardar até $COUNT$ predefinições.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

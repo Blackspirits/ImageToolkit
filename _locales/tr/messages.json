@@ -635,5 +635,49 @@
   },
   "downloadZip": {
     "message": "ZIP olarak indir"
+  },
+  "editorPresets": {
+    "message": "Düzenleyici hazır ayarları"
+  },
+  "editorPresetsHint": {
+    "message": "Düzenleyicide hangi grupların görüneceğini seçin ve kendi boyutlarınızı ekleyin."
+  },
+  "presetMine": {
+    "message": "Hazır ayarlarım"
+  },
+  "presetsEmpty": {
+    "message": "Henüz kendi hazır ayarınız yok."
+  },
+  "presetName": {
+    "message": "Ad"
+  },
+  "presetWidth": {
+    "message": "Genişlik"
+  },
+  "presetHeight": {
+    "message": "Yükseklik"
+  },
+  "presetAdd": {
+    "message": "Hazır ayar ekle"
+  },
+  "presetRemove": {
+    "message": "$NAME$ öğesini kaldır",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "En fazla $COUNT$ hazır ayar kaydedebilirsiniz.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

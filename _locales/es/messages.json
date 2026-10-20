@@ -636,5 +636,49 @@
   },
   "downloadZip": {
     "message": "Descargar como ZIP"
+  },
+  "editorPresets": {
+    "message": "Ajustes predefinidos del editor"
+  },
+  "editorPresetsHint": {
+    "message": "Elige qué grupos muestra el editor y añade tus propios tamaños."
+  },
+  "presetMine": {
+    "message": "Mis ajustes predefinidos"
+  },
+  "presetsEmpty": {
+    "message": "Aún no tienes ajustes predefinidos propios."
+  },
+  "presetName": {
+    "message": "Nombre"
+  },
+  "presetWidth": {
+    "message": "Ancho"
+  },
+  "presetHeight": {
+    "message": "Alto"
+  },
+  "presetAdd": {
+    "message": "Añadir ajuste predefinido"
+  },
+  "presetRemove": {
+    "message": "Quitar $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Puedes guardar hasta $COUNT$ ajustes predefinidos.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

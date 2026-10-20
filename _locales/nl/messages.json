@@ -635,5 +635,49 @@
   },
   "downloadZip": {
     "message": "Downloaden als ZIP"
+  },
+  "editorPresets": {
+    "message": "Editorvoorinstellingen"
+  },
+  "editorPresetsHint": {
+    "message": "Kies welke groepen de editor toont en voeg je eigen formaten toe."
+  },
+  "presetMine": {
+    "message": "Mijn voorinstellingen"
+  },
+  "presetsEmpty": {
+    "message": "Je hebt nog geen eigen voorinstellingen."
+  },
+  "presetName": {
+    "message": "Naam"
+  },
+  "presetWidth": {
+    "message": "Breedte"
+  },
+  "presetHeight": {
+    "message": "Hoogte"
+  },
+  "presetAdd": {
+    "message": "Voorinstelling toevoegen"
+  },
+  "presetRemove": {
+    "message": "$NAME$ verwijderen",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Je kunt tot $COUNT$ voorinstellingen bewaren.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

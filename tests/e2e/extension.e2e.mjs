@@ -1103,3 +1103,44 @@ test('files without a name in their URL keep their own name when saved from Tool
   }, base);
   assert.equal(res.filename, 'holiday.photo.png');
 });
+
+test('editor presets: groups can be hidden and your own sizes added, used and removed', async () => {
+  await freshPanel();
+  await ui.evaluate(() => switchTab('settings'));
+  // Hide two groups and add a preset from the Settings card.
+  await ui.click('#preset-group-tmdb');
+  await ui.click('#preset-group-social');
+  await ui.fill('#preset-name', 'Blog cover');
+  await ui.fill('#preset-w', '1200');
+  await ui.fill('#preset-h', '630');
+  await ui.click('#preset-form button[type="submit"]');
+  // Invalid input is refused, nothing is added.
+  await ui.fill('#preset-name', 'Broken');
+  await ui.fill('#preset-w', '0');
+  await ui.fill('#preset-h', '10');
+  await ui.click('#preset-form button[type="submit"]');
+  const saved = await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) =>
+    settings.customPresets?.length && settings.presetGroups?.social === false ? settings : null)));
+  assert.deepEqual(saved.customPresets, [{ name: 'Blog cover', w: 1200, h: 630 }]);
+  assert.equal(saved.presetGroups.tmdb, false);
+  assert.equal(await ui.locator('#custom-presets .preset-item').count(), 1);
+
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const visible = await editor.evaluate(() => [...document.querySelectorAll('details.panel')].filter((d) => !d.hidden).map((d) => d.dataset.group || d.id));
+  assert.deepEqual(visible, ['custom-presets-panel', 'ratio', 'common', 'tvdb']);
+  await editor.click('#custom-presets [data-preset="1200x630"]');
+  assert.deepEqual([await editor.inputValue('#out-w'), await editor.inputValue('#out-h')], ['1200', '630']);
+  await editor.close();
+
+  // Remove it again and restore the groups.
+  await ui.click('#custom-presets .preset-item button');
+  await ui.click('#preset-group-tmdb');
+  await ui.click('#preset-group-social');
+  const restored = await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) =>
+    !settings.customPresets?.length && settings.presetGroups?.social === true && settings.presetGroups?.tmdb === true ? settings : null)));
+  assert.ok(restored);
+  assert.equal(await ui.isVisible('#custom-presets-empty'), true);
+});

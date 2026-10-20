@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "ZIP でダウンロード"
+  },
+  "editorPresets": {
+    "message": "エディターのプリセット"
+  },
+  "editorPresetsHint": {
+    "message": "エディターに表示するグループを選び、独自のサイズを追加できます。"
+  },
+  "presetMine": {
+    "message": "マイプリセット"
+  },
+  "presetsEmpty": {
+    "message": "独自のプリセットはまだありません。"
+  },
+  "presetName": {
+    "message": "名前"
+  },
+  "presetWidth": {
+    "message": "幅"
+  },
+  "presetHeight": {
+    "message": "高さ"
+  },
+  "presetAdd": {
+    "message": "プリセットを追加"
+  },
+  "presetRemove": {
+    "message": "$NAME$ を削除",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "プリセットは最大 $COUNT$ 件まで保存できます。",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

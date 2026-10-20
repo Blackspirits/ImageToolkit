@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [2.4.1] - 2026-10-20
 
+### Added
+- **Editor presets in Settings**: show or hide each preset group (aspect ratios, social media, common sizes, TMDB, TheTVDB) and add up to 24 sizes of your own, which appear first in the editor as "My presets". Synced with your other settings, in all 18 languages.
+
 ### Fixed
+- Drop-down lists open as rounded menus in the theme's colours (Chrome 135+), the capture delay included, instead of a square white system list.
 - Selected images are no longer left outlined on the page after the panel closes or moves to another tab.
 - The image handed to the editor (a screenshot can be private) is deleted as soon as the editor window closes, instead of up to 30 minutes later.
 - Large ZIPs and edited images no longer depend on the page that started them: the action popup closing on Save As can no longer cut the download.
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - English interface text uses sentence case throughout, like Chrome's own menus.
 - Format names read the same everywhere (`WebP`, not `WEBP`); the Format advisor no longer uses an emoji.
 - Unchecked selection boxes on image cards are easier to see on the light theme.
+- Portuguese (Portugal): consistent "tu" form, sentence case, "Cinzento", "Esc".
 
 ## [2.4.0] - 2026-10-01
 

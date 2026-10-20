@@ -88,7 +88,12 @@
             </div>
           </section>
 
-          <details class="panel" open>
+          <details class="panel" id="custom-presets-panel" open hidden>
+            <summary class="panel-title"><span data-i18n="presetMine">My presets</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+            <div class="chips" id="custom-presets"></div>
+          </details>
+
+          <details class="panel" data-group="ratio" open>
             <summary class="panel-title"><span data-i18n="presetAspectRatio">Aspect ratio</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips ratio-grid">
               <button class="ratio ratio-wide" data-preset="free"><svg class="i"><use href="#i-image"/></svg><span data-i18n="pOriginal">Original</span></button>
@@ -104,7 +109,7 @@
             </div>
           </details>
 
-          <details class="panel" open>
+          <details class="panel" data-group="social" open>
             <summary class="panel-title"><span data-i18n="presetSocial">Social media</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="1080x1080" title="Instagram · 1080×1080"><svg class="i i-sm"><use href="#i-instagram"/></svg><span data-i18n="pPost">Post</span></button>
@@ -118,7 +123,7 @@
             </div>
           </details>
 
-          <details class="panel" open>
+          <details class="panel" data-group="common" open>
             <summary class="panel-title"><span data-i18n="presetCommon">Common sizes</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="3840x2160" title="3840×2160">4K</button>
@@ -130,7 +135,7 @@
             </div>
           </details>
 
-          <details class="panel">
+          <details class="panel" data-group="tmdb">
             <summary class="panel-title"><span>TMDB</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="2000x3000" data-i18n="pPoster" title="2000×3000">Poster</button>
@@ -140,7 +145,7 @@
             </div>
           </details>
 
-          <details class="panel">
+          <details class="panel" data-group="tvdb">
             <summary class="panel-title"><span>TheTVDB</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="680x1000" data-i18n="pPoster" title="680×1000">Poster</button>

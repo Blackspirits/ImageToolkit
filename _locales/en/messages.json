@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "Download as ZIP"
+  },
+  "editorPresets": {
+    "message": "Editor presets"
+  },
+  "editorPresetsHint": {
+    "message": "Choose which groups the editor shows and add sizes of your own."
+  },
+  "presetMine": {
+    "message": "My presets"
+  },
+  "presetsEmpty": {
+    "message": "No presets of your own yet."
+  },
+  "presetName": {
+    "message": "Name"
+  },
+  "presetWidth": {
+    "message": "Width"
+  },
+  "presetHeight": {
+    "message": "Height"
+  },
+  "presetAdd": {
+    "message": "Add preset"
+  },
+  "presetRemove": {
+    "message": "Remove $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "You can keep up to $COUNT$ presets.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

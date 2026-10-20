@@ -634,5 +634,49 @@
   },
   "downloadZip": {
     "message": "تنزيل كملف ZIP"
+  },
+  "editorPresets": {
+    "message": "إعدادات المحرر المسبقة"
+  },
+  "editorPresetsHint": {
+    "message": "اختر المجموعات التي يعرضها المحرر وأضف مقاساتك الخاصة."
+  },
+  "presetMine": {
+    "message": "إعداداتي المسبقة"
+  },
+  "presetsEmpty": {
+    "message": "لا توجد إعدادات مسبقة خاصة بك بعد."
+  },
+  "presetName": {
+    "message": "الاسم"
+  },
+  "presetWidth": {
+    "message": "العرض"
+  },
+  "presetHeight": {
+    "message": "الارتفاع"
+  },
+  "presetAdd": {
+    "message": "إضافة إعداد مسبق"
+  },
+  "presetRemove": {
+    "message": "إزالة $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "يمكنك حفظ ما يصل إلى $COUNT$ إعدادًا مسبقًا.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

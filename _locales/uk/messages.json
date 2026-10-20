@@ -635,5 +635,49 @@
   },
   "downloadZip": {
     "message": "Завантажити як ZIP"
+  },
+  "editorPresets": {
+    "message": "Шаблони редактора"
+  },
+  "editorPresetsHint": {
+    "message": "Виберіть, які групи показувати в редакторі, і додайте власні розміри."
+  },
+  "presetMine": {
+    "message": "Мої шаблони"
+  },
+  "presetsEmpty": {
+    "message": "У вас поки немає власних шаблонів."
+  },
+  "presetName": {
+    "message": "Назва"
+  },
+  "presetWidth": {
+    "message": "Ширина"
+  },
+  "presetHeight": {
+    "message": "Висота"
+  },
+  "presetAdd": {
+    "message": "Додати шаблон"
+  },
+  "presetRemove": {
+    "message": "Видалити «$NAME$»",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Можна зберегти до $COUNT$ шаблонів.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
   }
 }

@@ -72,6 +72,7 @@ Select images and download them one by one (never one Save As dialog per image) 
 - Default quality and format, resize behavior (center crop or fit/letterbox)
 - Save As dialog, notifications, side panel or popup
 - Subfolder, file name pattern (original, system or custom prefix), convert-on-download, ZIP by default
+- Editor presets: show or hide each group (aspect ratios, social media, common sizes, TMDB, TheTVDB) and add up to 24 sizes of your own
 - Optional, off-by-default Google Lens search
 - Auto / light / dark theme and 18 interface languages
 
