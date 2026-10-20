@@ -88,6 +88,19 @@ const FIXTURES = {
     + 'const add=(mb,i)=>{const img=new Image();img.alt="h"+i;img.src="data:image/png;base64,"+String.fromCharCode(65+i).repeat(mb*1024*1024);document.body.append(img)};'
     + 'add(9,0);for(let i=1;i<=5;i++)add(6,i);</script></body>'),
   'holey.png': pngWithHole(2000, { x: 1000, y: 700, size: 4 }),
+  // Infinite feed: reaching the end appends a batch and drops the oldest (like virtualised
+  // timelines), three times. A lazy image sits far below the first screen.
+  'feed.html': Buffer.from('<!doctype html><title>f</title><body style="margin:0">'
+    + '<img src="photo.png?feed=0" style="display:block;height:300px">'
+    + '<div style="height:3000px"></div><img loading="lazy" src="wide.png?lazy=1" style="display:block;height:50px">'
+    + '<div id="list"></div><div id="end" style="height:10px"></div><script>'
+    + 'let batch=0;const list=document.getElementById("list");'
+    + 'new IntersectionObserver((e)=>{if(!e[0].isIntersecting||batch>=3)return;batch++;'
+    + 'const box=document.createElement("div");box.className="batch";'
+    + 'box.innerHTML=`<img src="photo.png?feed=${batch}a" style="display:block;height:900px"><img src="photo.png?feed=${batch}b" style="display:block;height:900px">`;'
+    + 'list.append(box);[...list.children].slice(0,-1).forEach((b)=>b.querySelectorAll("img").forEach((i)=>{const d=document.createElement("div");d.style.height="900px";i.replaceWith(d);}));'
+    + '}).observe(document.getElementById("end"));'
+    + '</script></body>'),
   'page.html': Buffer.from('<!doctype html><title>t</title><body><img src="anim.gif"><img src="logo.svg"><img src="photo.png" srcset="photo.png 1x, wide.png 2x"><div style="position:fixed;inset:0 auto auto 0;width:50px;height:50px;background:url(wide.png)"></div><a href="javascript:alert(1)//x.png">x</a></body>'),
   // Right-click targets: every way a page can show an image the context menu may be used on.
   // The page also builds a data: and a blob: copy of a PNG with its own script.
@@ -1175,4 +1188,36 @@ test('filename template: chips insert variables, preview matches, downloads and 
 
   await ui.selectOption('#setting-filename', 'original');
   await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) => settings.filenamePattern === 'original')));
+});
+
+test('auto-scroll loads lazy and infinite-scroll images, keeps the ones a feed unloads, and returns', async () => {
+  const page = await ctx.newPage();
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.goto(base + 'feed.html');
+  await page.evaluate(() => window.scrollTo(0, 120));
+  const tabId = await tabIdOf(base + 'feed.html');
+  const before = await send({ action: 'collectImages', tabId });
+  assert.ok(!before.images.some((i) => i.src.includes('feed=1a')));
+  const res = await send({ action: 'autoScroll', tabId });
+  const srcs = res.images.map((i) => new URL(i.src).search);
+  for (const q of ['?feed=0', '?lazy=1', '?feed=1a', '?feed=1b', '?feed=2a', '?feed=3b']) assert.ok(srcs.includes(q), `missing ${q}: ${srcs}`);
+  // The page itself only holds the last batch's images now: the others were collected on the way.
+  assert.equal(await page.locator('#list img').count(), 2);
+  assert.equal(await page.evaluate(() => scrollY), 120);
+  assert.equal(res.stopped, false);
+  await page.close();
+});
+
+test('auto-scroll can be stopped from the panel', async () => {
+  const page = await ctx.newPage();
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.goto(base + 'feed.html');
+  const tabId = await tabIdOf(base + 'feed.html');
+  const running = send({ action: 'autoScroll', tabId });
+  await new Promise((r) => setTimeout(r, 400));
+  await send({ action: 'stopAutoScroll', tabId });
+  const res = await running;
+  assert.equal(res.stopped, true);
+  assert.equal(await page.evaluate(() => scrollY), 0);
+  await page.close();
 });

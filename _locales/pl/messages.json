@@ -728,5 +728,27 @@
   },
   "tokTime": {
     "message": "Bieżąca godzina (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Wczytaj wszystkie obrazy"
+  },
+  "autoScrollHint": {
+    "message": "Przewija stronę do końca, aby pojawiły się obrazy ładowane z opóźnieniem, i skanuje ponownie"
+  },
+  "autoScrollRunning": {
+    "message": "Wczytywanie obrazów… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Zatrzymaj"
+  },
+  "autoScrollNothing": {
+    "message": "Na tej stronie nie ma więcej obrazów do wczytania"
   }
 }

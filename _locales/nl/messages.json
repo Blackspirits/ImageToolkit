@@ -728,5 +728,27 @@
   },
   "tokTime": {
     "message": "Huidige tijd (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Alle afbeeldingen laden"
+  },
+  "autoScrollHint": {
+    "message": "Scrolt de pagina tot het einde zodat uitgesteld geladen afbeeldingen verschijnen en scant opnieuw"
+  },
+  "autoScrollRunning": {
+    "message": "Afbeeldingen laden… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Stoppen"
+  },
+  "autoScrollNothing": {
+    "message": "Geen extra afbeeldingen op deze pagina"
   }
 }

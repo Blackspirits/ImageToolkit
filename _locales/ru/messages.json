@@ -728,5 +728,27 @@
   },
   "tokTime": {
     "message": "Текущее время (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Загрузить все изображения"
+  },
+  "autoScrollHint": {
+    "message": "Прокручивает страницу до конца, чтобы подгрузились отложенные изображения, и сканирует снова"
+  },
+  "autoScrollRunning": {
+    "message": "Загрузка изображений… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Остановить"
+  },
+  "autoScrollNothing": {
+    "message": "На этой странице больше нечего загружать"
   }
 }

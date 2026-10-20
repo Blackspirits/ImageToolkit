@@ -727,5 +727,27 @@
   },
   "tokTime": {
     "message": "現在の時刻（14-05-07）"
+  },
+  "autoScroll": {
+    "message": "すべての画像を読み込む"
+  },
+  "autoScrollHint": {
+    "message": "ページを最後までスクロールして遅延読み込みの画像を表示し、再スキャンします"
+  },
+  "autoScrollRunning": {
+    "message": "画像を読み込み中… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "停止"
+  },
+  "autoScrollNothing": {
+    "message": "このページで読み込める画像はもうありません"
   }
 }

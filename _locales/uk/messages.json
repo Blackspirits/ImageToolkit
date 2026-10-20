@@ -728,5 +728,27 @@
   },
   "tokTime": {
     "message": "Поточний час (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Завантажити всі зображення"
+  },
+  "autoScrollHint": {
+    "message": "Прокручує сторінку до кінця, щоб підвантажилися відкладені зображення, і сканує знову"
+  },
+  "autoScrollRunning": {
+    "message": "Завантаження зображень… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Зупинити"
+  },
+  "autoScrollNothing": {
+    "message": "На цій сторінці більше нічого завантажувати"
   }
 }

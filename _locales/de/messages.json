@@ -729,5 +729,27 @@
   },
   "tokTime": {
     "message": "Aktuelle Uhrzeit (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Alle Bilder laden"
+  },
+  "autoScrollHint": {
+    "message": "Seite bis zum Ende scrollen, damit nachgeladene Bilder erscheinen, und erneut scannen"
+  },
+  "autoScrollRunning": {
+    "message": "Bilder werden geladen … $PCT$ %",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Stoppen"
+  },
+  "autoScrollNothing": {
+    "message": "Keine weiteren Bilder auf dieser Seite"
   }
 }

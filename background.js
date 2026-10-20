@@ -156,7 +156,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
 // Content scripts run inside the page's renderer, so they may only trigger the
 // few actions they actually need. Everything else is reserved for extension pages.
 const EXTENSION_ORIGIN = chrome.runtime.getURL('');
-const CONTENT_SCRIPT_ACTIONS = new Set(['captureSelection', 'newImagesDetected']);
+const CONTENT_SCRIPT_ACTIONS = new Set(['captureSelection', 'newImagesDetected', 'autoScrollProgress']);
 
 function isExtensionPage(sender) {
   return ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN);
@@ -195,6 +195,8 @@ const handlers = {
   downloadHandoff: (msg) => downloadHandoff(String(msg.key || ''), msg.filename, msg.saveAs !== false),
 
   collectImages: (msg) => collectImages(msg.tabId),
+  autoScroll: (msg) => autoScroll(msg.tabId),
+  stopAutoScroll: (msg) => stopAutoScroll(msg.tabId),
 
   startCapture: (msg) => startCapture(msg.tabId, msg.delay),
   captureVisible: (msg) => captureVisible(msg.tabId),
@@ -208,6 +210,10 @@ const handlers = {
 
   // ----- From content scripts -----
   captureSelection: (msg, sender) => captureSelection(sender.tab, msg.rect),
+  autoScrollProgress: (msg, sender) => {
+    const pct = Math.max(0, Math.min(100, Math.round(Number(msg.pct) || 0)));
+    chrome.runtime.sendMessage({ action: 'autoScrollProgressUpdate', tabId: sender.tab?.id, pct }).catch(() => {});
+  },
   newImagesDetected: (msg, sender) => {
     chrome.runtime.sendMessage({ action: 'newImagesAvailable', tabId: sender.tab?.id, count: msg.count || 0 }).catch(() => {});
   },
@@ -257,6 +263,109 @@ function requestImages(tabId) {
       resolve({ images, truncated: !!response.truncated });
     });
   });
+}
+
+// ---------- Auto-scroll ----------
+// Scrolls the page to its end so lazy and infinite-scroll images load, collecting images at
+// every step (lists that unload what leaves the screen still count), then returns to where
+// the reader was. Bounded in time and steps; the panel can stop it at any moment.
+const AUTOSCROLL_BUDGET_MS = 25000;
+
+async function autoScroll(tabId) {
+  if (!Number.isInteger(tabId)) return { images: [], error: 'noTab' };
+  const scanner = await collectImages(tabId); // injects the scanner if needed
+  if (scanner.error) return scanner;
+  try {
+    const [injection] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: autoScrollPage,
+      args: [AUTOSCROLL_BUDGET_MS, ITK.SCAN_MAX_ITEMS, ITK.SCAN_MAX_TOTAL_CHARS],
+    });
+    return injection?.result || { images: [], error: 'failed' };
+  } catch {
+    return { images: [], error: 'restricted' };
+  }
+}
+
+async function stopAutoScroll(tabId) {
+  if (!Number.isInteger(tabId)) return { error: 'noTab' };
+  await chrome.scripting.executeScript({ target: { tabId }, func: () => { window.__imagetoolkitStopScroll = true; } }).catch(() => {});
+  return { success: true };
+}
+
+// Runs inside the page (isolated world, next to content.js). Must be self-contained.
+async function autoScrollPage(budgetMs, maxItems, maxChars) {
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  window.__imagetoolkitStopScroll = false;
+
+  // Lazy images and frames load at once when asked to, wherever they are on the page.
+  document.querySelectorAll('img[loading="lazy"], iframe[loading="lazy"]').forEach((el) => { el.loading = 'eager'; });
+
+  // The element that really scrolls: the page, or in app-like layouts the largest scrolling box.
+  const page = document.scrollingElement || document.documentElement;
+  let scroller = page;
+  if (page.scrollHeight <= innerHeight + 4) {
+    let best = null, bestArea = 0, checked = 0;
+    for (const el of document.querySelectorAll('body *')) {
+      if (++checked > 8000) break;
+      if (el.scrollHeight - el.clientHeight < 200) continue;
+      const overflow = getComputedStyle(el).overflowY;
+      if (overflow !== 'auto' && overflow !== 'scroll') continue;
+      const area = el.clientWidth * el.clientHeight;
+      if (area > bestArea) { best = el; bestArea = area; }
+    }
+    if (best) scroller = best;
+  }
+  const isPage = scroller === page;
+  const viewHeight = () => (isPage ? innerHeight : scroller.clientHeight);
+  const top = () => (isPage ? scrollY : scroller.scrollTop);
+  const scrollTo = (y, x) => (isPage ? window : scroller).scrollTo({ top: y, left: x, behavior: 'instant' });
+  const startY = top(), startX = isPage ? scrollX : scroller.scrollLeft;
+
+  const found = new Map();
+  let chars = 0, truncated = false;
+  const take = () => {
+    const snapshot = globalThis.__imagetoolkitScan?.();
+    if (!snapshot) return;
+    if (snapshot.truncated) truncated = true;
+    for (const img of snapshot.images) {
+      const seen = found.get(img.src);
+      if (seen) {
+        if (!seen.width && img.width) Object.assign(seen, { width: img.width, height: img.height });
+        continue;
+      }
+      const cost = img.src.length + (img.alt || '').length;
+      if (found.size >= maxItems || chars + cost > maxChars) { truncated = true; continue; }
+      chars += cost;
+      found.set(img.src, img);
+    }
+  };
+
+  const deadline = Date.now() + budgetMs;
+  let steps = 0, quietAtBottom = 0, stopped = false;
+  take();
+  while (Date.now() < deadline && steps < 300) {
+    if (window.__imagetoolkitStopScroll) { stopped = true; break; }
+    const max = scroller.scrollHeight - viewHeight();
+    if (top() >= max - 2) {
+      // At the bottom: give infinite scroll two chances to append more before calling it done.
+      await sleep(700);
+      take();
+      if (scroller.scrollHeight - viewHeight() > max + 2) { quietAtBottom = 0; continue; }
+      if (++quietAtBottom >= 2) break;
+      continue;
+    }
+    scrollTo(Math.min(max, top() + Math.round(viewHeight() * 0.85)), isPage ? scrollX : scroller.scrollLeft);
+    steps++;
+    await frame();
+    await sleep(220);
+    take();
+    const pct = Math.round((100 * top()) / Math.max(1, scroller.scrollHeight - viewHeight()));
+    chrome.runtime.sendMessage({ action: 'autoScrollProgress', pct }).catch(() => {});
+  }
+  scrollTo(startY, startX);
+  return { images: [...found.values()], truncated, steps, stopped, timedOut: Date.now() >= deadline };
 }
 
 // ---------- Offscreen Document ----------

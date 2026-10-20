@@ -32,6 +32,7 @@ const state = {
   previewSrc: '',
   focusSrc: '',      // the grid's single Tab stop (roving tabindex)
   newImages: 0,
+  autoScrolling: false,
   checker: 'auto',
   tool: { src: '', name: '', ratio: 0, size: 0 },
   cards: new Map(),
@@ -139,6 +140,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function onRuntimeMessage(msg) {
+  if (msg?.action === 'autoScrollProgressUpdate' && msg.tabId === state.tabId && state.autoScrolling) {
+    setAutoScrollUI(true, msg.pct);
+    return;
+  }
   if (msg?.action !== 'newImagesAvailable' || msg.tabId !== state.tabId || !(msg.count > 0)) return;
   state.newImages += msg.count;
   $('new-images-text').textContent = i18n.plural(state.newImages, 'newImagesOne', 'newImagesOther');
@@ -268,6 +273,8 @@ function initImages() {
   $('btn-filters').addEventListener('click', () => setFiltersOpen($('filters-panel').hidden));
   $('btn-reset-filters').addEventListener('click', resetFilters);
   $('btn-refresh').addEventListener('click', () => scan());
+  $('btn-autoscroll').addEventListener('click', toggleAutoScroll);
+  $('btn-autoscroll-stop').addEventListener('click', toggleAutoScroll);
   $('btn-retry').addEventListener('click', () => scan());
   $('new-images-banner').addEventListener('click', () => scan({ keepSelection: true }));
 
@@ -341,6 +348,43 @@ function showSkeleton() {
   skeleton.hidden = false;
   $('image-grid').hidden = true;
   $('grid-empty').hidden = true;
+}
+
+// ---------- Auto-scroll ----------
+// Scrolls the page to its end (images collected on the way), then shows everything found.
+// A second click, or Stop, ends it early with what was found so far.
+async function toggleAutoScroll() {
+  if (state.autoScrolling) {
+    send({ action: 'stopAutoScroll', tabId: state.tabId });
+    return;
+  }
+  const tabId = state.tabId;
+  const before = new Set(state.images.map((i) => i.src));
+  const token = ++scanToken;
+  state.autoScrolling = true;
+  setAutoScrollUI(true, 0);
+  const res = await send({ action: 'autoScroll', tabId });
+  state.autoScrolling = false;
+  setAutoScrollUI(false);
+  if (token !== scanToken || tabId !== state.tabId) return;
+  if (!res || res.error) {
+    toast(t(res?.error === 'restricted' ? 'errorRestrictedPage' : 'errorNoImage'), 'error');
+    return;
+  }
+  setImages(res.images || []);
+  if (res.truncated) toast(t('scanTruncated'), 'info');
+  const added = (res.images || []).filter((i) => !before.has(i.src)).length;
+  toast(added ? i18n.plural(added, 'newImagesOne', 'newImagesOther') : t('autoScrollNothing'), added ? 'success' : 'info');
+}
+
+function setAutoScrollUI(running, pct = 0) {
+  $('autoscroll-status').hidden = !running;
+  $('btn-autoscroll').setAttribute('aria-pressed', String(running));
+  $('btn-autoscroll').querySelector('use').setAttribute('href', running ? '#i-stop' : '#i-scroll-down');
+  if (running) {
+    $('autoscroll-text').textContent = t('autoScrollRunning', [String(pct)]);
+    $('autoscroll-fill').style.width = `${Math.max(4, pct)}%`;
+  }
 }
 
 async function scan({ keepSelection = false } = {}) {

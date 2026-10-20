@@ -16,6 +16,8 @@
     <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-scroll-down" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="17" rx="6"/><path d="M12 6v4"/><path d="m9 19 3 3 3-3"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5"/></symbol>
@@ -97,6 +99,7 @@
             <kbd class="search-kbd">/</kbd>
           </div>
           <button id="btn-filters" class="icon-btn icon-btn-boxed" data-i18n-title="filters" title="Filters" aria-expanded="false" aria-controls="filters-panel"><svg class="i"><use href="#i-sliders"/></svg><span class="dot" id="filters-dot" hidden></span></button>
+          <button id="btn-autoscroll" class="icon-btn icon-btn-boxed" data-i18n-title="autoScrollHint" title="Scroll the page to the end so lazy-loaded images appear, then scan again" aria-pressed="false"><svg class="i"><use href="#i-scroll-down"/></svg></button>
           <button id="btn-refresh" class="icon-btn icon-btn-boxed" data-i18n-title="titleRefresh" title="Refresh"><svg class="i"><use href="#i-refresh"/></svg></button>
         </div>
 
@@ -162,6 +165,15 @@
             <button class="seg" data-layout="compact" aria-pressed="false" data-i18n-title="layoutCompact" title="Compact grid"><svg class="i i-sm"><use href="#i-grid-small"/></svg></button>
             <button class="seg" data-layout="list" aria-pressed="false" data-i18n-title="layoutList" title="List"><svg class="i i-sm"><use href="#i-list"/></svg></button>
           </div>
+        </div>
+
+        <div id="autoscroll-status" class="autoscroll" role="status" hidden>
+          <div class="autoscroll-head">
+            <svg class="i i-sm"><use href="#i-scroll-down"/></svg>
+            <span id="autoscroll-text" data-i18n="autoScroll">Load all images</span>
+            <button id="btn-autoscroll-stop" class="link-btn" data-i18n="autoScrollStop">Stop</button>
+          </div>
+          <div class="progress-track"><div id="autoscroll-fill" class="progress-fill"></div></div>
         </div>
 
         <button id="new-images-banner" class="new-banner" hidden>

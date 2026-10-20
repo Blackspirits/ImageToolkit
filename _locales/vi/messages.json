@@ -727,5 +727,27 @@
   },
   "tokTime": {
     "message": "Giờ hiện tại (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Tải tất cả hình ảnh"
+  },
+  "autoScrollHint": {
+    "message": "Cuộn trang đến cuối để ảnh tải chậm xuất hiện rồi quét lại"
+  },
+  "autoScrollRunning": {
+    "message": "Đang tải hình ảnh… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Dừng"
+  },
+  "autoScrollNothing": {
+    "message": "Không còn ảnh nào để tải trên trang này"
   }
 }

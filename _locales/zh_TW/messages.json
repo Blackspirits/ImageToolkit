@@ -727,5 +727,27 @@
   },
   "tokTime": {
     "message": "目前時間（14-05-07）"
+  },
+  "autoScroll": {
+    "message": "載入全部圖片"
+  },
+  "autoScrollHint": {
+    "message": "將頁面捲動到底部以載入延遲載入的圖片，然後重新掃描"
+  },
+  "autoScrollRunning": {
+    "message": "正在載入圖片… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "停止"
+  },
+  "autoScrollNothing": {
+    "message": "此頁面沒有更多可載入的圖片"
   }
 }

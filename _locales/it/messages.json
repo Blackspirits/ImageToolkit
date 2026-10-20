@@ -728,5 +728,27 @@
   },
   "tokTime": {
     "message": "Ora attuale (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Carica tutte le immagini"
+  },
+  "autoScrollHint": {
+    "message": "Scorre la pagina fino in fondo per far apparire le immagini caricate in differita, poi analizza di nuovo"
+  },
+  "autoScrollRunning": {
+    "message": "Caricamento immagini… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Interrompi"
+  },
+  "autoScrollNothing": {
+    "message": "Nessun'altra immagine da caricare in questa pagina"
   }
 }

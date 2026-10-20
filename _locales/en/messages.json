@@ -727,5 +727,27 @@
   },
   "tokTime": {
     "message": "Current time (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Load all images"
+  },
+  "autoScrollHint": {
+    "message": "Scroll the page to the end so lazy-loaded images appear, then scan again"
+  },
+  "autoScrollRunning": {
+    "message": "Loading images… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Stop"
+  },
+  "autoScrollNothing": {
+    "message": "No more images to load on this page"
   }
 }

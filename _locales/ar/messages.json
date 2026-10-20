@@ -727,5 +727,27 @@
   },
   "tokTime": {
     "message": "الوقت الحالي (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "تحميل كل الصور"
+  },
+  "autoScrollHint": {
+    "message": "يمرّر الصفحة حتى النهاية لتظهر الصور المؤجَّلة ثم يفحص من جديد"
+  },
+  "autoScrollRunning": {
+    "message": "جارٍ تحميل الصور… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "إيقاف"
+  },
+  "autoScrollNothing": {
+    "message": "لا توجد صور أخرى لتحميلها في هذه الصفحة"
   }
 }

@@ -29,6 +29,15 @@
     return false;
   });
 
+  // One snapshot for the auto-scroll, which runs in this same isolated world and calls it at
+  // every step; what it returns counts as seen for the "new images" notice.
+  globalThis.__imagetoolkitScan = () => {
+    const result = collectImages();
+    result.images.forEach((img) => known.add(keyOf(img.src)));
+    startObserver();
+    return result;
+  };
+
   // The panel outlines its selection over a port. The port disconnects when the panel closes
   // or moves to another tab, and the outlines go with it.
   chrome.runtime.onConnect.addListener((port) => {
