@@ -54,10 +54,10 @@
     "message": "画像を分析中..."
   },
   "advisorAlpha": {
-    "message": "🔍 透過画像です → PNGまたはWebP推奨"
+    "message": "透過画像です → PNGまたはWebP推奨"
   },
   "advisorSmallest": {
-    "message": "🔍 最小: {format} ({size})"
+    "message": "最小: {format} ({size})"
   },
   "scanning": {
     "message": "検索中..."

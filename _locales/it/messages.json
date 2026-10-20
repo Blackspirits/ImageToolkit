@@ -55,10 +55,10 @@
     "message": "Analisi dell'immagine..."
   },
   "advisorAlpha": {
-    "message": "🔍 L'immagine ha trasparenza → PNG o WebP consigliato"
+    "message": "L'immagine ha trasparenza → PNG o WebP consigliato"
   },
   "advisorSmallest": {
-    "message": "🔍 Più piccolo: {format} ({size})"
+    "message": "Più piccolo: {format} ({size})"
   },
   "scanning": {
     "message": "Ricerca..."

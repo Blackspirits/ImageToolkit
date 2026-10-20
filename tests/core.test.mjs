@@ -100,6 +100,13 @@ test('buildFilename uses the real format and options', () => {
   assert.equal(core.buildFilename('https://a.test/p/photo.jpg', { format: 'png', filenamePattern: 'custom', filenamePrefix: 'x_' }), 'x_photo.png');
   assert.equal(core.buildFilename('https://a.test/p/photo.jpg', { format: 'png', filenamePattern: 'system' }, 42), 'imagetoolkit_42.png');
   assert.equal(core.buildFilename('data:image/png;base64,AAAA', { format: 'png' }), 'image.png');
+  // Local files and page blobs have no name in their URL: the file's own name is kept.
+  assert.equal(core.buildFilename('data:image/png;base64,AAAA', { format: 'webp', sourceName: 'Férias 2026.PNG' }), 'Férias 2026.webp');
+  assert.equal(core.buildFilename('blob:https://a.test/3f2c9c1e-4d6b-4a59-9a5e-1c2b3d4e5f60', { format: 'jpeg' }), 'image.jpg');
+  assert.equal(core.buildFilename('blob:https://a.test/3f2c9c1e-4d6b-4a59-9a5e-1c2b3d4e5f60', { format: 'png', sourceName: 'chart.svg' }), 'chart.png');
+  // A URL's own name wins over sourceName.
+  assert.equal(core.buildFilename('https://a.test/p/photo.jpg', { format: 'png', sourceName: 'other.png' }), 'photo.png');
+  assert.equal(core.sanitizeInstructions({ sourceName: 'x'.repeat(300) }).sourceName.length, 120);
 });
 
 test('calculateDimensions covers crop, fit and resize', () => {

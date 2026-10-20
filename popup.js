@@ -385,6 +385,7 @@ function setImages(list, error) {
   $('dup-count').textContent = String(state.images.filter((i) => i.isDuplicate).length);
 
   if (!state.images.length) {
+    state.filtered = []; // otherwise the count and "Select all" still act on the previous page
     $('image-grid').hidden = true;
     $('grid-empty').hidden = false;
     $('empty-title').textContent = error === 'restricted' ? t('errorRestrictedPage') : t('noImagesFound');
@@ -544,11 +545,11 @@ function updateCard(card, img) {
   name.textContent = img.name;
   name.title = img.src;
 
-  const badges = [el('span', { class: 'gbadge', text: img.type === 'other' ? '?' : img.type.toUpperCase() })];
+  const badges = [el('span', { class: 'gbadge', text: img.type === 'other' ? '?' : ITK.formatLabel(img.type) })];
   if (img.isDuplicate) badges.push(el('span', { class: 'gbadge gbadge-dup', text: 'DUP' }));
   card.querySelector('.gbadges').replaceChildren(...badges);
 
-  const meta = [el('span', { class: 'gmeta-type', text: img.type === 'other' ? '?' : img.type.toUpperCase() }), el('span', { class: 'sep' })];
+  const meta = [el('span', { class: 'gmeta-type', text: img.type === 'other' ? '?' : ITK.formatLabel(img.type) }), el('span', { class: 'sep' })];
   meta.push(img.width && img.height ? el('span', { text: `${img.width} × ${img.height}` }) : el('span', { class: 'pending' }));
   meta.push(el('span', { class: 'sep' }));
   meta.push(img.fileSize > 0 ? el('span', { text: ITK.formatBytes(img.fileSize) }) : el('span', { class: 'pending' }));
@@ -750,7 +751,7 @@ function closeMenu() {
 
 function openDownloadMenu(anchor, img) {
   closeMenu();
-  const typeLabel = img.type === 'other' ? '?' : img.type.toUpperCase();
+  const typeLabel = img.type === 'other' ? '?' : ITK.formatLabel(img.type);
   const items = [['original', t('originalFormat'), typeLabel], ['png', 'PNG'], ['jpeg', 'JPG'], ['webp', 'WebP'], ['avif', 'AVIF']];
   const menu = el('div', { class: 'menu', role: 'menu' }, items.map(([value, label, hint]) =>
     el('button', { class: 'menu-item', role: 'menuitem', onclick: () => { closeMenu(); downloadOne(img, value); } },
@@ -1003,7 +1004,7 @@ function refreshPreviewMeta() {
   const img = currentPreview();
   if (!img) return;
   const index = state.filtered.findIndex((i) => i.src === img.src);
-  const meta = [img.type === 'other' ? '' : img.type.toUpperCase()];
+  const meta = [img.type === 'other' ? '' : ITK.formatLabel(img.type)];
   if (img.width && img.height) meta.push(`${img.width} × ${img.height}`);
   if (img.fileSize > 0) meta.push(ITK.formatBytes(img.fileSize));
   if (index >= 0) meta.push(`${index + 1}/${state.filtered.length}`);
@@ -1241,7 +1242,7 @@ async function convertTool() {
   const format = segmentedValue($('convert-format')) || 'webp';
   await withBusy($('btn-convert-url'), async () => {
     try {
-      const r = await call({ action: 'processAndSave', imageUrl: state.tool.src, instructions: { format, quality: state.settings.defaultQuality / 100, silent: true } });
+      const r = await call({ action: 'processAndSave', imageUrl: state.tool.src, instructions: { format, quality: state.settings.defaultQuality / 100, silent: true, sourceName: state.tool.name } });
       if (r.cancelled) return;
       toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + sizeSummary(r));
     } catch (err) {
@@ -1263,7 +1264,7 @@ async function resizeTool() {
     return;
   }
 
-  const ins = { format: state.settings.defaultFormat || 'webp', quality: state.settings.defaultQuality / 100, silent: true };
+  const ins = { format: state.settings.defaultFormat || 'webp', quality: state.settings.defaultQuality / 100, silent: true, sourceName: state.tool.name };
   if (!isLocked() && height >= 1) {
     Object.assign(ins, { cropWidth: width, cropHeight: height, fitMode: $('resize-mode').value === 'fit' });
   } else {

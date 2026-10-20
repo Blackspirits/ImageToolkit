@@ -12,7 +12,7 @@
     "description": "Extension description for the store"
   },
   "menuParent": {
-    "message": "Save Image As..."
+    "message": "Save image as…"
   },
   "menuSaveAs": {
     "message": "Save as $FORMAT$",
@@ -24,13 +24,13 @@
     }
   },
   "menuCopyClipboard": {
-    "message": "Copy to Clipboard"
+    "message": "Copy to clipboard"
   },
   "menuResize1080": {
     "message": "Save resized (1080px)"
   },
   "menuCustomResize": {
-    "message": "Custom Resize..."
+    "message": "Custom resize…"
   },
   "popupSubtitle": {
     "message": "Convert · Download · Resize · Optimize"
@@ -45,28 +45,28 @@
     "message": "Paste image URL here..."
   },
   "convertAndSave": {
-    "message": "Convert & Save"
+    "message": "Convert & save"
   },
   "copyClipboard": {
     "message": "Copy"
   },
   "formatAdvisor": {
-    "message": "Format Advisor"
+    "message": "Format advisor"
   },
   "analyzing": {
     "message": "Analyzing image..."
   },
   "advisorAlpha": {
-    "message": "🔍 Image has transparency → PNG or WebP recommended"
+    "message": "Image has transparency → PNG or WebP recommended"
   },
   "advisorSmallest": {
-    "message": "🔍 Smallest: {format} ({size})"
+    "message": "Smallest: {format} ({size})"
   },
   "scanning": {
     "message": "Scanning..."
   },
   "filterAll": {
-    "message": "All Types"
+    "message": "All types"
   },
   "filterOther": {
     "message": "Other"
@@ -99,16 +99,16 @@
     "message": "Preferences"
   },
   "settingQuality": {
-    "message": "Default Quality"
+    "message": "Default quality"
   },
   "settingDefaultFormat": {
-    "message": "Default Format"
+    "message": "Default format"
   },
   "settingResizeBehavior": {
-    "message": "Resize Behavior"
+    "message": "Resize behavior"
   },
   "settingCrop": {
-    "message": "Center Crop"
+    "message": "Center crop"
   },
   "settingFit": {
     "message": "Fit (Letterbox)"
@@ -132,7 +132,7 @@
     "message": "Dark"
   },
   "localProcessing": {
-    "message": "100% Local Processing"
+    "message": "100% local processing"
   },
   "noTracking": {
     "message": "No login. No tracking. External actions only run when you click them."
@@ -152,13 +152,13 @@
     "message": "Image copied to clipboard!"
   },
   "customResizeTitle": {
-    "message": "Custom Resize"
+    "message": "Custom resize"
   },
   "formatLabel": {
     "message": "Format"
   },
   "saveImage": {
-    "message": "Save Image"
+    "message": "Save image"
   },
   "loadingImageInfo": {
     "message": "Loading image info..."
@@ -173,7 +173,7 @@
     "message": "Copy failed"
   },
   "settingOpenSidePanel": {
-    "message": "Open as Side Panel"
+    "message": "Open as side panel"
   },
   "sortPixels": {
     "message": "Pixel size"
@@ -191,7 +191,7 @@
     "message": "Square"
   },
   "filterByUrl": {
-    "message": "Filter by URL or filename..."
+    "message": "Filter by URL or filename…"
   },
   "titleToggleTheme": {
     "message": "Toggle theme"
@@ -219,7 +219,7 @@
     "message": "Toggle layout"
   },
   "resizeAndSave": {
-    "message": "Resize & Save"
+    "message": "Resize & save"
   },
   "placeholderWidth": {
     "message": "W"
@@ -231,7 +231,7 @@
     "message": "Open in new tab"
   },
   "titleDownloadAs": {
-    "message": "Download as..."
+    "message": "Download as…"
   },
   "labelType": {
     "message": "Type:"
@@ -249,16 +249,16 @@
     "message": "Donate"
   },
   "bgPreview": {
-    "message": "Background Preview"
+    "message": "Background preview"
   },
   "bgTransparent": {
     "message": "Transparent"
   },
   "cropArea": {
-    "message": "Crop Area"
+    "message": "Crop area"
   },
   "outputSize": {
-    "message": "Output Size"
+    "message": "Output size"
   },
   "applyDimensions": {
     "message": "Apply"
@@ -279,7 +279,7 @@
     "message": "Resize"
   },
   "openCropTool": {
-    "message": "Open Crop Tool"
+    "message": "Open crop tool"
   },
   "titleCapture": {
     "message": "Capture area"
@@ -306,7 +306,7 @@
     "message": "Capture delay"
   },
   "downloadOptions": {
-    "message": "Download Options"
+    "message": "Download options"
   },
   "settingSubfolder": {
     "message": "Subfolder"
@@ -357,7 +357,7 @@
     "message": "Large (500–1199px)"
   },
   "filterXLargeLabel": {
-    "message": "Extra Large (≥ 1200px)"
+    "message": "Extra large (≥ 1200px)"
   },
   "filterAtLeast": {
     "message": "At least…"
@@ -369,13 +369,13 @@
     "message": "Saved"
   },
   "presetAspectRatio": {
-    "message": "Aspect Ratio"
+    "message": "Aspect ratio"
   },
   "presetCommon": {
-    "message": "Common Sizes"
+    "message": "Common sizes"
   },
   "presetSocial": {
-    "message": "Social Media"
+    "message": "Social media"
   },
   "pOriginal": {
     "message": "Original"
@@ -438,7 +438,7 @@
     "message": "Only applies when downloading as Original format"
   },
   "settingSubfolderNote": {
-    "message": "Works best with '$OPTION$' turned off",
+    "message": "Works best with “$OPTION$” turned off",
     "placeholders": {
       "OPTION": {
         "content": "$1",
@@ -456,7 +456,7 @@
     "message": "Flip vertical"
   },
   "captureHint": {
-    "message": "Draw a rectangle to capture · ESC to cancel"
+    "message": "Draw a rectangle to capture · Esc to cancel"
   },
   "settingGoogleLens": {
     "message": "Google Lens search"

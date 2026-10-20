@@ -55,10 +55,10 @@
     "message": "Analiza obrazu..."
   },
   "advisorAlpha": {
-    "message": "🔍 Obraz ma przezroczystość → zalecany PNG lub WebP"
+    "message": "Obraz ma przezroczystość → zalecany PNG lub WebP"
   },
   "advisorSmallest": {
-    "message": "🔍 Najmniejszy: {format} ({size})"
+    "message": "Najmniejszy: {format} ({size})"
   },
   "scanning": {
     "message": "Szukanie..."

@@ -54,10 +54,10 @@
     "message": "Đang phân tích ảnh..."
   },
   "advisorAlpha": {
-    "message": "🔍 Ảnh có độ trong suốt → Khuyến nghị PNG hoặc WebP"
+    "message": "Ảnh có độ trong suốt → Khuyến nghị PNG hoặc WebP"
   },
   "advisorSmallest": {
-    "message": "🔍 Nhỏ nhất: {format} ({size})"
+    "message": "Nhỏ nhất: {format} ({size})"
   },
   "scanning": {
     "message": "Đang tìm..."

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title data-i18n="customResizeTitle">Adjust Image</title>
+  <title data-i18n="customResizeTitle">Custom resize</title>
   <link rel="stylesheet" href="lib/cropper.min.css">
   <link rel="stylesheet" href="lib/ui.css">
   <link rel="stylesheet" href="resize.css">
@@ -37,7 +37,7 @@
     <header class="topbar">
       <div class="topbar-brand">
         <img src="icons/icon48.png" alt="" class="topbar-logo" width="28" height="28">
-        <h1 data-i18n="customResizeTitle">Adjust Image</h1>
+        <h1 data-i18n="customResizeTitle">Custom resize</h1>
       </div>
       <div class="topbar-info">
         <span id="info-text" class="pill"></span>
@@ -70,7 +70,7 @@
       <aside class="sidebar">
         <div class="sidebar-scroll">
           <section class="panel">
-            <h2 class="panel-title" data-i18n="cropArea">Crop Area</h2>
+            <h2 class="panel-title" data-i18n="cropArea">Crop area</h2>
             <div class="dims">
               <label class="dim"><span data-i18n="placeholderWidth">W</span><input type="number" id="crop-w" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
               <button id="btn-lock" class="icon-btn lock active" aria-pressed="true" data-i18n-title="titleLockRatio" title="Lock ratio"><svg class="i i-sm"><use href="#i-lock"/></svg></button>
@@ -80,7 +80,7 @@
           </section>
 
           <section class="panel">
-            <h2 class="panel-title" data-i18n="outputSize">Output Size</h2>
+            <h2 class="panel-title" data-i18n="outputSize">Output size</h2>
             <div class="dims">
               <label class="dim"><span data-i18n="placeholderWidth">W</span><input type="number" id="out-w" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
               <span class="dims-x">×</span>
@@ -89,7 +89,7 @@
           </section>
 
           <details class="panel" open>
-            <summary class="panel-title"><span data-i18n="presetAspectRatio">Aspect Ratio</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+            <summary class="panel-title"><span data-i18n="presetAspectRatio">Aspect ratio</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips ratio-grid">
               <button class="ratio ratio-wide" data-preset="free"><svg class="i"><use href="#i-image"/></svg><span data-i18n="pOriginal">Original</span></button>
               <button class="ratio ratio-wide" data-preset="custom"><svg class="i"><use href="#i-ratio-free"/></svg><span data-i18n="pCustom">Custom</span></button>
@@ -105,7 +105,7 @@
           </details>
 
           <details class="panel" open>
-            <summary class="panel-title"><span data-i18n="presetSocial">Social Media</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+            <summary class="panel-title"><span data-i18n="presetSocial">Social media</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="1080x1080" title="Instagram · 1080×1080"><svg class="i i-sm"><use href="#i-instagram"/></svg><span data-i18n="pPost">Post</span></button>
               <button class="chip-btn" data-preset="1080x1350" title="Instagram · 1080×1350"><svg class="i i-sm"><use href="#i-instagram"/></svg>4:5</button>
@@ -119,7 +119,7 @@
           </details>
 
           <details class="panel" open>
-            <summary class="panel-title"><span data-i18n="presetCommon">Common Sizes</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+            <summary class="panel-title"><span data-i18n="presetCommon">Common sizes</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="3840x2160" title="3840×2160">4K</button>
               <button class="chip-btn" data-preset="2560x1440" title="2560×1440">2K</button>
@@ -170,7 +170,7 @@
           </div>
           <div class="foot-actions">
             <button id="btn-copy" class="btn btn-ghost" data-i18n-title="copyImage" title="Copy image"><svg class="i i-sm"><use href="#i-copy"/></svg><span data-i18n="copyClipboard">Copy</span></button>
-            <button id="btn-save" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="saveImage">Save Image</span></button>
+            <button id="btn-save" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="saveImage">Save image</span></button>
           </div>
         </footer>
       </aside>

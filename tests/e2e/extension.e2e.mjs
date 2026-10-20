@@ -1084,3 +1084,22 @@ test('a large download completes even when the page that started it closes at on
     };
   })), 0);
 });
+
+test('a page with no images resets the count and "Select all" acts on nothing', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }, { src: b + 'wide.png', width: 40, height: 20 }]), base);
+  await ui.evaluate(() => setImages([], 'restricted'));
+  assert.match(await ui.textContent('#grid-count'), /^0\b/);
+  await ui.evaluate(() => toggleSelectAll());
+  assert.equal(await ui.evaluate(() => state.selected.size), 0);
+  assert.equal(await ui.isHidden('#action-bar'), true);
+});
+
+test('files without a name in their URL keep their own name when saved from Tools', async () => {
+  const res = await ui.evaluate(async (b) => {
+    const blob = await (await fetch(b + 'photo.png')).blob();
+    const dataUrl = await ITK.ui.blobToDataUrl(blob);
+    return chrome.runtime.sendMessage({ action: 'processAndSave', imageUrl: dataUrl, instructions: { format: 'png', saveAs: false, silent: true, sourceName: 'holiday.photo.png' } });
+  }, base);
+  assert.equal(res.filename, 'holiday.photo.png');
+});

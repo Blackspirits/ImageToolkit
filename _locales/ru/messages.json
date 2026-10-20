@@ -55,10 +55,10 @@
     "message": "Анализ изображения..."
   },
   "advisorAlpha": {
-    "message": "🔍 Изображение с прозрачностью → рекомендуется PNG или WebP"
+    "message": "Изображение с прозрачностью → рекомендуется PNG или WebP"
   },
   "advisorSmallest": {
-    "message": "🔍 Наименьший: {format} ({size})"
+    "message": "Наименьший: {format} ({size})"
   },
   "scanning": {
     "message": "Поиск..."

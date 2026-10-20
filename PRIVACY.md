@@ -1,6 +1,6 @@
 # Privacy Policy — ImageToolkit
 
-**Last updated:** 2026-10-01
+**Last updated:** 2026-10-20
 
 ## Summary
 
@@ -42,7 +42,8 @@ These requests only read data; they are never used to send data anywhere. **Goog
 ## Local Storage
 
 - **Settings** are stored with `chrome.storage.sync`, which Chrome may synchronize across your signed-in browsers. ImageToolkit can only read and write its own settings and has no access to your Google Account or other sync data.
-- **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it. These entries expire after 30 minutes: an expired entry is never shown again and is deleted when it is next looked up or on the extension's next cleanup pass (at startup or when another image is opened in the editor).
+- **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it (and reload it). It is deleted as soon as that editor window closes. As a safety net, any entry older than 30 minutes is never shown again and is removed on the next cleanup pass (at startup or when another image is opened in the editor).
+- **Large downloads** — files too large to pass between the extension's pages in one message (big ZIPs or edited images) are kept briefly in the same IndexedDB store and removed as soon as the download has started.
 - **Interface state** (grid layout, transparency background, whether filters are open) is kept in the extension's local storage.
 - **Upgrades** — version 2.3.5 and earlier passed images to the editor through `chrome.storage.local`; any image left there is deleted when the extension updates or starts.
 
@@ -61,7 +62,7 @@ ImageToolkit does not contact third-party services automatically. The following 
 
 | Permission | Why it's needed |
 |---|---|
-| `contextMenus` | Adds the "Save Image As…" right-click menu and toolbar-icon capture actions |
+| `contextMenus` | Adds the "Save image as…" right-click menu and toolbar-icon capture actions |
 | `downloads` | Saves converted images and ZIP files to your computer |
 | `storage` | Saves your preferences |
 | `notifications` | Shows save/copy confirmations and errors for right-click actions (can be disabled) |

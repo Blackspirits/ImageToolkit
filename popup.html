@@ -102,7 +102,7 @@
         <div id="filters-panel" class="filters" hidden>
           <label class="field"><span data-i18n="labelType">Type:</span>
             <select id="filter-type" class="select">
-              <option value="all" data-i18n="filterAll">All</option>
+              <option value="all" data-i18n="filterAll">All types</option>
               <option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option>
               <option value="gif">GIF</option><option value="svg">SVG</option><option value="avif">AVIF</option>
               <option value="bmp">BMP</option><option value="tiff">TIFF</option><option value="ico">ICO</option>
@@ -112,10 +112,10 @@
           <label class="field"><span data-i18n="labelSize">Size:</span>
             <select id="filter-size" class="select">
               <option value="all" data-i18n="filterAny">Any</option>
-              <option value="small" data-i18n="filterSmallLabel">Small</option>
-              <option value="medium" data-i18n="filterMediumLabel">Medium</option>
-              <option value="large" data-i18n="filterLargeLabel">Large</option>
-              <option value="xlarge" data-i18n="filterXLargeLabel">Extra Large</option>
+              <option value="small" data-i18n="filterSmallLabel">Small (&lt; 200px)</option>
+              <option value="medium" data-i18n="filterMediumLabel">Medium (200–499px)</option>
+              <option value="large" data-i18n="filterLargeLabel">Large (500–1199px)</option>
+              <option value="xlarge" data-i18n="filterXLargeLabel">Extra large (≥ 1200px)</option>
               <option value="atleast" data-i18n="filterAtLeast">At least…</option>
             </select>
           </label>
@@ -208,11 +208,11 @@
             <button class="seg active" data-value="webp" role="radio">WebP</button>
             <button class="seg" data-value="avif" role="radio">AVIF</button>
           </div>
-          <button id="btn-convert-url" class="btn btn-primary btn-block mt10"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="convertAndSave">Convert &amp; Save</span></button>
+          <button id="btn-convert-url" class="btn btn-primary btn-block mt10"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="convertAndSave">Convert &amp; save</span></button>
         </div>
 
         <div class="card" id="format-advisor" hidden>
-          <h3 class="card-title"><span class="card-icon card-icon-amber"><svg class="i"><use href="#i-bulb"/></svg></span><span data-i18n="formatAdvisor">Format Advisor</span></h3>
+          <h3 class="card-title"><span class="card-icon card-icon-amber"><svg class="i"><use href="#i-bulb"/></svg></span><span data-i18n="formatAdvisor">Format advisor</span></h3>
           <p id="advisor-recommendation" class="muted"></p>
           <div id="advisor-sizes" class="bars"></div>
         </div>
@@ -224,15 +224,15 @@
             <button id="resize-url-lock" class="icon-btn lock active" aria-pressed="true" data-i18n-title="titleLockRatio" title="Lock ratio"><svg class="i i-sm"><use href="#i-lock"/></svg></button>
             <label class="dim"><span data-i18n="placeholderHeight">H</span><input type="number" id="resize-url-h" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
           </div>
-          <label id="resize-mode-row" class="field field-inline mt10" hidden><span data-i18n="settingResizeBehavior">Resize Behavior</span>
+          <label id="resize-mode-row" class="field field-inline mt10" hidden><span data-i18n="settingResizeBehavior">Resize behavior</span>
             <select id="resize-mode" class="select select-sm">
-              <option value="crop" data-i18n="settingCrop">Center Crop</option>
+              <option value="crop" data-i18n="settingCrop">Center crop</option>
               <option value="fit" data-i18n="settingFit">Fit (Letterbox)</option>
             </select>
           </label>
           <div class="btn-row mt10">
-            <button id="btn-resize-url" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="resizeAndSave">Resize &amp; Save</span></button>
-            <button id="btn-open-crop" class="btn btn-ghost"><svg class="i i-sm"><use href="#i-crop"/></svg><span data-i18n="openCropTool">Open Crop Tool</span></button>
+            <button id="btn-resize-url" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="resizeAndSave">Resize &amp; save</span></button>
+            <button id="btn-open-crop" class="btn btn-ghost"><svg class="i i-sm"><use href="#i-crop"/></svg><span data-i18n="openCropTool">Open crop tool</span></button>
           </div>
         </div>
       </section>
@@ -242,11 +242,11 @@
         <div class="card">
           <h3 class="card-title"><span class="card-icon"><svg class="i"><use href="#i-settings"/></svg></span><span data-i18n="settingsTitle">Preferences</span></h3>
           <div class="row">
-            <label for="setting-quality" data-i18n="settingQuality">Default Quality</label>
+            <label for="setting-quality" data-i18n="settingQuality">Default quality</label>
             <div class="row-ctrl"><input type="range" id="setting-quality" min="10" max="100" step="1" value="85" class="range"><output id="quality-value" class="value">85%</output></div>
           </div>
           <div class="row">
-            <label id="default-format-label" data-i18n="settingDefaultFormat">Default Format</label>
+            <label id="default-format-label" data-i18n="settingDefaultFormat">Default format</label>
             <div class="row-ctrl">
               <div class="segmented" id="setting-default-format" role="radiogroup" aria-labelledby="default-format-label">
                 <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" role="radio">AVIF</button>
@@ -254,8 +254,8 @@
             </div>
           </div>
           <div class="row">
-            <label for="setting-resize-behavior" data-i18n="settingResizeBehavior">Resize Behavior</label>
-            <div class="row-ctrl"><select id="setting-resize-behavior" class="select select-sm"><option value="crop" data-i18n="settingCrop">Center Crop</option><option value="fit" data-i18n="settingFit">Fit (Letterbox)</option></select></div>
+            <label for="setting-resize-behavior" data-i18n="settingResizeBehavior">Resize behavior</label>
+            <div class="row-ctrl"><select id="setting-resize-behavior" class="select select-sm"><option value="crop" data-i18n="settingCrop">Center crop</option><option value="fit" data-i18n="settingFit">Fit (Letterbox)</option></select></div>
           </div>
           <div class="row">
             <label id="theme-label" data-i18n="settingTheme">Theme</label>
@@ -290,7 +290,7 @@
             </select></div>
           </div>
           <div class="row">
-            <label for="setting-open-sidepanel" data-i18n="settingOpenSidePanel">Open as Side Panel</label>
+            <label for="setting-open-sidepanel" data-i18n="settingOpenSidePanel">Open as side panel</label>
             <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-open-sidepanel" checked><span></span></label></div>
           </div>
           <div class="row">
@@ -304,7 +304,7 @@
         </div>
 
         <div class="card">
-          <h3 class="card-title"><span class="card-icon card-icon-cyan"><svg class="i"><use href="#i-download"/></svg></span><span data-i18n="downloadOptions">Download Options</span></h3>
+          <h3 class="card-title"><span class="card-icon card-icon-cyan"><svg class="i"><use href="#i-download"/></svg></span><span data-i18n="downloadOptions">Download options</span></h3>
           <div class="row">
             <label for="setting-save-as" data-i18n="settingSaveAs">Ask save location</label>
             <div class="row-ctrl"><label class="switch"><input type="checkbox" id="setting-save-as" checked><span></span></label></div>
@@ -334,8 +334,8 @@
         <div class="card about">
           <img src="icons/logo128.png" alt="" class="about-logo" width="52" height="52">
           <div class="about-name"><span data-i18n="extShortName">ImageToolkit</span> <span class="about-version" id="version-text"></span></div>
-          <p class="about-badge"><svg class="i i-sm"><use href="#i-shield"/></svg><span data-i18n="localProcessing">100% Local Processing</span></p>
-          <p class="muted" data-i18n="noTracking">No login. No tracking. External actions only run when clicked.</p>
+          <p class="about-badge"><svg class="i i-sm"><use href="#i-shield"/></svg><span data-i18n="localProcessing">100% local processing</span></p>
+          <p class="muted" data-i18n="noTracking">No login. No tracking. External actions only run when you click them.</p>
           <p class="about-shortcut" id="shortcut-row" hidden><svg class="i i-sm"><use href="#i-keyboard"/></svg><span data-i18n="titleCapture">Capture area</span><kbd id="shortcut-key"></kbd></p>
           <div class="about-links">
             <a href="https://blackspirits.github.io" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">BlackSpirits</a>

@@ -55,10 +55,10 @@
     "message": "Resim analiz ediliyor..."
   },
   "advisorAlpha": {
-    "message": "🔍 Resim şeffaflık içeriyor → PNG veya WebP önerilir"
+    "message": "Resim şeffaflık içeriyor → PNG veya WebP önerilir"
   },
   "advisorSmallest": {
-    "message": "🔍 En küçük: {format} ({size})"
+    "message": "En küçük: {format} ({size})"
   },
   "scanning": {
     "message": "Aranıyor..."

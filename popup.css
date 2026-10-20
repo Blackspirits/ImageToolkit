@@ -14,9 +14,19 @@ body.sidepanel .app{height:100vh}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-logo{width:30px;height:30px;filter:drop-shadow(0 3px 6px rgba(90,84,240,.45))}
 .brand-text{min-width:0}
-.brand-title{font-size:15px;font-weight:750;letter-spacing:-.01em;line-height:1.2}
+.brand-title{font-size:15px;font-weight:750;letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-sub{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:479px){.brand-sub{display:none}.brand-title{font-size:16px}}
+/* Chrome's narrowest side panel (320 px): the logo alone names the app, controls get tighter */
+@media (max-width:359px){
+  .brand-text{display:none}
+  .search-kbd{display:none}
+  .search input{padding-inline-end:10px}
+  .statusbar{gap:4px}
+  .statusbar .chip{padding:0 8px}
+  .statusbar .chip-icon{padding:0}
+  .statusbar .segmented-icons .seg{min-width:26px;padding:0 5px}
+}
 .header-actions{display:flex;align-items:center;gap:2px;flex:none}
 .split{display:flex;align-items:center;gap:0;padding:2px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-elev);box-shadow:var(--shadow-sm);margin-right:4px}
 .split .icon-btn{width:30px;height:28px}
@@ -37,14 +47,15 @@ body.sidepanel .app{height:100vh}
 .views{flex:1;min-height:0;position:relative}
 .view{display:none;height:100%;overflow-y:auto;overflow-x:hidden;padding:0 14px 16px;scrollbar-gutter:stable}
 .view.active{display:block;animation:viewIn .22s var(--ease)}
-body.popup #tab-images.view{padding-bottom:80px}
+/* Room for the floating selection bar, so the last row is never hidden under it */
+#tab-images.view:has(.grid.has-selection){padding-bottom:80px}
 @keyframes viewIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* ---------- Images toolbar ---------- */
 .toolbar{display:flex;gap:6px;align-items:center;position:sticky;top:0;z-index:5;padding:2px 0 8px;background:linear-gradient(var(--bg) 80%,transparent)}
 .search{flex:1;position:relative;display:flex;align-items:center;min-width:0}
 .search-icon{position:absolute;inset-inline-start:10px;color:var(--text-3);pointer-events:none}
-.search input{width:100%;height:34px;border:1px solid var(--control-line);border-radius:var(--r-sm);background:var(--bg-elev);padding:0 34px;font-size:12.5px;box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s}
+.search input{width:100%;height:34px;text-overflow:ellipsis;border:1px solid var(--control-line);border-radius:var(--r-sm);background:var(--bg-elev);padding:0 34px;font-size:12.5px;box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s}
 .search input:hover{border-color:var(--accent-line)}
 .search input:focus{outline:none;border-color:var(--accent);box-shadow:var(--ring)}
 .search input::placeholder{color:var(--text-3)}
@@ -101,7 +112,7 @@ body.popup #tab-images.view{padding-bottom:80px}
 .gthumb-broken{color:var(--text-3)}
 .gthumb-broken .i{width:28px;height:28px;stroke-width:1.5}
 
-.gcheck{position:absolute;top:8px;inset-inline-start:8px;width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(15,15,25,.45);border:1.5px solid rgba(255,255,255,.85);color:transparent;backdrop-filter:blur(6px);opacity:0;transform:scale(.9);transition:opacity .15s,transform .15s,background .15s}
+.gcheck{position:absolute;top:8px;inset-inline-start:8px;width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(15,15,25,.45);border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(15,15,25,.28),0 1px 3px rgba(15,15,25,.25);color:transparent;backdrop-filter:blur(6px);opacity:0;transform:scale(.9);transition:opacity .15s,transform .15s,background .15s}
 .gcheck .i{width:14px;height:14px;stroke-width:3}
 .gcard:hover .gcheck,.gcard:focus-within .gcheck,.gcard.selected .gcheck,.grid.has-selection .gcheck{opacity:1;transform:none}
 .gcard.selected .gcheck{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -221,14 +232,20 @@ body.popup #tab-images.view{padding-bottom:80px}
 .about-links{display:flex;gap:8px;margin-top:6px}
 
 /* ---------- Action bar ---------- */
-.action-bar{position:absolute;left:10px;right:10px;bottom:10px;z-index:50;border-radius:var(--r-lg);background:var(--bg-glass);border:1px solid var(--line-strong);box-shadow:var(--shadow-lg);backdrop-filter:blur(16px) saturate(1.4);animation:barIn .28s var(--ease)}
+.action-bar{position:absolute;left:10px;right:10px;bottom:10px;z-index:50;container-type:inline-size;border-radius:var(--r-lg);background:var(--bg-glass);border:1px solid var(--line-strong);box-shadow:var(--shadow-lg);backdrop-filter:blur(16px) saturate(1.4);animation:barIn .28s var(--ease)}
 @keyframes barIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .action-bar-inner{display:flex;align-items:center;gap:6px;padding:8px}
 .action-bar .icon-btn-boxed{width:30px;height:30px}
 .action-count{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px 0 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent-text);font-size:12.5px;white-space:nowrap;flex:none}
 .action-count strong{color:inherit}
 .action-count .i{stroke-width:2.6;width:13px;height:13px}
-body.popup .action-count-label{display:none}
+/* The bar shrinks with the panel: drop the word "selected", then the Download label
+   (it stays the accessible name), so no control is ever cut off. */
+@container (max-width:439px){.action-count-label{display:none}}
+@container (max-width:359px){
+  #action-download{width:30px;padding:0}
+  #action-download span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+}
 .action-bar .select{flex:none;width:auto}
 .action-bar .btn,.action-bar .icon-btn{flex:none}
 .action-count strong{font-variant-numeric:tabular-nums}

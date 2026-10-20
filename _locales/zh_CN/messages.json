@@ -54,10 +54,10 @@
     "message": "分析图片中..."
   },
   "advisorAlpha": {
-    "message": "🔍 图片含透明通道 → 推荐PNG或WebP"
+    "message": "图片含透明通道 → 推荐PNG或WebP"
   },
   "advisorSmallest": {
-    "message": "🔍 最小: {format} ({size})"
+    "message": "最小: {format} ({size})"
   },
   "scanning": {
     "message": "扫描中..."

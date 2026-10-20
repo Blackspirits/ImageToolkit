@@ -54,10 +54,10 @@
     "message": "이미지 분석 중..."
   },
   "advisorAlpha": {
-    "message": "🔍 투명도가 있는 이미지 → PNG 또는 WebP 권장"
+    "message": "투명도가 있는 이미지 → PNG 또는 WebP 권장"
   },
   "advisorSmallest": {
-    "message": "🔍 최소: {format} ({size})"
+    "message": "최소: {format} ({size})"
   },
   "scanning": {
     "message": "검색 중..."

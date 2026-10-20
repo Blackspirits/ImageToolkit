@@ -55,10 +55,10 @@
     "message": "Afbeelding analyseren..."
   },
   "advisorAlpha": {
-    "message": "🔍 Afbeelding heeft transparantie → PNG of WebP aanbevolen"
+    "message": "Afbeelding heeft transparantie → PNG of WebP aanbevolen"
   },
   "advisorSmallest": {
-    "message": "🔍 Kleinste: {format} ({size})"
+    "message": "Kleinste: {format} ({size})"
   },
   "scanning": {
     "message": "Zoeken..."

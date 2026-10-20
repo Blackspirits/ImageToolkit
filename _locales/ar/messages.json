@@ -54,10 +54,10 @@
     "message": "جاري تحليل الصورة..."
   },
   "advisorAlpha": {
-    "message": "🔍 الصورة تحتوي على شفافية → PNG أو WebP موصى به"
+    "message": "الصورة تحتوي على شفافية → PNG أو WebP موصى به"
   },
   "advisorSmallest": {
-    "message": "🔍 الأصغر: {format} ({size})"
+    "message": "الأصغر: {format} ({size})"
   },
   "scanning": {
     "message": "جاري البحث..."

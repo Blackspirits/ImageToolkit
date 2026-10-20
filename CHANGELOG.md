@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [2.4.1] - 2026-10-20
+
+### Fixed
+- Selected images are no longer left outlined on the page after the panel closes or moves to another tab.
+- The image handed to the editor (a screenshot can be private) is deleted as soon as the editor window closes, instead of up to 30 minutes later.
+- Large ZIPs and edited images no longer depend on the page that started them: the action popup closing on Save As can no longer cut the download.
+- The selection bar fits every panel width (down to Chrome's 320 px side panel); the header and toolbar no longer overlap or overflow there, and the last row of images is never hidden under the bar.
+- A page with no images (or one the browser does not let extensions read) now shows 0 images, and "Select all" no longer acts on the previous page.
+- Files opened from disk in Tools keep their own name when converted or resized (e.g. `holiday.webp`, not `image.webp`); `blob:` images no longer get a random id as their name.
+
+### Changed
+- English interface text uses sentence case throughout, like Chrome's own menus.
+- Format names read the same everywhere (`WebP`, not `WEBP`); the Format advisor no longer uses an emoji.
+- Unchecked selection boxes on image cards are easier to see on the light theme.
+
 ## [2.4.0] - 2026-10-01
 
 ### Added
