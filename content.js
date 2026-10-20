@@ -16,21 +16,9 @@
   const LAZY_ATTRS = ['data-src', 'data-lazy-src', 'data-original', 'data-srcset', 'data-lazy-srcset'];
   const OBSERVER_IDLE_MS = 5 * 60 * 1000;
 
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (sender.id !== chrome.runtime.id) return false;
-
-    if (message.action === 'getImages') {
-      const { images, truncated } = collectImages();
-      known = new Set(images.map((img) => keyOf(img.src)));
-      sendResponse({ images, truncated });
-      startObserver();
-      return false;
-    }
-    return false;
-  });
-
-  // One snapshot for the auto-scroll, which runs in this same isolated world and calls it at
-  // every step; what it returns counts as seen for the "new images" notice.
+  // The service worker scans every frame with this (via scripting.executeScript, which runs in
+  // this same isolated world), and so does the auto-scroll at every step. What it returns
+  // counts as seen for the "new images" notice.
   globalThis.__imagetoolkitScan = () => {
     const result = collectImages();
     result.images.forEach((img) => known.add(keyOf(img.src)));

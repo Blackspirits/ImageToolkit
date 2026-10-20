@@ -239,30 +239,54 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // ---------- Image Scanner ----------
+// Every frame of the tab is scanned (iframes included), each with the scanner injected once.
+// The page's own frame comes first; the merged list keeps the scan's overall budget.
+const SCANNER_FILES = ['lib/core.js', 'content.js'];
+
 async function collectImages(tabId) {
   if (!Number.isInteger(tabId)) return { images: [], error: 'noTab' };
 
-  let result = await requestImages(tabId);
-  if (result) return result;
-
+  let probes;
   try {
-    await chrome.scripting.executeScript({ target: { tabId }, files: ['lib/core.js', 'content.js'] });
+    probes = await chrome.scripting.executeScript({ target: { tabId, allFrames: true }, func: () => !!globalThis.__imagetoolkitScan });
   } catch {
+    // The page itself cannot be scripted (browser pages, the Web Store…).
     return { images: [], error: 'restricted' };
   }
+  const missing = probes.filter((p) => p.result !== true).map((p) => p.frameId);
+  if (missing.length) {
+    await chrome.scripting.executeScript({ target: { tabId, frameIds: missing }, files: SCANNER_FILES })
+      .catch(() => chrome.scripting.executeScript({ target: { tabId }, files: SCANNER_FILES }).catch(() => {}));
+  }
 
-  return (await requestImages(tabId)) || { images: [] };
+  const scans = await chrome.scripting.executeScript({
+    target: { tabId, allFrames: true },
+    func: () => globalThis.__imagetoolkitScan?.() ?? null,
+  }).catch(() => []);
+  scans.sort((a, b) => (a.frameId === 0 ? -1 : b.frameId === 0 ? 1 : a.frameId - b.frameId));
+  return mergeScans(scans.map((s) => s.result).filter(Boolean));
 }
 
-function requestImages(tabId) {
-  return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, { action: 'getImages' }, (response) => {
-      if (chrome.runtime.lastError || !response) { resolve(null); return; }
-      // { images, truncated } — a bare array is accepted for scanners injected by older builds.
-      const images = Array.isArray(response) ? response : (Array.isArray(response.images) ? response.images : []);
-      resolve({ images, truncated: !!response.truncated });
-    });
-  });
+// Union by URL across frames (or auto-scroll snapshots), within the scan's size budget.
+function mergeScans(scans) {
+  const found = new Map();
+  let chars = 0, truncated = false;
+  for (const scan of scans) {
+    if (scan.truncated) truncated = true;
+    for (const img of scan.images || []) {
+      const seen = found.get(img.src);
+      if (seen) {
+        if (!(seen.width > 0) && img.width > 0) Object.assign(seen, { width: img.width, height: img.height });
+        if (!seen.fileSize && img.fileSize) seen.fileSize = img.fileSize;
+        continue;
+      }
+      const cost = String(img.src).length + String(img.alt || '').length;
+      if (found.size >= ITK.SCAN_MAX_ITEMS || chars + cost > ITK.SCAN_MAX_TOTAL_CHARS) { truncated = true; continue; }
+      chars += cost;
+      found.set(img.src, img);
+    }
+  }
+  return { images: [...found.values()], truncated };
 }
 
 // ---------- Auto-scroll ----------
@@ -281,7 +305,12 @@ async function autoScroll(tabId) {
       func: autoScrollPage,
       args: [AUTOSCROLL_BUDGET_MS, ITK.SCAN_MAX_ITEMS, ITK.SCAN_MAX_TOTAL_CHARS],
     });
-    return injection?.result || { images: [], error: 'failed' };
+    const page = injection?.result;
+    if (!page) return { images: [], error: 'failed' };
+    // Frames loaded on the way (and the page's final state) join what the scroll collected.
+    const frames = await collectImages(tabId);
+    const merged = mergeScans([page, scanner, frames]);
+    return { ...page, images: merged.images, truncated: page.truncated || merged.truncated };
   } catch {
     return { images: [], error: 'restricted' };
   }

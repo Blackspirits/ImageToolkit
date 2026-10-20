@@ -88,6 +88,7 @@ const FIXTURES = {
     + 'const add=(mb,i)=>{const img=new Image();img.alt="h"+i;img.src="data:image/png;base64,"+String.fromCharCode(65+i).repeat(mb*1024*1024);document.body.append(img)};'
     + 'add(9,0);for(let i=1;i<=5;i++)add(6,i);</script></body>'),
   'holey.png': pngWithHole(2000, { x: 1000, y: 700, size: 4 }),
+  'frame.html': Buffer.from('<!doctype html><title>fr</title><body><img src="anim.gif?inframe=1"><div style="width:40px;height:40px;background:url(wide.png?inframebg=1)"></div></body>'),
   // Infinite feed: reaching the end appends a batch and drops the oldest (like virtualised
   // timelines), three times. A lazy image sits far below the first screen.
   'feed.html': Buffer.from('<!doctype html><title>f</title><body style="margin:0">'
@@ -227,7 +228,8 @@ before(async () => {
     channel: 'chromium',
     headless: true,
     acceptDownloads: true,
-    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
+    // itk-other.test is the same local server under another origin (cross-origin iframes).
+    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--host-resolver-rules=MAP itk-other.test 127.0.0.1'],
   });
   sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker');
   id = new URL(sw.url()).host;
@@ -1219,5 +1221,34 @@ test('auto-scroll can be stopped from the panel', async () => {
   const res = await running;
   assert.equal(res.stopped, true);
   assert.equal(await page.evaluate(() => scrollY), 0);
+  await page.close();
+});
+
+test('images inside iframes are listed, same-origin and cross-origin, and outlined there too', async () => {
+  const port = new URL(base).port;
+  FIXTURES['frames.html'] = Buffer.from('<!doctype html><title>frames</title><body><img src="photo.png?top=1">'
+    + `<iframe src="frame.html" width="200" height="120"></iframe><iframe src="http://itk-other.test:${port}/frame.html?x=1" width="200" height="120"></iframe></body>`);
+  const page = await ctx.newPage();
+  await page.goto(base + 'frames.html');
+  await page.waitForTimeout(300);
+  const tabId = await tabIdOf(base + 'frames.html');
+  const { images } = await send({ action: 'collectImages', tabId });
+  const srcs = images.map((i) => i.src);
+  assert.equal(srcs[0], base + 'photo.png?top=1', 'the page itself comes first');
+  assert.ok(srcs.includes(base + 'anim.gif?inframe=1'), srcs.join(' '));
+  assert.ok(srcs.includes(base + 'wide.png?inframebg=1'));
+  assert.ok(srcs.includes(`http://itk-other.test:${port}/anim.gif?inframe=1`), 'cross-origin frame');
+  // A second scan does not inject again or duplicate anything.
+  assert.equal((await send({ action: 'collectImages', tabId })).images.length, images.length);
+
+  // Outlines reach the frames through the same port.
+  const panel = await ctx.newPage();
+  await panel.goto(`chrome-extension://${id}/popup.html`);
+  await panel.waitForSelector('#image-grid', { state: 'attached' });
+  await panel.evaluate(async ({ tabId, src }) => { state.tabId = tabId; await scan(); state.selected.add(src); updateSelectionUI(); }, { tabId, src: `http://itk-other.test:${port}/anim.gif?inframe=1` });
+  const frame = page.frames().find((f) => f.url().startsWith('http://itk-other.test'));
+  await waitFor(() => frame.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length === 1));
+  await panel.close();
+  await waitFor(() => frame.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length === 0));
   await page.close();
 });
