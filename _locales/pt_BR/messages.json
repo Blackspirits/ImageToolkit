@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "Digite e pressione Enter"
+  },
+  "captureTabChanged": {
+    "message": "Captura interrompida: a aba mudou. Mantenha-a em primeiro plano durante a captura.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "A página parou de rolar antes do fim: a captura pode estar incompleta.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

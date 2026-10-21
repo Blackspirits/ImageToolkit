@@ -859,5 +859,13 @@
   },
   "textPlaceholder": {
     "message": "Escribe y pulsa Intro"
+  },
+  "captureTabChanged": {
+    "message": "Captura detenida: la pestaña cambió. Mantenla al frente durante la captura.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "La página dejó de desplazarse antes del final: la captura puede estar incompleta.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

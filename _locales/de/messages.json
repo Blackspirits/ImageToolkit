@@ -859,5 +859,13 @@
   },
   "textPlaceholder": {
     "message": "Text eingeben, dann Eingabe"
+  },
+  "captureTabChanged": {
+    "message": "Aufnahme abgebrochen: Der Tab hat gewechselt. Lass ihn während der Aufnahme im Vordergrund.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Die Seite hat vor dem Ende aufgehört zu scrollen: Die Aufnahme ist eventuell unvollständig.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

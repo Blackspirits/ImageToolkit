@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "Nhập rồi nhấn Enter"
+  },
+  "captureTabChanged": {
+    "message": "Đã dừng chụp: thẻ đã thay đổi. Hãy giữ thẻ ở phía trước trong khi chụp.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Trang đã ngừng cuộn trước khi đến cuối: ảnh chụp có thể chưa đầy đủ.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

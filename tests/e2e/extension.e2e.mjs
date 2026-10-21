@@ -229,7 +229,7 @@ before(async () => {
     headless: true,
     acceptDownloads: true,
     // itk-other.test is the same local server under another origin (cross-origin iframes).
-    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--host-resolver-rules=MAP itk-other.test 127.0.0.1'],
+    args: ['--screen-info={1600x1200}', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--host-resolver-rules=MAP itk-other.test 127.0.0.1'],
   });
   sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker');
   id = new URL(sw.url()).host;
@@ -405,9 +405,7 @@ test('context-menu copy writes the image from the focused page', async () => {
 });
 
 test('area capture crops the selection and opens the editor', async () => {
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'page.html');
+  const page = await screenPage('page.html');
   await page.bringToFront();
   const tabId = await sw.evaluate(async (url) => (await chrome.tabs.query({ url })).at(0).id, base + 'page.html');
   assert.deepEqual(await send({ action: 'startCapture', tabId }), { success: true });
@@ -639,6 +637,20 @@ test('editor: crop and output sizes use the same rounding', async () => {
 // ---------- Release hardening ----------
 const countDownloadsAll = () => sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
 const tabIdOf = (url) => sw.evaluate(async (u) => (await chrome.tabs.query({ url: u })).at(0).id, url);
+// A screenshot shows what the window really displays: it must be at least as large as the
+// emulated viewport, or the bottom of each screen is never visible.
+async function screenPage(name, width = 800, height = 600) {
+  const page = await ctx.newPage();
+  await page.goto(base + name);
+  const shown = await sw.evaluate(async (u) => {
+    const tab = (await chrome.tabs.query({ url: u })).at(0);
+    const win = await chrome.windows.update(tab.windowId, { left: 0, top: 0, width: 1200, height: 1000, state: 'normal' }).catch((e) => e.message);
+    return win;
+  }, base + name);
+  if (typeof shown === 'string') throw new Error(shown);
+  await page.setViewportSize({ width, height });
+  return page;
+}
 
 test('scan payload is bounded: an oversized inline image is skipped and the total stays in budget', async () => {
   const page = await ctx.newPage();
@@ -1193,9 +1205,7 @@ test('filename template: chips insert variables, preview matches, downloads and 
 });
 
 test('auto-scroll loads lazy and infinite-scroll images, keeps the ones a feed unloads, and returns', async () => {
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'feed.html');
+  const page = await screenPage('feed.html');
   await page.evaluate(() => window.scrollTo(0, 120));
   const tabId = await tabIdOf(base + 'feed.html');
   const before = await send({ action: 'collectImages', tabId });
@@ -1211,9 +1221,7 @@ test('auto-scroll loads lazy and infinite-scroll images, keeps the ones a feed u
 });
 
 test('auto-scroll can be stopped from the panel', async () => {
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'feed.html');
+  const page = await screenPage('feed.html');
   const tabId = await tabIdOf(base + 'feed.html');
   const running = send({ action: 'autoScroll', tabId });
   await new Promise((r) => setTimeout(r, 400));
@@ -1288,9 +1296,7 @@ test('full-page capture: slices in order, fixed header only once, scrollbar off,
   FIXTURES['long.html'] = Buffer.from('<!doctype html><title>long</title><style>body{margin:0}div.b{height:600px}</style><body>'
     + '<header style="position:fixed;top:0;left:0;right:0;height:40px;background:#000"></header>'
     + ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'].map((c) => `<div class="b" style="background:${c}"></div>`).join('') + '</body>');
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'long.html');
+  const page = await screenPage('long.html');
   await page.evaluate(() => window.scrollTo(0, 250));
   await page.bringToFront();
   const tabId = await tabIdOf(base + 'long.html');
@@ -1411,9 +1417,7 @@ test('a scanner left in the page by an older version does not block the new one'
 test('full-page capture keeps sticky content where it belongs and never repeats it', async () => {
   FIXTURES['sticky.html'] = Buffer.from('<!doctype html><title>sticky</title><style>body{margin:0}section{height:1200px;background:#00ff00}h2{position:sticky;top:0;margin:0;height:60px;background:#ff0000}</style><body>'
     + '<section></section><section><h2></h2></section><section style="background:#0000ff"></section></body>');
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'sticky.html');
+  const page = await screenPage('sticky.html');
   await page.bringToFront();
   const known = new Set(ctx.pages());
   assert.equal((await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'sticky.html') })).success, true);
@@ -1434,10 +1438,74 @@ test('full-page capture keeps sticky content where it belongs and never repeats 
   await page.close();
 });
 
+test('full-page capture of an app-like layout follows its inner scrolling area', async () => {
+  FIXTURES['app.html'] = Buffer.from('<!doctype html><title>app</title><style>html,body{margin:0;height:100%;overflow:hidden}'
+    + 'header{height:50px;background:#000}main{height:calc(100% - 50px);overflow:auto}main div{height:600px}</style><body><header></header><main>'
+    + ['#ff0000', '#00ff00', '#0000ff'].map((c) => `<div style="background:${c}"></div>`).join('') + '</main></body>');
+  const page = await screenPage('app.html');
+  await page.evaluate(() => { document.querySelector('main').scrollTop = 120; });
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'app.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const probe = await editor.evaluate((dpr) => {
+    const img = document.getElementById('cropper-img');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
+    return { h: img.naturalHeight, top: at(5), red: at(300), green: at(900), blue: at(1500), end: at(1795) };
+  }, dpr);
+  // The whole scrolling area (3 × 600 px), not one screen of it; the header is not part of it.
+  assert.equal(probe.h, Math.round(1800 * dpr));
+  assert.deepEqual([probe.top, probe.red, probe.green, probe.blue, probe.end], ['255,0,0', '255,0,0', '0,255,0', '0,0,255', '0,0,255']);
+  assert.equal(await page.evaluate(() => document.querySelector('main').scrollTop), 120);
+  await editor.close();
+  await page.close();
+});
+
+test('full-page capture ends on a page that refuses to scroll, and says it may be incomplete', async () => {
+  FIXTURES['stuck.html'] = Buffer.from('<!doctype html><title>stuck</title><style>body{margin:0}div{height:4000px;background:#ff0000}</style><body><div></div>'
+    + '<script>addEventListener("scroll", () => scrollTo(0, 0));</script></body>');
+  const page = await screenPage('stuck.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const started = Date.now();
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'stuck.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.equal(res.truncated, true);
+  assert.ok(Date.now() - started < 20000, 'ends at once instead of looping');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  await editor.close();
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  await page.close();
+});
+
+test('full-page capture stops when another tab comes to the front, and restores the page', async () => {
+  FIXTURES['tall.html'] = Buffer.from('<!doctype html><title>tall</title><style>body{margin:0}div{height:6000px;background:linear-gradient(#f00,#00f)}</style><body><div></div></body>');
+  const page = await screenPage('tall.html');
+  FIXTURES['other.html'] = Buffer.from('<!doctype html><title>other</title><body>other</body>');
+  const other = await ctx.newPage();
+  await other.goto(base + 'other.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const pending = send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'tall.html') });
+  await new Promise((r) => setTimeout(r, 1200));
+  await other.bringToFront();
+  const res = await pending;
+  assert.equal(res.error, 'tabChanged', JSON.stringify(res));
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('resize.html')), false, 'no editor with a mixed capture');
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  assert.equal(await page.evaluate(() => scrollY), 0);
+  await other.close();
+  await page.close();
+});
+
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'feed.html');
+  const page = await screenPage('feed.html');
   const tabId = await tabIdOf(base + 'feed.html');
   const first = send({ action: 'autoScroll', tabId });
   await new Promise((r) => setTimeout(r, 300));

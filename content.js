@@ -22,7 +22,7 @@
   // counts as seen for the "new images" notice.
   globalThis.__imagetoolkitScan = () => {
     const result = collectImages();
-    result.images.forEach((img) => known.add(keyOf(img.src)));
+    result.images.forEach((img) => remember(keyOf(img.src)));
     startObserver();
     return result;
   };
@@ -214,12 +214,20 @@
     try { return new URL(src, document.baseURI).href; } catch { return ''; }
   }
 
+  // Every URL the panel has seen, for the "new images" notice. Bounded: a gallery that keeps
+  // changing src would otherwise grow it forever; the oldest half goes first.
+  const KNOWN_MAX = 10000;
+  function remember(key) {
+    known.add(key);
+    if (known.size > KNOWN_MAX) known = new Set([...known].slice(known.size - KNOWN_MAX / 2));
+  }
+
   function countSrc(src) {
     src = String(src || '').trim();
     if (src.startsWith('data:') && (!src.startsWith('data:image/') || src.length < 100)) return 0; // as in collectImages
     const key = keyOf(src);
     if (!key || known.has(key) || (!key.startsWith('data:') && !isAllowedImageSrc(key))) return 0;
-    known.add(key);
+    remember(key);
     return 1;
   }
 
@@ -293,6 +301,7 @@
   function stopObserver() {
     observer?.disconnect();
     observer = null;
+    known = new Set(); // the next scan starts from what the page shows then
     clearTimeout(debounceTimer);
     newImageCount = 0;
   }

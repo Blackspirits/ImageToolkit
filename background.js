@@ -132,7 +132,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
-  if (id === 'custom-resize') { openEditor(imageUrl); return; }
+  if (id === 'custom-resize') { openEditor(imageUrl, { site: hostOf(tab?.url), title: tab?.title || '' }); return; }
   if (id === 'google-lens') { openGoogleLens(imageUrl, tab); return; }
   if (id === 'copy-to-clipboard') { await copyImageUrl(imageUrl, tab?.id, settings); return; }
 
@@ -205,7 +205,7 @@ const handlers = {
   startCapture: (msg) => startCapture(msg.tabId, msg.delay),
   captureVisible: (msg) => captureVisible(msg.tabId),
   captureFullPage: (msg) => captureFullPage(msg.tabId),
-  openEditor: (msg) => openEditor(msg.imageUrl).then(() => ({ success: true })),
+  openEditor: (msg) => openEditor(msg.imageUrl, { site: msg.site, title: msg.title }).then(() => ({ success: true })),
 
   copyDataUrlToClipboard: (msg) => offscreenRequest({ action: 'offscreen-copy', imageDataUrl: msg.dataUrl }, 15000),
   copyTextToClipboard: (msg) => offscreenRequest({ action: 'offscreen-copy-text', text: String(msg.text || '') }, 15000),
@@ -226,11 +226,6 @@ const handlers = {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const { action } = message || {};
-
-  if (action === 'offscreen-response') {
-    if (isExtensionPage(sender)) settleOffscreenRequest(message);
-    return false;
-  }
 
   const handler = Object.prototype.hasOwnProperty.call(handlers, action) ? handlers[action] : null;
   if (!handler) return false;
@@ -432,8 +427,6 @@ async function autoScrollPage(budgetMs, maxItems, maxChars) {
 
 // ---------- Offscreen Document ----------
 let offscreenCreating = null;
-const pendingRequests = new Map();
-let requestIdCounter = 0;
 
 async function ensureOffscreen() {
   try {
@@ -464,35 +457,21 @@ async function ensureOffscreen() {
   }
 }
 
+// The offscreen document answers on the request's own channel. A stale answer from before a
+// service worker restart cannot reach a newer request: its channel is gone with the old worker.
 async function offscreenRequest(payload, timeoutMs = 30000) {
   await ensureOffscreen();
-  const id = ++requestIdCounter;
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      pendingRequests.delete(id);
-      reject(new Error(`Processing timed out (${Math.round(timeoutMs / 1000)}s)`));
-    }, timeoutMs);
-    pendingRequests.set(id, { resolve, reject, timeout });
-    chrome.runtime.sendMessage({ ...payload, id }).catch((err) => {
-      // The offscreen document answers with a separate message, so a closed port is expected.
-      if (!/Receiving end does not exist/i.test(err?.message || '')) return;
-      clearTimeout(timeout);
-      pendingRequests.delete(id);
-      reject(err);
-    });
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Processing timed out (${Math.round(timeoutMs / 1000)}s)`)), timeoutMs);
   });
-}
-
-function settleOffscreenRequest(message) {
-  const pending = pendingRequests.get(message.id);
-  if (!pending) return;
-  clearTimeout(pending.timeout);
-  pendingRequests.delete(message.id);
-  if (message.error) {
-    pending.reject(new Error(message.error));
-  } else {
-    const { action, id, ...result } = message;
-    pending.resolve(result);
+  try {
+    const response = await Promise.race([chrome.runtime.sendMessage(payload), timeout]);
+    if (!response) throw new Error('No answer from the offscreen document');
+    if (response.error) throw new Error(response.error);
+    return response;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -693,9 +672,10 @@ async function pagePngToClipboard(base64) {
 }
 
 // ---------- Downloads ----------
-// blob: URLs served by the offscreen document, per download, released once it ends. If the
-// service worker restarts in between, the offscreen document's own timer releases them.
-const offscreenObjectUrls = new Map();
+// blob: URLs served by the offscreen document, per download, released once it ends. The map
+// lives in session storage, so a service worker restarted during a long download (or a Save As
+// dialog left open) still releases the URL; the offscreen document's own timer is the backstop.
+const objectUrlKey = (downloadId) => `blobdl:${downloadId}`;
 
 function releaseObjectUrl(url) {
   offscreenRequest({ action: 'offscreen-revoke', url }, 5000).catch(() => {});
@@ -715,14 +695,16 @@ async function downloadHandoff(key, rawFilename, saveAs) {
     releaseObjectUrl(url);
     return { cancelled: true };
   }
-  offscreenObjectUrls.set(downloadId, url);
+  await chrome.storage.session.set({ [objectUrlKey(downloadId)]: url }).catch(() => {});
   return { success: true, downloadId };
 }
 
-chrome.downloads.onChanged.addListener((delta) => {
-  const url = offscreenObjectUrls.get(delta.id);
-  if (!url || !['complete', 'interrupted'].includes(delta.state?.current)) return;
-  offscreenObjectUrls.delete(delta.id);
+chrome.downloads.onChanged.addListener(async (delta) => {
+  if (!['complete', 'interrupted'].includes(delta.state?.current)) return;
+  const name = objectUrlKey(delta.id);
+  const { [name]: url } = await chrome.storage.session.get(name).catch(() => ({}));
+  if (!url) return;
+  await chrome.storage.session.remove(name).catch(() => {});
   releaseObjectUrl(url);
 });
 
@@ -760,6 +742,8 @@ async function startCapture(tabId, delaySeconds = 0) {
     return { error: 'restricted' };
   }
 
+  // The caller gets its answer before the delay, so the popup can close and show the page.
+  // The delay is capped at 10 s, well inside the 30 s a service worker may sit idle.
   const inject = () => chrome.scripting.executeScript({ target, files: ['capture.js'] }).catch(() => {});
   const delay = Math.min(10, Math.max(0, Number(delaySeconds) || 0));
   if (delay > 0) {
@@ -770,27 +754,28 @@ async function startCapture(tabId, delaySeconds = 0) {
   return { success: true };
 }
 
-// Chrome allows two captureVisibleTab calls per second for the whole extension, so every
-// capture (area, visible, full page) is spaced from the previous one, and a call refused for
-// that quota is tried again once.
+// Chrome allows two captureVisibleTab calls per second for the whole extension. Every capture
+// (area, visible, full page) reserves its slot before waiting, so concurrent callers queue up
+// instead of waking together; a call refused for that quota is tried once more, in the queue.
 const CAPTURE_INTERVAL_MS = 550;
 let lastCaptureAt = 0;
 
 async function captureTab(windowId, retry = true) {
-  const wait = lastCaptureAt + CAPTURE_INTERVAL_MS - Date.now();
-  if (wait > 0) await sleep(wait);
-  lastCaptureAt = Date.now();
+  const now = Date.now();
+  const slot = Math.max(now, lastCaptureAt + CAPTURE_INTERVAL_MS);
+  lastCaptureAt = slot;
+  if (slot > now) await sleep(slot - now);
   try {
-    return await new Promise((resolve, reject) => {
+    return await withTimeout(new Promise((resolve, reject) => {
       chrome.tabs.captureVisibleTab(windowId, { format: 'png' }, (dataUrl) => {
         const error = chrome.runtime.lastError;
         if (error || !dataUrl) reject(new Error(error?.message || 'Capture failed'));
         else resolve(dataUrl);
       });
-    });
+    }), 10000, 'Screenshot');
   } catch (err) {
     if (!retry || !/MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND/.test(err.message)) throw err;
-    await sleep(CAPTURE_INTERVAL_MS * 2);
+    lastCaptureAt = Math.max(lastCaptureAt, Date.now() + CAPTURE_INTERVAL_MS);
     return captureTab(windowId, false);
   }
 }
@@ -803,106 +788,161 @@ function validCaptureRect(rect) {
   return width >= 1 && height >= 1 && x >= 0 && y >= 0 ? { x, y, width, height } : null;
 }
 
+// captureVisibleTab shoots whatever tab is at the front of the window: the one that asked must
+// still be there when the screenshot is taken.
+async function isFrontTab(tabId, windowId) {
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  return Boolean(tab?.active && tab.windowId === windowId);
+}
+
 async function captureSelection(tab, rawRect) {
-  if (tab?.windowId == null) return { error: 'noTab' };
+  if (tab?.windowId == null || !Number.isInteger(tab.id)) return { error: 'noTab' };
   try {
     const rect = validCaptureRect(rawRect);
     if (!rect) throw new Error('Invalid selection');
+    if (!(await isFrontTab(tab.id, tab.windowId))) throw tabChanged();
     const dataUrl = await captureTab(tab.windowId);
+    if (!(await isFrontTab(tab.id, tab.windowId))) throw tabChanged();
     // Never fall back to the whole screenshot: the user asked for one area only.
     const { dataUrl: cropped } = await offscreenRequest({ action: 'offscreen-crop', dataUrl, rect }, 15000);
     if (!cropped || !cropped.startsWith('data:image/')) throw new Error('Crop failed');
-    await openEditor(cropped);
+    await openEditor(cropped, { site: hostOf(tab.url), title: tab.title || '' });
     return { success: true };
   } catch (err) {
     await loadSettingsAndLocale();
-    notify(`${t('errorCaptureFailed')}: ${err.message}`, { error: true });
-    return { error: err.message };
+    notify(err.tabChanged ? t('captureTabChanged') : `${t('errorCaptureFailed')}: ${err.message}`, { error: true });
+    return { error: err.tabChanged ? 'tabChanged' : err.message };
   }
 }
 
 async function captureVisible(tabId) {
   if (!Number.isInteger(tabId)) return { error: 'noTab' };
   try {
-    const tab = await chrome.tabs.get(tabId);
-    await openEditor(await captureTab(tab.windowId));
+    let tab = await chrome.tabs.get(tabId);
+    if (!tab.active) {
+      tab = await chrome.tabs.update(tabId, { active: true });
+      await sleep(150);
+    }
+    const dataUrl = await captureTab(tab.windowId);
+    if (!(await isFrontTab(tabId, tab.windowId))) throw tabChanged();
+    await openEditor(dataUrl, { site: hostOf(tab.url), title: tab.title || '' });
     return { success: true };
-  } catch {
+  } catch (err) {
     await loadSettingsAndLocale();
-    notify(t('errorRestrictedPage'), { error: true });
-    return { error: 'restricted' };
+    notify(err.tabChanged ? t('captureTabChanged') : t('errorRestrictedPage'), { error: true });
+    return { error: err.tabChanged ? 'tabChanged' : 'restricted' };
   }
 }
 
 // ---------- Full-page capture ----------
-// Scrolls the page one screen at a time, captures each screen and stitches them in the
-// offscreen document, which hands the result to the editor through IndexedDB (no base64).
-// Fixed and sticky elements (headers, chat buttons, cookie bars) appear once, in the first
-// screen, instead of on every slice. The scrollbar is cropped off, the reader's position is
-// restored, progress shows on the toolbar icon and Esc in the page cancels.
-const FULLPAGE_MAX_HEIGHT = 16384; // device pixels; taller pages are scaled down (to 50%), then cut
+// Scrolls the page (or, in app-like layouts, its main scrolling area) one screen at a time,
+// captures each screen and stitches them in the offscreen document, which hands the result to
+// the editor through IndexedDB (no base64).
+// - Sticky elements flow as ordinary content; fixed overlays appear in the first slice only.
+// - A capture belongs to one tab: if another tab comes to the front or the page navigates, it stops.
+// - Every step has a time limit, the whole capture a deadline, and a page that stops scrolling
+//   ends it, so it can never hang. The page also restores itself if this worker dies midway.
+const FULLPAGE_MAX_HEIGHT = 16384;   // device pixels; taller pages are scaled down (to 50%), then cut
+const FULLPAGE_DEADLINE_MS = 120000;
+const FULLPAGE_STEP_MS = 15000;
 let fullPageBusy = false;
+
+function withTimeout(promise, ms, what) {
+  let timer;
+  const limit = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${what} timed out`)), ms); });
+  return Promise.race([promise, limit]).finally(() => clearTimeout(timer));
+}
+
+const tabChanged = () => Object.assign(new Error('tab changed'), { tabChanged: true });
 
 async function captureFullPage(tabId) {
   if (!Number.isInteger(tabId)) return { error: 'noTab' };
   if (fullPageBusy) return { error: 'busy' };
   fullPageBusy = true;
-  const run = (func, args = []) => chrome.scripting.executeScript({ target: { tabId }, func, args }).then(([r]) => r?.result);
+  const deadline = Date.now() + FULLPAGE_DEADLINE_MS;
+  const run = (func, args = []) => withTimeout(
+    chrome.scripting.executeScript({ target: { tabId }, func, args }).then(([r]) => r?.result), FULLPAGE_STEP_MS, 'Page step');
   let session = null;
   let prepared = false;
   try {
     let tab = await chrome.tabs.get(tabId);
     // Only the active tab of a window can be captured.
     if (!tab.active) tab = await chrome.tabs.update(tabId, { active: true });
+    const startUrl = tab.url;
     const page = await run(fullPagePrepare).catch(() => null);
     if (!page) throw Object.assign(new Error('restricted'), { restricted: true });
     prepared = true;
 
-    // The first screenshot gives the real pixel scale and visible height: with page zoom or an
-    // emulated viewport they differ from devicePixelRatio and clientHeight, and trusting those
-    // would leave gaps between slices.
+    // Checked right before and right after every screenshot, so no slice of another page
+    // (another tab brought to the front, or this one navigating) ever gets into the result.
+    const sameTab = async () => {
+      const now = await chrome.tabs.get(tabId).catch(() => null);
+      return !!now && now.active && now.windowId === tab.windowId && now.url === startUrl;
+    };
     const shoot = async (y, hideFloating) => {
       const at = await run(fullPageScroll, [y, hideFloating]);
       if (!at || at.cancelled) return null;
-      return { at, dataUrl: await captureTab(tab.windowId) };
+      if (!(await sameTab())) throw tabChanged();
+      const dataUrl = await captureTab(tab.windowId);
+      if (!(await sameTab())) throw tabChanged();
+      return { at, dataUrl };
     };
+
+    // The first screenshot gives the real pixel scale and visible height: with page zoom or an
+    // emulated viewport they differ from devicePixelRatio and clientHeight, and trusting those
+    // would leave gaps between slices.
     const first = await shoot(0, false);
     if (!first) return { cancelled: true };
     const size = await offscreenRequest({ action: 'image-size', dataUrl: first.dataUrl }, 15000);
     const px = size.width / page.innerWidth;                         // device pixels per CSS pixel
-    const viewHeight = Math.max(1, Math.min(page.clientHeight, Math.floor(size.height / px)));
+    const viewHeight = Math.max(1, Math.min(page.height, Math.floor(size.height / px) - page.top));
+    const fullWidth = Math.round(page.width * px);
     const fullHeight = Math.round(page.scrollHeight * px);
-    const scale = Math.max(0.5, Math.min(1, FULLPAGE_MAX_HEIGHT / fullHeight));
-    const width = Math.max(1, Math.round(page.clientWidth * px * scale));
-    const height = Math.max(1, Math.min(FULLPAGE_MAX_HEIGHT, Math.round(fullHeight * scale)));
-    const truncated = Math.round(fullHeight * scale) > FULLPAGE_MAX_HEIGHT;
+    // Within one side's limit and the editor's area limit (100 MP): scaled down to 50% at most,
+    // then cut.
+    const scale = Math.max(0.5, Math.min(1, FULLPAGE_MAX_HEIGHT / fullHeight, Math.sqrt(ITK.MAX_AREA / (fullWidth * fullHeight))));
+    const width = Math.max(1, Math.round(fullWidth * scale));
+    const maxHeight = Math.min(FULLPAGE_MAX_HEIGHT, Math.floor(ITK.MAX_AREA / width));
+    const height = Math.max(1, Math.min(maxHeight, Math.round(fullHeight * scale)));
+    const cut = Math.round(fullHeight * scale) > maxHeight;
     session = (await offscreenRequest({ action: 'fullpage-begin', width, height }, 15000)).session;
-    const crop = { width: Math.round(page.clientWidth * px), height: Math.round(viewHeight * px) };
+    const crop = { x: Math.round(page.left * px), y: Math.round(page.top * px), width: fullWidth, height: Math.round(viewHeight * px) };
 
-    const steps = Math.ceil(page.scrollHeight / viewHeight);
+    const maxSlices = Math.ceil(page.scrollHeight / viewHeight) + 2;
     let slice = first;
-    for (let i = 0; slice; i++) {
+    let incomplete = true;
+    let grewTo = page.scrollHeight;
+    for (let i = 0; i < maxSlices; i++) {
       await offscreenRequest({ action: 'fullpage-draw', session, dataUrl: slice.dataUrl, crop, y: Math.round(slice.at.y * px * scale), scale }, 15000);
+      grewTo = Math.max(grewTo, slice.at.scrollHeight || 0);
+      const bottom = slice.at.y + viewHeight;
       // Done at the end of the page, or where a very tall capture is cut.
-      if (slice.at.y + viewHeight >= page.scrollHeight || (slice.at.y + viewHeight) * px * scale >= height) break;
-      chrome.action.setBadgeText({ tabId, text: `${Math.round(((i + 1) / steps) * 100)}%` }).catch(() => {});
-      slice = await shoot(slice.at.y + viewHeight, true);
-      if (!slice) return { cancelled: true };
+      if (bottom >= page.scrollHeight || bottom * px * scale >= height) { incomplete = false; break; }
+      if (Date.now() > deadline) break;
+      chrome.action.setBadgeText({ tabId, text: `${Math.min(99, Math.round(((i + 1) / (maxSlices - 2)) * 100))}%` }).catch(() => {});
+      const next = await shoot(bottom, true);
+      if (!next) return { cancelled: true };
+      // A page that refuses to scroll further (scripts resetting it, snap points) ends here.
+      if (next.at.y <= slice.at.y) break;
+      slice = next;
     }
+    const grew = grewTo > page.scrollHeight + 4;
+
     const { key } = await offscreenRequest({ action: 'fullpage-end', session }, 60000);
     session = null;
     await run(fullPageRestore).catch(() => {});
     prepared = false;
-    await openEditorWithKey(key);
-    if (truncated) {
+    await openEditorWithKey(key, { site: hostOf(startUrl), title: tab.title || '' });
+    if (cut || incomplete || grew) {
       await loadSettingsAndLocale();
-      notify(t('fullPageCut', [String(Math.round(FULLPAGE_MAX_HEIGHT / px / scale))]));
+      notify(cut ? t('fullPageCut', [String(Math.round(height / px / scale))]) : t('fullPageIncomplete'));
     }
-    return { success: true, width, height, truncated };
+    return { success: true, width, height, truncated: cut || incomplete || grew };
   } catch (err) {
     await loadSettingsAndLocale();
-    notify(err.restricted ? t('errorRestrictedPage') : `${t('errorCaptureFailed')}: ${err.message}`, { error: true });
-    return { error: err.restricted ? 'restricted' : err.message };
+    const message = err.restricted ? t('errorRestrictedPage') : err.tabChanged ? t('captureTabChanged') : `${t('errorCaptureFailed')}: ${err.message}`;
+    notify(message, { error: true });
+    return { error: err.restricted ? 'restricted' : err.tabChanged ? 'tabChanged' : err.message };
   } finally {
     if (session) offscreenRequest({ action: 'fullpage-cancel', session }, 5000).catch(() => {});
     if (prepared) await run(fullPageRestore).catch(() => {});
@@ -911,16 +951,63 @@ async function captureFullPage(tabId) {
   }
 }
 
+function hostOf(url) {
+  try { return new URL(url).hostname; } catch { return ''; }
+}
+
 // The three functions below run inside the page (isolated world). Each must be self-contained.
-function fullPagePrepare() {
+async function fullPagePrepare() {
+  // A capture abandoned by a worker that stopped midway: put that page back first.
+  window.__imagetoolkitFullPageRestore?.();
+
   const root = document.scrollingElement || document.documentElement;
+  // What really scrolls: the page, or in app-like layouts (mail, chat, docs) the largest
+  // scrolling area, which is then captured on its own.
+  let box = null;
+  if (root.scrollHeight <= innerHeight + 4) {
+    let bestArea = 0, checked = 0;
+    for (const el of document.querySelectorAll('body *')) {
+      if (++checked > 8000) break;
+      if (el.scrollHeight - el.clientHeight < 200) continue;
+      const overflow = getComputedStyle(el).overflowY;
+      if (overflow !== 'auto' && overflow !== 'scroll') continue;
+      const area = el.clientWidth * el.clientHeight;
+      if (area > bestArea) { box = el; bestArea = area; }
+    }
+  }
+
   const style = document.createElement('style');
   style.id = 'imagetoolkit-fullpage-style';
   // Instant scrolling; nothing animated in while a slice is taken.
-  style.textContent = 'html,body{scroll-behavior:auto!important}*,*::before,*::after{transition:none!important;animation-play-state:paused!important;caret-color:transparent!important}';
+  style.textContent = 'html,body{scroll-behavior:auto!important}*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation-play-state:paused!important;caret-color:transparent!important}';
   (document.head || document.documentElement).appendChild(style);
-  const state = { x: scrollX, y: scrollY, cancelled: false, changed: [] };
+
+  const state = {
+    box, cancelled: false, changed: [], timer: null,
+    x: box ? box.scrollLeft : scrollX, y: box ? box.scrollTop : scrollY,
+  };
+  const onKey = (e) => { if (e.key === 'Escape') state.cancelled = true; };
+  const restore = () => {
+    clearTimeout(state.timer);
+    style.remove();
+    removeEventListener('keydown', onKey, true);
+    for (const [el, property, value, priority] of state.changed.reverse()) {
+      if (value) el.style.setProperty(property, value, priority);
+      else el.style.removeProperty(property);
+    }
+    (box || window).scrollTo({ top: state.y, left: state.x, behavior: 'instant' });
+    if (window.__imagetoolkitFullPage === state) {
+      delete window.__imagetoolkitFullPage;
+      delete window.__imagetoolkitFullPageRestore;
+    }
+  };
+  // Nobody may be left to call restore (the service worker can stop): every step re-arms this.
+  state.arm = () => { clearTimeout(state.timer); state.timer = setTimeout(restore, 30000); };
+  state.arm();
   window.__imagetoolkitFullPage = state;
+  window.__imagetoolkitFullPageRestore = restore;
+  addEventListener('keydown', onKey, true);
+
   // Sticky headers and sidebars become ordinary content: each appears once, where it belongs,
   // instead of following every slice (hiding them would lose what they contain).
   for (const el of document.querySelectorAll('body *')) {
@@ -928,13 +1015,30 @@ function fullPagePrepare() {
     state.changed.push([el, 'position', el.style.getPropertyValue('position'), el.style.getPropertyPriority('position')]);
     el.style.setProperty('position', 'static', 'important');
   }
-  window.__imagetoolkitFullPageKey = (e) => { if (e.key === 'Escape') window.__imagetoolkitFullPage.cancelled = true; };
-  addEventListener('keydown', window.__imagetoolkitFullPageKey, true);
+
+  // Lazy images load now; give them (up to 1.5 s) to arrive, so the height measured is final.
   document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
+  const pending = [...document.images].filter((img) => !img.complete);
+  if (pending.length) {
+    await Promise.race([
+      Promise.all(pending.map((img) => new Promise((resolve) => {
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+      }))),
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+    ]);
+  }
+
+  if (box) {
+    const rect = box.getBoundingClientRect();
+    const left = Math.max(0, rect.left + box.clientLeft), top = Math.max(0, rect.top + box.clientTop);
+    return { innerWidth, left, top, width: box.clientWidth, height: Math.min(box.clientHeight, innerHeight - top), scrollHeight: box.scrollHeight };
+  }
   return {
     innerWidth,                      // CSS width the screenshot covers (scrollbar included)
-    clientWidth: root.clientWidth,   // without the vertical scrollbar
-    clientHeight: root.clientHeight, // without a horizontal scrollbar
+    left: 0, top: 0,
+    width: root.clientWidth,         // without the vertical scrollbar
+    height: root.clientHeight,       // without a horizontal scrollbar
     scrollHeight: Math.max(root.scrollHeight, document.body?.scrollHeight || 0),
   };
 }
@@ -942,33 +1046,32 @@ function fullPagePrepare() {
 async function fullPageScroll(y, hideFloating) {
   const state = window.__imagetoolkitFullPage;
   if (!state || state.cancelled) return { cancelled: true };
+  state.arm();
   if (hideFloating && !state.floatingHidden) {
     // Fixed overlays (headers, chat buttons, cookie bars) were in the first slice; not again.
+    // An app shell that holds the scrolling area itself is fixed too: it stays.
     state.floatingHidden = true;
     for (const el of document.querySelectorAll('body *')) {
-      if (getComputedStyle(el).position !== 'fixed') continue;
+      if (getComputedStyle(el).position !== 'fixed' || (state.box && el.contains(state.box))) continue;
       state.changed.push([el, 'visibility', el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
       el.style.setProperty('visibility', 'hidden', 'important');
     }
   }
-  window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+  const scroller = state.box || window;
+  scroller.scrollTo({ top: y, left: state.box ? state.box.scrollLeft : scrollX, behavior: 'instant' });
   // Two frames so the new position is painted; frames never come in a hidden tab, hence the cap.
   await Promise.race([new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))), new Promise((r) => setTimeout(r, 120))]);
   await new Promise((r) => setTimeout(r, 150)); // lazy images and late layout
-  return { y: scrollY, cancelled: state.cancelled };
+  const root = document.scrollingElement || document.documentElement;
+  return {
+    y: state.box ? state.box.scrollTop : scrollY,
+    scrollHeight: state.box ? state.box.scrollHeight : root.scrollHeight,
+    cancelled: state.cancelled,
+  };
 }
 
 function fullPageRestore() {
-  const state = window.__imagetoolkitFullPage;
-  document.getElementById('imagetoolkit-fullpage-style')?.remove();
-  if (window.__imagetoolkitFullPageKey) removeEventListener('keydown', window.__imagetoolkitFullPageKey, true);
-  if (!state) return;
-  for (const [el, property, value, priority] of state.changed.reverse()) {
-    if (value) el.style.setProperty(property, value, priority);
-    else el.style.removeProperty(property);
-  }
-  window.scrollTo({ top: state.y, left: state.x, behavior: 'instant' });
-  delete window.__imagetoolkitFullPage;
+  window.__imagetoolkitFullPageRestore?.();
 }
 
 // ---------- Editor Window ----------
@@ -977,13 +1080,17 @@ function fullPageRestore() {
 // service worker restart; the 30-minute prune stays as a safety net.
 const editorKeyName = (windowId) => `editor:${windowId}`;
 
-async function openEditor(imageUrl) {
+// meta (optional): { site, title } of the page a screenshot came from, for filename templates.
+async function openEditor(imageUrl, meta) {
   if (!imageUrl) return;
-  await openEditorWithKey(await handoff.put(imageUrl));
+  await openEditorWithKey(await handoff.put(imageUrl), meta);
 }
 
-async function openEditorWithKey(key) {
-  const win = await chrome.windows.create({ url: `resize.html?key=${encodeURIComponent(key)}`, ...EDITOR_WINDOW, focused: true });
+async function openEditorWithKey(key, meta = {}) {
+  const params = new URLSearchParams({ key });
+  if (meta.site) params.set('site', String(meta.site).slice(0, 253));
+  if (meta.title) params.set('title', String(meta.title).slice(0, 200));
+  const win = await chrome.windows.create({ url: `resize.html?${params}`, ...EDITOR_WINDOW, focused: true });
   if (win?.id != null) await chrome.storage.session.set({ [editorKeyName(win.id)]: key }).catch(() => {});
 }
 

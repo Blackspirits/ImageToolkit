@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "入力して Enter"
+  },
+  "captureTabChanged": {
+    "message": "キャプチャを中止しました：タブが切り替わりました。キャプチャ中はタブを前面に表示したままにしてください。",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "ページが最後までスクロールされませんでした：キャプチャが不完全な可能性があります。",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

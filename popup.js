@@ -958,8 +958,8 @@ function openLens(src) {
   chrome.tabs.create({ url: `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(src)}`, active: true });
 }
 
-function openEditor(src) {
-  send({ action: 'openEditor', imageUrl: src });
+function openEditor(src, img) {
+  send({ action: 'openEditor', imageUrl: src, site: img?.pageHost || state.host || '', title: img?.pageTitle || state.pageTitle || '' });
 }
 
 // ============================================================
@@ -1111,7 +1111,7 @@ function initPreview() {
   const withImage = (fn) => () => { const img = currentPreview(); if (img) fn(img); };
   $('preview-download').addEventListener('click', withImage((img) => withBusy($('preview-download'), () => downloadOne(img, $('preview-format').value))));
   $('preview-copy').addEventListener('click', withImage((img) => copyImage(img.src)));
-  $('preview-resize').addEventListener('click', withImage((img) => { openEditor(img.src); closePreview(); }));
+  $('preview-resize').addEventListener('click', withImage((img) => { openEditor(img.src, img); closePreview(); }));
   $('preview-open').addEventListener('click', withImage((img) => chrome.tabs.create({ url: img.src, active: false })));
   $('preview-lens').addEventListener('click', withImage((img) => openLens(img.src)));
   $('preview-modal').addEventListener('keydown', trapFocus);

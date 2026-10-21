@@ -858,5 +858,13 @@
   },
   "textPlaceholder": {
     "message": "Yazın ve Enter'a basın"
+  },
+  "captureTabChanged": {
+    "message": "Yakalama durdu: sekme değişti. Yakalama sırasında sekmeyi önde tutun.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Sayfa sonuna gelmeden kaydırma durdu: yakalama eksik olabilir.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

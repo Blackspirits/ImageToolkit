@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "輸入後按 Enter"
+  },
+  "captureTabChanged": {
+    "message": "擷取已停止：分頁已切換。擷取期間請讓該分頁保持在前景。",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "頁面在到達底部前停止捲動：擷取可能不完整。",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

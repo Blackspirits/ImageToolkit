@@ -858,5 +858,13 @@
   },
   "textPlaceholder": {
     "message": "Введіть текст і натисніть Enter"
+  },
+  "captureTabChanged": {
+    "message": "Захоплення зупинено: вкладка змінилася. Тримайте її на передньому плані під час захоплення.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Сторінка перестала прокручуватися до кінця: знімок може бути неповним.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

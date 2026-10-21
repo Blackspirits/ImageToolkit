@@ -858,5 +858,13 @@
   },
   "textPlaceholder": {
     "message": "Введите текст и нажмите Enter"
+  },
+  "captureTabChanged": {
+    "message": "Захват остановлен: вкладка сменилась. Держите её на переднем плане во время захвата.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Страница перестала прокручиваться до конца: снимок может быть неполным.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

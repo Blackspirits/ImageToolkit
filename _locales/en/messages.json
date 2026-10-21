@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "Type, then press Enter"
+  },
+  "captureTabChanged": {
+    "message": "Capture stopped: the tab changed. Keep it in front while capturing.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "The page stopped scrolling before its end: the capture may be incomplete.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "اكتب ثم اضغط Enter"
+  },
+  "captureTabChanged": {
+    "message": "توقف الالتقاط: تغيّرت علامة التبويب. أبقها في المقدمة أثناء الالتقاط.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "توقفت الصفحة عن التمرير قبل نهايتها: قد يكون الالتقاط غير مكتمل.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

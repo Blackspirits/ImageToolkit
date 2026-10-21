@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "Saisissez puis appuyez sur Entrée"
+  },
+  "captureTabChanged": {
+    "message": "Capture interrompue : l’onglet a changé. Gardez-le au premier plan pendant la capture.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "La page a cessé de défiler avant la fin : la capture est peut-être incomplète.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

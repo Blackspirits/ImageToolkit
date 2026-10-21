@@ -6,8 +6,9 @@
 
 'use strict';
 
-// Only the service worker (or another extension page) may drive this document.
+// Only this extension's service worker drives this document.
 const EXTENSION_ORIGIN = chrome.runtime.getURL('');
+const SERVICE_WORKER_URL = chrome.runtime.getURL('background.js');
 
 const OFFSCREEN_HANDLERS = {
   'offscreen-process': (message) => handleProcess(message),
@@ -29,15 +30,18 @@ const OFFSCREEN_HANDLERS = {
   'offscreen-revoke': async (message) => { revokeObjectUrl(message.url); return { success: true }; },
 };
 
-chrome.runtime.onMessage.addListener((message, sender) => {
-  if (!ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN)) return false;
-  const handler = OFFSCREEN_HANDLERS[message?.action];
+// Each request is answered on its own message channel (sendResponse), so an answer can never
+// be matched to another request, not even one made after the service worker restarted.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN) || sender.url !== SERVICE_WORKER_URL) return false;
+  const handler = Object.prototype.hasOwnProperty.call(OFFSCREEN_HANDLERS, message?.action) ? OFFSCREEN_HANDLERS[message.action] : null;
   if (!handler) return false;
 
-  handler(message)
-    .then((result) => chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, ...result }))
-    .catch((err) => chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err?.message || 'Processing failed' }));
-  return false;
+  Promise.resolve()
+    .then(() => handler(message))
+    .then((result) => sendResponse(result ?? { success: true }))
+    .catch((err) => sendResponse({ error: err?.message || 'Processing failed' }));
+  return true;
 });
 
 // ---------- Main Processing Pipeline ----------
@@ -217,7 +221,7 @@ const fullPages = new Map();
 const FULLPAGE_MAX_AGE_MS = 5 * 60 * 1000;
 
 function fullPageBegin({ width, height }) {
-  if (!(width >= 1 && height >= 1) || width > 16384 || height > 16384) throw new Error('Invalid capture size');
+  if (!(width >= 1 && height >= 1) || width > 16384 || height > 16384 || width * height > ITK.MAX_AREA) throw new Error('Invalid capture size');
   // A capture whose service worker restarted midway is never finished: free its pixels.
   for (const [id, entry] of fullPages) {
     if (Date.now() - entry.started > FULLPAGE_MAX_AGE_MS) { entry.canvas.width = entry.canvas.height = 0; fullPages.delete(id); }
@@ -234,8 +238,10 @@ async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
   const canvas = fullPages.get(session)?.canvas;
   if (!canvas) throw new Error('Capture expired');
   const img = await loadImage(dataUrl);
-  const w = Math.min(crop.width, img.naturalWidth), h = Math.min(crop.height, img.naturalHeight);
-  canvas.getContext('2d').drawImage(img, 0, 0, w, h, 0, y, Math.round(w * scale), Math.round(h * scale));
+  const x0 = Math.max(0, Math.round(crop.x) || 0), y0 = Math.max(0, Math.round(crop.y) || 0);
+  const w = Math.min(crop.width, img.naturalWidth - x0), h = Math.min(crop.height, img.naturalHeight - y0);
+  if (!(w >= 1 && h >= 1)) return { success: true };
+  canvas.getContext('2d').drawImage(img, x0, y0, w, h, 0, y, Math.round(w * scale), Math.round(h * scale));
   return { success: true };
 }
 

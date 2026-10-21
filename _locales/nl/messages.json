@@ -858,5 +858,13 @@
   },
   "textPlaceholder": {
     "message": "Typ en druk op Enter"
+  },
+  "captureTabChanged": {
+    "message": "Opname gestopt: het tabblad is gewijzigd. Houd het op de voorgrond tijdens de opname.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "De pagina stopte met scrollen voor het einde: de opname is mogelijk onvolledig.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

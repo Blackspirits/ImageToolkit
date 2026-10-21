@@ -858,5 +858,13 @@
   },
   "textPlaceholder": {
     "message": "Wpisz i naciśnij Enter"
+  },
+  "captureTabChanged": {
+    "message": "Przechwytywanie przerwane: karta się zmieniła. Trzymaj ją na wierzchu podczas przechwytywania.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Strona przestała się przewijać przed końcem: zrzut może być niepełny.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }

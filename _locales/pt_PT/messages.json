@@ -857,5 +857,13 @@
   },
   "textPlaceholder": {
     "message": "Escreve e carrega em Enter"
+  },
+  "captureTabChanged": {
+    "message": "Captura interrompida: o separador mudou. Mantém-no à frente durante a captura.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "A página deixou de deslizar antes do fim: a captura pode estar incompleta.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
   }
 }
