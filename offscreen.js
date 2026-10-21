@@ -20,7 +20,12 @@ const OFFSCREEN_HANDLERS = {
   'fullpage-begin': async (message) => fullPageBegin(message),
   'fullpage-draw': (message) => fullPageDraw(message),
   'fullpage-end': (message) => fullPageEnd(message),
-  'fullpage-cancel': async (message) => { fullPages.delete(message.session); return { success: true }; },
+  'fullpage-cancel': async (message) => {
+    const entry = fullPages.get(message.session);
+    if (entry) entry.canvas.width = entry.canvas.height = 0;
+    fullPages.delete(message.session);
+    return { success: true };
+  },
   'offscreen-revoke': async (message) => { revokeObjectUrl(message.url); return { success: true }; },
 };
 
@@ -209,18 +214,24 @@ async function convertBlobToPng(blob) {
 // than one screen. The finished PNG goes straight to the handoff store for the editor.
 const fullPages = new Map();
 
+const FULLPAGE_MAX_AGE_MS = 5 * 60 * 1000;
+
 function fullPageBegin({ width, height }) {
   if (!(width >= 1 && height >= 1) || width > 16384 || height > 16384) throw new Error('Invalid capture size');
+  // A capture whose service worker restarted midway is never finished: free its pixels.
+  for (const [id, entry] of fullPages) {
+    if (Date.now() - entry.started > FULLPAGE_MAX_AGE_MS) { entry.canvas.width = entry.canvas.height = 0; fullPages.delete(id); }
+  }
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const session = crypto.randomUUID();
-  fullPages.set(session, canvas);
+  fullPages.set(session, { canvas, started: Date.now() });
   return { session };
 }
 
 async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
-  const canvas = fullPages.get(session);
+  const canvas = fullPages.get(session)?.canvas;
   if (!canvas) throw new Error('Capture expired');
   const img = await loadImage(dataUrl);
   const w = Math.min(crop.width, img.naturalWidth), h = Math.min(crop.height, img.naturalHeight);
@@ -229,7 +240,7 @@ async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
 }
 
 async function fullPageEnd({ session }) {
-  const canvas = fullPages.get(session);
+  const canvas = fullPages.get(session)?.canvas;
   if (!canvas) throw new Error('Capture expired');
   fullPages.delete(session);
   const blob = await canvasToBlob(canvas, 'image/png');

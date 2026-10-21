@@ -1393,3 +1393,81 @@ test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on 
   await waitFor(async () => (await countPng()) > before);
   await editor.close();
 });
+
+// ---------- Review of 2.5.0 ----------
+
+test('a scanner left in the page by an older version does not block the new one', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  const tabId = await tabIdOf(base + 'page.html');
+  // 2.4.x marked its scanner with this flag and had no scan function.
+  await sw.evaluate((tabId) => chrome.scripting.executeScript({ target: { tabId }, func: () => { window.__imagetoolkitScanner = true; } }), tabId);
+  const { images, error } = await send({ action: 'collectImages', tabId });
+  assert.equal(error, undefined);
+  assert.ok(images.some((i) => i.src === base + 'photo.png'));
+  await page.close();
+});
+
+test('full-page capture keeps sticky content where it belongs and never repeats it', async () => {
+  FIXTURES['sticky.html'] = Buffer.from('<!doctype html><title>sticky</title><style>body{margin:0}section{height:1200px;background:#00ff00}h2{position:sticky;top:0;margin:0;height:60px;background:#ff0000}</style><body>'
+    + '<section></section><section><h2></h2></section><section style="background:#0000ff"></section></body>');
+  const page = await ctx.newPage();
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.goto(base + 'sticky.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  assert.equal((await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'sticky.html') })).success, true);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const px = await editor.evaluate((dpr) => {
+    const img = document.getElementById('cropper-img');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
+    return { heading: at(1230), afterHeading: at(1300), slice3top: at(1805), blue: at(3000) };
+  }, dpr);
+  // The heading sits at the top of its section (y 1200–1260), once; nowhere else is red.
+  assert.deepEqual(px, { heading: '255,0,0', afterHeading: '0,255,0', slice3top: '0,255,0', blue: '0,0,255' });
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('h2')).position), 'sticky');
+  await editor.close();
+  await page.close();
+});
+
+test('auto-scroll runs once per page: a second request gets "busy"', async () => {
+  const page = await ctx.newPage();
+  await page.setViewportSize({ width: 800, height: 600 });
+  await page.goto(base + 'feed.html');
+  const tabId = await tabIdOf(base + 'feed.html');
+  const first = send({ action: 'autoScroll', tabId });
+  await new Promise((r) => setTimeout(r, 300));
+  const second = await send({ action: 'autoScroll', tabId });
+  assert.equal(second.error, 'busy');
+  assert.ok((await first).images.length > 0);
+  await page.close();
+});
+
+test('annotate: Esc drops a shape in progress but never the marks already made', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.setViewportSize({ width: 1000, height: 700 });
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  const box = await editor.locator('.annot-overlay').boundingBox();
+  await editor.mouse.move(box.x + 5, box.y + 5);
+  await editor.mouse.down();
+  await editor.mouse.move(box.x + box.width - 5, box.y + box.height - 5, { steps: 3 });
+  await editor.mouse.up();
+  await editor.keyboard.press('Escape');
+  assert.equal(await editor.locator('.annot-layer').count(), 1, 'still annotating');
+  await editor.click('.annot-bar .btn-ghost'); // Cancel
+  assert.equal(await editor.locator('.annot-layer').count(), 0);
+  // With nothing drawn, Esc simply leaves.
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  await editor.keyboard.press('Escape');
+  assert.equal(await editor.locator('.annot-layer').count(), 0);
+  await editor.close();
+});

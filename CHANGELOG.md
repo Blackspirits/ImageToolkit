@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Load all images**: scrolls the page (or the scrolling area of app-like pages) to the end, wakes lazy images, waits for infinite scroll and collects images at every step, so feeds that unload old items lose nothing. Progress bar and Stop.
 - **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
 
+### Fixed
+- Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
+
 ### Changed
 - Every screen capture respects Chrome's rate limit (two per second) and retries once when refused.
 - Large images handed to the editor travel as Blobs and are shown through `blob:` URLs, without a base64 copy.

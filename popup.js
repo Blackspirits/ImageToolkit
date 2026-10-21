@@ -156,7 +156,8 @@ function onRuntimeMessage(msg) {
 // The side panel stays open across tabs: follow the active tab and page loads.
 function watchTabs() {
   const rescan = debounce(() => scan(), 350);
-  const rescanWindow = debounce(() => scan({ keepSelection: true }), 1200);
+  // Other tabs finishing a load refresh the list in place, without the loading skeleton.
+  const rescanWindow = debounce(() => scan({ keepSelection: true, quiet: true }), 1200);
   chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
     if (state.windowId != null && windowId !== state.windowId) return;
     state.tabId = tabId;
@@ -390,6 +391,7 @@ async function toggleAutoScroll() {
   state.autoScrolling = false;
   setAutoScrollUI(false);
   if (token !== scanToken || tabId !== state.tabId) return;
+  if (res?.error === 'busy') return; // another panel is already scrolling this page
   if (!res || res.error) {
     toast(t(res?.error === 'restricted' ? 'errorRestrictedPage' : 'errorNoImage'), 'error');
     return;
@@ -414,9 +416,9 @@ function setAutoScrollUI(running, pct = 0) {
   }
 }
 
-async function scan({ keepSelection = false } = {}) {
+async function scan({ keepSelection = false, quiet = false } = {}) {
   const token = ++scanToken;
-  showSkeleton();
+  if (!quiet) showSkeleton();
   $('new-images-banner').hidden = true;
   state.newImages = 0;
 

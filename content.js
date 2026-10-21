@@ -6,9 +6,10 @@
 (() => {
   'use strict';
 
-  // Injected again after the extension reloads or when the panel rescans: keep one instance.
-  if (window.__imagetoolkitScanner) return;
-  window.__imagetoolkitScanner = true;
+  // Injected again when the panel rescans: keep one instance. The guard is the scan function
+  // itself, so a scanner left in the page by an older version (before an update) never
+  // blocks this one from installing.
+  if (typeof globalThis.__imagetoolkitScan === 'function') return;
 
   const { isAllowedImageSrc, parseSrcset, extractBgUrls, svgPixelSize, SCAN_MAX_ITEM_CHARS, SCAN_MAX_TOTAL_CHARS, SCAN_MAX_ITEMS } = globalThis.ITK;
 

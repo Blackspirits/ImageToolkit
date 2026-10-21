@@ -332,7 +332,7 @@ async function autoScroll(tabId) {
       args: [AUTOSCROLL_BUDGET_MS, ITK.SCAN_MAX_ITEMS, ITK.SCAN_MAX_TOTAL_CHARS],
     });
     const page = injection?.result;
-    if (!page) return { images: [], error: 'failed' };
+    if (!page || page.error) return { images: [], error: page?.error || 'failed' };
     // Frames loaded on the way (and the page's final state) join what the scroll collected.
     const frames = await collectImages(tabId);
     const merged = mergeScans([page, scanner, frames]);
@@ -352,6 +352,10 @@ async function stopAutoScroll(tabId) {
 async function autoScrollPage(budgetMs, maxItems, maxChars) {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  // One run per page: a second panel on the same tab must not scroll it at the same time.
+  if (window.__imagetoolkitScrolling) return { images: [], error: 'busy' };
+  window.__imagetoolkitScrolling = true;
+  try {
   window.__imagetoolkitStopScroll = false;
 
   // Lazy images and frames load at once when asked to, wherever they are on the page.
@@ -421,6 +425,9 @@ async function autoScrollPage(budgetMs, maxItems, maxChars) {
   }
   scrollTo(startY, startX);
   return { images: [...found.values()], truncated, steps, stopped, timedOut: Date.now() >= deadline };
+  } finally {
+    window.__imagetoolkitScrolling = false;
+  }
 }
 
 // ---------- Offscreen Document ----------
@@ -912,7 +919,15 @@ function fullPagePrepare() {
   // Instant scrolling; nothing animated in while a slice is taken.
   style.textContent = 'html,body{scroll-behavior:auto!important}*,*::before,*::after{transition:none!important;animation-play-state:paused!important;caret-color:transparent!important}';
   (document.head || document.documentElement).appendChild(style);
-  window.__imagetoolkitFullPage = { x: scrollX, y: scrollY, cancelled: false, hidden: [] };
+  const state = { x: scrollX, y: scrollY, cancelled: false, changed: [] };
+  window.__imagetoolkitFullPage = state;
+  // Sticky headers and sidebars become ordinary content: each appears once, where it belongs,
+  // instead of following every slice (hiding them would lose what they contain).
+  for (const el of document.querySelectorAll('body *')) {
+    if (getComputedStyle(el).position !== 'sticky') continue;
+    state.changed.push([el, 'position', el.style.getPropertyValue('position'), el.style.getPropertyPriority('position')]);
+    el.style.setProperty('position', 'static', 'important');
+  }
   window.__imagetoolkitFullPageKey = (e) => { if (e.key === 'Escape') window.__imagetoolkitFullPage.cancelled = true; };
   addEventListener('keydown', window.__imagetoolkitFullPageKey, true);
   document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
@@ -928,11 +943,11 @@ async function fullPageScroll(y, hideFloating) {
   const state = window.__imagetoolkitFullPage;
   if (!state || state.cancelled) return { cancelled: true };
   if (hideFloating && !state.floatingHidden) {
+    // Fixed overlays (headers, chat buttons, cookie bars) were in the first slice; not again.
     state.floatingHidden = true;
     for (const el of document.querySelectorAll('body *')) {
-      const position = getComputedStyle(el).position;
-      if (position !== 'fixed' && position !== 'sticky') continue;
-      state.hidden.push([el, el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
+      if (getComputedStyle(el).position !== 'fixed') continue;
+      state.changed.push([el, 'visibility', el.style.getPropertyValue('visibility'), el.style.getPropertyPriority('visibility')]);
       el.style.setProperty('visibility', 'hidden', 'important');
     }
   }
@@ -948,9 +963,9 @@ function fullPageRestore() {
   document.getElementById('imagetoolkit-fullpage-style')?.remove();
   if (window.__imagetoolkitFullPageKey) removeEventListener('keydown', window.__imagetoolkitFullPageKey, true);
   if (!state) return;
-  for (const [el, value, priority] of state.hidden) {
-    if (value) el.style.setProperty('visibility', value, priority);
-    else el.style.removeProperty('visibility');
+  for (const [el, property, value, priority] of state.changed.reverse()) {
+    if (value) el.style.setProperty(property, value, priority);
+    else el.style.removeProperty(property);
   }
   window.scrollTo({ top: state.y, left: state.x, behavior: 'instant' });
   delete window.__imagetoolkitFullPage;
