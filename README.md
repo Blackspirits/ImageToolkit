@@ -31,7 +31,7 @@ The mark is a single continuous image frame that opens into an export arrow: fin
   <img src="docs/screenshots/editor-dark.png" alt="Editor with crop presets" width="860">
 </p>
 <p align="center">
-  <img src="docs/screenshots/editor-annotate-dark.png" alt="Editor: annotate with boxes, arrows, text, highlight, blur and pixelate" width="860">
+  <img src="docs/screenshots/editor-annotate-dark.png" alt="Editor: annotate with redact, pixelate, box, arrow, highlight and text" width="860">
 </p>
 
 ## ✨ Features
@@ -61,7 +61,7 @@ Capture an **area** (with an optional 3/5/10-second delay), the **visible page**
 ### ✂️ Editor
 Crop, rotate and flip with presets for aspect ratios, common resolutions, social networks (Instagram, Facebook, YouTube, X, LinkedIn, Pinterest), TMDB and TheTVDB. Pick the output size and format, then **Save** (`Ctrl/⌘ + S`) or **Copy** (`Ctrl/⌘ + C`) the result.
 
-**Annotate** to redact or mark up before saving: **pixelate** (true block averages, nothing readable survives) and **blur** sensitive data, draw **boxes**, **arrows**, **text** (outlined so it reads on any background) and **highlights**, in six colours and three thicknesses, with undo/redo and one-key shortcuts (P B R A T H). Marks scale with the image, and nothing changes until you press Apply.
+**Annotate** to redact or mark up before saving: **redact** with opaque colour (the sure way to hide data), **pixelate** (true block averages) and **blur** as softer effects, draw **boxes**, **arrows**, **text** (outlined so it reads on any background) and **highlights**, in six colours and three thicknesses, with undo/redo and one-key shortcuts (X P B R A T H). Marks scale with the image, and nothing changes until you press Apply (Ctrl+Enter).
 
 ### 📋 Copy & Paste
 Copy any image to the clipboard as PNG, ready to paste into Slack, Discord, Figma or any app. Paste an image (or an image URL) anywhere in the panel with **Ctrl/⌘ + V** to open it in Tools, or drag one in from a web page.

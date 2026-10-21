@@ -1,6 +1,6 @@
 # Privacy Policy — ImageToolkit
 
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-21
 
 ## Summary
 
@@ -21,7 +21,7 @@ This extension collects **zero** data. Specifically:
 
 All image conversion, resizing, cropping, and optimization happens **entirely locally** in your browser using the Canvas API.
 
-When you use features that work with remote images, the extension fetches those image URLs directly from your browser so it can inspect, convert, copy, resize, or download them. Requests include your normal browser cookies for those image hosts, so images behind a login keep working; ImageToolkit never reads, stores, or transmits those cookies elsewhere.
+When you **ask** for something done with a remote image (save, convert, copy, open in the editor), the extension fetches that image URL directly from your browser. These requests include your normal browser cookies for that image host, so images behind a login keep working; ImageToolkit never reads, stores, or transmits those cookies elsewhere. Every download has a time limit, so a server that stops answering cannot keep it waiting.
 
 ### Automatic requests for previews and metadata
 
@@ -29,7 +29,8 @@ While the panel shows a page's images, the extension **contacts the hosts of tho
 
 - **Lightweight first:** a `HEAD` request or a 1-byte range request, which returns headers only. Size and type checks are sent without cookies.
 - **Limited reads when needed:** if a server gives no size in its headers, the extension reads the start of the image to count its size, at most 2 MB per image and 8 MB in total per request batch, then stops; past that, the size stays unknown.
-- **Previews of protected images:** if a site refuses to show an image directly (hotlink protection), the extension downloads it to display the thumbnail and read its dimensions: at most 40 images, 8 MB each and 48 MB in total per scan. These downloads include your normal cookies for that host, like the user-triggered downloads above.
+- **Previews of protected images:** if a site refuses to show an image directly (hotlink protection), the extension downloads it to display the thumbnail and read its dimensions: at most 40 images, 8 MB each and 48 MB in total per scan, 20 seconds each. These downloads are sent **without cookies**.
+- **No automatic request carries your cookies.** Only the actions you ask for (above) do.
 - At most 100 images per scan are checked for size and 30 for type.
 
 These requests only read data; they are never used to send data anywhere. **Google Lens and the Ko-fi and author links are different**: they never run automatically and only open when you click them (see below).
@@ -39,12 +40,13 @@ These requests only read data; they are never used to send data anywhere. **Goog
 - **Image scanner** — when you open the panel, a script is injected into the current tab (and its frames) to list its images (URLs, dimensions, alt text). Only if you choose **All tabs**, the same happens in every web page open in that window; browser pages and sleeping tabs are skipped. The list stays in the panel; it is never stored or sent anywhere. Very large inline images are left out of the list to keep it fast. While the panel is in use, the script watches the page for newly loaded images and stops after a few idle minutes.
 - **Load all images** — only when you click it, the page is scrolled to its end to load lazy images and then scrolled back; nothing is clicked or submitted.
 - **Screen capture** — only when you start a capture (button, toolbar menu, or keyboard shortcut), the visible part of the tab is captured and opened in the editor. A full-page capture scrolls the page, captures it screen by screen and stitches the result locally, temporarily hiding fixed elements, then restores the page. Captures are not saved unless you save them.
-- **Annotations** made in the editor are drawn locally on your copy of the image.
+- **Capture checks** — a capture belongs to the tab it started in: if another tab comes to the front or the page navigates, it stops, so a screenshot never mixes in another page.
+- **Annotations** made in the editor are drawn locally on your copy of the image. To hide information for sure, use **Redact** (opaque colour): pixelate and blur are visual effects and may leave large text recognisable.
 
 ## Local Storage
 
 - **Settings** are stored with `chrome.storage.sync`, which Chrome may synchronize across your signed-in browsers. ImageToolkit can only read and write its own settings and has no access to your Google Account or other sync data.
-- **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it (and reload it). It is deleted as soon as that editor window closes. As a safety net, any entry older than 30 minutes is never shown again and is removed on the next cleanup pass (at startup or when another image is opened in the editor).
+- **Editor handoff** — when an image or capture is opened in the editor, it is kept in the extension's own IndexedDB so the editor window can load it (and reload it). It is deleted as soon as that editor window closes. As a safety net, an editor entry older than 12 hours (any other entry: 30 minutes) is never shown again and is removed on the next cleanup pass (at startup or when another image is opened in the editor).
 - **Large downloads** — files too large to pass between the extension's pages in one message (big ZIPs or edited images) are kept briefly in the same IndexedDB store and removed as soon as the download has started.
 - **Interface state** (grid layout, transparency background, whether filters are open, scan scope) is kept in the extension's local storage.
 - **Upgrades** — version 2.3.5 and earlier passed images to the editor through `chrome.storage.local`; any image left there is deleted when the extension updates or starts.
@@ -57,7 +59,7 @@ The clipboard is only written when you ask to copy an image, a URL list, or an e
 
 ImageToolkit does not contact third-party services automatically. The following user-triggered actions may open external sites:
 
-- **Google Lens** — off by default. If you enable it in Settings and click the search action, the image URL is opened with Google Lens in a new tab.
+- **Google Lens** — off by default. If you enable it in Settings and click the search action, the **full image URL** (including any query string it carries, which on some sites holds an access token) is opened with Google Lens in a new tab, so Google receives it. The image itself is not uploaded by ImageToolkit.
 - **Ko-fi / BlackSpirits** — if you click the support or author links, those pages open in a new tab.
 
 ## Permissions Explained

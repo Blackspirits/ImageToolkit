@@ -1603,7 +1603,14 @@ test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies
   await editor.click('#btn-rotate-left'); // 400×100 becomes 100×400
   await editor.click('#btn-annotate');
   await editor.waitForSelector('.annot-layer');
-  const box = await editor.locator('.annot-overlay').boundingBox();
+  // Wait until the board has been fitted to the stage (its size stops changing).
+  let box = null;
+  for (let i = 0; i < 20; i++) {
+    await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const now = await editor.locator('.annot-overlay').boundingBox();
+    if (box && now && Math.abs(now.width - box.width) < 0.5 && Math.abs(now.height - box.height) < 0.5) break;
+    box = now;
+  }
   const at = (x, y) => [box.x + (x / 100) * box.width, box.y + (y / 400) * box.height];
   const drag = async (x1, y1, x2, y2) => {
     await editor.mouse.move(...at(x1, y1)); await editor.mouse.down();

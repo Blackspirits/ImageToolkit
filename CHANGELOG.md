@@ -6,11 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
-## [2.5.0] - 2026-10-20
+## [2.5.0] - 2026-10-21
 
 ### Added
 - **Full-page capture**: scrolls and captures the page screen by screen and stitches it locally. Fixed and sticky elements (headers, chat buttons, cookie bars) appear once instead of on every slice, the scrollbar is left out, animations pause, lazy images load, and the page returns to where you were. Progress shows on the toolbar icon and Esc cancels. Very tall pages are scaled down (to 50%) before being cut. From the panel, the toolbar-icon menu or an assignable shortcut.
-- **Annotate in the editor**: pixelate (true block averages) and blur sensitive data, draw boxes, arrows, outlined text and highlights; six colours, three thicknesses, undo/redo and one-key shortcuts. Works on the image as rotated/flipped and changes nothing until Apply.
+- **Annotate in the editor**: **redact** with opaque colour (the way to hide data for sure), pixelate (true block averages) and blur, draw boxes, arrows, outlined text and highlights; six colours, three thicknesses, undo/redo and one-key shortcuts. Pixel blocks and blur grow with the area covered. Works on the image as rotated/flipped and changes nothing until Apply (Ctrl+Enter).
 - **Images inside iframes**, same-origin and cross-origin, are listed with the page's own (and outlined there when selected).
 - **All tabs at once**: a scan scope that lists the images of every web page in the window, without duplicates, with a Tab filter. Each image keeps its page's site and title.
 - **Load all images**: scrolls the page (or the scrolling area of app-like pages) to the end, wakes lazy images, waits for infinite scroll and collects images at every step, so feeds that unload old items lose nothing. Progress bar and Stop.
@@ -18,10 +18,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 - Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
+- Full-page capture can no longer hang: every step has a time limit and the whole capture a deadline; a page that stops scrolling ends it (with a notice that it may be incomplete); app-like pages are captured through their inner scrolling area; the page restores itself even if the extension stops midway.
+- Captures stop if another tab comes to the front or the page navigates, so a screenshot never mixes in another page; the visible-tab capture brings its tab to the front first.
+- "Hide duplicates" no longer merges different pictures: `/image?id=1` and `/image?id=2`, or `/Photo.png` and `/photo.png`, are kept apart; only cache-busting and tracking parameters are ignored.
+- Two inline images with the same length and ending are both listed.
+- All tabs: an image shown on several pages belongs to each of them, in the Tab filter and for `{site}`/`{title}`.
+- Stop ends auto-scroll in the tab it runs in, even after switching tabs.
+- The editor knows the page an image or screenshot came from, so `{site}` and `{title}` work there, and screenshots no longer get a made-up `local` domain.
+- Long file names keep their extension when shortened.
+- Editor: the stage takes the shape of a rotated, annotated image; a click outside a text field only confirms it; memory of full-resolution copies is freed at once.
 
 ### Changed
-- Every screen capture respects Chrome's rate limit (two per second) and retries once when refused.
-- Large images handed to the editor travel as Blobs and are shown through `blob:` URLs, without a base64 copy.
+- Automatic requests (thumbnails and dimensions of hotlink-protected images) no longer send cookies; only the actions you ask for do. Every image download has a total and an idle time limit.
+- The offscreen document answers only the service worker, through direct replies; requests time out instead of waiting forever.
+- Every screen capture respects Chrome's rate limit (two per second), queued, and retries once when refused.
+- Large images handed to the editor travel as Blobs and are shown through `blob:` URLs, without a base64 copy; an open editor keeps its image for up to 12 hours.
 
 ## [2.4.1] - 2026-10-20
 
