@@ -27,10 +27,10 @@ When you **ask** for something done with a remote image (save, convert, copy, op
 
 While the panel shows a page's images, the extension **contacts the hosts of those images automatically**, without a click, to show their type, file size, dimensions and thumbnails. These requests go only to the image URLs already used by the page you are viewing, and nothing about you or the page is sent beyond the request itself:
 
-- **Lightweight first:** a `HEAD` request or a 1-byte range request, which returns headers only. Size and type checks are sent without cookies.
+- **Lightweight first:** a `HEAD` request or a 1-byte range request, which returns headers only.
 - **Limited reads when needed:** if a server gives no size in its headers, the extension reads the start of the image to count its size, at most 2 MB per image and 8 MB in total per request batch, then stops; past that, the size stays unknown.
 - **Previews of protected images:** if a site refuses to show an image directly (hotlink protection), the extension downloads it to display the thumbnail and read its dimensions: at most 40 images, 8 MB each and 48 MB in total per scan, 20 seconds each. These downloads are sent **without cookies**.
-- **No automatic request carries your cookies.** Only the actions you ask for (above) do.
+- **No automatic request carries your cookies or can set any.** This covers the thumbnails and previews the panel shows, size and type checks and the fallback downloads: Chrome would otherwise attach your cookies for those hosts to the extension's requests, so ImageToolkit removes them (and any `Set-Cookie` in the answers) with a browser rule limited to its own image requests. Only the actions you ask for (above) send cookies.
 - At most 100 images per scan are checked for size and 30 for type.
 
 These requests only read data; they are never used to send data anywhere. **Google Lens and the Ko-fi and author links are different**: they never run automatically and only open when you click them (see below).
@@ -72,6 +72,7 @@ ImageToolkit does not contact third-party services automatically. The following 
 | `notifications` | Shows save/copy confirmations and errors for right-click actions (can be disabled) |
 | `offscreen` | Runs the Canvas API for image conversion in the background |
 | `clipboardWrite` | Copies images or image URLs to your clipboard when you ask |
+| `declarativeNetRequestWithHostAccess` | One rule that removes cookies from the images the extension's own pages load by themselves (thumbnails, previews); it never touches web pages' own requests |
 | `scripting` | Injects the image scanner and the capture overlay, on demand only |
 | `sidePanel` | Shows the extension UI as a docked side panel |
 | `<all_urls>` | Scans pages and fetches images from any website for conversion, copying, and downloading; captures the visible tab |

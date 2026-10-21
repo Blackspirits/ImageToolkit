@@ -88,8 +88,30 @@ chrome.runtime.onInstalled.addListener(async () => {
   applySidePanelBehavior(await getSettings());
 });
 
+// Images the extension's own pages show by themselves (thumbnails, previews, size probes) load
+// without cookies, and cannot set any: Chrome would otherwise send the user's cookies with them,
+// SameSite=Lax ones included. Actions the user asks for (save, copy, edit) use fetch(), which
+// this rule does not touch, so images behind a login keep working there.
+const NO_COOKIE_RULE_ID = 1;
+function installNoCookieRule() {
+  return chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [NO_COOKIE_RULE_ID],
+    addRules: [{
+      id: NO_COOKIE_RULE_ID,
+      priority: 1,
+      action: {
+        type: 'modifyHeaders',
+        requestHeaders: [{ header: 'cookie', operation: 'remove' }],
+        responseHeaders: [{ header: 'set-cookie', operation: 'remove' }],
+      },
+      condition: { initiatorDomains: [chrome.runtime.id], resourceTypes: ['image'] },
+    }],
+  });
+}
+
 // Keep runtime-only Chrome settings in sync whenever the service worker wakes up.
 async function initializeExtensionRuntime() {
+  installNoCookieRule().catch(() => {});
   const settings = await loadSettingsAndLocale();
   applySidePanelBehavior(settings);
   handoff.prune().catch(() => {});
@@ -215,7 +237,7 @@ const handlers = {
   probeImageTypes: (msg) => probeImageTypes(msg.urls || []),
 
   // ----- From content scripts -----
-  captureSelection: (msg, sender) => captureSelection(sender.tab, msg.rect),
+  captureSelection: (msg, sender) => captureSelection(sender.tab, msg.rect, sender.frameId),
   autoScrollProgress: (msg, sender) => {
     const pct = Math.max(0, Math.min(100, Math.round(Number(msg.pct) || 0)));
     chrome.runtime.sendMessage({ action: 'autoScrollProgressUpdate', tabId: sender.tab?.id, pct }).catch(() => {});
@@ -368,9 +390,14 @@ async function autoScrollPage(budgetMs, maxItems, maxChars) {
     for (const el of document.querySelectorAll('body *')) {
       if (++checked > 8000) break;
       if (el.scrollHeight - el.clientHeight < 200) continue;
-      const overflow = getComputedStyle(el).overflowY;
-      if (overflow !== 'auto' && overflow !== 'scroll') continue;
-      const area = el.clientWidth * el.clientHeight;
+      const style = getComputedStyle(el);
+      if (style.overflowY !== 'auto' && style.overflowY !== 'scroll') continue;
+      // Only an area the user can see: hidden or off-screen panels are never chosen.
+      if (style.visibility !== 'visible' || el.checkVisibility?.({ opacityProperty: true }) === false) continue;
+      const r = el.getBoundingClientRect();
+      const seenW = Math.min(innerWidth, r.right) - Math.max(0, r.left), seenH = Math.min(innerHeight, r.bottom) - Math.max(0, r.top);
+      if (seenW < 100 || seenH < 100) continue;
+      const area = seenW * seenH;
       if (area > bestArea) { best = el; bestArea = area; }
     }
     if (best) scroller = best;
@@ -821,19 +848,43 @@ function validCaptureRect(rect) {
 
 // captureVisibleTab shoots whatever tab is at the front of the window: the one that asked must
 // still be there when the screenshot is taken.
+// watchTab() remembers any switch away, navigation (a reload of the same URL included) or close
+// for the whole capture, even if the tab is back in front by the time the next check runs.
+function watchTab(tabId, windowId) {
+  const watch = { changed: false };
+  const onActivated = (info) => { if (info.windowId === windowId && info.tabId !== tabId) watch.changed = true; };
+  const onUpdated = (id, info) => { if (id === tabId && (info.status === 'loading' || info.url)) watch.changed = true; };
+  const onGone = (id) => { if (id === tabId) watch.changed = true; };
+  const onReplaced = (added, removed) => { if (removed === tabId) watch.changed = true; };
+  chrome.tabs.onActivated.addListener(onActivated);
+  chrome.tabs.onUpdated.addListener(onUpdated);
+  chrome.tabs.onRemoved.addListener(onGone);
+  chrome.tabs.onReplaced.addListener(onReplaced);
+  watch.stop = () => {
+    chrome.tabs.onActivated.removeListener(onActivated);
+    chrome.tabs.onUpdated.removeListener(onUpdated);
+    chrome.tabs.onRemoved.removeListener(onGone);
+    chrome.tabs.onReplaced.removeListener(onReplaced);
+  };
+  return watch;
+}
+
 async function isFrontTab(tabId, windowId) {
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   return Boolean(tab?.active && tab.windowId === windowId);
 }
 
-async function captureSelection(tab, rawRect) {
+async function captureSelection(tab, rawRect, frameId = 0) {
   if (tab?.windowId == null || !Number.isInteger(tab.id)) return { error: 'noTab' };
+  // The overlay only ever runs in the top document of the tab.
+  if (frameId !== 0) return { error: 'Invalid sender' };
+  const watch = watchTab(tab.id, tab.windowId);
   try {
     const rect = validCaptureRect(rawRect);
     if (!rect) throw new Error('Invalid selection');
     if (!(await isFrontTab(tab.id, tab.windowId))) throw tabChanged();
     const dataUrl = await captureTab(tab.windowId);
-    if (!(await isFrontTab(tab.id, tab.windowId))) throw tabChanged();
+    if (watch.changed || !(await isFrontTab(tab.id, tab.windowId)) || watch.changed) throw tabChanged();
     // Never fall back to the whole screenshot: the user asked for one area only.
     const { dataUrl: cropped } = await offscreenRequest({ action: 'offscreen-crop', dataUrl, rect }, 15000);
     if (!cropped || !cropped.startsWith('data:image/')) throw new Error('Crop failed');
@@ -843,25 +894,31 @@ async function captureSelection(tab, rawRect) {
     await loadSettingsAndLocale();
     notify(err.tabChanged ? t('captureTabChanged') : `${t('errorCaptureFailed')}: ${err.message}`, { error: true });
     return { error: err.tabChanged ? 'tabChanged' : err.message };
+  } finally {
+    watch.stop();
   }
 }
 
 async function captureVisible(tabId) {
   if (!Number.isInteger(tabId)) return { error: 'noTab' };
+  let watch = null;
   try {
     let tab = await chrome.tabs.get(tabId);
     if (!tab.active) {
       tab = await chrome.tabs.update(tabId, { active: true });
       await sleep(150);
     }
+    watch = watchTab(tabId, tab.windowId);
     const dataUrl = await captureTab(tab.windowId);
-    if (!(await isFrontTab(tabId, tab.windowId))) throw tabChanged();
+    if (watch.changed || !(await isFrontTab(tabId, tab.windowId)) || watch.changed) throw tabChanged();
     await openEditor(dataUrl, { site: hostOf(tab.url), title: tab.title || '' });
     return { success: true };
   } catch (err) {
     await loadSettingsAndLocale();
     notify(err.tabChanged ? t('captureTabChanged') : t('errorRestrictedPage'), { error: true });
     return { error: err.tabChanged ? 'tabChanged' : 'restricted' };
+  } finally {
+    watch?.stop();
   }
 }
 
@@ -891,24 +948,32 @@ async function captureFullPage(tabId) {
   if (fullPageBusy) return { error: 'busy' };
   fullPageBusy = true;
   const deadline = Date.now() + FULLPAGE_DEADLINE_MS;
+  // Every step after the first goes to the document the capture started in, and to no other
+  // (a reload, even of the same URL, is another document: the step fails and the capture stops).
+  let documentId = null;
   const run = (func, args = []) => withTimeout(
-    chrome.scripting.executeScript({ target: { tabId }, func, args }).then(([r]) => r?.result), FULLPAGE_STEP_MS, 'Page step');
+    chrome.scripting.executeScript({ target: documentId ? { tabId, documentIds: [documentId] } : { tabId }, func, args })
+      .then(([r]) => { documentId ??= r?.documentId ?? null; return r?.result; }), FULLPAGE_STEP_MS, 'Page step');
   let session = null;
   let prepared = false;
+  let watch = null;
   try {
     let tab = await chrome.tabs.get(tabId);
     // Only the active tab of a window can be captured.
     if (!tab.active) tab = await chrome.tabs.update(tabId, { active: true });
     const startUrl = tab.url;
+    watch = watchTab(tabId, tab.windowId);
     const page = await run(fullPagePrepare).catch(() => null);
     if (!page) throw Object.assign(new Error('restricted'), { restricted: true });
     prepared = true;
+    if (!(page.width >= 1 && page.height >= 1 && page.scrollHeight >= 1)) throw new Error('Nothing visible to capture');
 
     // Checked right before and right after every screenshot, so no slice of another page
     // (another tab brought to the front, or this one navigating) ever gets into the result.
     const sameTab = async () => {
+      if (watch.changed) return false;
       const now = await chrome.tabs.get(tabId).catch(() => null);
-      return !!now && now.active && now.windowId === tab.windowId && now.url === startUrl;
+      return !watch.changed && !!now && now.active && now.windowId === tab.windowId && now.url === startUrl;
     };
     const shoot = async (y, hideFloating) => {
       const at = await run(fullPageScroll, [y, hideFloating]);
@@ -977,6 +1042,7 @@ async function captureFullPage(tabId) {
   } finally {
     if (session) offscreenRequest({ action: 'fullpage-cancel', session }, 5000).catch(() => {});
     if (prepared) await run(fullPageRestore).catch(() => {});
+    watch?.stop();
     chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {});
     fullPageBusy = false;
   }
@@ -1000,9 +1066,14 @@ async function fullPagePrepare() {
     for (const el of document.querySelectorAll('body *')) {
       if (++checked > 8000) break;
       if (el.scrollHeight - el.clientHeight < 200) continue;
-      const overflow = getComputedStyle(el).overflowY;
-      if (overflow !== 'auto' && overflow !== 'scroll') continue;
-      const area = el.clientWidth * el.clientHeight;
+      const style = getComputedStyle(el);
+      if (style.overflowY !== 'auto' && style.overflowY !== 'scroll') continue;
+      // Only an area the user can see: hidden or off-screen panels are never chosen.
+      if (style.visibility !== 'visible' || el.checkVisibility?.({ opacityProperty: true }) === false) continue;
+      const r = el.getBoundingClientRect();
+      const seenW = Math.min(innerWidth, r.right) - Math.max(0, r.left), seenH = Math.min(innerHeight, r.bottom) - Math.max(0, r.top);
+      if (seenW < 100 || seenH < 100 || r.top < -1 || r.left < -1) continue; // starts on screen
+      const area = seenW * seenH;
       if (area > bestArea) { box = el; bestArea = area; }
     }
   }
@@ -1051,19 +1122,25 @@ async function fullPagePrepare() {
   document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = 'eager'; });
   const pending = [...document.images].filter((img) => !img.complete);
   if (pending.length) {
-    await Promise.race([
-      Promise.all(pending.map((img) => new Promise((resolve) => {
-        img.addEventListener('load', resolve, { once: true });
-        img.addEventListener('error', resolve, { once: true });
-      }))),
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-    ]);
+    // One signal removes every listener, whether the images arrived or the wait ran out.
+    const listening = new AbortController();
+    try {
+      await Promise.race([
+        Promise.all(pending.map((img) => new Promise((resolve) => {
+          img.addEventListener('load', resolve, { signal: listening.signal });
+          img.addEventListener('error', resolve, { signal: listening.signal });
+        }))),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]);
+    } finally {
+      listening.abort();
+    }
   }
 
   if (box) {
     const rect = box.getBoundingClientRect();
     const left = Math.max(0, rect.left + box.clientLeft), top = Math.max(0, rect.top + box.clientTop);
-    return { innerWidth, left, top, width: box.clientWidth, height: Math.min(box.clientHeight, innerHeight - top), scrollHeight: box.scrollHeight };
+    return { innerWidth, left, top, width: Math.min(box.clientWidth, innerWidth - left), height: Math.min(box.clientHeight, innerHeight - top), scrollHeight: box.scrollHeight };
   }
   return {
     innerWidth,                      // CSS width the screenshot covers (scrollbar included)
@@ -1210,12 +1287,13 @@ async function probeImageSizes(urls) {
   return out;
 }
 
-// Resolves once headers arrive; the body is never read.
+// Resolves once headers arrive; the body is never read. Like every automatic request (size and
+// type probes), it carries no cookies: Chrome would otherwise send them, SameSite=Lax included.
 async function fetchHeaders(url, init, timeoutMs = 4000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { cache: 'force-cache', ...init, signal: controller.signal });
+    const response = await fetch(url, { cache: 'force-cache', ...init, credentials: 'omit', signal: controller.signal });
     if (!response.ok && response.status !== 206) throw new Error(`HTTP ${response.status}`);
     return response;
   } finally {
@@ -1251,7 +1329,7 @@ async function countBodyBytes(url, cap, timeoutMs, budget) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { cache: 'force-cache', signal: controller.signal });
+    const response = await fetch(url, { cache: 'force-cache', credentials: 'omit', signal: controller.signal });
     if (!response.ok || !response.body) return 0;
     const declared = ITK.parseSizeFromHeaders(response.headers);
     if (declared > 0) return declared;

@@ -26,6 +26,9 @@ Saves the user's preferences (`chrome.storage.sync`) and short-lived state (`chr
 **`offscreen`**
 Runs the Canvas API in the background for conversion, stitching full-page captures and writing to the clipboard from a service worker.
 
+**`declarativeNetRequestWithHostAccess`**
+One rule, limited to image requests made by the extension's own pages (`initiatorDomains` = the extension's id): it removes the `Cookie` request header and `Set-Cookie` response header, so the thumbnails and previews the panel loads by itself never carry the user's cookies. It does not read, block or redirect any request, and never touches the requests of web pages.
+
 **`clipboardWrite`**
 Copies an image or a list of image URLs when the user asks.
 

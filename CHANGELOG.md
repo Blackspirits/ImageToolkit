@@ -19,8 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 - Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
 - Full-page capture can no longer hang: every step has a time limit and the whole capture a deadline; a page that stops scrolling ends it (with a notice that it may be incomplete); app-like pages are captured through their inner scrolling area; the page restores itself even if the extension stops midway.
-- Captures stop if another tab comes to the front or the page navigates, so a screenshot never mixes in another page; the visible-tab capture brings its tab to the front first.
-- "Hide duplicates" no longer merges different pictures: `/image?id=1` and `/image?id=2`, or `/Photo.png` and `/photo.png`, are kept apart; only cache-busting and tracking parameters are ignored.
+- Captures stop if another tab comes to the front (even briefly) or the page navigates or reloads, so a screenshot never mixes in another page; a full-page capture talks only to the document it started in. The visible-tab capture brings its tab to the front first.
+- Full-page capture never picks a hidden or off-screen scrolling panel, and a slice outside the screenshot is an error instead of a blank result; abandoned stitching canvases free themselves after five minutes.
+- "Hide duplicates" no longer merges different pictures: `/image?id=1` and `/image?id=2`, `/Photo.png` and `/photo.png`, two ports, or `?t=10` and `?t=20` are kept apart; only tracking tags and cache-busting values (timestamps, hashes) are ignored.
 - Two inline images with the same length and ending are both listed.
 - All tabs: an image shown on several pages belongs to each of them, in the Tab filter and for `{site}`/`{title}`.
 - Stop ends auto-scroll in the tab it runs in, even after switching tabs.
@@ -29,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Editor: the stage takes the shape of a rotated, annotated image; a click outside a text field only confirms it; memory of full-resolution copies is freed at once.
 
 ### Changed
-- Automatic requests (thumbnails and dimensions of hotlink-protected images) no longer send cookies; only the actions you ask for do. Every image download has a total and an idle time limit.
+- Nothing the extension loads by itself carries cookies or can set them: thumbnails, previews, size and type checks and the hotlink fallback (a `declarativeNetRequest` rule limited to the extension's own image requests, plus `credentials: 'omit'` on its automatic fetches). Only the actions you ask for send cookies. Every image download has a total and an idle time limit.
 - The offscreen document answers only the service worker, through direct replies; requests time out instead of waiting forever.
 - Every screen capture respects Chrome's rate limit (two per second), queued, and retries once when refused.
 - Large images handed to the editor travel as Blobs and are shown through `blob:` URLs, without a base64 copy; an open editor keeps its image for up to 12 hours.

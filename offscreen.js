@@ -21,12 +21,7 @@ const OFFSCREEN_HANDLERS = {
   'fullpage-begin': async (message) => fullPageBegin(message),
   'fullpage-draw': (message) => fullPageDraw(message),
   'fullpage-end': (message) => fullPageEnd(message),
-  'fullpage-cancel': async (message) => {
-    const entry = fullPages.get(message.session);
-    if (entry) entry.canvas.width = entry.canvas.height = 0;
-    fullPages.delete(message.session);
-    return { success: true };
-  },
+  'fullpage-cancel': async (message) => { dropFullPage(message.session); return { success: true }; },
   'offscreen-revoke': async (message) => { revokeObjectUrl(message.url); return { success: true }; },
 };
 
@@ -218,39 +213,59 @@ async function convertBlobToPng(blob) {
 // than one screen. The finished PNG goes straight to the handoff store for the editor.
 const fullPages = new Map();
 
-const FULLPAGE_MAX_AGE_MS = 5 * 60 * 1000;
+// A capture whose service worker stopped midway is never finished: each session frees its own
+// pixels after five minutes without a slice, and at most two exist at once.
+const FULLPAGE_IDLE_MS = 5 * 60 * 1000;
+const FULLPAGE_MAX_SESSIONS = 2;
+
+function dropFullPage(session) {
+  const entry = fullPages.get(session);
+  if (!entry) return;
+  clearTimeout(entry.timer);
+  entry.canvas.width = entry.canvas.height = 0;
+  fullPages.delete(session);
+}
+
+function touchFullPage(session) {
+  const entry = fullPages.get(session);
+  if (!entry) return null;
+  clearTimeout(entry.timer);
+  entry.timer = setTimeout(() => dropFullPage(session), FULLPAGE_IDLE_MS);
+  return entry;
+}
 
 function fullPageBegin({ width, height }) {
   if (!(width >= 1 && height >= 1) || width > 16384 || height > 16384 || width * height > ITK.MAX_AREA) throw new Error('Invalid capture size');
-  // A capture whose service worker restarted midway is never finished: free its pixels.
-  for (const [id, entry] of fullPages) {
-    if (Date.now() - entry.started > FULLPAGE_MAX_AGE_MS) { entry.canvas.width = entry.canvas.height = 0; fullPages.delete(id); }
-  }
+  // Oldest first (a Map keeps insertion order).
+  while (fullPages.size >= FULLPAGE_MAX_SESSIONS) dropFullPage(fullPages.keys().next().value);
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const session = crypto.randomUUID();
-  fullPages.set(session, { canvas, started: Date.now() });
+  fullPages.set(session, { canvas, timer: null });
+  touchFullPage(session);
   return { session };
 }
 
 async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
-  const canvas = fullPages.get(session)?.canvas;
+  const canvas = touchFullPage(session)?.canvas;
   if (!canvas) throw new Error('Capture expired');
   const img = await loadImage(dataUrl);
   const x0 = Math.max(0, Math.round(crop.x) || 0), y0 = Math.max(0, Math.round(crop.y) || 0);
   const w = Math.min(crop.width, img.naturalWidth - x0), h = Math.min(crop.height, img.naturalHeight - y0);
-  if (!(w >= 1 && h >= 1)) return { success: true };
+  // A slice that lies outside the screenshot is an error, never an empty success.
+  if (!(w >= 1 && h >= 1)) throw new Error('Capture area is outside the screenshot');
   canvas.getContext('2d').drawImage(img, x0, y0, w, h, 0, y, Math.round(w * scale), Math.round(h * scale));
   return { success: true };
 }
 
 async function fullPageEnd({ session }) {
-  const canvas = fullPages.get(session)?.canvas;
-  if (!canvas) throw new Error('Capture expired');
+  const entry = fullPages.get(session);
+  if (!entry) throw new Error('Capture expired');
+  clearTimeout(entry.timer);
   fullPages.delete(session);
-  const blob = await canvasToBlob(canvas, 'image/png');
-  canvas.width = canvas.height = 0; // free the pixels now
+  const blob = await canvasToBlob(entry.canvas, 'image/png');
+  entry.canvas.width = entry.canvas.height = 0; // free the pixels now
   return { key: await ITK.handoff.put(blob, { maxAge: ITK.handoff.EDITOR_MAX_AGE_MS }) };
 }
 

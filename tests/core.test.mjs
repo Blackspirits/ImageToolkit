@@ -77,7 +77,8 @@ test('extractBgUrls handles quotes and multiple layers', () => {
 });
 
 test('dedupeKey ignores cache-busting but keeps size parameters', () => {
-  assert.equal(core.dedupeKey('https://a.test/img.jpg?v=1'), core.dedupeKey('https://a.test/img.jpg?v=2'));
+  assert.equal(core.dedupeKey('https://a.test/img.jpg?v=1697890000'), core.dedupeKey('https://a.test/img.jpg?v=1697890001'));
+  assert.equal(core.dedupeKey('https://a.test/img.jpg?_=5f3a9c2e7b1d'), core.dedupeKey('https://a.test/img.jpg'));
   assert.notEqual(core.dedupeKey('https://a.test/img.jpg?w=100'), core.dedupeKey('https://a.test/img.jpg?w=200'));
 });
 
@@ -85,8 +86,12 @@ test('dedupeKey never merges different pictures', () => {
   const key = core.dedupeKey;
   assert.notEqual(key('https://a.test/image?id=1'), key('https://a.test/image?id=2'));
   assert.notEqual(key('https://a.test/Photo.png'), key('https://a.test/photo.png'));
-  assert.equal(key('https://A.TEST/p.png?b=2&a=1'), key('http://a.test/p.png?a=1&b=2'));
-  assert.equal(key('https://a.test/p.png?utm_source=x&_=123&id=7'), key('https://a.test/p.png?id=7'));
+  assert.equal(key('https://A.TEST/p.png?b=2&a=1'), key('https://a.test/p.png?a=1&b=2'));
+  assert.equal(key('https://a.test/p.png?utm_source=x&_=1697890000123&id=7'), key('https://a.test/p.png?id=7'));
+  assert.notEqual(key('https://a.test/frame.jpg?t=10'), key('https://a.test/frame.jpg?t=20'), 'short values are content, not cache-busting');
+  assert.notEqual(key('http://host:8000/a.png'), key('http://host:8001/a.png'), 'the port is part of the origin');
+  assert.notEqual(key('http://a.test/a.png'), key('https://a.test/a.png'));
+  assert.notEqual(key('https://a.test/a.png?q=a%26b%3Dc'), key('https://a.test/a.png?q=a&b=c'), 'values stay encoded');
 });
 
 test('sanitizeFilename keeps the extension when it shortens a long name', () => {

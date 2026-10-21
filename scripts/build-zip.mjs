@@ -1,4 +1,4 @@
-// Builds the Chrome Web Store bundle: only the files the extension loads at runtime.
+// Builds the Chrome Web Store bundle: the files the extension loads at runtime, its licence and privacy policy.
 // Usage: npm run build  →  dist/imagetoolkit-<version>.zip
 
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -16,7 +16,7 @@ const RUNTIME = [
   'resize.html', 'resize.css', 'resize.js',
   'lib', '_locales',
   'icons/icon16.png', 'icons/icon32.png', 'icons/icon48.png', 'icons/icon128.png', 'icons/logo128.png',
-  'LICENSE',
+  'LICENSE', 'PRIVACY.md',
 ];
 
 function walk(path) {

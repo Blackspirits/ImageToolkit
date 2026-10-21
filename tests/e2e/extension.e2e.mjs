@@ -118,6 +118,7 @@ const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', jpg: '
 const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html', 'mislabel.png': 'text/plain', typed: 'image/png' };
 
 let server, base, ctx, sw, id, ui;
+const cookieLog = [];
 const hits = new Map(); // GET requests per path, to check that work is not repeated
 const fetchHits = new Map(); // the same, without <img> loads (grid thumbnails): extension fetches only
 let hugeBytesSent = 0;   // bytes the "huge" endpoint managed to push before the client hung up
@@ -201,6 +202,13 @@ before(async () => {
       res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
       res.write(FIXTURES['wide.png'].subarray(0, 64));
       res.on('close', () => res.destroy());
+      return;
+    }
+    // Records the cookies each image load carried.
+    if (name.startsWith('echo/')) {
+      cookieLog.push({ name, cookie: req.headers.cookie || '', dest: req.headers['sec-fetch-dest'] || '' });
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store', 'set-cookie': 'tracker=1; Path=/' });
+      res.end(FIXTURES['wide.png']);
       return;
     }
     // Needs the session cookie, like an image behind a login.
@@ -1574,6 +1582,119 @@ test('auto-scroll: Stop goes to the tab being scrolled, not the one now active',
     return calls;
   });
   assert.deepEqual(calls.map((m) => [m.action, m.tabId]), [['stopAutoScroll', 111]]);
+});
+
+test('thumbnails and previews the panel loads by itself carry no cookies and cannot set any', async () => {
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  await freshPanel();
+  cookieLog.length = 0;
+  await ui.evaluate((b) => setImages([{ src: b + 'echo/thumb.png', width: 0, height: 0 }]), base);
+  await waitFor(() => cookieLog.length > 0, 10000);
+  await new Promise((r) => setTimeout(r, 500));
+  assert.ok(cookieLog.every((entry) => !/itk=1/.test(entry.cookie)), JSON.stringify(cookieLog));
+  assert.equal((await ctx.cookies(base)).some((c) => c.name === 'tracker'), false, 'no cookie set through a thumbnail');
+  // The page itself still sends its cookies: only the extension's own loads are changed.
+  cookieLog.length = 0;
+  FIXTURES['echo.html'] = Buffer.from('<!doctype html><title>echo</title><img src="echo/page.png">');
+  const page = await ctx.newPage();
+  await page.goto(base + 'echo.html');
+  await waitFor(() => cookieLog.some((e) => e.name === 'echo/page.png'), 10000);
+  assert.ok(cookieLog.find((e) => e.name === 'echo/page.png').cookie.includes('itk=1'));
+  await page.close();
+});
+
+test('capture watch: a tab that leaves and comes back, or reloads the same URL, stays marked', async () => {
+  FIXTURES['w1.html'] = Buffer.from('<!doctype html><title>w1</title>');
+  FIXTURES['w2.html'] = Buffer.from('<!doctype html><title>w2</title>');
+  const a = await ctx.newPage(); await a.goto(base + 'w1.html');
+  const b = await ctx.newPage(); await b.goto(base + 'w2.html');
+  await a.bringToFront();
+  const ids = { a: await tabIdOf(base + 'w1.html'), b: await tabIdOf(base + 'w2.html') };
+  const awayAndBack = await sw.evaluate(async ({ a, b }) => {
+    const tab = await chrome.tabs.get(a);
+    const watch = watchTab(a, tab.windowId);
+    await chrome.tabs.update(b, { active: true });
+    await chrome.tabs.update(a, { active: true });
+    await new Promise((r) => setTimeout(r, 200));
+    watch.stop();
+    return { changed: watch.changed, front: (await chrome.tabs.get(a)).active };
+  }, ids);
+  assert.deepEqual(awayAndBack, { changed: true, front: true });
+  const quiet = await sw.evaluate(async ({ a }) => {
+    const tab = await chrome.tabs.get(a);
+    const watch = watchTab(a, tab.windowId);
+    await new Promise((r) => setTimeout(r, 300));
+    watch.stop();
+    return watch.changed;
+  }, ids);
+  assert.equal(quiet, false);
+  const reloaded = await sw.evaluate(async ({ a }) => {
+    const tab = await chrome.tabs.get(a);
+    const watch = watchTab(a, tab.windowId);
+    await chrome.tabs.reload(a);
+    await new Promise((r) => setTimeout(r, 500));
+    watch.stop();
+    return watch.changed;
+  }, ids);
+  assert.equal(reloaded, true);
+  await a.close(); await b.close();
+});
+
+test('full-page capture stops when the page reloads the same URL midway', async () => {
+  FIXTURES['reload.html'] = Buffer.from('<!doctype html><title>reload</title><style>body{margin:0}div{height:6000px;background:linear-gradient(#0f0,#f0f)}</style><body><div></div></body>');
+  const page = await screenPage('reload.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const tabId = await tabIdOf(base + 'reload.html');
+  const pending = send({ action: 'captureFullPage', tabId });
+  await new Promise((r) => setTimeout(r, 1200));
+  await sw.evaluate((id) => chrome.tabs.reload(id), tabId);
+  const res = await pending;
+  assert.ok(res.error, JSON.stringify(res));
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('resize.html')), false);
+  await page.close();
+});
+
+test('full-page capture ignores a hidden off-screen scrolling panel', async () => {
+  FIXTURES['panel.html'] = Buffer.from('<!doctype html><title>panel</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#00ff00}'
+    + 'aside{position:fixed;top:900px;left:0;width:700px;height:700px;overflow:auto;visibility:hidden;background:#f00}aside div{height:5000px}</style>'
+    + '<body><aside><div></div></aside></body>');
+  const page = await screenPage('panel.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'panel.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const probe = await editor.evaluate((dpr) => {
+    const img = document.getElementById('cropper-img');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    return { h: img.naturalHeight, mid: [...x.getImageData(Math.round(400 * dpr), Math.round(300 * dpr), 1, 1).data.slice(0, 3)].join(',') };
+  }, dpr);
+  assert.equal(probe.h, Math.round(600 * dpr), 'the visible page, not the hidden panel');
+  assert.equal(probe.mid, '0,255,0');
+  await editor.close();
+  await page.close();
+});
+
+test('offscreen: at most two stitching sessions live at once; a slice outside the screenshot is an error', async () => {
+  const result = await sw.evaluate(async () => {
+    const begin = () => offscreenRequest({ action: 'fullpage-begin', width: 10, height: 10 }).then((r) => r.session);
+    const s1 = await begin(); const s2 = await begin(); const s3 = await begin();
+    const tiny = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYPj/HwADAgH/eL9GtQAAAABJRU5ErkJggg==';
+    const draw = (session, crop) => offscreenRequest({ action: 'fullpage-draw', session, dataUrl: tiny, crop, y: 0, scale: 1 }).then(() => 'ok', (e) => e.message);
+    const out = {
+      oldest: await draw(s1, { x: 0, y: 0, width: 1, height: 1 }),
+      newest: await draw(s3, { x: 0, y: 0, width: 1, height: 1 }),
+      outside: await draw(s3, { x: 0, y: 5, width: 1, height: 1 }),
+    };
+    for (const session of [s2, s3]) await offscreenRequest({ action: 'fullpage-cancel', session });
+    return out;
+  });
+  assert.deepEqual(result, { oldest: 'Capture expired', newest: 'ok', outside: 'Capture area is outside the screenshot' });
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
