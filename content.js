@@ -57,8 +57,11 @@
     const markup = new XMLSerializer().serializeToString(clone);
     if (markup.length <= 50) return null; // trivial SVGs
     // Base64 grows by a third; a copy that cannot fit one scan item is not worth encoding.
-    if (markup.length * 4 / 3 > SCAN_MAX_ITEM_CHARS) return { tooLarge: true };
-    return { dataUrl: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(markup))), ...size };
+    const bytes = new TextEncoder().encode(markup);
+    if (bytes.length * 4 / 3 > SCAN_MAX_ITEM_CHARS) return { tooLarge: true };
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { dataUrl: 'data:image/svg+xml;base64,' + btoa(binary), ...size };
   }
 
   // ---------- Collection ----------
@@ -95,9 +98,9 @@
       const alt = String(rawAlt || '').slice(0, 300);
       if (src.startsWith('data:')) {
         if (!src.startsWith('data:image/') || src.length < 100) return; // skip non-images and tracking pixels
-        const key = 'data:' + src.length + ':' + src.slice(-64);
-        if (seen.has(key)) return;
-        seen.add(key);
+        // The whole string: two inline images can share their length and their ending.
+        if (seen.has(src)) return;
+        seen.add(src);
         if (!fits(src, alt)) return;
         results.push({ src, width: width || 0, height: height || 0, alt, fileSize: Math.round((src.length - src.indexOf(',') - 1) * 0.75) });
         return;
@@ -206,11 +209,18 @@
   let debounceTimer = null;
   let known = new Set();
 
-  // Same identity collectImages() uses, so a re-render of a known image is not "new".
+  // FNV-1a over the whole string: inline images are remembered without keeping their bytes.
+  function hashOf(text) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+    return (h >>> 0).toString(36);
+  }
+
+  // One identity for scan results and observed changes, so a re-render of a known image is not "new".
   function keyOf(rawSrc) {
     const src = String(rawSrc || '').trim();
     if (!src) return '';
-    if (src.startsWith('data:')) return 'data:' + src.length + ':' + src.slice(-64);
+    if (src.startsWith('data:')) return 'data:' + src.length + ':' + hashOf(src); // all of it, kept small
     try { return new URL(src, document.baseURI).href; } catch { return ''; }
   }
 

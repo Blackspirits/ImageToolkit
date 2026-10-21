@@ -19,6 +19,7 @@ const UI_KEY = 'imagetoolkit-ui';
 const state = {
   settings: {},
   tabId: null,
+  autoScrollTab: null, // the tab auto-scroll runs in (Stop goes there)
   windowId: null,
   host: '',
   pageTitle: '',
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function onRuntimeMessage(msg) {
-  if (msg?.action === 'autoScrollProgressUpdate' && msg.tabId === state.tabId && state.autoScrolling) {
+  if (msg?.action === 'autoScrollProgressUpdate' && msg.tabId === state.autoScrollTab && state.autoScrolling) {
     setAutoScrollUI(true, msg.pct);
     return;
   }
@@ -378,11 +379,13 @@ function showSkeleton() {
 // Scrolls the page to its end (images collected on the way), then shows everything found.
 // A second click, or Stop, ends it early with what was found so far.
 async function toggleAutoScroll() {
+  // Stop goes to the tab being scrolled, even if another tab is now the active one.
   if (state.autoScrolling) {
-    send({ action: 'stopAutoScroll', tabId: state.tabId });
+    send({ action: 'stopAutoScroll', tabId: state.autoScrollTab });
     return;
   }
   const tabId = state.tabId;
+  state.autoScrollTab = tabId;
   const before = new Set(state.images.map((i) => i.src));
   const token = ++scanToken;
   state.autoScrolling = true;
@@ -467,6 +470,7 @@ function setImages(list, error) {
       tabId: img.tabId ?? null,
       pageHost: img.pageHost || '',
       pageTitle: img.pageTitle || '',
+      pages: Array.isArray(img.pages) ? img.pages : img.tabId != null ? [{ tabId: img.tabId, pageHost: img.pageHost || '', pageTitle: img.pageTitle || '' }] : [],
     };
     updateDerived(item);
     return item;
@@ -523,16 +527,24 @@ function populateDomains() {
   select.value = counts.has(current) ? current : 'all';
 }
 
+// The page an image is named after: the tab the list is filtered on, else the first one.
+function pageOf(img) {
+  const pages = img?.pages || [];
+  const tab = $('filter-tab')?.value || 'all';
+  return pages.find((p) => String(p.tabId) === tab) || pages[0] || img;
+}
+
 // Tab filter (all-tabs scope): one entry per tab, named after its page, in tab order.
 function populateTabs() {
   const select = $('filter-tab');
   const current = select.value;
   const tabs = new Map();
   for (const img of state.images) {
-    if (img.tabId == null) continue;
-    const entry = tabs.get(img.tabId) || { label: img.pageTitle || img.pageHost || String(img.tabId), n: 0 };
-    entry.n++;
-    tabs.set(img.tabId, entry);
+    for (const page of img.pages) {
+      const entry = tabs.get(page.tabId) || { label: page.pageTitle || page.pageHost || String(page.tabId), n: 0 };
+      entry.n++;
+      tabs.set(page.tabId, entry);
+    }
   }
   const options = [el('option', { value: 'all', text: t('filterAny') })];
   for (const [tabId, { label, n }] of tabs) {
@@ -576,7 +588,7 @@ function matchesFilters(img) {
   }
   if (shape !== 'all' && img.shape !== shape) return false;
   if (domain !== 'all' && img.domain !== domain) return false;
-  if (tab !== 'all' && String(img.tabId) !== tab) return false;
+  if (tab !== 'all' && !img.pages.some((p) => String(p.tabId) === tab)) return false;
   if (query && !img.src.toLowerCase().includes(query) && !img.name.toLowerCase().includes(query) && !img.alt.toLowerCase().includes(query)) return false;
   return true;
 }
@@ -898,9 +910,10 @@ function buildInstructions(format, img = null, index = 0) {
   // "Original" keeps the exact bytes; the background picks the extension from the real content type.
   const ins = fmt === 'original' ? { passthrough: true } : { format: fmt === 'jpg' ? 'jpeg' : fmt, quality: s.defaultQuality / 100 };
   ins.silent = true;
+  const page = pageOf(img);
   Object.assign(ins, {
-    pageHost: img?.pageHost || state.host,
-    pageTitle: img?.pageTitle || state.pageTitle,
+    pageHost: page?.pageHost || state.host,
+    pageTitle: page?.pageTitle || state.pageTitle,
     knownWidth: img?.width || 0,
     knownHeight: img?.height || 0,
     index,
@@ -959,7 +972,8 @@ function openLens(src) {
 }
 
 function openEditor(src, img) {
-  send({ action: 'openEditor', imageUrl: src, site: img?.pageHost || state.host || '', title: img?.pageTitle || state.pageTitle || '' });
+  const page = img ? pageOf(img) : null;
+  send({ action: 'openEditor', imageUrl: src, site: page?.pageHost || state.host || '', title: page?.pageTitle || state.pageTitle || '' });
 }
 
 // ============================================================

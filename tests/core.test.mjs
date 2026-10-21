@@ -81,6 +81,20 @@ test('dedupeKey ignores cache-busting but keeps size parameters', () => {
   assert.notEqual(core.dedupeKey('https://a.test/img.jpg?w=100'), core.dedupeKey('https://a.test/img.jpg?w=200'));
 });
 
+test('dedupeKey never merges different pictures', () => {
+  const key = core.dedupeKey;
+  assert.notEqual(key('https://a.test/image?id=1'), key('https://a.test/image?id=2'));
+  assert.notEqual(key('https://a.test/Photo.png'), key('https://a.test/photo.png'));
+  assert.equal(key('https://A.TEST/p.png?b=2&a=1'), key('http://a.test/p.png?a=1&b=2'));
+  assert.equal(key('https://a.test/p.png?utm_source=x&_=123&id=7'), key('https://a.test/p.png?id=7'));
+});
+
+test('sanitizeFilename keeps the extension when it shortens a long name', () => {
+  const cleaned = core.sanitizeFilename('a'.repeat(80) + '.png');
+  assert.equal([...cleaned].length, 60);
+  assert.ok(cleaned.endsWith('.png'));
+});
+
 test('sanitizeFilename strips unsafe characters and keeps Unicode', () => {
   assert.equal(core.sanitizeFilename('a<b>:c|d?.png'), 'abcd.png');
   assert.equal(core.sanitizeFilename('..'), 'image');

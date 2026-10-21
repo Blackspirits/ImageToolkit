@@ -1293,10 +1293,42 @@ test('all tabs of a window: merged, tagged with their page, browser pages skippe
   assert.equal(await ui.locator('#filter-tab option').count(), 4); // Any + 3 tabs
   const feedTab = await ui.evaluate(() => [...document.querySelectorAll('#filter-tab option')].find((o) => o.textContent.startsWith('f ('))?.value);
   await ui.evaluate((v) => { const s = document.getElementById('filter-tab'); s.value = v; s.dispatchEvent(new Event('change')); }, feedTab);
-  assert.ok(await ui.evaluate(() => state.filtered.length > 0 && state.filtered.every((i) => i.pageTitle === 'f')));
+  assert.ok(await ui.evaluate(() => state.filtered.length > 0 && state.filtered.every((i) => i.pages.some((p) => p.pageTitle === 'f'))));
   assert.match(await ui.textContent('#scan-host'), /3/);
   await ui.evaluate(() => setScope('tab', false));
   await sw.evaluate((id) => chrome.windows.remove(id), win.id);
+});
+
+test('all tabs: an image on two pages belongs to both, for the filter and for file names', async () => {
+  FIXTURES['shareA.html'] = Buffer.from('<!doctype html><title>Alpha</title><img src="photo.png?shared=1"><img src="wide.png?onlyA=1">');
+  FIXTURES['shareB.html'] = Buffer.from('<!doctype html><title>Beta</title><img src="photo.png?shared=1">');
+  const win = await sw.evaluate(async (urls) => {
+    const w = await chrome.windows.create({ url: urls, focused: false });
+    return { id: w.id, tabs: w.tabs.map((t) => t.id) };
+  }, [base + 'shareA.html', base + 'shareB.html']);
+  await waitFor(() => sw.evaluate(async (id) => (await chrome.tabs.query({ windowId: id })).every((t) => t.status === 'complete'), win.id), 10000);
+  await freshPanel();
+  await ui.evaluate(async (windowId) => { state.windowId = windowId; setScope('window', false); await scan(); }, win.id);
+  const betaTab = await ui.evaluate(() => [...document.querySelectorAll('#filter-tab option')].find((o) => o.textContent.startsWith('Beta ('))?.value);
+  assert.ok(betaTab, 'the page with only shared images is in the filter');
+  await ui.evaluate((v) => { const s = document.getElementById('filter-tab'); s.value = v; s.dispatchEvent(new Event('change')); }, betaTab);
+  const shown = await ui.evaluate(() => state.filtered.map((i) => i.src));
+  assert.deepEqual(shown, [base + 'photo.png?shared=1']);
+  const title = await ui.evaluate(() => buildInstructions('png', state.filtered[0], 1).pageTitle);
+  assert.equal(title, 'Beta');
+  await ui.evaluate(() => setScope('tab', false));
+  await sw.evaluate((id) => chrome.windows.remove(id), win.id);
+});
+
+test('scanner: inline images with the same length and ending are both listed', async () => {
+  const svg = (color) => `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="#${color}"/><!--${'x'.repeat(120)}--></svg>`;
+  const src = (color) => 'data:image/svg+xml;base64,' + Buffer.from(svg(color)).toString('base64');
+  FIXTURES['inline2.html'] = Buffer.from(`<!doctype html><title>inline</title><img src="${src('ff0000')}"><img src="${src('8b4513')}">`);
+  const page = await ctx.newPage();
+  await page.goto(base + 'inline2.html');
+  const { images } = await send({ action: 'collectImages', tabId: await tabIdOf(base + 'inline2.html') });
+  assert.equal(images.filter((i) => i.src.startsWith('data:image/svg+xml')).length, 2);
+  await page.close();
 });
 
 test('full-page capture: slices in order, fixed header only once, scrollbar off, position restored', async () => {
@@ -1524,6 +1556,24 @@ test('a download that stalls ends with a time-out instead of hanging', async () 
   const message = await sw.evaluate((url) => fetchImageBlob(url, { totalMs: 1500 }).then(() => 'resolved', (err) => err.message), base + 'stall.png');
   assert.equal(message, 'Download timed out');
   assert.ok(Date.now() - started < 8000);
+});
+
+test('auto-scroll: Stop goes to the tab being scrolled, not the one now active', async () => {
+  await freshPanel();
+  const calls = await ui.evaluate(async () => {
+    const calls = [];
+    const original = chrome.runtime.sendMessage;
+    chrome.runtime.sendMessage = (message) => { calls.push(message); return Promise.resolve({}); };
+    try {
+      Object.assign(state, { autoScrolling: true, autoScrollTab: 111, tabId: 222 });
+      await toggleAutoScroll();
+    } finally {
+      chrome.runtime.sendMessage = original;
+      state.autoScrolling = false;
+    }
+    return calls;
+  });
+  assert.deepEqual(calls.map((m) => [m.action, m.tabId]), [['stopAutoScroll', 111]]);
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {

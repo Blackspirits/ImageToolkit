@@ -296,16 +296,19 @@ function mergeScans(scans) {
   for (const scan of scans) {
     if (scan.truncated) truncated = true;
     for (const img of scan.images || []) {
+      // From several tabs, an image remembers every page it is on (tab filter, file names).
+      const page = img.tabId != null ? { tabId: img.tabId, pageHost: img.pageHost || '', pageTitle: img.pageTitle || '' } : null;
       const seen = found.get(img.src);
       if (seen) {
         if (!(seen.width > 0) && img.width > 0) Object.assign(seen, { width: img.width, height: img.height });
         if (!seen.fileSize && img.fileSize) seen.fileSize = img.fileSize;
+        if (page && seen.pages && !seen.pages.some((p) => p.tabId === page.tabId)) seen.pages.push(page);
         continue;
       }
       const cost = String(img.src).length + String(img.alt || '').length;
       if (found.size >= ITK.SCAN_MAX_ITEMS || chars + cost > ITK.SCAN_MAX_TOTAL_CHARS) { truncated = true; continue; }
       chars += cost;
-      found.set(img.src, img);
+      found.set(img.src, page ? { ...img, pages: [page] } : img);
     }
   }
   return { images: [...found.values()], truncated };
