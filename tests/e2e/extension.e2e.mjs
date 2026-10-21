@@ -196,6 +196,13 @@ before(async () => {
       res.end(body);
       return;
     }
+    // Sends the headers and a first chunk, then nothing more: only a time limit ends it.
+    if (name === 'stall.png') {
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      res.write(FIXTURES['wide.png'].subarray(0, 64));
+      res.on('close', () => res.destroy());
+      return;
+    }
     // Needs the session cookie, like an image behind a login.
     if (name === 'auth/cookie.png') {
       if (!/(?:^|;\s*)itk=1(?:;|$)/.test(req.headers.cookie || '')) { res.writeHead(401); res.end(); return; }
@@ -1502,6 +1509,21 @@ test('full-page capture stops when another tab comes to the front, and restores 
   assert.equal(await page.evaluate(() => scrollY), 0);
   await other.close();
   await page.close();
+});
+
+test('automatic preview fetches never send cookies; a fetch the user asks for does', async () => {
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  const automatic = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'auth/cookie.png', automatic: true });
+  assert.ok(!automatic?.dataUrl, JSON.stringify(automatic).slice(0, 120));
+  const asked = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'auth/cookie.png' });
+  assert.ok(asked?.dataUrl?.startsWith('data:image/png'), 'the editor and downloads still reach images behind a login');
+});
+
+test('a download that stalls ends with a time-out instead of hanging', async () => {
+  const started = Date.now();
+  const message = await sw.evaluate((url) => fetchImageBlob(url, { totalMs: 1500 }).then(() => 'resolved', (err) => err.message), base + 'stall.png');
+  assert.equal(message, 'Download timed out');
+  assert.ok(Date.now() - started < 8000);
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {

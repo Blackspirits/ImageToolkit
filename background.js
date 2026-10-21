@@ -181,9 +181,10 @@ const handlers = {
   cancelAnalysis: (msg, sender) => { analysisControllers.get(analysisKey(sender))?.abort(); return { success: true }; },
 
   // `maxBytes` lets previews and metadata ask for less than a full-size download.
+  // `automatic` (previews, dimensions): no cookies and a shorter time limit.
   fetchAsDataUrl: async (msg) => {
     const maxBytes = Math.min(MAX_FETCH_BYTES, Math.max(1, Number(msg.maxBytes) || MAX_FETCH_BYTES));
-    const blob = await fetchImageBlob(msg.imageUrl, { maxBytes });
+    const blob = await fetchImageBlob(msg.imageUrl, msg.automatic ? { maxBytes, cookies: false, totalMs: 20000 } : { maxBytes });
     return { dataUrl: await blobToDataUrl(blob), size: blob.size };
   },
 
@@ -480,33 +481,59 @@ function tooLarge(bytes) {
   return new Error(`Image too large (${bytes > 0 ? ITK.formatBytes(bytes) : `> ${ITK.formatBytes(MAX_FETCH_BYTES)}`})`);
 }
 
-async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES } = {}) {
+// A download may take this long in all, and may go this long without receiving a byte.
+const FETCH_TOTAL_MS = 90000;
+const FETCH_IDLE_MS = 20000;
+
+// `cookies`: true only for what the user asked for (save, copy, edit one image): images behind
+// a login then still work. Automatic fetches (previews, dimensions) never send cookies.
+async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES, cookies = true, totalMs = FETCH_TOTAL_MS } = {}) {
   if (!ITK.isFetchableImageSrc(String(imageUrl || ''))) throw new Error('Unsupported image URL');
 
-  let response;
+  const controller = new AbortController();
+  const stop = () => controller.abort();
+  if (signal?.aborted) stop();
+  signal?.addEventListener('abort', stop, { once: true });
+  let timedOut = false;
+  const expire = () => { timedOut = true; stop(); };
+  const total = setTimeout(expire, totalMs);
+  let idle;
+  const alive = () => { clearTimeout(idle); idle = setTimeout(expire, FETCH_IDLE_MS); };
+  alive();
   try {
-    // Cookies help with images behind a login; retry without them on network errors.
-    response = await fetch(imageUrl, { credentials: 'include', signal });
+    let response;
+    try {
+      // With cookies first; retried without them on network errors.
+      response = await fetch(imageUrl, { credentials: cookies ? 'include' : 'omit', signal: controller.signal });
+    } catch (err) {
+      if (controller.signal.aborted || !cookies) throw err;
+      response = await fetch(imageUrl, { credentials: 'omit', signal: controller.signal });
+    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const declared = ITK.parseSizeFromHeaders(response.headers);
+    if (declared > maxBytes) {
+      response.body?.cancel().catch(() => {});
+      throw tooLarge(declared);
+    }
+
+    const blob = await readBodyCapped(response, maxBytes, alive);
+    if (!blob.size) throw new Error('Empty response');
+    return blob;
   } catch (err) {
-    if (signal?.aborted) throw err;
-    response = await fetch(imageUrl, { signal });
+    if (timedOut) throw new Error('Download timed out');
+    throw err;
+  } finally {
+    clearTimeout(total);
+    clearTimeout(idle);
+    signal?.removeEventListener('abort', stop);
   }
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-  const declared = ITK.parseSizeFromHeaders(response.headers);
-  if (declared > maxBytes) {
-    response.body?.cancel().catch(() => {});
-    throw tooLarge(declared);
-  }
-
-  const blob = await readBodyCapped(response, maxBytes);
-  if (!blob.size) throw new Error('Empty response');
-  return blob;
 }
 
 // Reads the body chunk by chunk and stops as soon as it passes the cap, so a server
 // that sends no Content-Length can never push more than `cap` bytes into memory.
-async function readBodyCapped(response, cap) {
+// `onChunk` is called for every chunk received (the idle timer).
+async function readBodyCapped(response, cap, onChunk = () => {}) {
   const type = (response.headers.get('content-type') || '').split(';')[0].trim();
   if (!response.body) {
     const blob = await response.blob();
@@ -519,6 +546,7 @@ async function readBodyCapped(response, cap) {
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
+    onChunk();
     total += value.byteLength;
     if (total > cap) {
       reader.cancel().catch(() => {});

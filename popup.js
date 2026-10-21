@@ -714,7 +714,7 @@ function pumpViaExtension() {
     budget.fetches--;
     budget.bytes -= maxBytes;
     viaExtensionActive++;
-    send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes })
+    send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes, automatic: true })
       .then((res) => {
         budget.bytes += maxBytes - Math.min(maxBytes, res?.dataUrl ? res.size || 0 : 0);
         resolve(res?.dataUrl || null);
