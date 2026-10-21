@@ -865,5 +865,9 @@
   "fullPageIncomplete": {
     "message": "페이지가 끝까지 스크롤되지 않았습니다. 캡처가 불완전할 수 있습니다.",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "단색으로 가리기",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }

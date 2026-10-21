@@ -867,5 +867,9 @@
   "fullPageIncomplete": {
     "message": "La página dejó de desplazarse antes del final: la captura puede estar incompleta.",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Ocultar con color sólido",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }

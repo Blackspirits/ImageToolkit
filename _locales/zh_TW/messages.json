@@ -865,5 +865,9 @@
   "fullPageIncomplete": {
     "message": "頁面在到達底部前停止捲動：擷取可能不完整。",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "用純色遮蓋",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }

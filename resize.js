@@ -63,11 +63,12 @@ async function resolveSource(source) {
 }
 
 // Give Cropper a box with the image's own proportions, so no empty bands surround it.
-function fitStage(img) {
+// `w`/`h`: the size of an image about to replace the current one.
+function fitStage(img, w = img.naturalWidth, h = img.naturalHeight) {
   const area = $('crop-area');
   const maxW = area.clientWidth - 56, maxH = area.clientHeight - 120;
-  if (!img.naturalWidth || !img.naturalHeight || maxW <= 0 || maxH <= 0) return;
-  const { width, height } = ITK.stageSize(img.naturalWidth, img.naturalHeight, maxW, maxH);
+  if (!w || !h || maxW <= 0 || maxH <= 0) return;
+  const { width, height } = ITK.stageSize(w, h, maxW, maxH);
   const inner = area.querySelector('.crop-inner');
   inner.style.width = `${width}px`;
   inner.style.height = `${height}px`;
@@ -83,6 +84,7 @@ async function loadImage(source) {
   }, { once: true });
   img.addEventListener('error', () => showStatus(t('errorNoImage'), true), { once: true });
   const src = await resolveSource(source);
+  if (src.startsWith('blob:')) editor.previousUrl = src; // released when an annotated image replaces it
   if (!/^(data|blob):/.test(src)) img.crossOrigin = 'anonymous';
   img.src = src;
 }
@@ -188,9 +190,13 @@ async function annotate() {
   $('app').classList.add('annotating');
   const blob = await ITK.annotate.open({ host: document.querySelector('.stage'), base });
   $('app').classList.remove('annotating');
+  const { width, height } = base;
+  base.width = base.height = 0; // a full-resolution copy: free it now
   if (!blob) return;
   const url = URL.createObjectURL(blob);
   const img = $('cropper-img');
+  // A rotated image changes shape: size the stage for it before Cropper measures it.
+  fitStage(img, width, height);
   img.addEventListener('ready', () => {
     editor.outputManual = false;
     clearPresetActive();

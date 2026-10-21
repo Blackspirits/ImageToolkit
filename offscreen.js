@@ -251,7 +251,7 @@ async function fullPageEnd({ session }) {
   fullPages.delete(session);
   const blob = await canvasToBlob(canvas, 'image/png');
   canvas.width = canvas.height = 0; // free the pixels now
-  return { key: await ITK.handoff.put(blob) };
+  return { key: await ITK.handoff.put(blob, { maxAge: ITK.handoff.EDITOR_MAX_AGE_MS }) };
 }
 
 // ---------- Large downloads ----------

@@ -1587,6 +1587,66 @@ test('auto-scroll runs once per page: a second request gets "busy"', async () =>
   await page.close();
 });
 
+test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies, the stage takes the new shape', async () => {
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 100;
+    const x = c.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 100);
+    x.fillStyle = '#000'; x.font = '700 70px sans-serif'; x.textBaseline = 'top'; x.fillText('SECRET', 10, 15);
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), dataUrl);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.setViewportSize({ width: 1200, height: 800 });
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-rotate-left'); // 400×100 becomes 100×400
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  const box = await editor.locator('.annot-overlay').boundingBox();
+  const at = (x, y) => [box.x + (x / 100) * box.width, box.y + (y / 400) * box.height];
+  const drag = async (x1, y1, x2, y2) => {
+    await editor.mouse.move(...at(x1, y1)); await editor.mouse.down();
+    await editor.mouse.move(...at(x2, y2), { steps: 4 }); await editor.mouse.up();
+  };
+  const region = (x, y, w, h) => editor.evaluate(([x, y, w, h]) => {
+    const d = document.querySelector('.annot-canvas').getContext('2d').getImageData(x, y, w, h).data;
+    const colours = new Set();
+    for (let i = 0; i < d.length; i += 4) colours.add(`${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}`);
+    return [...colours];
+  }, [x, y, w, h]);
+
+  await editor.keyboard.press('x');
+  await editor.click('.annot-color[data-color="#111111"]');
+  await drag(5, 5, 95, 395);
+  assert.deepEqual(await region(10, 10, 80, 380), ['17,17,17,255'], 'nothing of the text is left');
+
+  // Text: a click outside the open field confirms it and does not open another one.
+  await editor.keyboard.press('t');
+  await editor.mouse.click(...at(50, 100));
+  await editor.locator('.annot-text').fill('Hi');
+  await editor.mouse.click(...at(50, 300));
+  assert.equal(await editor.locator('.annot-text').count(), 0);
+
+  await editor.keyboard.press('Enter');
+  assert.equal(await editor.locator('.annot-layer').count(), 1, 'Enter alone does not apply');
+  await editor.keyboard.press('Control+Enter');
+  await editor.waitForSelector('.annot-layer', { state: 'detached' });
+  await waitFor(() => editor.evaluate(() => editor.cropper.ready && document.getElementById('cropper-img').naturalWidth === 100));
+  const ratio = await editor.evaluate(() => { const r = document.querySelector('.crop-inner').getBoundingClientRect(); return r.width / r.height; });
+  assert.ok(Math.abs(ratio - 0.25) < 0.02, `the stage is shaped like the new image: ${ratio}`);
+  await editor.close();
+});
+
+test('the editor knows the page an image or screenshot came from', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url, { site: 'example.org', title: 'My page' }), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  assert.deepEqual(await editor.evaluate(() => editor.page), { host: 'example.org', title: 'My page' });
+  await editor.close();
+});
+
 test('annotate: Esc drops a shape in progress but never the marks already made', async () => {
   const known = new Set(ctx.pages());
   await sw.evaluate((url) => openEditor(url), base + 'wide.png');

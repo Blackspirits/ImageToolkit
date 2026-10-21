@@ -866,5 +866,9 @@
   "fullPageIncomplete": {
     "message": "Sayfa sonuna gelmeden kaydırma durdu: yakalama eksik olabilir.",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Düz renkle kapat",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }

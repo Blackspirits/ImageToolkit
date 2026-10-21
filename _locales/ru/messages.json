@@ -866,5 +866,9 @@
   "fullPageIncomplete": {
     "message": "Страница перестала прокручиваться до конца: снимок может быть неполным.",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Закрасить сплошным цветом",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }

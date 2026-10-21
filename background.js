@@ -1108,13 +1108,13 @@ function fullPageRestore() {
 // ---------- Editor Window ----------
 // The handed-off image (a screenshot can be private) only lives as long as its editor
 // window, reloads included. The window → key map is in session storage so it survives a
-// service worker restart; the 30-minute prune stays as a safety net.
+// service worker restart; a 12-hour expiry stays as a safety net.
 const editorKeyName = (windowId) => `editor:${windowId}`;
 
 // meta (optional): { site, title } of the page a screenshot came from, for filename templates.
 async function openEditor(imageUrl, meta) {
   if (!imageUrl) return;
-  await openEditorWithKey(await handoff.put(imageUrl), meta);
+  await openEditorWithKey(await handoff.put(imageUrl, { maxAge: handoff.EDITOR_MAX_AGE_MS }), meta);
 }
 
 async function openEditorWithKey(key, meta = {}) {

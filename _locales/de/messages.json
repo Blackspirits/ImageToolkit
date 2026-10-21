@@ -867,5 +867,9 @@
   "fullPageIncomplete": {
     "message": "Die Seite hat vor dem Ende aufgehört zu scrollen: Die Aufnahme ist eventuell unvollständig.",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Mit Vollfarbe schwärzen",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }

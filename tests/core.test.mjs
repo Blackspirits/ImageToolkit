@@ -289,3 +289,13 @@ test('filename templates: tokens, cleanup and safe paths', () => {
   assert.deepEqual([ins.index, ins.knownWidth, ins.knownHeight, ins.pageTitle.length, ins.filenameTemplate], [7, 640, undefined, 120, '{name}']);
   assert.equal(ins.width, undefined, 'naming hints never resize');
 });
+
+test('templates: a screenshot or inline image takes {domain} from its page, never a made-up host', () => {
+  const name = core.buildFilename('data:,', {
+    filenamePattern: 'template', filenameTemplate: '{domain}/{title}/{name}',
+    sourceName: 'imagetoolkit', pageHost: 'example.org', pageTitle: 'My page', format: 'png',
+  });
+  assert.equal(name, 'example.org/My page/imagetoolkit.png');
+  const remote = core.buildFilename('https://cdn.test/a/photo.jpg', { filenamePattern: 'template', filenameTemplate: '{domain}/{name}', pageHost: 'example.org', format: 'jpeg' });
+  assert.equal(remote, 'cdn.test/photo.jpg');
+});

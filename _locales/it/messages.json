@@ -866,5 +866,9 @@
   "fullPageIncomplete": {
     "message": "La pagina ha smesso di scorrere prima della fine: la cattura potrebbe essere incompleta.",
     "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Oscura con colore pieno",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
   }
 }
