@@ -86,8 +86,9 @@ function saveSettings(patch) {
 
 // ---------- Theme ----------
 function applyTheme(theme = 'auto') {
-  ui.applyTheme($('app'), theme);
-  $('theme-icon').setAttribute('href', theme === 'auto' ? '#i-contrast' : theme === 'dark' ? '#i-moon' : '#i-sun');
+  const dark = ui.applyTheme($('app'), theme);
+  // The icon shows the theme on screen, Automatic included.
+  $('theme-icon').setAttribute('href', dark ? '#i-moon' : '#i-sun');
   setSegmented($('setting-theme'), theme);
 }
 
@@ -196,9 +197,10 @@ function updateScanHost() {
 // Header
 // ============================================================
 function initHeader() {
+  // The header button flips between light and dark (from Automatic too: to the opposite of what
+  // is shown now). Automatic, which follows Windows/macOS or Chrome, is chosen in Settings.
   $('btn-theme').addEventListener('click', () => {
-    const order = ['auto', 'light', 'dark'];
-    const next = order[(order.indexOf($('app').dataset.theme || 'auto') + 1) % order.length];
+    const next = $('app').classList.contains('dark') ? 'light' : 'dark';
     applyTheme(next);
     saveSettings({ theme: next });
   });

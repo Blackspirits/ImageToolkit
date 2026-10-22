@@ -1714,6 +1714,23 @@ test('offscreen: at most two stitching sessions live at once; a slice outside th
   assert.deepEqual(result, { oldest: 'Capture expired', newest: 'ok', outside: 'Capture area is outside the screenshot' });
 });
 
+test('the header theme button flips light/dark; Automatic is only chosen in Settings', async () => {
+  await freshPanel();
+  await ui.evaluate(() => applyTheme('auto'));
+  const shownDark = await ui.evaluate(() => document.getElementById('app').classList.contains('dark'));
+  const seen = [];
+  for (let i = 0; i < 3; i++) {
+    await ui.click('#btn-theme');
+    seen.push(await ui.evaluate(() => ({ theme: document.getElementById('app').dataset.theme, icon: document.getElementById('theme-icon').getAttribute('href') })));
+  }
+  const first = shownDark ? 'light' : 'dark';
+  const second = shownDark ? 'dark' : 'light';
+  const icon = (t) => (t === 'dark' ? '#i-moon' : '#i-sun');
+  assert.deepEqual(seen, [first, second, first].map((theme) => ({ theme, icon: icon(theme) })));
+  await waitFor(async () => (await sw.evaluate(async () => (await chrome.storage.sync.get('settings')).settings.theme)) === first);
+  await ui.evaluate(() => { applyTheme('auto'); saveSettings({ theme: 'auto' }); });
+});
+
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
   const page = await screenPage('feed.html');
   const tabId = await tabIdOf(base + 'feed.html');
