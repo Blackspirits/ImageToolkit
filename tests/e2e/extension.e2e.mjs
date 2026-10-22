@@ -1584,6 +1584,20 @@ test('auto-scroll: Stop goes to the tab being scrolled, not the one now active',
   assert.deepEqual(calls.map((m) => [m.action, m.tabId]), [['stopAutoScroll', 111]]);
 });
 
+test('the panel loads thumbnails directly only once the no-cookie rule is confirmed', async () => {
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  await freshPanel();
+  assert.deepEqual(await send({ action: 'imagesReady' }), { ok: true });
+  assert.equal(await ui.evaluate(() => state.directImages), true);
+  // Without the rule (Chrome refused it): no direct load at all, only the cookie-less download.
+  cookieLog.length = 0;
+  await ui.evaluate((b) => { state.directImages = false; setImages([{ src: b + 'echo/norule.png', width: 0, height: 0 }]); }, base);
+  await waitFor(() => cookieLog.length > 0, 10000);
+  await waitFor(() => ui.evaluate(() => document.querySelector('.gthumb img')?.src.startsWith('data:')), 10000);
+  await new Promise((r) => setTimeout(r, 300));
+  assert.ok(cookieLog.every((e) => e.dest !== 'image' && !/itk=1/.test(e.cookie)), JSON.stringify(cookieLog));
+});
+
 test('thumbnails and previews the panel loads by itself carry no cookies and cannot set any', async () => {
   await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
   await freshPanel();

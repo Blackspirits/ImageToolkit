@@ -70,7 +70,7 @@ Copy any image to the clipboard as PNG, ready to paste into Slack, Discord, Figm
 Load an image in Tools and see how large it would be as PNG, JPG and WebP next to the original — with a recommendation that respects transparency.
 
 ### 🔁 Duplicate Detection
-URL-based heuristic deduplication identifies likely duplicates (same path, different cache-busting params). Duplicates are flagged and can be hidden with one click. It is URL-based, not pixel-based.
+Duplicate detection flags the same image address listed more than once, ignoring only the host's case, the order of parameters and tracking tags (`utm_*`, `fbclid`…), so different pictures are never merged. Duplicates can be hidden with one click. It is URL-based, not pixel-based.
 
 ### 📦 Batch Download
 Select images and download them one by one (never one Save As dialog per image) or as a single ZIP, in their original format or converted. ZIP entries follow your file name settings and never collide. Copy all selected URLs in one click.

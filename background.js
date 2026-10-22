@@ -93,7 +93,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 // SameSite=Lax ones included. Actions the user asks for (save, copy, edit) use fetch(), which
 // this rule does not touch, so images behind a login keep working there.
 const NO_COOKIE_RULE_ID = 1;
-function installNoCookieRule() {
+function addNoCookieRule() {
   return chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [NO_COOKIE_RULE_ID],
     addRules: [{
@@ -109,9 +109,24 @@ function installNoCookieRule() {
   });
 }
 
+// Resolves to true once the rule is in place (tried twice), false if Chrome refused it. Pages
+// that show remote images ask for it first ('imagesReady') and, without it, load nothing
+// directly: every thumbnail then goes through the cookie-less fetch instead.
+let noCookieRule = null;
+function installNoCookieRule() {
+  noCookieRule ??= addNoCookieRule()
+    .catch(() => addNoCookieRule())
+    .then(() => true, (err) => {
+      console.error('ImageToolkit: the no-cookie rule for thumbnails could not be installed', err);
+      noCookieRule = null; // asked again next time
+      return false;
+    });
+  return noCookieRule;
+}
+
 // Keep runtime-only Chrome settings in sync whenever the service worker wakes up.
 async function initializeExtensionRuntime() {
-  installNoCookieRule().catch(() => {});
+  installNoCookieRule();
   const settings = await loadSettingsAndLocale();
   applySidePanelBehavior(settings);
   handoff.prune().catch(() => {});
@@ -190,6 +205,7 @@ function isExtensionPage(sender) {
 // Handlers return a value or a promise; the result is sent back to the caller.
 const handlers = {
   getSettings: () => getSettings(),
+  imagesReady: async () => ({ ok: await installNoCookieRule() }),
 
   processAndSave: (msg) => processAndSave(msg.imageUrl, msg.instructions, null),
 

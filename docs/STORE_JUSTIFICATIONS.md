@@ -9,7 +9,7 @@ ImageToolkit finds, converts, edits and saves the images of the pages you visit:
 ## Permission justifications
 
 **`<all_urls>` (host permission)**
-The user can use ImageToolkit on any website: it lists the images of the page the user opens it on, and fetches an image the user asks to save, convert, copy or edit, wherever it is hosted (images are often on CDNs other than the page's own domain). It also captures the visible tab for screenshots. Narrowing it to `activeTab` would break the side panel (which follows tab changes), the "All tabs" scope, images inside cross-origin iframes and downloads from image CDNs. No data is sent anywhere: everything is processed locally.
+The user can use ImageToolkit on any website: it lists the images of the page the user opens it on (or, when the user picks the "All tabs" scope, of every web page open in that window), and fetches an image the user asks to save, convert, copy or edit, wherever it is hosted (images are often on CDNs other than the page's own domain). It also captures the visible tab for screenshots. Narrowing it to `activeTab` would break the side panel (which follows tab changes), the "All tabs" scope, images inside cross-origin iframes and downloads from image CDNs. No data is sent anywhere: everything is processed locally.
 
 **`scripting`**
 Injects, on demand only, the image scanner into the page (and its frames) when the panel is opened, the area-selection overlay when a capture starts, and the scrolling helper for "Load all images" and full-page capture. No remote code: every injected script ships in the package.
@@ -44,4 +44,4 @@ No. All JavaScript is included in the package; nothing is loaded from the networ
 
 ## Data usage
 
-ImageToolkit collects no user data. Tick none of the data categories. Certify: not sold, not used for unrelated purposes, not used for creditworthiness.
+ImageToolkit sends nothing to its author (no servers, no analytics). It does handle **website content** locally: the images and screenshots of the pages the user works on, which can contain personal information. To keep the dashboard consistent with PRIVACY.md, tick **Website content** and explain it is processed locally, kept only while the editor is open, and never transmitted. Certify: not sold, not used for unrelated purposes, not used for creditworthiness.

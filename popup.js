@@ -19,6 +19,7 @@ const UI_KEY = 'imagetoolkit-ui';
 const state = {
   settings: {},
   tabId: null,
+  directImages: false, // thumbnails may load straight from their URL (the no-cookie rule is in place)
   autoScrollTab: null, // the tab auto-scroll runs in (Stop goes there)
   windowId: null,
   host: '',
@@ -114,7 +115,9 @@ function localize() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadSettings();
+  // Nothing remote is shown before the no-cookie rule for the extension's images is in place.
+  const [ready] = await Promise.all([send({ action: 'imagesReady' }), loadSettings()]);
+  state.directImages = ready?.ok === true;
   await i18n.load(state.settings.locale);
   localize();
   applyTheme(state.settings.theme);
@@ -644,8 +647,12 @@ function createCard(img) {
       queueRefresh();
     }
   });
-  pic.addEventListener('error', () => thumbFallback(img, pic), { once: true });
-  pic.src = img.src;
+  if (state.directImages || img.src.startsWith('data:')) {
+    pic.addEventListener('error', () => thumbFallback(img, pic), { once: true });
+    pic.src = img.src;
+  } else {
+    thumbFallback(img, pic); // cookie-less fetch only
+  }
 
   const thumb = el('div', { class: 'gthumb' }, pic);
   const check = el('button', { class: 'gcheck', 'data-act': 'select', tabindex: '-1', role: 'checkbox', 'aria-checked': 'false', 'aria-label': img.name }, icon('check'));
@@ -745,7 +752,7 @@ async function thumbFallback(img, pic) {
 
 // Direct load first; hotlink-protected images fall back to the extension fetch.
 async function loadDimensionsWithFallback(img) {
-  const direct = await loadDimensions(img.thumb || img.src).catch(() => null);
+  const direct = state.directImages || img.thumb || img.src.startsWith('data:') ? await loadDimensions(img.thumb || img.src).catch(() => null) : null;
   if (direct?.width > 0) return direct;
   const dataUrl = await fetchViaExtension(img.src);
   if (!dataUrl) return null;
@@ -1141,7 +1148,9 @@ function openPreview(src) {
   if ($('preview-modal').hidden) previewReturnFocus = document.activeElement;
   state.previewSrc = src;
   const stage = $('preview-img');
-  stage.src = img.thumb || img.src;
+  const direct = state.directImages || img.src.startsWith('data:');
+  stage.src = img.thumb || (direct ? img.src : '');
+  if (!img.thumb && !direct) fetchViaExtension(img.src).then((dataUrl) => { if (dataUrl && state.previewSrc === src) stage.src = dataUrl; });
   stage.alt = img.alt || img.name;
   $('preview-filename').textContent = img.name;
   $('preview-filename').title = img.src;

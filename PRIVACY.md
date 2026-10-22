@@ -1,21 +1,19 @@
 # Privacy Policy — ImageToolkit
 
-**Last updated:** 2026-10-21
+**Last updated:** 2026-10-22
 
 ## Summary
 
-ImageToolkit does **not** collect, store, sell, or share personal data. Image processing runs locally in your browser.
+ImageToolkit works on the pages you open it on: it reads the images of those pages, and the screenshots you take, which can contain personal information (names, messages, account details…). **All of this is handled locally in your browser.** Nothing is sent to the author: ImageToolkit has no servers, no account, no analytics and no telemetry, and it does not sell or share data.
 
-## Data Collection
+What does leave your browser are the requests to the **image addresses found in the page** (to show and save them), described below, and the pages you choose to open (Google Lens, links).
 
-This extension collects **zero** data. Specifically:
+## What is handled, and where
 
-- **No personal information** is collected
-- **No browsing history** is accessed or stored
-- **No images are uploaded** to ImageToolkit servers (there are none)
-- **No analytics or telemetry** of any kind
-- **No cookies** are set by ImageToolkit
-- **No remote scripts** are loaded
+- **Page content** — image addresses, dimensions and alt text of the pages you scan, and the screenshots you take. Kept in the extension's memory while you use it; screenshots and images opened in the editor are also stored **temporarily** in the extension's local storage (see *Local Storage*) until the editor closes.
+- **Files you save** — written to your Downloads folder only when you save, copy or download.
+- **Settings** — your preferences, synced by Chrome if you use Chrome Sync.
+- **Never** — your browsing history, form data, passwords or cookies are not read or stored. No remote code is loaded, and ImageToolkit sets no cookies of its own.
 
 ## Image Processing
 
@@ -25,12 +23,12 @@ When you **ask** for something done with a remote image (save, convert, copy, op
 
 ### Automatic requests for previews and metadata
 
-While the panel shows a page's images, the extension **contacts the hosts of those images automatically**, without a click, to show their type, file size, dimensions and thumbnails. These requests go only to the image URLs already used by the page you are viewing, and nothing about you or the page is sent beyond the request itself:
+While the panel shows a page's images, the extension **contacts the hosts of those images automatically**, without a click, to show their type, file size, dimensions and thumbnails. These requests go only to image addresses **found in the page you are scanning**: the images it shows, but also ones it only references and may never have downloaded itself (other sizes in `srcset`/`<picture>`, `og:image` and Twitter card images, preloads, icons, links to image files). They may therefore reach hosts the page had not contacted. Nothing about you or the page is sent beyond the request itself:
 
 - **Lightweight first:** a `HEAD` request or a 1-byte range request, which returns headers only.
 - **Limited reads when needed:** if a server gives no size in its headers, the extension reads the start of the image to count its size, at most 2 MB per image and 8 MB in total per request batch, then stops; past that, the size stays unknown.
 - **Previews of protected images:** if a site refuses to show an image directly (hotlink protection), the extension downloads it to display the thumbnail and read its dimensions: at most 40 images, 8 MB each and 48 MB in total per scan, 20 seconds each. These downloads are sent **without cookies**.
-- **No automatic request carries your cookies or can set any.** This covers the thumbnails and previews the panel shows, size and type checks and the fallback downloads: Chrome would otherwise attach your cookies for those hosts to the extension's requests, so ImageToolkit removes them (and any `Set-Cookie` in the answers) with a browser rule limited to its own image requests. Only the actions you ask for (above) send cookies.
+- **No automatic request carries your cookies or can set any.** This covers the thumbnails and previews the panel shows, size and type checks and the fallback downloads: Chrome would otherwise attach your cookies for those hosts to the extension's requests, so ImageToolkit removes them (and any `Set-Cookie` in the answers) with a browser rule limited to its own image requests. The panel waits for that rule before showing any thumbnail; if Chrome ever refuses it, thumbnails are only downloaded the cookie-less way instead. Only the actions you ask for (above) send cookies.
 - At most 100 images per scan are checked for size and 30 for type.
 
 These requests only read data; they are never used to send data anywhere. **Google Lens and the Ko-fi and author links are different**: they never run automatically and only open when you click them (see below).
@@ -39,7 +37,7 @@ These requests only read data; they are never used to send data anywhere. **Goog
 
 - **Image scanner** — when you open the panel, a script is injected into the current tab (and its frames) to list its images (URLs, dimensions, alt text). Only if you choose **All tabs**, the same happens in every web page open in that window; browser pages and sleeping tabs are skipped. The list stays in the panel; it is never stored or sent anywhere. Very large inline images are left out of the list to keep it fast. While the panel is in use, the script watches the page for newly loaded images and stops after a few idle minutes.
 - **Load all images** — only when you click it, the page is scrolled to its end to load lazy images and then scrolled back; nothing is clicked or submitted.
-- **Screen capture** — only when you start a capture (button, toolbar menu, or keyboard shortcut), the visible part of the tab is captured and opened in the editor. A full-page capture scrolls the page, captures it screen by screen and stitches the result locally, temporarily hiding fixed elements, then restores the page. Captures are not saved unless you save them.
+- **Screen capture** — only when you start a capture (button, toolbar menu, or keyboard shortcut), the visible part of the tab is captured and opened in the editor. A full-page capture scrolls the page, captures it screen by screen and stitches the result locally, temporarily hiding fixed elements, then restores the page. A capture is never written to your files unless you save it; while its editor is open it is kept in the extension's local storage (see *Editor handoff*).
 - **Capture checks** — a capture belongs to the tab it started in: if another tab comes to the front or the page navigates, it stops, so a screenshot never mixes in another page.
 - **Annotations** made in the editor are drawn locally on your copy of the image. To hide information for sure, use **Redact** (opaque colour): pixelate and blur are visual effects and may leave large text recognisable.
 
@@ -57,7 +55,7 @@ The clipboard is only written when you ask to copy an image, a URL list, or an e
 
 ## Optional External Services
 
-ImageToolkit does not contact third-party services automatically. The following user-triggered actions may open external sites:
+Apart from the image hosts described above, ImageToolkit contacts no other service automatically. The following actions, only when you click them, open external sites:
 
 - **Google Lens** — off by default. If you enable it in Settings and click the search action, the **full image URL** (including any query string it carries, which on some sites holds an access token) is opened with Google Lens in a new tab, so Google receives it. The image itself is not uploaded by ImageToolkit.
 - **Ko-fi / BlackSpirits** — if you click the support or author links, those pages open in a new tab.
