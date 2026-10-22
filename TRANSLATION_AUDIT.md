@@ -1,32 +1,32 @@
-# Translation Audit — Unreleased (after v2.3.5)
+# Translation Audit — 2.5.0
 
-Total keys: 236  
-Audit date: 2026-09-29
+Total keys: 239  
+Audit date: 2026-10-22
 
 ## Coverage
 
-All 18 locale packs have 236/236 keys present (0 missing). `npm run validate` enforces key parity, identical placeholders and `$TOKENS$` in every locale, and fails on keys that are defined but unused or used but undefined.
+All 18 locale packs have 239/239 keys present (0 missing). `npm run validate` enforces key parity, identical placeholders and `$TOKENS$` in every locale, and fails on keys that are defined but unused or used but undefined.
 
 | Locale | Keys | Identical to EN |
 |--------|------|-----------------|
-| ar | 236 | 2 |
-| de | 236 | 25 |
-| en | 236 | — |
-| es | 236 | 13 |
-| fr | 236 | 15 |
-| it | 236 | 12 |
-| ja | 236 | 4 |
-| ko | 236 | 4 |
-| nl | 236 | 14 |
-| pl | 236 | 9 |
-| pt_BR | 236 | 11 |
-| pt_PT | 236 | 11 |
-| ru | 236 | 2 |
-| tr | 236 | 9 |
-| uk | 236 | 2 |
-| vi | 236 | 10 |
-| zh_CN | 236 | 2 |
-| zh_TW | 236 | 2 |
+| ar | 239 | 2 |
+| de | 239 | 25 |
+| en | 239 | — |
+| es | 239 | 13 |
+| fr | 239 | 15 |
+| it | 239 | 12 |
+| ja | 239 | 4 |
+| ko | 239 | 4 |
+| nl | 239 | 14 |
+| pl | 239 | 9 |
+| pt_BR | 239 | 11 |
+| pt_PT | 239 | 11 |
+| ru | 239 | 2 |
+| tr | 239 | 9 |
+| uk | 239 | 2 |
+| vi | 239 | 10 |
+| zh_CN | 239 | 2 |
+| zh_TW | 239 | 2 |
 
 ## Why "identical to EN" ≠ "untranslated"
 

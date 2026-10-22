@@ -94,6 +94,8 @@ test('dedupeKey never merges different pictures', () => {
   assert.notEqual(key('http://host:8000/a.png'), key('http://host:8001/a.png'), 'the port is part of the origin');
   assert.notEqual(key('http://a.test/a.png'), key('https://a.test/a.png'));
   assert.notEqual(key('https://a.test/a.png?q=a%26b%3Dc'), key('https://a.test/a.png?q=a&b=c'), 'values stay encoded');
+  assert.notEqual(key('https://a.test/icons.svg#red'), key('https://a.test/icons.svg#blue'), 'SVG views');
+  assert.notEqual(key('https://a.test/i.svg#svgView(viewBox(0,0,24,24))'), key('https://a.test/i.svg#svgView(viewBox(24,0,24,24))'));
 });
 
 test('sanitizeFilename keeps the extension when it shortens a long name', () => {

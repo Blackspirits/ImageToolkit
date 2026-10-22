@@ -1411,9 +1411,11 @@ test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on 
   });
   assert.equal(await variance(), 255);
   await editor.keyboard.press('p');
+  await editor.waitForSelector('.annot-tool[data-tool="pixelate"].active');
   await drag(10, 110, 90, 190);
   assert.ok(await variance() < 60, 'the checker is pixelated');
   await editor.keyboard.press('r');
+  await editor.waitForSelector('.annot-tool[data-tool="box"].active');
   await editor.click('.annot-color[data-color="#3b82f6"]');
   await drag(10, 10, 90, 90);
   const edge = await pixel(10, 50);
@@ -1424,6 +1426,7 @@ test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on 
   assert.ok((await pixel(10, 50))[2] > 180);
   // Text: click, type, Enter.
   await editor.keyboard.press('t');
+  await editor.waitForSelector('.annot-tool[data-tool="text"].active');
   const box = await editor.locator('.annot-overlay').boundingBox();
   await editor.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.3);
   await editor.locator('.annot-text').fill('Hi');
@@ -1738,19 +1741,21 @@ test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies
   await editor.click('#btn-rotate-left'); // 400×100 becomes 100×400
   await editor.click('#btn-annotate');
   await editor.waitForSelector('.annot-layer');
-  // Wait until the board has been fitted to the stage (its size stops changing).
-  let box = null;
-  for (let i = 0; i < 20; i++) {
-    await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-    const now = await editor.locator('.annot-overlay').boundingBox();
-    if (box && now && Math.abs(now.width - box.width) < 0.5 && Math.abs(now.height - box.height) < 0.5) break;
-    box = now;
-  }
-  const at = (x, y) => [box.x + (x / 100) * box.width, box.y + (y / 400) * box.height];
-  const drag = async (x1, y1, x2, y2) => {
-    await editor.mouse.move(...at(x1, y1)); await editor.mouse.down();
-    await editor.mouse.move(...at(x2, y2), { steps: 4 }); await editor.mouse.up();
+  // Positions are read at every step, from the board as it is now (it is fitted after opening).
+  const at = async (x, y) => {
+    const box = await editor.locator('.annot-overlay').boundingBox();
+    return [box.x + (x / 100) * box.width, box.y + (y / 400) * box.height];
   };
+  const drag = async (x1, y1, x2, y2) => {
+    await editor.mouse.move(...await at(x1, y1)); await editor.mouse.down();
+    await editor.mouse.move(...await at(x2, y2), { steps: 4 }); await editor.mouse.up();
+  };
+  // Tools are picked with their button and confirmed active before anything is drawn.
+  const pick = async (tool) => {
+    await editor.click(`.annot-tool[data-tool="${tool}"]`);
+    await editor.waitForSelector(`.annot-tool[data-tool="${tool}"].active`);
+  };
+  await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const region = (x, y, w, h) => editor.evaluate(([x, y, w, h]) => {
     const d = document.querySelector('.annot-canvas').getContext('2d').getImageData(x, y, w, h).data;
     const colours = new Set();
@@ -1758,18 +1763,20 @@ test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies
     return [...colours];
   }, [x, y, w, h]);
 
-  await editor.keyboard.press('x');
+  await pick('redact');
   await editor.click('.annot-color[data-color="#111111"]');
   await drag(5, 5, 95, 395);
   assert.deepEqual(await region(10, 10, 80, 380), ['17,17,17,255'], 'nothing of the text is left');
 
   // Text: a click outside the open field confirms it and does not open another one.
-  await editor.keyboard.press('t');
-  await editor.mouse.click(...at(50, 100));
+  await pick('text');
+  await editor.mouse.click(...await at(50, 100));
   await editor.locator('.annot-text').fill('Hi');
-  await editor.mouse.click(...at(50, 300));
+  await editor.mouse.click(...await at(50, 300));
   assert.equal(await editor.locator('.annot-text').count(), 0);
 
+  await editor.keyboard.press('x'); // the shortcut picks the tool too
+  await editor.waitForSelector('.annot-tool[data-tool="redact"].active');
   await editor.keyboard.press('Enter');
   assert.equal(await editor.locator('.annot-layer').count(), 1, 'Enter alone does not apply');
   await editor.keyboard.press('Control+Enter');

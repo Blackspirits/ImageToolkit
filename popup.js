@@ -1149,7 +1149,8 @@ function openPreview(src) {
   state.previewSrc = src;
   const stage = $('preview-img');
   const direct = state.directImages || img.src.startsWith('data:');
-  stage.src = img.thumb || (direct ? img.src : '');
+  if (img.thumb || direct) stage.src = img.thumb || img.src;
+  else stage.removeAttribute('src'); // empty until the cookie-less copy arrives (src='' would load the page itself)
   if (!img.thumb && !direct) fetchViaExtension(img.src).then((dataUrl) => { if (dataUrl && state.previewSrc === src) stage.src = dataUrl; });
   stage.alt = img.alt || img.name;
   $('preview-filename').textContent = img.name;
