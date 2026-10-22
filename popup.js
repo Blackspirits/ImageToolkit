@@ -21,6 +21,7 @@ const state = {
   tabId: null,
   directImages: false, // thumbnails may load straight from their URL (the no-cookie rule is in place)
   autoScrollTab: null, // the tab auto-scroll runs in (Stop goes there)
+  fullPageRunning: false, // a full-page capture started from this panel (Esc cancels it)
   windowId: null,
   host: '',
   pageTitle: '',
@@ -215,15 +216,36 @@ function initHeader() {
   });
 
   $('btn-capture-full').addEventListener('click', async () => {
+    const pending = send({ action: 'captureFullPage', tabId: state.tabId });
+    // The action popup closes so the page has the keyboard (Esc there cancels); the side panel
+    // stays and cancels with Esc itself. Errors are also reported as notifications.
+    if (VIEW_MODE === 'popup') { window.close(); return; }
     toast(t('captureFullRunning'), 'info');
-    const res = await send({ action: 'captureFullPage', tabId: state.tabId });
+    state.fullPageRunning = true;
+    const res = await pending;
+    state.fullPageRunning = false;
     if (res?.error === 'restricted') toast(t('errorRestrictedPage'), 'error');
   });
 
   $('btn-capture-visible').addEventListener('click', async () => {
-    const res = await send({ action: 'captureVisible', tabId: state.tabId });
-    if (res?.error) toast(t('errorRestrictedPage'), 'error');
+    const delay = parseInt($('capture-delay').value, 10) || 0;
+    const pending = send({ action: 'captureVisible', tabId: state.tabId, delay });
+    if (delay > 0) {
+      // Time to open a menu or hover something; the popup gets out of the way.
+      if (VIEW_MODE === 'popup') { window.close(); return; }
+      toast(`${t('captureVisible')} · ${delay}s`, 'info');
+    }
+    const res = await pending;
+    if (res?.error === 'restricted') toast(t('errorRestrictedPage'), 'error');
   });
+
+  // Esc in the side panel stops a full-page capture started from it.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !state.fullPageRunning) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    send({ action: 'cancelFullPage' });
+  }, true);
 }
 
 // ============================================================
@@ -673,6 +695,8 @@ function createCard(img) {
     el('button', { class: 'gact', 'data-act': 'copy', tabindex: '-1', title: t('copyImage'), 'aria-label': t('copyImage') }, icon('copy')),
     el('button', { class: 'gact', 'data-act': 'download', tabindex: '-1', title: t('titleDownloadAs'), 'aria-label': t('titleDownloadAs') }, icon('download')),
     el('button', { class: 'gact gact-extra', 'data-act': 'open', tabindex: '-1', title: t('titleOpenTab'), 'aria-label': t('titleOpenTab') }, icon('external')),
+    // Only web addresses can be shared as a link (an inline image's data: URL is the whole file).
+    /^https?:/i.test(img.src) && el('button', { class: 'gact gact-extra', 'data-act': 'link', tabindex: '-1', title: t('copyLink'), 'aria-label': t('copyLink') }, icon('link')),
     el('button', { class: 'gact gact-extra', 'data-act': 'lens', tabindex: '-1', title: t('titleSearchSimilar'), 'aria-label': t('titleSearchSimilar') }, icon('lens')),
   ]);
 
@@ -792,6 +816,7 @@ function onGridClick(e) {
   if (action === 'copy') { copyImage(img.src); return; }
   if (action === 'download') { openDownloadMenu(e.target.closest('[data-act]'), img); return; }
   if (action === 'open') { chrome.tabs.create({ url: img.src, active: false }); return; }
+  if (action === 'link') { copyLink(img.src); return; }
   if (action === 'lens') { openLens(img.src); return; }
   openPreview(img.src);
 }
@@ -973,6 +998,15 @@ async function copyImage(src) {
   }
 }
 
+async function copyLink(src) {
+  try {
+    await copyText(src);
+    toast(t('linkCopied'));
+  } catch (err) {
+    toast(`${t('errorCopyFailed')}: ${err.message}`, 'error');
+  }
+}
+
 async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -1141,6 +1175,7 @@ function initPreview() {
   const withImage = (fn) => () => { const img = currentPreview(); if (img) fn(img); };
   $('preview-download').addEventListener('click', withImage((img) => withBusy($('preview-download'), () => downloadOne(img, $('preview-format').value))));
   $('preview-copy').addEventListener('click', withImage((img) => copyImage(img.src)));
+  $('preview-link').addEventListener('click', withImage((img) => copyLink(img.src)));
   $('preview-resize').addEventListener('click', withImage((img) => { openEditor(img.src, img); closePreview(); }));
   $('preview-open').addEventListener('click', withImage((img) => chrome.tabs.create({ url: img.src, active: false })));
   $('preview-lens').addEventListener('click', withImage((img) => openLens(img.src)));
@@ -1165,6 +1200,7 @@ function openPreview(src) {
   $('preview-filename').textContent = img.name;
   $('preview-filename').title = img.src;
   $('preview-lens').hidden = !state.settings.enableGoogleLens || img.src.startsWith('data:');
+  $('preview-link').hidden = !/^https?:/i.test(img.src);
   refreshPreviewMeta();
   if ($('preview-modal').hidden) {
     $('preview-modal').hidden = false;

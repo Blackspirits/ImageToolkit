@@ -796,7 +796,7 @@
     "message": "التقاط الصفحة كاملة"
   },
   "captureFullRunning": {
-    "message": "جارٍ التقاط الصفحة كاملة… أبقِ علامة التبويب مفتوحة (Esc في الصفحة يلغي)"
+    "message": "جارٍ التقاط الصفحة كاملة… أبقِ علامة التبويب مفتوحة (Esc يلغي)"
   },
   "fullPageCut": {
     "message": "الصفحة طويلة جدًا: يتوقف الالتقاط عند $PX$ بكسل.",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "رقعة شطرنج",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "نسخ رابط الصورة",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "تم نسخ الرابط",
+    "description": "Toast after copying one image link"
   }
 }

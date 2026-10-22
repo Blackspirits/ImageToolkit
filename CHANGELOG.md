@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Images inside iframes**, same-origin and cross-origin, are listed with the page's own (and outlined there when selected).
 - **All tabs at once**: a scan scope that lists the images of every web page in the window, without duplicates, with a Tab filter. Each image keeps its page's site and title.
 - **Load all images**: scrolls the page (or the scrolling area of app-like pages) to the end, wakes lazy images, waits for infinite scroll and collects images at every step, so feeds that unload old items lose nothing. Progress bar and Stop.
+- **Copy image link** from a card or the preview (web images only).
 - **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
 
 ### Fixed
@@ -33,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The header theme button flips between light and dark; **Automatic** (follows Windows/macOS or Chrome) is chosen in Settings. The icon shows the theme on screen.
 - Transparency background in the image grid: **checkerboard** (follows the theme), **white**, **grey** or **black**, like the editor's; the button shows the one in use.
 - The editor opens with the whole image selected, so saving a capture straight away never trims its edges.
+- The capture delay also applies to **Capture visible page** (time to open a menu or hover something) and counts down on the toolbar icon.
+- **Esc** cancels a full-page capture from the side panel too; from the toolbar popup, the popup closes so Esc reaches the page.
+- Full-page captures of chats and virtual lists (Discord, Slack…) never contain empty bands: the capture stops where the page jumps and the image is trimmed to what was captured, with the "may be incomplete" notice.
+- The panel's count, duplicates, background and layout bar stays under the search bar while the images scroll.
 - Nothing the extension loads by itself carries cookies or can set them: thumbnails, previews, size and type checks and the hotlink fallback (a `declarativeNetRequest` rule limited to the extension's own image requests, plus `credentials: 'omit'` on its automatic fetches). The panel shows no thumbnail before that rule is in place (if Chrome refuses it, thumbnails come only through the cookie-less download). Only the actions you ask for send cookies. Every image download has a total and an idle time limit.
 - The offscreen document answers only the service worker, through direct replies; requests time out instead of waiting forever.
 - Every screen capture respects Chrome's rate limit (two per second), queued, and retries once when refused.

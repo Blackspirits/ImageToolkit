@@ -798,7 +798,7 @@
     "message": "Capturar la página completa"
   },
   "captureFullRunning": {
-    "message": "Capturando la página completa… mantén esta pestaña abierta (Esc en la página cancela)"
+    "message": "Capturando la página completa… mantén esta pestaña abierta (Esc cancela)"
   },
   "fullPageCut": {
     "message": "La página es muy larga: la captura se detiene en $PX$ px.",
@@ -875,5 +875,13 @@
   "bgChecker": {
     "message": "Cuadrícula",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copiar enlace de la imagen",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Enlace copiado",
+    "description": "Toast after copying one image link"
   }
 }

@@ -797,7 +797,7 @@
     "message": "Сделать снимок всей страницы"
   },
   "captureFullRunning": {
-    "message": "Снимаем всю страницу… не закрывайте вкладку (Esc на странице отменяет)"
+    "message": "Снимаем всю страницу… не закрывайте вкладку (Esc отменяет)"
   },
   "fullPageCut": {
     "message": "Страница очень длинная: снимок обрывается на $PX$ px.",
@@ -874,5 +874,13 @@
   "bgChecker": {
     "message": "Шахматка",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Копировать ссылку на изображение",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Ссылка скопирована",
+    "description": "Toast after copying one image link"
   }
 }

@@ -796,7 +796,7 @@
     "message": "ページ全体をキャプチャ"
   },
   "captureFullRunning": {
-    "message": "ページ全体をキャプチャ中… このタブを開いたままにしてください（ページで Esc を押すとキャンセル）"
+    "message": "ページ全体をキャプチャ中… このタブを開いたままにしてください（Esc でキャンセル）"
   },
   "fullPageCut": {
     "message": "ページが非常に長いため、キャプチャは $PX$ px で終わります。",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "市松模様",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "画像のリンクをコピー",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "リンクをコピーしました",
+    "description": "Toast after copying one image link"
   }
 }

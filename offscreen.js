@@ -259,13 +259,25 @@ async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
   return { success: true };
 }
 
-async function fullPageEnd({ session }) {
+// `height`: how much of the canvas was really filled (a capture that stopped early is trimmed,
+// so the image never ends in an empty band).
+async function fullPageEnd({ session, height }) {
   const entry = fullPages.get(session);
   if (!entry) throw new Error('Capture expired');
   clearTimeout(entry.timer);
   fullPages.delete(session);
-  const blob = await canvasToBlob(entry.canvas, 'image/png');
-  entry.canvas.width = entry.canvas.height = 0; // free the pixels now
+  let canvas = entry.canvas;
+  const used = Math.round(Number(height));
+  if (used >= 1 && used < canvas.height) {
+    const trimmed = document.createElement('canvas');
+    trimmed.width = canvas.width;
+    trimmed.height = used;
+    trimmed.getContext('2d').drawImage(canvas, 0, 0);
+    canvas.width = canvas.height = 0;
+    canvas = trimmed;
+  }
+  const blob = await canvasToBlob(canvas, 'image/png');
+  canvas.width = canvas.height = 0; // free the pixels now
   return { key: await ITK.handoff.put(blob, { maxAge: ITK.handoff.EDITOR_MAX_AGE_MS }) };
 }
 

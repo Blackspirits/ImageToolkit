@@ -796,7 +796,7 @@
     "message": "Capturer la page entière"
   },
   "captureFullRunning": {
-    "message": "Capture de la page entière… gardez cet onglet ouvert (Échap dans la page annule)"
+    "message": "Capture de la page entière… gardez cet onglet ouvert (Échap annule)"
   },
   "fullPageCut": {
     "message": "La page est très longue : la capture s'arrête à $PX$ px.",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "Damier",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copier le lien de l’image",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Lien copié",
+    "description": "Toast after copying one image link"
   }
 }

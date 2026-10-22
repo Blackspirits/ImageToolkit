@@ -796,7 +796,7 @@
     "message": "전체 페이지 캡처"
   },
   "captureFullRunning": {
-    "message": "전체 페이지 캡처 중… 이 탭을 열어 두세요(페이지에서 Esc로 취소)"
+    "message": "전체 페이지 캡처 중… 이 탭을 열어 두세요(Esc로 취소)"
   },
   "fullPageCut": {
     "message": "페이지가 너무 길어 $PX$px에서 캡처가 끝납니다.",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "체크무늬",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "이미지 링크 복사",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "링크를 복사했습니다",
+    "description": "Toast after copying one image link"
   }
 }

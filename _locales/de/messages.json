@@ -798,7 +798,7 @@
     "message": "Ganze Seite aufnehmen"
   },
   "captureFullRunning": {
-    "message": "Ganze Seite wird aufgenommen … diesen Tab geöffnet lassen (Esc in der Seite bricht ab)"
+    "message": "Ganze Seite wird aufgenommen … diesen Tab geöffnet lassen (Esc bricht ab)"
   },
   "fullPageCut": {
     "message": "Die Seite ist sehr lang: Die Aufnahme endet bei $PX$ px.",
@@ -875,5 +875,13 @@
   "bgChecker": {
     "message": "Schachbrett",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Bildlink kopieren",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Link kopiert",
+    "description": "Toast after copying one image link"
   }
 }

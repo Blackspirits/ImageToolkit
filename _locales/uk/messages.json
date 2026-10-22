@@ -797,7 +797,7 @@
     "message": "Зробити знімок усієї сторінки"
   },
   "captureFullRunning": {
-    "message": "Знімаємо всю сторінку… не закривайте вкладку (Esc на сторінці скасовує)"
+    "message": "Знімаємо всю сторінку… не закривайте вкладку (Esc скасовує)"
   },
   "fullPageCut": {
     "message": "Сторінка дуже довга: знімок обривається на $PX$ px.",
@@ -874,5 +874,13 @@
   "bgChecker": {
     "message": "Шахівниця",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Копіювати посилання на зображення",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Посилання скопійовано",
+    "description": "Toast after copying one image link"
   }
 }

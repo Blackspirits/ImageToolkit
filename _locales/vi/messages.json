@@ -796,7 +796,7 @@
     "message": "Chụp toàn bộ trang"
   },
   "captureFullRunning": {
-    "message": "Đang chụp toàn bộ trang… hãy giữ tab này mở (nhấn Esc trên trang để hủy)"
+    "message": "Đang chụp toàn bộ trang… hãy giữ tab này mở (nhấn Esc để hủy)"
   },
   "fullPageCut": {
     "message": "Trang quá dài: ảnh chụp dừng ở $PX$ px.",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "Ô cờ",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Sao chép liên kết ảnh",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Đã sao chép liên kết",
+    "description": "Toast after copying one image link"
   }
 }

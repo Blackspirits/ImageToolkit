@@ -797,7 +797,7 @@
     "message": "Sayfanın tamamını yakala"
   },
   "captureFullRunning": {
-    "message": "Sayfanın tamamı yakalanıyor… bu sekmeyi açık tutun (sayfada Esc iptal eder)"
+    "message": "Sayfanın tamamı yakalanıyor… bu sekmeyi açık tutun (Esc iptal eder)"
   },
   "fullPageCut": {
     "message": "Sayfa çok uzun: yakalama $PX$ px'te durur.",
@@ -874,5 +874,13 @@
   "bgChecker": {
     "message": "Dama deseni",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Görsel bağlantısını kopyala",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Bağlantı kopyalandı",
+    "description": "Toast after copying one image link"
   }
 }

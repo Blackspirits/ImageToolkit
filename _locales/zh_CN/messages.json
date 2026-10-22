@@ -796,7 +796,7 @@
     "message": "截取整个页面"
   },
   "captureFullRunning": {
-    "message": "正在截取整个页面…请保持此标签页打开（在页面中按 Esc 取消）"
+    "message": "正在截取整个页面…请保持此标签页打开（按 Esc 取消）"
   },
   "fullPageCut": {
     "message": "页面过长：截图在 $PX$ 像素处截止。",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "棋盘格",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "复制图片链接",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "已复制链接",
+    "description": "Toast after copying one image link"
   }
 }

@@ -797,7 +797,7 @@
     "message": "Przechwyć całą stronę"
   },
   "captureFullRunning": {
-    "message": "Przechwytywanie całej strony… nie zamykaj tej karty (Esc na stronie anuluje)"
+    "message": "Przechwytywanie całej strony… nie zamykaj tej karty (Esc anuluje)"
   },
   "fullPageCut": {
     "message": "Strona jest bardzo długa: zrzut kończy się na $PX$ px.",
@@ -874,5 +874,13 @@
   "bgChecker": {
     "message": "Szachownica",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Kopiuj link do obrazu",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Link skopiowany",
+    "description": "Toast after copying one image link"
   }
 }

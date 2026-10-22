@@ -796,7 +796,7 @@
     "message": "Capture the full page"
   },
   "captureFullRunning": {
-    "message": "Capturing the whole page… keep this tab open (Esc in the page cancels)"
+    "message": "Capturing the whole page… keep this tab open (Esc cancels)"
   },
   "fullPageCut": {
     "message": "The page is very tall: the capture stops at $PX$ px.",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "Checkerboard",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copy image link",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Link copied",
+    "description": "Toast after copying one image link"
   }
 }

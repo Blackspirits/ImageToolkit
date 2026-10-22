@@ -242,8 +242,10 @@ const handlers = {
   stopAutoScroll: (msg) => stopAutoScroll(msg.tabId),
 
   startCapture: (msg) => startCapture(msg.tabId, msg.delay),
-  captureVisible: (msg) => captureVisible(msg.tabId),
+  captureVisible: (msg) => captureVisible(msg.tabId, msg.delay),
   captureFullPage: (msg) => captureFullPage(msg.tabId),
+  // Esc in the panel (where the focus is after clicking its button) stops a full-page capture.
+  cancelFullPage: () => { fullPageCancelled = true; return { success: true }; },
   openEditor: (msg) => openEditor(msg.imageUrl, { site: msg.site, title: msg.title }).then(() => ({ success: true })),
 
   copyDataUrlToClipboard: (msg) => offscreenRequest({ action: 'offscreen-copy', imageDataUrl: msg.dataUrl }, 15000),
@@ -819,13 +821,23 @@ async function startCapture(tabId, delaySeconds = 0) {
   // The caller gets its answer before the delay, so the popup can close and show the page.
   // The delay is capped at 10 s, well inside the 30 s a service worker may sit idle.
   const inject = () => chrome.scripting.executeScript({ target, files: ['capture.js'] }).catch(() => {});
-  const delay = Math.min(10, Math.max(0, Number(delaySeconds) || 0));
+  const delay = captureDelay(delaySeconds);
   if (delay > 0) {
-    sleep(delay * 1000).then(inject);
+    countdown(tabId, delay).then(inject);
   } else {
     await inject();
   }
   return { success: true };
+}
+
+// A capture delay (0–10 s) counts down on the toolbar icon, so the user knows when it fires.
+const captureDelay = (seconds) => Math.min(10, Math.max(0, Math.round(Number(seconds) || 0)));
+async function countdown(tabId, seconds) {
+  for (let left = seconds; left > 0; left--) {
+    chrome.action.setBadgeText({ tabId, text: String(left) }).catch(() => {});
+    await sleep(1000);
+  }
+  chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {});
 }
 
 // Chrome allows two captureVisibleTab calls per second for the whole extension. Every capture
@@ -915,10 +927,13 @@ async function captureSelection(tab, rawRect, frameId = 0) {
   }
 }
 
-async function captureVisible(tabId) {
+async function captureVisible(tabId, delaySeconds = 0) {
   if (!Number.isInteger(tabId)) return { error: 'noTab' };
   let watch = null;
   try {
+    // The delay leaves time to open a menu or hover something before the screenshot.
+    const delay = captureDelay(delaySeconds);
+    if (delay > 0) await countdown(tabId, delay);
     let tab = await chrome.tabs.get(tabId);
     if (!tab.active) {
       tab = await chrome.tabs.update(tabId, { active: true });
@@ -950,6 +965,7 @@ const FULLPAGE_MAX_HEIGHT = 16384;   // device pixels; taller pages are scaled d
 const FULLPAGE_DEADLINE_MS = 120000;
 const FULLPAGE_STEP_MS = 15000;
 let fullPageBusy = false;
+let fullPageCancelled = false;
 
 function withTimeout(promise, ms, what) {
   let timer;
@@ -963,6 +979,7 @@ async function captureFullPage(tabId) {
   if (!Number.isInteger(tabId)) return { error: 'noTab' };
   if (fullPageBusy) return { error: 'busy' };
   fullPageBusy = true;
+  fullPageCancelled = false;
   const deadline = Date.now() + FULLPAGE_DEADLINE_MS;
   // Every step after the first goes to the document the capture started in, and to no other
   // (a reload, even of the same URL, is another document: the step fails and the capture stops).
@@ -992,8 +1009,9 @@ async function captureFullPage(tabId) {
       return !watch.changed && !!now && now.active && now.windowId === tab.windowId && now.url === startUrl;
     };
     const shoot = async (y, hideFloating) => {
+      if (fullPageCancelled) return null;
       const at = await run(fullPageScroll, [y, hideFloating]);
-      if (!at || at.cancelled) return null;
+      if (!at || at.cancelled || fullPageCancelled) return null;
       if (!(await sameTab())) throw tabChanged();
       const dataUrl = await captureTab(tab.windowId);
       if (!(await sameTab())) throw tabChanged();
@@ -1021,26 +1039,36 @@ async function captureFullPage(tabId) {
     const crop = { x: Math.round(page.left * px), y: Math.round(page.top * px), width: fullWidth, height: Math.round(viewHeight * px) };
 
     const maxSlices = Math.ceil(page.scrollHeight / viewHeight) + 2;
+    // The image only ever holds what was captured without a gap, from the first slice down:
+    // chats and virtual lists (Discord, Slack…) that jump while scrolling end the capture at
+    // the jump, and the result is trimmed to what was really taken.
+    const origin = first.at.y; // a page that will not go to the top starts lower
     let slice = first;
-    let incomplete = true;
+    let incomplete = origin > 1;
+    let finished = false;
+    let coveredTo = origin;
     let grewTo = page.scrollHeight;
     for (let i = 0; i < maxSlices; i++) {
-      await offscreenRequest({ action: 'fullpage-draw', session, dataUrl: slice.dataUrl, crop, y: Math.round(slice.at.y * px * scale), scale }, 15000);
+      await offscreenRequest({ action: 'fullpage-draw', session, dataUrl: slice.dataUrl, crop, y: Math.round((slice.at.y - origin) * px * scale), scale }, 15000);
       grewTo = Math.max(grewTo, slice.at.scrollHeight || 0);
       const bottom = slice.at.y + viewHeight;
+      coveredTo = Math.max(coveredTo, bottom);
       // Done at the end of the page, or where a very tall capture is cut.
-      if (bottom >= page.scrollHeight || bottom * px * scale >= height) { incomplete = false; break; }
+      if (bottom >= page.scrollHeight || (bottom - origin) * px * scale >= height) { finished = true; break; }
       if (Date.now() > deadline) break;
       chrome.action.setBadgeText({ tabId, text: `${Math.min(99, Math.round(((i + 1) / (maxSlices - 2)) * 100))}%` }).catch(() => {});
       const next = await shoot(bottom, true);
       if (!next) return { cancelled: true };
-      // A page that refuses to scroll further (scripts resetting it, snap points) ends here.
-      if (next.at.y <= slice.at.y) break;
+      // A page that refuses to scroll further (scripts resetting it, snap points), or that jumped
+      // past the next screen, ends here.
+      if (next.at.y <= slice.at.y || next.at.y > bottom + 1) break;
       slice = next;
     }
+    if (!finished) incomplete = true;
     const grew = grewTo > page.scrollHeight + 4;
+    const usedHeight = Math.max(1, Math.min(height, Math.round((coveredTo - origin) * px * scale)));
 
-    const { key } = await offscreenRequest({ action: 'fullpage-end', session }, 60000);
+    const { key } = await offscreenRequest({ action: 'fullpage-end', session, height: usedHeight }, 60000);
     session = null;
     await run(fullPageRestore).catch(() => {});
     prepared = false;
@@ -1049,7 +1077,7 @@ async function captureFullPage(tabId) {
       await loadSettingsAndLocale();
       notify(cut ? t('fullPageCut', [String(Math.round(height / px / scale))]) : t('fullPageIncomplete'));
     }
-    return { success: true, width, height, truncated: cut || incomplete || grew };
+    return { success: true, width, height: usedHeight, truncated: cut || incomplete || grew };
   } catch (err) {
     await loadSettingsAndLocale();
     const message = err.restricted ? t('errorRestrictedPage') : err.tabChanged ? t('captureTabChanged') : `${t('errorCaptureFailed')}: ${err.message}`;

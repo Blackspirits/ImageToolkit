@@ -796,7 +796,7 @@
     "message": "Capturar a página inteira"
   },
   "captureFullRunning": {
-    "message": "A capturar a página inteira… mantém este separador aberto (Esc na página cancela)"
+    "message": "A capturar a página inteira… mantém este separador aberto (Esc cancela)"
   },
   "fullPageCut": {
     "message": "A página é muito comprida: a captura para nos $PX$ px.",
@@ -873,5 +873,13 @@
   "bgChecker": {
     "message": "Xadrez",
     "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copiar link da imagem",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Link copiado",
+    "description": "Toast after copying one image link"
   }
 }

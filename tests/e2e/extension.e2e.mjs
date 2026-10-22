@@ -1533,6 +1533,57 @@ test('full-page capture ends on a page that refuses to scroll, and says it may b
   await page.close();
 });
 
+test('full-page capture of a page that jumps while scrolling (chats) has no holes: it stops at the jump and is trimmed', async () => {
+  FIXTURES['jumpy.html'] = Buffer.from('<!doctype html><title>jumpy</title><style>body{margin:0}div{height:600px}</style><body>'
+    + ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#000000'].map((c) => `<div style="background:${c}"></div>`).join('')
+    + '<script>addEventListener("scroll", () => { if (scrollY > 900 && scrollY < 2500) scrollTo(0, 3000); });</script></body>');
+  const page = await screenPage('jumpy.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'jumpy.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.equal(res.truncated, true);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const probe = await editor.evaluate((dpr) => {
+    const img = document.getElementById('cropper-img');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const rows = [];
+    for (let y = 50; y < img.naturalHeight / dpr; y += 100) rows.push(x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data[3]);
+    return { h: Math.round(img.naturalHeight / dpr), transparentRows: rows.filter((a) => a < 255).length };
+  }, dpr);
+  assert.ok(probe.h <= 1200 && probe.h >= 600, `trimmed to what was captured: ${probe.h}`);
+  assert.equal(probe.transparentRows, 0, 'no empty band anywhere');
+  await editor.close();
+  await page.close();
+});
+
+test('Esc in the panel cancels a full-page capture; the page is restored and no editor opens', async () => {
+  FIXTURES['esc.html'] = Buffer.from('<!doctype html><title>esc</title><style>body{margin:0}div{height:8000px;background:linear-gradient(#f00,#00f)}</style><body><div></div></body>');
+  const page = await screenPage('esc.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const tabId = await tabIdOf(base + 'esc.html');
+  // The side panel keeps the focus after its button is clicked: Esc there must cancel.
+  const panel = await ctx.newPage();
+  await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
+  await panel.waitForSelector('#image-grid', { state: 'attached' });
+  await page.bringToFront();
+  await panel.evaluate((id) => { state.tabId = id; document.getElementById('btn-capture-full').click(); }, tabId);
+  await new Promise((r) => setTimeout(r, 1200));
+  await panel.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+  await waitFor(() => panel.evaluate(() => !state.fullPageRunning), 15000);
+  await new Promise((r) => setTimeout(r, 500));
+  known.add(panel);
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('resize.html')), false);
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  assert.equal(await page.evaluate(() => scrollY), 0);
+  await panel.close();
+  await page.close();
+});
+
 test('full-page capture stops when another tab comes to the front, and restores the page', async () => {
   FIXTURES['tall.html'] = Buffer.from('<!doctype html><title>tall</title><style>body{margin:0}div{height:6000px;background:linear-gradient(#f00,#00f)}</style><body><div></div></body>');
   const page = await screenPage('tall.html');
@@ -1761,6 +1812,24 @@ test('the editor starts with the whole image selected, so saving never trims a c
   }));
   assert.deepEqual([r.x, r.y, r.w, r.h], [0, 0, r.nw, r.nh]);
   await editor.close();
+});
+
+test('copy link: one image address from the card or the preview; never for inline images', async () => {
+  await freshPanel();
+  await ui.evaluate(() => {
+    window.__copied = [];
+    window.copyText = async (text) => { window.__copied.push(text); };
+    setImages([{ src: 'https://example.com/a.png', width: 10, height: 10 }, { src: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="9" height="9"><!--' + 'x'.repeat(120) + '--></svg>'), width: 9, height: 9 }]);
+  });
+  const cards = ui.locator('.gcard');
+  assert.equal(await cards.nth(0).locator('[data-act="link"]').count(), 1);
+  assert.equal(await cards.nth(1).locator('[data-act="link"]').count(), 0, 'no link for an inline image');
+  await ui.evaluate(() => document.querySelector('.gcard [data-act="link"]').click());
+  await ui.evaluate(() => openPreview('https://example.com/a.png'));
+  assert.equal(await ui.isHidden('#preview-link'), false);
+  await ui.click('#preview-link');
+  assert.deepEqual(await ui.evaluate(() => window.__copied), ['https://example.com/a.png', 'https://example.com/a.png']);
+  await ui.evaluate(() => closePreview());
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
