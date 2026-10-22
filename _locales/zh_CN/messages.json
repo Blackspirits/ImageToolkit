@@ -869,5 +869,9 @@
   "toolRedact": {
     "message": "用纯色遮盖",
     "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "棋盘格",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
   }
 }

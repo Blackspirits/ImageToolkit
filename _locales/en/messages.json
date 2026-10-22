@@ -869,5 +869,9 @@
   "toolRedact": {
     "message": "Redact with solid colour",
     "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Checkerboard",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
   }
 }

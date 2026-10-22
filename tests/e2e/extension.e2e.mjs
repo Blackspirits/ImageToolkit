@@ -1731,6 +1731,38 @@ test('the header theme button flips light/dark; Automatic is only chosen in Sett
   await ui.evaluate(() => { applyTheme('auto'); saveSettings({ theme: 'auto' }); });
 });
 
+test('transparency background: checkerboard, white, grey, black, shown on the button', async () => {
+  await freshPanel();
+  await ui.evaluate(() => setChecker('auto', false));
+  const seen = [];
+  for (let i = 0; i < 4; i++) {
+    await ui.click('#btn-checker');
+    seen.push(await ui.evaluate(() => ({
+      mode: document.querySelector('.app').dataset.checker || 'auto',
+      bg: getComputedStyle(document.querySelector('.app')).getPropertyValue('--checker').trim(),
+      swatch: !!document.querySelector('#btn-checker .bg-swatch'),
+    })));
+  }
+  assert.deepEqual(seen.map((s) => [s.mode, s.swatch]), [['white', true], ['gray', true], ['black', true], ['auto', false]]);
+  assert.deepEqual(seen.slice(0, 3).map((s) => s.bg), ['#ffffff', '#808080', '#000000']);
+  assert.match(await ui.getAttribute('#btn-checker', 'title'), /:/);
+});
+
+test('the editor starts with the whole image selected, so saving never trims a capture', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const r = await waitFor(() => editor.evaluate(() => {
+    if (!editor.cropper?.ready) return null;
+    const img = document.getElementById('cropper-img');
+    const d = editor.cropper.getData(true);
+    return { x: d.x, y: d.y, w: d.width, h: d.height, nw: img.naturalWidth, nh: img.naturalHeight };
+  }));
+  assert.deepEqual([r.x, r.y, r.w, r.h], [0, 0, r.nw, r.nh]);
+  await editor.close();
+});
+
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
   const page = await screenPage('feed.html');
   const tabId = await tabIdOf(base + 'feed.html');

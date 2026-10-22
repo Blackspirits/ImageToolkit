@@ -870,5 +870,9 @@
   "toolRedact": {
     "message": "Зафарбувати суцільним кольором",
     "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Шахівниця",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
   }
 }

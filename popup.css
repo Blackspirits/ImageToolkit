@@ -86,9 +86,11 @@ body.sidepanel .app{height:100vh}
 .chip:hover{color:var(--text);border-color:var(--accent-line)}
 .chip[aria-pressed="true"]{color:var(--accent-text);border-color:var(--accent-line);background:var(--accent-soft)}
 .chip-icon{width:28px;padding:0;justify-content:center}
-/* Transparency background: follows the theme unless the viewer picks light or dark. */
-.app.app[data-checker="light"]{--checker:repeating-conic-gradient(#d9d9e3 0 25%,#f6f6fa 0 50%) 0 0/14px 14px}
-.app.app[data-checker="dark"]{--checker:repeating-conic-gradient(#15151d 0 25%,#22222d 0 50%) 0 0/14px 14px}
+/* Transparency background: a checkerboard that follows the theme, or plain white, grey or black. */
+.app.app[data-checker="white"]{--checker:#ffffff}
+.app.app[data-checker="gray"]{--checker:#808080}
+.app.app[data-checker="black"]{--checker:#000000}
+.bg-swatch{width:13px;height:13px;border-radius:4px;background:var(--swatch);box-shadow:inset 0 0 0 1px var(--control-line)}
 
 .autoscroll{margin-bottom:10px;padding:8px 12px 10px;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-text);font-size:12px;font-weight:650;animation:viewIn .25s var(--ease)}
 .autoscroll-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}

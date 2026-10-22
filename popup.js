@@ -317,7 +317,7 @@ function initImages() {
   $('btn-select-all').addEventListener('click', toggleSelectAll);
 
   $('btn-checker').addEventListener('click', () => {
-    const order = ['auto', 'light', 'dark'];
+    const order = Object.keys(CHECKER_MODES);
     setChecker(order[(order.indexOf(state.checker) + 1) % order.length]);
   });
 
@@ -357,14 +357,21 @@ function setLayout(layout, persist = true) {
   if (persist) writeUiState({ layout: state.layout });
 }
 
-// Black icons vanish on the dark checkerboard and white ones on the light one: let the viewer switch.
+// Behind transparent images: a checkerboard that follows the theme (shows what is transparent),
+// or plain white, grey or black, to judge a logo on the background it will be used on.
+const CHECKER_MODES = { auto: null, white: '#ffffff', gray: '#808080', black: '#000000' };
+
 function setChecker(mode, persist = true) {
-  state.checker = ['light', 'dark'].includes(mode) ? mode : 'auto';
+  state.checker = mode in CHECKER_MODES ? mode : 'auto';
   const app = document.querySelector('.app');
   if (state.checker === 'auto') delete app.dataset.checker;
   else app.dataset.checker = state.checker;
-  const label = t('titleTransparency', [t({ auto: 'themeAuto', light: 'themeLight', dark: 'themeDark' }[state.checker])]);
+  // Literal keys, so the i18n check sees every one in use.
+  const label = t('titleTransparency', [{ auto: t('bgChecker'), white: t('bgWhite'), gray: t('bgGray'), black: t('bgBlack') }[state.checker]]);
   const btn = $('btn-checker');
+  // The button shows the background in use: the usual icon for the checkerboard, else a swatch.
+  const colour = CHECKER_MODES[state.checker];
+  btn.replaceChildren(colour ? el('span', { class: 'bg-swatch', style: `--swatch:${colour}` }) : icon('contrast'));
   btn.title = label;
   btn.setAttribute('aria-label', label);
   btn.setAttribute('aria-pressed', String(state.checker !== 'auto'));

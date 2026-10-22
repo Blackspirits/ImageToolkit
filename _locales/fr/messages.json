@@ -869,5 +869,9 @@
   "toolRedact": {
     "message": "Masquer d’une couleur pleine",
     "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Damier",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
   }
 }

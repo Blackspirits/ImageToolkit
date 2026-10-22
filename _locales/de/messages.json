@@ -871,5 +871,9 @@
   "toolRedact": {
     "message": "Mit Vollfarbe schwärzen",
     "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Schachbrett",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
   }
 }

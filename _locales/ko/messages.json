@@ -869,5 +869,9 @@
   "toolRedact": {
     "message": "단색으로 가리기",
     "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "체크무늬",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
   }
 }

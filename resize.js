@@ -98,7 +98,7 @@ function initCropper(img) {
   editor.cropper = new Cropper(img, {
     viewMode: 1,
     dragMode: 'crop',
-    autoCropArea: 0.86,
+    autoCropArea: 1, // the whole image: saving right away never trims a capture's edges
     background: false,
     responsive: true,
     restore: true,
