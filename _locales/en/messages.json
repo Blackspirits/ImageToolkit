@@ -881,5 +881,9 @@
   "linkCopied": {
     "message": "Link copied",
     "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Lossless",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
   }
 }

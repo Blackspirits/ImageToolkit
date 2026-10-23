@@ -881,5 +881,9 @@
   "linkCopied": {
     "message": "リンクをコピーしました",
     "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "可逆圧縮",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
   }
 }

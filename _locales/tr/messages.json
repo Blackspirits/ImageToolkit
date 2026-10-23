@@ -882,5 +882,9 @@
   "linkCopied": {
     "message": "Bağlantı kopyalandı",
     "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Kayıpsız",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
   }
 }

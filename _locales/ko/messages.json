@@ -881,5 +881,9 @@
   "linkCopied": {
     "message": "링크를 복사했습니다",
     "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "무손실",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
   }
 }

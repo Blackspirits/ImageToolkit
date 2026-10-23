@@ -1925,6 +1925,27 @@ test('failed previews are charged for the bytes they downloaded: the preview bud
   assert.ok(left < 16 * 1024, `budget left: ${left}`);
 });
 
+test('editor: PNG keeps the quality row in place, disabled and labelled lossless', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const state = async () => editor.evaluate(() => ({
+    hidden: document.getElementById('quality-row').hidden,
+    disabled: document.getElementById('resize-quality').disabled,
+    label: document.getElementById('resize-quality-value').textContent,
+    footTop: Math.round(document.getElementById('btn-save').getBoundingClientRect().top),
+  }));
+  await editor.click('#resize-format [data-value="webp"]');
+  const webp = await state();
+  await editor.click('#resize-format [data-value="png"]');
+  const png = await state();
+  assert.deepEqual([webp.hidden, webp.disabled, webp.label.endsWith('%')], [false, false, true]);
+  assert.deepEqual([png.hidden, png.disabled, png.label.endsWith('%')], [false, true, false]);
+  assert.equal(png.footTop, webp.footTop, 'the buttons below do not move');
+  await editor.close();
+});
+
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
   const page = await screenPage('feed.html');
   const tabId = await tabIdOf(base + 'feed.html');

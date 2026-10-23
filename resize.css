@@ -84,6 +84,8 @@ details.panel:not([open]) .chev{transform:rotate(-90deg)}
 /* Sticky footer: the primary action is always visible */
 .sidebar-foot{flex:none;padding:14px 16px 16px;border-top:1px solid var(--line);background:var(--bg-elev);display:flex;flex-direction:column;gap:12px;box-shadow:0 -12px 24px -18px rgba(0,0,0,.35)}
 .foot-row{display:flex;flex-direction:column;gap:6px}
+.foot-row.is-off .range{opacity:.4;cursor:not-allowed}
+.foot-row.is-off .value{color:var(--text-3);font-weight:600}
 .foot-label{font-size:11px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
 .quality{display:flex;align-items:center;gap:10px}
 .quality .range{flex:1;width:auto}
