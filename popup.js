@@ -443,7 +443,8 @@ async function toggleAutoScroll() {
     return;
   }
   if (state.scope === 'window') {
-    await scan({ keepSelection: true });
+    // The other tabs are scanned again; this one keeps everything auto-scroll gathered.
+    await scan({ keepSelection: true, extra: { tabId, images: res.images || [] } });
   } else {
     setImages(res.images || []);
     if (res.truncated) toast(t('scanTruncated'), 'info');
@@ -462,7 +463,7 @@ function setAutoScrollUI(running, pct = 0) {
   }
 }
 
-async function scan({ keepSelection = false, quiet = false } = {}) {
+async function scan({ keepSelection = false, quiet = false, extra = null } = {}) {
   const token = ++scanToken;
   if (!quiet) showSkeleton();
   $('new-images-banner').hidden = true;
@@ -470,7 +471,7 @@ async function scan({ keepSelection = false, quiet = false } = {}) {
 
   const windowScope = state.scope === 'window';
   const res = windowScope
-    ? await send({ action: 'collectWindowImages', windowId: state.windowId })
+    ? await send({ action: 'collectWindowImages', windowId: state.windowId, extra })
     : await send({ action: 'collectImages', tabId: state.tabId });
   if (token !== scanToken) return;
   if (!keepSelection) state.selected.clear();
@@ -777,9 +778,11 @@ function pumpViaExtension() {
     viaExtensionActive++;
     send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes, automatic: true })
       .then((res) => {
-        budget.bytes += maxBytes - Math.min(maxBytes, res?.dataUrl ? res.size || 0 : 0);
+        // Only bytes that were never downloaded go back; when that is unknown, nothing does.
+        const used = res?.dataUrl ? res.size || 0 : Number.isFinite(res?.bytesRead) ? res.bytesRead : maxBytes;
+        budget.bytes += maxBytes - Math.min(maxBytes, used);
         resolve(res?.dataUrl || null);
-      }, () => { budget.bytes += maxBytes; resolve(null); })
+      }, () => resolve(null))
       .finally(() => { viaExtensionActive--; pumpViaExtension(); });
   }
 }

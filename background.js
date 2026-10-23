@@ -221,10 +221,16 @@ const handlers = {
 
   // `maxBytes` lets previews and metadata ask for less than a full-size download.
   // `automatic` (previews, dimensions): no cookies and a shorter time limit.
+  // A failure also says how many bytes were received, so the panel's preview budget is charged
+  // for what was really downloaded, not refunded.
   fetchAsDataUrl: async (msg) => {
     const maxBytes = Math.min(MAX_FETCH_BYTES, Math.max(1, Number(msg.maxBytes) || MAX_FETCH_BYTES));
-    const blob = await fetchImageBlob(msg.imageUrl, msg.automatic ? { maxBytes, cookies: false, totalMs: 20000 } : { maxBytes });
-    return { dataUrl: await blobToDataUrl(blob), size: blob.size };
+    try {
+      const blob = await fetchImageBlob(msg.imageUrl, msg.automatic ? { maxBytes, cookies: false, totalMs: 20000 } : { maxBytes });
+      return { dataUrl: await blobToDataUrl(blob), size: blob.size };
+    } catch (err) {
+      return { error: err.message, bytesRead: Number.isFinite(err.bytesRead) ? err.bytesRead : null };
+    }
   },
 
   downloadBlob: (msg) => {
@@ -238,7 +244,7 @@ const handlers = {
   downloadHandoff: (msg) => downloadHandoff(String(msg.key || ''), msg.filename, msg.saveAs !== false),
 
   collectImages: (msg) => collectImages(msg.tabId),
-  collectWindowImages: (msg) => collectWindowImages(msg.windowId),
+  collectWindowImages: (msg) => collectWindowImages(msg.windowId, msg.extra),
   autoScroll: (msg) => autoScroll(msg.tabId),
   stopAutoScroll: (msg) => stopAutoScroll(msg.tabId),
 
@@ -312,15 +318,21 @@ async function collectImages(tabId) {
 // Every web page open in one window, a few tabs at a time. Each image keeps its tab and that
 // page's site and title (for the tab filter and for {site}/{title} in file names). Browser
 // pages and tabs Chrome has put to sleep are skipped and counted.
-async function collectWindowImages(windowId) {
+// `extra` ({ tabId, images }): what auto-scroll gathered in one tab, kept even when a feed has
+// since unloaded it from the page (a fresh scan alone would only see what is left).
+async function collectWindowImages(windowId, extra = null) {
   if (!Number.isInteger(windowId)) return { images: [], error: 'noTab' };
+  const extraImages = Number.isInteger(extra?.tabId) && Array.isArray(extra.images)
+    ? extra.images.filter((img) => typeof img?.src === 'string').slice(0, ITK.SCAN_MAX_ITEMS)
+    : [];
   const tabs = await chrome.tabs.query({ windowId });
   const targets = tabs.filter((tab) => /^https?:/i.test(tab.url || '') && !tab.discarded);
   let skipped = tabs.length - targets.length;
   const scans = [];
   await ITK.mapLimit(targets, 3, async (tab) => {
-    const result = await collectImages(tab.id);
+    let result = await collectImages(tab.id);
     if (result.error) { skipped++; return; }
+    if (extraImages.length && tab.id === extra.tabId) result = mergeScans([result, { images: extraImages }]);
     let pageHost = '';
     try { pageHost = new URL(tab.url).hostname; } catch {}
     const pageTitle = String(tab.title || '').slice(0, 120);
@@ -547,7 +559,8 @@ async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES, co
   const expire = () => { timedOut = true; stop(); };
   const total = setTimeout(expire, totalMs);
   let idle;
-  const alive = () => { clearTimeout(idle); idle = setTimeout(expire, FETCH_IDLE_MS); };
+  let bytesRead = 0;
+  const alive = (bytes = 0) => { bytesRead += bytes; clearTimeout(idle); idle = setTimeout(expire, FETCH_IDLE_MS); };
   alive();
   try {
     let response;
@@ -570,8 +583,9 @@ async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES, co
     if (!blob.size) throw new Error('Empty response');
     return blob;
   } catch (err) {
-    if (timedOut) throw new Error('Download timed out');
-    throw err;
+    const failure = timedOut ? new Error('Download timed out') : err;
+    failure.bytesRead = bytesRead; // what this attempt really downloaded
+    throw failure;
   } finally {
     clearTimeout(total);
     clearTimeout(idle);
@@ -581,7 +595,7 @@ async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES, co
 
 // Reads the body chunk by chunk and stops as soon as it passes the cap, so a server
 // that sends no Content-Length can never push more than `cap` bytes into memory.
-// `onChunk` is called for every chunk received (the idle timer).
+// `onChunk(bytes)` is called for every chunk received (idle timer and byte count).
 async function readBodyCapped(response, cap, onChunk = () => {}) {
   const type = (response.headers.get('content-type') || '').split(';')[0].trim();
   if (!response.body) {
@@ -595,7 +609,7 @@ async function readBodyCapped(response, cap, onChunk = () => {}) {
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    onChunk();
+    onChunk(value.byteLength);
     total += value.byteLength;
     if (total > cap) {
       reader.cancel().catch(() => {});

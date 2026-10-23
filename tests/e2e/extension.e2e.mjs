@@ -122,7 +122,7 @@ const cookieLog = [];
 const hits = new Map(); // GET requests per path, to check that work is not repeated
 const fetchHits = new Map(); // the same, without <img> loads (grid thumbnails): extension fetches only
 let hugeBytesSent = 0;   // bytes the "huge" endpoint managed to push before the client hung up
-const traffic = { nolenBytes: 0, nolenGets: 0, hotBytes: 0, hotGets: 0 };
+const traffic = { nolenBytes: 0, nolenGets: 0, hotBytes: 0, hotGets: 0, overGets: 0 };
 
 async function send(message) {
   return ui.evaluate((m) => chrome.runtime.sendMessage(m), message);
@@ -202,6 +202,13 @@ before(async () => {
       res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
       res.write(FIXTURES['wide.png'].subarray(0, 64));
       res.on('close', () => res.destroy());
+      return;
+    }
+    // 9 KiB with no Content-Length: only reading tells it is too big for a small preview cap.
+    if (name.startsWith('over/')) {
+      traffic.overGets++;
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      res.end(Buffer.alloc(9 * 1024));
       return;
     }
     // Records the cookies each image load carried.
@@ -1855,6 +1862,67 @@ test('AVIF is offered as an output only if the browser can write it; reading AVI
   await editor.waitForSelector('.cropper-container', { timeout: 10000 });
   assert.equal(await editor.evaluate(() => !!document.querySelector('#resize-format [data-value="avif"]')), canWrite);
   await editor.close();
+});
+
+test('annotate: nothing behind the layer can be reached by keyboard, and Save/Copy wait for Apply', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  assert.equal(await editor.evaluate(() => document.querySelector('.sidebar').inert && document.querySelector('.topbar').inert), true);
+  const reached = new Set();
+  for (let i = 0; i < 40; i++) {
+    await editor.keyboard.press('Tab');
+    reached.add(await editor.evaluate(() => {
+      const a = document.activeElement;
+      return a?.closest('.annot-layer') ? 'layer' : a?.closest('.sidebar') ? 'sidebar' : a?.closest('.topbar') ? 'topbar' : a === document.body ? 'body' : 'other';
+    }));
+  }
+  assert.ok(!reached.has('sidebar') && !reached.has('topbar') && !reached.has('other'), [...reached].join());
+  const count = () => sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
+  const before = await count();
+  await editor.evaluate(async () => { await save(); await copy(); });
+  await new Promise((r) => setTimeout(r, 800));
+  assert.equal(await count(), before, 'no export while the marks are not applied');
+  await editor.click('.annot-bar .btn-ghost'); // Cancel
+  assert.equal(await editor.evaluate(() => document.querySelector('.sidebar').inert), false);
+  await editor.close();
+});
+
+test('all tabs + load all images keeps what a feed unloaded while scrolling', async () => {
+  FIXTURES['unload.html'] = Buffer.from('<!doctype html><title>unload</title><body style="margin:0"><img id="first" src="photo.png?first=1" width="50" height="50"><div style="height:2600px"></div>'
+    + '<img src="photo.png?last=1" width="50" height="50"><script>addEventListener("scroll", () => { if (scrollY > 300) document.getElementById("first")?.remove(); });</script></body>');
+  const page = await screenPage('unload.html');
+  await page.bringToFront();
+  const tabId = await tabIdOf(base + 'unload.html');
+  const windowId = await sw.evaluate((id) => chrome.tabs.get(id).then((t) => t.windowId), tabId);
+  await freshPanel();
+  await ui.evaluate(async ({ tabId, windowId }) => { state.tabId = tabId; state.windowId = windowId; setScope('window', false); await toggleAutoScroll(); }, { tabId, windowId });
+  const srcs = await ui.evaluate(() => state.images.map((i) => i.src));
+  assert.ok(srcs.includes(base + 'photo.png?first=1'), 'the unloaded image is kept');
+  assert.ok(srcs.includes(base + 'photo.png?last=1'));
+  const first = await ui.evaluate((src) => state.images.find((i) => i.src === src)?.pages?.map((p) => p.pageTitle), base + 'photo.png?first=1');
+  assert.deepEqual(first, ['unload'], 'and still belongs to its tab');
+  await ui.evaluate(() => setScope('tab', false));
+  await page.close();
+});
+
+test('failed previews are charged for the bytes they downloaded: the preview budget really caps traffic', async () => {
+  await freshPanel();
+  traffic.overGets = 0;
+  const left = await ui.evaluate(async (b) => {
+    LIMITS.fallbackFetches = 8; LIMITS.fallbackItemBytes = 8 * 1024; LIMITS.fallbackBytes = 16 * 1024;
+    resetViaExtension();
+    await Promise.all(Array.from({ length: 8 }, (_, i) => fetchViaExtension(`${b}over/${i}.png`)));
+    const out = viaExtensionBudget.bytes;
+    LIMITS.fallbackFetches = 40; LIMITS.fallbackItemBytes = 8 * 1024 * 1024; LIMITS.fallbackBytes = 48 * 1024 * 1024;
+    resetViaExtension();
+    return out;
+  }, base);
+  assert.ok(traffic.overGets <= 2, `downloads started: ${traffic.overGets}`);
+  assert.ok(left < 16 * 1024, `budget left: ${left}`);
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {

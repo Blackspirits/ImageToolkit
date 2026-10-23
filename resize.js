@@ -191,9 +191,18 @@ async function annotate() {
     return;
   }
   $('btn-annotate').blur();
+  // Everything behind the layer is inert while it is open: no Tab, click or screen reader can
+  // reach Save or Copy, which would export the image without the marks not yet applied.
+  const behind = [document.querySelector('.topbar'), $('crop-area'), document.querySelector('.stage > .floating-tools'), document.querySelector('.sidebar')].filter(Boolean);
   $('app').classList.add('annotating');
-  const blob = await ITK.annotate.open({ host: document.querySelector('.stage'), base });
-  $('app').classList.remove('annotating');
+  behind.forEach((node) => { node.inert = true; });
+  let blob = null;
+  try {
+    blob = await ITK.annotate.open({ host: document.querySelector('.stage'), base });
+  } finally {
+    behind.forEach((node) => { node.inert = false; });
+    $('app').classList.remove('annotating');
+  }
   const { width, height } = base;
   base.width = base.height = 0; // a full-resolution copy: free it now
   if (!blob) return;
@@ -410,8 +419,11 @@ async function encode(format) {
   return { blob, width: canvas.width, height: canvas.height, format: ITK.formatFromMime(blob.type) || format };
 }
 
+// Neither runs while the annotate layer is open: Apply or Cancel decides about the marks first.
+const annotating = () => $('app').classList.contains('annotating');
+
 async function save() {
-  if (!editor.cropper) return;
+  if (!editor.cropper || annotating()) return;
   try {
     const { blob, width, height, format } = await encode(currentFormat());
     const s = editor.settings;
@@ -431,7 +443,7 @@ async function save() {
 }
 
 async function copy() {
-  if (!editor.cropper) return;
+  if (!editor.cropper || annotating()) return;
   try {
     const png = encode('png').then((r) => r.blob);
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
@@ -445,7 +457,7 @@ function initKeyboard() {
   document.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
     const mod = e.ctrlKey || e.metaKey;
-    if ($('app').classList.contains('annotating')) return; // the annotate layer owns the keyboard
+    if (annotating()) return; // the annotate layer owns the keyboard
     if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); $('btn-save').click(); return; }
     if (mod && e.key.toLowerCase() === 'c' && !typing && !getSelection().toString()) { e.preventDefault(); $('btn-copy').click(); }
   });
