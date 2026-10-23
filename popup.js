@@ -20,6 +20,7 @@ const state = {
   settings: {},
   tabId: null,
   directImages: false, // thumbnails may load straight from their URL (the no-cookie rule is in place)
+  avif: false,         // the browser can write AVIF (Chrome cannot today)
   autoScrollTab: null, // the tab auto-scroll runs in (Stop goes there)
   fullPageRunning: false, // a full-page capture started from this panel (Esc cancels it)
   windowId: null,
@@ -118,8 +119,15 @@ function localize() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Nothing remote is shown before the no-cookie rule for the extension's images is in place.
-  const [ready] = await Promise.all([send({ action: 'imagesReady' }), loadSettings()]);
+  const [ready, formats] = await Promise.all([send({ action: 'imagesReady' }), ITK.encodableFormats(), loadSettings()]);
   state.directImages = ready?.ok === true;
+  state.avif = formats.has('avif');
+  if (!state.avif) {
+    // Offered nowhere as an output; a saved AVIF choice falls back to WebP, as it did in practice.
+    document.querySelectorAll('[data-output-avif]').forEach((node) => node.remove());
+    if (state.settings.defaultFormat === 'avif') saveSettings({ defaultFormat: 'webp' });
+    if (state.settings.convertOnDl === 'avif') saveSettings({ convertOnDl: 'webp' });
+  }
   await i18n.load(state.settings.locale);
   localize();
   applyTheme(state.settings.theme);
@@ -145,6 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   chrome.runtime.onMessage.addListener(onRuntimeMessage);
   if (VIEW_MODE === 'sidepanel') watchTabs();
+  $('app').dataset.ready = 'true'; // every control is wired (tests wait for this)
 });
 
 function onRuntimeMessage(msg) {
@@ -923,7 +932,7 @@ function closeMenu() {
 function openDownloadMenu(anchor, img) {
   closeMenu();
   const typeLabel = img.type === 'other' ? '?' : ITK.formatLabel(img.type);
-  const items = [['original', t('originalFormat'), typeLabel], ['png', 'PNG'], ['jpeg', 'JPG'], ['webp', 'WebP'], ['avif', 'AVIF']];
+  const items = [['original', t('originalFormat'), typeLabel], ['png', 'PNG'], ['jpeg', 'JPG'], ['webp', 'WebP'], ...(state.avif ? [['avif', 'AVIF']] : [])];
   const menu = el('div', { class: 'menu', role: 'menu' }, items.map(([value, label, hint]) =>
     el('button', { class: 'menu-item', role: 'menuitem', onclick: () => { closeMenu(); downloadOne(img, value); } },
       [el('span', { text: label }), hint ? el('small', { text: hint }) : null])));

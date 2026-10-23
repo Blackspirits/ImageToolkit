@@ -230,7 +230,7 @@
             <button class="seg" data-value="png" role="radio">PNG</button>
             <button class="seg" data-value="jpeg" role="radio">JPG</button>
             <button class="seg active" data-value="webp" role="radio">WebP</button>
-            <button class="seg" data-value="avif" role="radio">AVIF</button>
+            <button class="seg" data-value="avif" data-output-avif role="radio">AVIF</button>
           </div>
           <button id="btn-convert-url" class="btn btn-primary btn-block mt10"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="convertAndSave">Convert &amp; save</span></button>
         </div>
@@ -273,7 +273,7 @@
             <label id="default-format-label" data-i18n="settingDefaultFormat">Default format</label>
             <div class="row-ctrl">
               <div class="segmented" id="setting-default-format" role="radiogroup" aria-labelledby="default-format-label">
-                <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" role="radio">AVIF</button>
+                <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" data-output-avif role="radio">AVIF</button>
               </div>
             </div>
           </div>
@@ -421,7 +421,7 @@
         <button id="action-clear" class="icon-btn" data-i18n-title="clearSelection" title="Clear selection"><svg class="i i-sm"><use href="#i-x"/></svg></button>
         <span class="action-count"><svg class="i i-sm"><use href="#i-check"/></svg><strong id="action-bar-count">0</strong><span class="action-count-label" data-i18n="selected">selected</span></span>
         <span class="spacer"></span>
-        <select id="action-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
+        <select id="action-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif" data-output-avif>AVIF</option></select>
         <button id="action-copy-urls" class="icon-btn icon-btn-boxed" data-i18n-title="copyUrls" title="Copy URLs"><svg class="i i-sm"><use href="#i-link"/></svg></button>
         <button id="action-zip" class="icon-btn icon-btn-boxed" data-i18n-title="downloadZip" title="Download as ZIP"><svg class="i i-sm"><use href="#i-archive"/></svg></button>
         <button id="action-download" class="btn btn-primary btn-sm"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="download">Download</span></button>
@@ -449,7 +449,7 @@
           <button id="preview-next" class="stage-nav stage-next" data-i18n-title="nextImage" title="Next image"><svg class="i"><use href="#i-chevron-right"/></svg></button>
         </div>
         <div class="modal-acts">
-          <select id="preview-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select>
+          <select id="preview-format" class="select select-sm" data-i18n-aria="formatLabel" aria-label="Format"><option value="original" data-i18n="originalFormat">Original</option><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option><option value="avif" data-output-avif>AVIF</option></select>
           <button id="preview-download" class="btn btn-primary btn-sm"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="download">Download</span></button>
           <span class="spacer"></span>
           <button id="preview-copy" class="icon-btn icon-btn-boxed" data-i18n-title="copyImage" title="Copy image"><svg class="i i-sm"><use href="#i-copy"/></svg></button>

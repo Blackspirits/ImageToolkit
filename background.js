@@ -55,7 +55,8 @@ async function buildContextMenus() {
   const image = { contexts: ['image'] };
 
   add({ id: 'imagetoolkit-parent', title: t('menuParent'), ...image });
-  MENU_FORMATS.forEach((fmt) => {
+  const formats = await ITK.encodableFormats();
+  MENU_FORMATS.filter((fmt) => formats.has(fmt === 'jpg' ? 'jpeg' : fmt)).forEach((fmt) => {
     add({ id: `save-as-${fmt}`, title: t('menuSaveAs', [fmt.toUpperCase()]), parentId: 'imagetoolkit-parent', ...image });
   });
   add({ id: 'sep-1', type: 'separator', parentId: 'imagetoolkit-parent', ...image });

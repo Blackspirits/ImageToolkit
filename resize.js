@@ -28,6 +28,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   ui.followSystemTheme(app, () => ui.applyTheme(app, 'auto'));
   await i18n.load(editor.settings.locale);
   i18n.apply();
+  if (!(await ITK.encodableFormats()).has('avif')) {
+    $('resize-format')?.querySelector('[data-output-avif]')?.remove();
+    if (editor.settings.defaultFormat === 'avif') editor.settings.defaultFormat = 'webp';
+  }
 
   initFooter();
   applyPresetSettings();

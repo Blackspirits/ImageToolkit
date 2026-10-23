@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The header theme button flips between light and dark; **Automatic** (follows Windows/macOS or Chrome) is chosen in Settings. The icon shows the theme on screen.
 - Transparency background in the image grid: **checkerboard** (follows the theme), **white**, **grey** or **black**, like the editor's; the button shows the one in use.
 - The editor opens with the whole image selected, so saving a capture straight away never trims its edges.
+- **AVIF is offered as an output only where the browser can write it** (Chrome cannot yet: it used to silently produce WebP). It appears by itself the day it can. Reading, listing, filtering and downloading AVIF images as they are is unchanged; a saved "AVIF" default becomes WebP.
 - The capture delay also applies to **Capture visible page** (time to open a menu or hover something) and counts down on the toolbar icon.
 - **Esc** cancels a full-page capture from the side panel too; from the toolbar popup, the popup closes so Esc reaches the page.
 - Full-page captures of chats and virtual lists (Discord, Slack…) never contain empty bands: the capture stops where the page jumps and the image is trimmed to what was captured, with the "may be incomplete" notice.

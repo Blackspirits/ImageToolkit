@@ -37,7 +37,7 @@ The mark is a single continuous image frame that opens into an export arrow: fin
 ## ✨ Features
 
 ### 🔄 Format Conversion
-Right-click any image and save it as **PNG**, **JPG**, **WebP** or **AVIF**. Transparent images get a white background when converting to JPG — no more black artifacts. Chrome cannot encode AVIF from a canvas yet, so AVIF requests fall back to WebP and the file is saved with a `.webp` extension: the extension always matches the real content.
+Right-click any image and save it as **PNG**, **JPG** or **WebP**. Transparent images get a white background when converting to JPG — no more black artifacts. AVIF images are listed, downloaded as they are and converted to any of those formats; **AVIF as an output** appears by itself on browsers that can write it (Chrome cannot yet), so a format offered always produces exactly that format.
 
 ### 📥 True "Original" Downloads
 **Original** keeps the exact source bytes — GIF animation, SVG vectors and JPEG quality are preserved, and the file extension comes from the real content type, even when the URL has none.

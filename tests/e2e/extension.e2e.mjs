@@ -463,7 +463,7 @@ test('batch download from the panel saves every image without dialogs', async ()
 async function freshPanel() {
   await ui.bringToFront();
   await ui.reload();
-  await ui.waitForSelector('#image-grid', { state: 'attached' });
+  await ui.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
 }
 
 test('preview actions follow the image, not its position, when the grid re-sorts', async () => {
@@ -1072,7 +1072,7 @@ test('page outlines follow the panel: gone when it moves to another tab or close
 
   const panel = await ctx.newPage();
   await panel.goto(`chrome-extension://${id}/popup.html`);
-  await panel.waitForSelector('#image-grid', { state: 'attached' });
+  await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
   const select = () => panel.evaluate(async ({ tabId, src }) => {
     state.tabId = tabId;
     await scan();
@@ -1107,7 +1107,7 @@ test('closing the editor window forgets the handed-off image', async () => {
 test('a large download completes even when the page that started it closes at once', async () => {
   const page = await ctx.newPage();
   await page.goto(`chrome-extension://${id}/popup.html`);
-  await page.waitForSelector('#image-grid', { state: 'attached' });
+  await page.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
   const res = await page.evaluate(() => ITK.ui.saveBlob(new Blob([new Uint8Array(37 * 1024 * 1024)], { type: 'application/zip' }), 'closing-test.zip', false));
   assert.equal(res.via, 'blob');
   await page.close();
@@ -1267,7 +1267,7 @@ test('images inside iframes are listed, same-origin and cross-origin, and outlin
   // Outlines reach the frames through the same port.
   const panel = await ctx.newPage();
   await panel.goto(`chrome-extension://${id}/popup.html`);
-  await panel.waitForSelector('#image-grid', { state: 'attached' });
+  await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
   await panel.evaluate(async ({ tabId, src }) => { state.tabId = tabId; await scan(); state.selected.add(src); updateSelectionUI(); }, { tabId, src: `http://itk-other.test:${port}/anim.gif?inframe=1` });
   const frame = page.frames().find((f) => f.url().startsWith('http://itk-other.test'));
   await waitFor(() => frame.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length === 1));
@@ -1569,7 +1569,7 @@ test('Esc in the panel cancels a full-page capture; the page is restored and no 
   // The side panel keeps the focus after its button is clicked: Esc there must cancel.
   const panel = await ctx.newPage();
   await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
-  await panel.waitForSelector('#image-grid', { state: 'attached' });
+  await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
   await page.bringToFront();
   await panel.evaluate((id) => { state.tabId = id; document.getElementById('btn-capture-full').click(); }, tabId);
   await new Promise((r) => setTimeout(r, 1200));
@@ -1830,6 +1830,31 @@ test('copy link: one image address from the card or the preview; never for inlin
   await ui.click('#preview-link');
   assert.deepEqual(await ui.evaluate(() => window.__copied), ['https://example.com/a.png', 'https://example.com/a.png']);
   await ui.evaluate(() => closePreview());
+});
+
+test('AVIF is offered as an output only if the browser can write it; reading AVIF is unaffected', async () => {
+  const canWrite = await sw.evaluate(async () => (await ITK.encodableFormats()).has('avif'));
+  await freshPanel();
+  const panel = await ui.evaluate(() => ({
+    convert: !!document.querySelector('#convert-format [data-value="avif"]'),
+    defaultFormat: !!document.querySelector('#setting-default-format [data-value="avif"]'),
+    selection: !!document.querySelector('#action-format option[value="avif"]'),
+    preview: !!document.querySelector('#preview-format option[value="avif"]'),
+    typeFilter: !!document.querySelector('#filter-type option[value="avif"]'), // finding AVIF images stays
+  }));
+  assert.deepEqual(panel, { convert: canWrite, defaultFormat: canWrite, selection: canWrite, preview: canWrite, typeFilter: true });
+  await ui.evaluate((b) => { setImages([{ src: b + 'photo.png', width: 10, height: 10 }]); document.querySelector('.gcard [data-act="download"]').click(); }, base);
+  const menu = await ui.evaluate(() => [...document.querySelectorAll('.menu .menu-item span')].map((s) => s.textContent));
+  assert.equal(menu.includes('AVIF'), canWrite);
+  await ui.evaluate(() => closeMenu());
+  const menuItem = await sw.evaluate(() => new Promise((resolve) => chrome.contextMenus.update('save-as-avif', {}, () => resolve(!chrome.runtime.lastError))));
+  assert.equal(menuItem, canWrite, 'right-click menu');
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  assert.equal(await editor.evaluate(() => !!document.querySelector('#resize-format [data-value="avif"]')), canWrite);
+  await editor.close();
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
