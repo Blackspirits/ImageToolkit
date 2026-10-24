@@ -233,9 +233,6 @@
   "titleDownloadAs": {
     "message": "下載為..."
   },
-  "donate": {
-    "message": "捐贈"
-  },
   "labelType": {
     "message": "類型："
   },
@@ -283,9 +280,6 @@
   },
   "titleCapture": {
     "message": "擷取區域"
-  },
-  "titleKofi": {
-    "message": "在Ko-fi上支持"
   },
   "bgWhite": {
     "message": "白色"
@@ -905,5 +899,41 @@
   "cropAction": {
     "message": "裁切",
     "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "支持 ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "支持",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit 免費且開放原始碼，沒有廣告，也不追蹤。如果它為你節省了時間，可以透過以下方式支持。",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "捐款",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "免費支持方式",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "在 GitHub 上給星星",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "回報問題或提出建議",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "協助翻譯",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "在 Chrome 線上應用程式商店評分",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSettings();
   initPresetSettings();
   initPreview();
+  initSupport();
   initActionBar();
   initKeyboard();
   initPaste();
@@ -1219,6 +1220,39 @@ function initPreview() {
   $('preview-modal').addEventListener('keydown', trapFocus);
 }
 
+// ============================================================
+// Support: donations and free ways to help, in a small dialog (the links open in new tabs)
+// ============================================================
+let supportReturnFocus = null;
+
+function initSupport() {
+  for (const id of ['btn-support', 'btn-support-about']) $(id).addEventListener('click', openSupport);
+  $('support-backdrop').addEventListener('click', closeSupport);
+  $('support-close').addEventListener('click', closeSupport);
+  $('support-modal').addEventListener('keydown', trapFocus);
+  // Rating only makes sense for a copy installed from the Chrome Web Store.
+  chrome.management.getSelf().then((self) => {
+    if (self.installType !== 'normal' || !/clients2\.google\.com/.test(self.updateUrl || '')) return;
+    $('support-rate').href = `https://chromewebstore.google.com/detail/${chrome.runtime.id}/reviews`;
+    $('support-rate').hidden = false;
+  }).catch(() => {});
+}
+
+function openSupport() {
+  if (!$('support-modal').hidden) return;
+  supportReturnFocus = document.activeElement;
+  $('support-modal').hidden = false;
+  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.setAttribute('inert', ''));
+  $('support-close').focus();
+}
+
+function closeSupport() {
+  if ($('support-modal').hidden) return;
+  $('support-modal').hidden = true;
+  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.removeAttribute('inert'));
+  supportReturnFocus?.focus?.();
+}
+
 function currentPreview() {
   return state.previewSrc ? state.images.find((i) => i.src === state.previewSrc) : null;
 }
@@ -1287,7 +1321,7 @@ function closePreview() {
 // Keep Tab and Shift+Tab inside the dialog.
 function trapFocus(e) {
   if (e.key !== 'Tab') return;
-  const focusable = [...$('preview-modal').querySelectorAll('button, select, [tabindex]:not([tabindex="-1"])')]
+  const focusable = [...e.currentTarget.querySelectorAll('button, select, a[href], [tabindex]:not([tabindex="-1"])')]
     .filter((node) => !node.disabled && !node.hidden && node.offsetParent !== null);
   if (!focusable.length) return;
   const first = focusable[0], last = focusable[focusable.length - 1];
@@ -1307,9 +1341,11 @@ function initKeyboard() {
     if (e.key === 'Escape') {
       if (openMenu) { closeMenu(); return; }
       if (!$('preview-modal').hidden) { closePreview(); return; }
+      if (!$('support-modal').hidden) { closeSupport(); return; }
       if (state.selected.size && !isTyping(e.target)) { state.selected.clear(); updateSelectionUI(); }
       return;
     }
+    if (!$('support-modal').hidden) return; // nothing behind the dialog reacts to keys
     if (!$('preview-modal').hidden) {
       const rtl = document.documentElement.dir === 'rtl';
       if (e.key === 'ArrowRight') { e.preventDefault(); stepPreview(rtl ? -1 : 1); }

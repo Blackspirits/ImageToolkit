@@ -2296,3 +2296,27 @@ test('long labels (Ukrainian, Russian) never push a control out of the panel or 
     await setLocale('auto');
   }
 });
+
+test('support: the heart opens a dialog with every way to help; Esc closes it and gives the focus back', async () => {
+  await freshPanel();
+  await ui.click('#btn-support');
+  await ui.waitForSelector('#support-modal:not([hidden])');
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'support-close');
+  const links = await ui.$$eval('#support-modal a.support-row:not([hidden])', (as) => as.map((a) => [a.textContent.trim(), a.href, a.target]));
+  assert.deepEqual(links.map(([text]) => text), ['Ko-fi', 'GitHub Sponsors', 'PayPal', 'Buy Me a Coffee', 'Star it on GitHub', 'Report a bug or suggest an idea', 'Help translate']);
+  assert.ok(links.every(([, href, target]) => href.startsWith('https://') && target === '_blank'), 'every link opens a new tab on https');
+  // Rating needs a Web Store install: hidden for an unpacked copy.
+  assert.equal(await ui.isHidden('#support-rate'), true);
+  // Behind the dialog nothing takes the focus or the keys.
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').inert), true);
+  await ui.keyboard.press('Escape');
+  await ui.waitForSelector('#support-modal', { state: 'hidden' });
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'btn-support');
+  // The About button opens the same dialog.
+  await ui.evaluate(() => document.querySelector('.tab[data-tab="settings"]').click());
+  await ui.click('#btn-support-about');
+  await ui.waitForSelector('#support-modal:not([hidden])');
+  await ui.click('#support-backdrop', { position: { x: 5, y: 5 } });
+  await ui.waitForSelector('#support-modal', { state: 'hidden' });
+  await ui.evaluate(() => document.querySelector('.tab[data-tab="images"]').click());
+});

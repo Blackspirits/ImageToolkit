@@ -1,32 +1,32 @@
 # Translation Audit — 2.5.0
 
-Total keys: 248  
+Total keys: 255  
 Audit date: 2026-10-24
 
 ## Coverage
 
-All 18 locale packs have 248/248 keys present (0 missing). `npm run validate` enforces key parity, identical placeholders and `$TOKENS$` in every locale, and fails on keys that are defined but unused or used but undefined.
+All 18 locale packs have 255/255 keys present (0 missing). `npm run validate` enforces key parity, identical placeholders and `$TOKENS$` in every locale, and fails on keys that are defined but unused or used but undefined.
 
 | Locale | Keys | Identical to EN |
 |--------|------|-----------------|
-| ar | 248 | 2 |
-| de | 248 | 25 |
-| en | 248 | — |
-| es | 248 | 13 |
-| fr | 248 | 15 |
-| it | 248 | 13 |
-| ja | 248 | 4 |
-| ko | 248 | 4 |
-| nl | 248 | 14 |
-| pl | 248 | 9 |
-| pt_BR | 248 | 11 |
-| pt_PT | 248 | 11 |
-| ru | 248 | 2 |
-| tr | 248 | 9 |
-| uk | 248 | 2 |
-| vi | 248 | 10 |
-| zh_CN | 248 | 2 |
-| zh_TW | 248 | 2 |
+| ar | 255 | 2 |
+| de | 255 | 25 |
+| en | 255 | — |
+| es | 255 | 13 |
+| fr | 255 | 15 |
+| it | 255 | 13 |
+| ja | 255 | 4 |
+| ko | 255 | 4 |
+| nl | 255 | 14 |
+| pl | 255 | 9 |
+| pt_BR | 255 | 11 |
+| pt_PT | 255 | 11 |
+| ru | 255 | 2 |
+| tr | 255 | 9 |
+| uk | 255 | 2 |
+| vi | 255 | 10 |
+| zh_CN | 255 | 2 |
+| zh_TW | 255 | 2 |
 
 ## Why "identical to EN" ≠ "untranslated"
 
@@ -55,7 +55,7 @@ The following items in `resize.html` are **not** routed through `messages.json`:
 
 ## Changelog
 
-- v2.5.0: 248 keys (+59). Full-page capture, annotate tools (pixelate, blur, box, arrow, text, highlight, colour, thickness, undo/redo), all-tabs scan scope and tab filter, auto-scroll, file name templates and their variables, capture viewer (fit to window, crop, annotate, back to screenshot), redact tool, transparency backgrounds, copy link, lossless quality label, all translated in the 18 locales.
+- v2.5.0: 255 keys (+66). Full-page capture, annotate tools (pixelate, blur, box, arrow, text, highlight, colour, thickness, undo/redo), all-tabs scan scope and tab filter, auto-scroll, file name templates and their variables, capture viewer (fit to window, crop, annotate, back to screenshot), support dialog, redact tool, transparency backgrounds, copy link, lossless quality label, all translated in the 18 locales.
 - v2.4.1: 189 keys (+10). Editor presets in Settings (groups, own presets). English switched to sentence case; Portuguese (Portugal) consistent "tu" form, sentence case, "Cinzento", "Esc".
 - v2.4.0: 162 keys. Added 13 keys for the redesigned UI (capture visible page, copy image/URLs, paste hint, filters, batch result, restricted-page and capture errors, empty-state hint, capture shortcut) in all 18 locales. Translated the theme labels that were still in English in ru, uk and tr, and the automatic theme label in pl. Removed 10 unused keys (`cmdQuickSave`, `presets`, `presetFree`, `resize`, `errorOnSaving`, `lockRatio`, `pTransform`, `pRotate`, `pHorizontal`, `pVertical`).
 - v2.3.4: 159 keys. Added Google Lens setting labels, Google Lens disabled warning, inline data URL warning, and clearer privacy/footer wording for optional external actions.

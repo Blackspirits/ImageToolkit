@@ -235,9 +235,6 @@
   "titleDownloadAs": {
     "message": "Herunterladen als..."
   },
-  "donate": {
-    "message": "Spenden"
-  },
   "labelType": {
     "message": "Typ:"
   },
@@ -285,9 +282,6 @@
   },
   "titleCapture": {
     "message": "Bereich erfassen"
-  },
-  "titleKofi": {
-    "message": "Unterstützen auf Ko-fi"
   },
   "bgWhite": {
     "message": "Weiß"
@@ -907,5 +901,41 @@
   "cropAction": {
     "message": "Zuschneiden",
     "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "ImageToolkit unterstützen",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Unterstützen",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit ist kostenlos und Open Source, ohne Werbung und ohne Tracking. Wenn es dir Zeit spart, kannst du so helfen:",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Spenden",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Kostenlos helfen",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "Auf GitHub einen Stern geben",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Fehler melden oder Idee vorschlagen",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Beim Übersetzen helfen",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Im Chrome Web Store bewerten",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

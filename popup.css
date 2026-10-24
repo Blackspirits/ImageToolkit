@@ -275,6 +275,20 @@ body.sidepanel .app{height:100vh}
 .about-shortcut{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
 .about-links{display:flex;gap:8px;margin-top:6px}
 
+/* ---------- Support dialog ---------- */
+.support-box{max-width:400px}
+.support-heart{color:#f43f5e;flex:none}
+.support-body{padding:14px 16px 16px;overflow-y:auto}
+.support-intro{font-size:12.5px;line-height:1.5;color:var(--text-2)}
+.support-heading{margin:16px 0 8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.support-list{display:flex;flex-direction:column;gap:6px}
+.support-row{display:flex;align-items:center;gap:12px;min-height:40px;padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:13px;font-weight:600;text-decoration:none;transition:border-color .15s,background .15s}
+.support-row:hover,.support-row:focus-visible{border-color:var(--accent-line);background:var(--accent-soft)}
+.support-row>.i:first-child{color:var(--accent);flex:none}
+.support-row>span{flex:1;min-width:0}
+.support-ext{color:var(--text-3);flex:none}
+.support-row[hidden]{display:none}
+
 /* ---------- Action bar ---------- */
 .action-bar{position:absolute;left:10px;right:10px;bottom:10px;z-index:50;container-type:inline-size;border-radius:var(--r-lg);background:var(--bg-glass);border:1px solid var(--line-strong);box-shadow:var(--shadow-lg);backdrop-filter:blur(16px) saturate(1.4);animation:barIn .28s var(--ease)}
 @keyframes barIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}

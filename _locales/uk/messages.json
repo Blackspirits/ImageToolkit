@@ -234,9 +234,6 @@
   "titleDownloadAs": {
     "message": "Завантажити як..."
   },
-  "donate": {
-    "message": "Підтримати"
-  },
   "labelType": {
     "message": "Тип:"
   },
@@ -284,9 +281,6 @@
   },
   "titleCapture": {
     "message": "Захопити область"
-  },
-  "titleKofi": {
-    "message": "Підтримати на Ko-fi"
   },
   "bgWhite": {
     "message": "Білий"
@@ -906,5 +900,41 @@
   "cropAction": {
     "message": "Обрізати",
     "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "Підтримати ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Підтримати",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit безкоштовний і з відкритим кодом, без реклами та стеження. Якщо він заощаджує вам час, допомогти можна так:",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Пожертвувати",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Безкоштовно",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "Поставити зірку на GitHub",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Повідомити про помилку або запропонувати ідею",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Допомогти з перекладом",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Оцінити в Chrome Web Store",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }
