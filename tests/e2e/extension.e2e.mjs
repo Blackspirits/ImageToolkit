@@ -2015,6 +2015,19 @@ test('capture viewer: whole capture, exact PNG, other formats, Crop and Annotate
   });
   assert.equal(layout.scrolls, true);
   assert.equal(layout.width, Math.round(400 / layout.dpr));
+  // Fit to window: the whole capture in view, an overview (it differs even when the page size
+  // is close to the tab's width); a click on the image switches back.
+  const shotBox = () => viewer.evaluate(() => {
+    const r = document.getElementById('shot').getBoundingClientRect(), s = document.getElementById('stage').getBoundingClientRect();
+    return { inside: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, height: Math.round(r.height) };
+  });
+  assert.equal(await viewer.isDisabled('#btn-zoom'), false);
+  await viewer.click('#btn-zoom');
+  const whole = await shotBox();
+  assert.equal(whole.inside, true, 'all of it in the window');
+  assert.equal(await viewer.getAttribute('#btn-zoom', 'aria-pressed'), 'true');
+  await viewer.click('#shot');
+  assert.ok((await shotBox()).height > whole.height * 1.5, 'back at page size');
   // PNG keeps the exact bytes of the capture; JPG and WebP are encoded from it.
   await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, saveAs: false } }); });
   await viewer.reload();
@@ -2039,9 +2052,13 @@ test('capture viewer: whole capture, exact PNG, other formats, Crop and Annotate
   const url = new URL(viewer.url());
   assert.deepEqual([url.searchParams.get('key'), url.searchParams.get('site'), url.searchParams.get('capture')], [key, 'example.org', '1']);
   assert.match(await viewer.textContent('#info-text'), /400 × 1600/);
-  // Annotate: straight into the annotate layer.
-  await viewer.goBack();
+  // The editor's Back button returns to the viewer, in the same tab.
+  assert.equal(await viewer.isVisible('#btn-back'), true);
+  await viewer.click('#btn-back');
+  await viewer.waitForURL(/view\.html/);
   await viewer.waitForSelector('#app[data-ready="true"]');
+  assert.equal(new URL(viewer.url()).searchParams.get('key'), key);
+  // Annotate: straight into the annotate layer.
   await viewer.click('#btn-annotate');
   await viewer.waitForSelector('.annot-layer', { timeout: 10000 });
   await viewer.close();

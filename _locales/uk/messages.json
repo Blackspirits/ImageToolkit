@@ -892,12 +892,16 @@
     "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
   },
   "zoomFit": {
-    "message": "За шириною",
-    "description": "Button: show the screenshot fitted to the window width"
+    "message": "За розміром вікна",
+    "description": "Button: show the whole screenshot in the window (an overview)"
   },
   "zoomActual": {
     "message": "Реальний розмір",
     "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Назад до знімка",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
   },
   "cropAction": {
     "message": "Обрізати",

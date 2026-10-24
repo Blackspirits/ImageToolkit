@@ -28,7 +28,7 @@
         <span id="info-text" class="pill"></span>
       </div>
       <div class="topbar-actions" role="toolbar" data-i18n-aria="viewerTitle" aria-label="Screenshot">
-        <button id="btn-zoom" class="btn btn-ghost" aria-pressed="false"><svg class="i i-sm"><use href="#i-actual"/></svg><span data-i18n="zoomActual">Actual size</span></button>
+        <button id="btn-zoom" class="btn btn-ghost" aria-pressed="false"><svg class="i i-sm"><use href="#i-fit"/></svg><span data-i18n="zoomFit">Fit to window</span></button>
         <span class="tool-sep"></span>
         <button id="btn-crop" class="btn btn-ghost" data-i18n-title="customResizeTitle" title="Crop &amp; resize"><svg class="i i-sm"><use href="#i-crop"/></svg><span data-i18n="cropAction">Crop</span></button>
         <button id="btn-annotate" class="btn btn-ghost" data-i18n-title="annotateHint" title="Annotate"><svg class="i i-sm"><use href="#i-annotate"/></svg><span data-i18n="annotate">Annotate</span></button>
@@ -43,7 +43,7 @@
 
     <main class="stage" id="stage" tabindex="-1">
       <div id="stage-status" class="stage-status"><div class="spinner"></div><span data-i18n="loadingImageInfo">Loading image info...</span></div>
-      <img id="shot" class="shot fit" alt="" hidden>
+      <img id="shot" class="shot" alt="" hidden>
     </main>
   </div>
 

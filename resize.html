@@ -11,6 +11,7 @@
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
     <symbol id="i-annotate" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
     <symbol id="i-tool-redact" viewBox="0 0 24 24"><path d="M4 5h10M4 19h13"/><rect x="3" y="9" width="18" height="6" rx="1.5" fill="currentColor"/></symbol>
     <symbol id="i-tool-pixelate" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/></symbol>
@@ -46,6 +47,7 @@
   <div class="app" id="app">
     <header class="topbar">
       <div class="topbar-brand">
+        <button id="btn-back" class="btn btn-ghost btn-sm topbar-back" hidden><svg class="i i-sm"><use href="#i-arrow-left"/></svg><span data-i18n="backToCapture">Back to screenshot</span></button>
         <img src="icons/icon48.png" alt="" class="topbar-logo" width="28" height="28">
         <h1 data-i18n="customResizeTitle">Custom resize</h1>
       </div>

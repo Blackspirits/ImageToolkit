@@ -893,12 +893,16 @@
     "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
   },
   "zoomFit": {
-    "message": "Ajustar al ancho",
-    "description": "Button: show the screenshot fitted to the window width"
+    "message": "Ajustar a la ventana",
+    "description": "Button: show the whole screenshot in the window (an overview)"
   },
   "zoomActual": {
     "message": "Tamaño real",
     "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Volver a la captura",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
   },
   "cropAction": {
     "message": "Recortar",

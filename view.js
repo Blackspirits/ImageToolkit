@@ -19,7 +19,7 @@ const view = {
   url: '',
   width: 0,
   height: 0,
-  fit: true,
+  whole: false, // the whole capture in the window (an overview) instead of at the page's size
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -44,10 +44,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   img.addEventListener('load', () => {
     view.width = img.naturalWidth;
     view.height = img.naturalHeight;
-    // Screenshots are in device pixels: shown at the page's own size, then fitted to the tab.
-    img.style.width = `${Math.round(view.width / devicePixelRatio)}px`;
     $('info-text').textContent = `${view.width} × ${view.height} px`;
     img.hidden = false;
+    layout();
+    new ResizeObserver(() => layout()).observe($('stage'));
     showStatus('');
     $('stage').focus({ preventScroll: true });
     app.dataset.ready = 'true';
@@ -56,7 +56,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   img.src = view.url;
 });
 
-addEventListener('pagehide', () => { if (view.url) URL.revokeObjectURL(view.url); });
+// Kept while the page may come back from the back/forward cache (Back from the editor).
+addEventListener('pagehide', (e) => { if (!e.persisted && view.url) URL.revokeObjectURL(view.url); });
 
 function showStatus(message, isError = false) {
   const status = $('stage-status');
@@ -72,7 +73,9 @@ function initControls() {
   ui.setRadio(group, ['png', 'jpeg', 'webp'].includes(preferred) ? preferred : 'png');
   ui.initRadioGroup(group);
 
-  $('btn-zoom').addEventListener('click', () => setFit(!view.fit));
+  $('btn-zoom').addEventListener('click', () => setWhole(!view.whole));
+  // A click on the capture switches too, like an image viewer.
+  $('shot').addEventListener('click', () => { if (!$('btn-zoom').disabled) setWhole(!view.whole); });
   $('btn-save').addEventListener('click', () => withBusy($('btn-save'), save));
   $('btn-copy').addEventListener('click', () => withBusy($('btn-copy'), copy));
   // Same tab, same image: the editor takes over (and the image stays tied to this tab).
@@ -87,21 +90,46 @@ function initControls() {
   });
 }
 
-// Fit: the capture fills the tab's width (never enlarged) and scrolls down.
-// Actual size: one screenshot pixel per screen pixel, as on the page; scrolls both ways.
-function setFit(fit) {
-  view.fit = fit;
-  $('shot').classList.toggle('fit', fit);
+// Page size: the capture as the page looked (screenshots are in device pixels), narrowed to the
+// tab if it is wider, scrolling down. Whole: all of it in the window, as an overview. The button
+// switches between them, and is off when the capture fits at page size anyway.
+function stageBox() {
+  const stage = $('stage');
+  const cs = getComputedStyle(stage);
+  return {
+    width: stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+    height: stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom),
+  };
+}
+
+function layout() {
+  if (!view.width) return;
+  const img = $('shot');
+  const box = stageBox();
+  const pageWidth = view.width / devicePixelRatio, pageHeight = view.height / devicePixelRatio;
+  const fitsAlready = pageWidth <= box.width + 1 && pageHeight <= box.height + 1;
+  const scale = view.whole && !fitsAlready ? Math.min(1, box.width / pageWidth, box.height / pageHeight) : Math.min(1, box.width / pageWidth);
+  img.style.width = `${Math.max(1, Math.floor(pageWidth * scale))}px`;
+  img.classList.toggle('zoomable', !fitsAlready);
+  img.classList.toggle('whole', view.whole && !fitsAlready);
   const btn = $('btn-zoom');
-  btn.setAttribute('aria-pressed', String(!fit));
-  btn.querySelector('use').setAttribute('href', fit ? '#i-actual' : '#i-fit');
-  btn.querySelector('span').textContent = fit ? t('zoomActual') : t('zoomFit');
+  btn.disabled = fitsAlready;
+  btn.setAttribute('aria-pressed', String(view.whole && !fitsAlready));
+  btn.querySelector('use').setAttribute('href', view.whole ? '#i-actual' : '#i-fit');
+  btn.querySelector('span').textContent = view.whole ? t('zoomActual') : t('zoomFit');
+}
+
+function setWhole(whole) {
+  view.whole = whole;
+  layout();
+  if (!whole) $('stage').scrollTo({ top: 0 });
 }
 
 function openEditor(annotate) {
   const params = new URLSearchParams(view.params);
   if (annotate) params.set('annotate', '1');
   else params.delete('annotate');
+  params.set('from', 'view'); // the editor offers a way back here
   location.href = `resize.html?${params}`;
 }
 

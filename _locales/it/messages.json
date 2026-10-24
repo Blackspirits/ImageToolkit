@@ -892,12 +892,16 @@
     "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
   },
   "zoomFit": {
-    "message": "Adatta alla larghezza",
-    "description": "Button: show the screenshot fitted to the window width"
+    "message": "Adatta alla finestra",
+    "description": "Button: show the whole screenshot in the window (an overview)"
   },
   "zoomActual": {
     "message": "Dimensioni reali",
     "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Torna allo screenshot",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
   },
   "cropAction": {
     "message": "Ritaglia",

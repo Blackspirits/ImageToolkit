@@ -43,6 +43,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   // The page the image or screenshot came from, for {site} and {title} in filename templates.
   editor.page = { host: params.get('site') || '', title: params.get('title') || '' };
   editor.capture = params.get('capture') === '1';
+  // Opened from the capture viewer (Crop or Annotate there): a way back to it, in this tab.
+  if (params.get('from') === 'view') {
+    const back = $('btn-back');
+    back.hidden = false;
+    back.addEventListener('click', () => {
+      if (annotating()) return;
+      if (history.length > 1 && document.referrer.includes('/view.html')) { history.back(); return; }
+      const viewParams = new URLSearchParams(params);
+      viewParams.delete('annotate');
+      viewParams.delete('from');
+      location.replace(`view.html?${viewParams}`);
+    });
+  }
   // From the capture viewer's Annotate button: straight into the annotate layer once ready.
   if (params.get('annotate') === '1') $('cropper-img').addEventListener('ready', () => annotate(), { once: true });
   const source = await handoff.get(key).catch(() => null);

@@ -891,12 +891,16 @@
     "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
   },
   "zoomFit": {
-    "message": "符合寬度",
-    "description": "Button: show the screenshot fitted to the window width"
+    "message": "符合視窗大小",
+    "description": "Button: show the whole screenshot in the window (an overview)"
   },
   "zoomActual": {
     "message": "實際大小",
     "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "返回擷取畫面",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
   },
   "cropAction": {
     "message": "裁切",

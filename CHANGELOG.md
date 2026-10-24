@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [2.5.0] - 2026-10-21
 
 ### Added
-- **Capture viewer**: every screenshot (area, visible page, full page) opens in a tab next to the page, shown whole at the tab's width with the page's own scroll (or at actual size), ready to **save** (PNG keeps the exact capture; JPG or WebP), **copy**, **crop** or **annotate** in the editor, in the same tab.
+- **Capture viewer**: every screenshot (area, visible page, full page) opens in a tab next to the page, shown at the page's own size with its scroll, or all of it in the window as an overview (button or a click on the image), ready to **save** (PNG keeps the exact capture; JPG or WebP), **copy**, **crop** or **annotate** in the editor, in the same tab, with a **Back to screenshot** button there.
 - **The editor opens in a tab** next to the page instead of a separate window, with all the room of the browser. Its image is deleted when the tab closes or leaves for another page.
 - New Chrome Web Store screenshots in all 18 languages and promo tiles, rendered from the real extension on a demo page with fictional characters (`npm run store:shots`).
 - **Full-page capture**: scrolls and captures the page screen by screen and stitches it locally. Fixed and sticky elements (headers, chat buttons, cookie bars) appear once instead of on every slice, the scrollbar is left out, animations pause, lazy images load, and the page returns to where you were. Progress shows on the toolbar icon and Esc cancels. Very tall pages are scaled down (to 50%) before being cut. From the panel, the toolbar-icon menu or an assignable shortcut.
