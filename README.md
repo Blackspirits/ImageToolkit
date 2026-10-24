@@ -23,16 +23,18 @@ The mark is a single continuous image frame that opens into an export arrow: fin
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/images-dark.png" alt="Image grid with selection (dark theme)" width="280">
-  <img src="docs/screenshots/tools-light.png" alt="Tools: convert, format advisor and resize (light theme)" width="280">
-  <img src="docs/screenshots/settings-light.png" alt="Settings (light theme)" width="280">
+  <img src="docs/store/en/01-find.png" alt="Find every image on the page in the side panel" width="860">
 </p>
 <p align="center">
-  <img src="docs/screenshots/editor-dark.png" alt="Editor with crop presets" width="860">
+  <img src="docs/store/en/02-filter.png" alt="Filter by type, size, layout and domain, then select" width="425">
+  <img src="docs/store/en/03-editor.png" alt="Editor: crop and resize with presets" width="425">
 </p>
 <p align="center">
-  <img src="docs/screenshots/editor-annotate-dark.png" alt="Editor: annotate with redact, pixelate, box, arrow, highlight and text" width="860">
+  <img src="docs/store/en/04-capture.png" alt="Full-page capture in its own tab, then redact before sharing" width="425">
+  <img src="docs/store/en/05-privacy.png" alt="Settings and privacy" width="425">
 </p>
+
+The characters in the demo gallery are fictional. `npm run store:shots` regenerates these images (and the Portuguese set in [`docs/store/pt_PT`](docs/store/pt_PT)) from the real extension.
 
 ## ✨ Features
 
@@ -43,7 +45,7 @@ Right-click any image and save it as **PNG**, **JPG** or **WebP**. Transparent i
 **Original** keeps the exact source bytes — GIF animation, SVG vectors and JPEG quality are preserved, and the file extension comes from the real content type, even when the URL has none.
 
 ### 🖼️ Image Grid
-Browse every image on the current page — **iframes included** — or on **every tab of the window at once**, in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape**, **domain** or **tab**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a light or dark checkerboard. Inline SVG icons are listed at the size the page shows them, with the page's colours. In the side panel, the grid follows the active tab and page loads automatically.
+Browse every image on the current page — **iframes included** — or on **every tab of the window at once**, in a fast grid, compact grid or list, with dimensions, file size and type. Search by URL, file name or alt text, and filter by **format**, **size range**, **shape**, **domain** or **tab**. Hotlink-protected thumbnails are fetched through the extension so they still show, and transparent images can be checked on a checkerboard or on a white, grey or black background. Inline SVG icons are listed at the size the page shows them, with the page's colours. In the side panel, the grid follows the active tab and page loads automatically.
 
 While the panel is open, new images are announced as they appear: `<img>`, `<picture>` sources, inline SVG and inline-style backgrounds. Images added only through stylesheet classes show up on the next refresh. `blob:` URLs are not listed.
 
@@ -56,15 +58,15 @@ While the panel is open, new images are announced as they appear: `<img>`, `<pic
 - In the preview, ← / → browse through the filtered images
 
 ### 📸 Screen Capture
-Capture an **area** (with an optional 3/5/10-second delay), the **visible page** or the **full page**, straight into the editor. Full-page captures are stitched locally: fixed headers and chat buttons appear once instead of on every slice, the scrollbar is left out, very tall pages are scaled before being cut, progress shows on the toolbar icon and **Esc** cancels. Start it from the panel, by right-clicking the toolbar icon, or with the `Alt+Shift+S` shortcut (customizable in `chrome://extensions/shortcuts`).
+Capture an **area**, the **visible page** (both with an optional 3/5/10-second delay) or the **full page**. The result opens in a **new tab next to the page**, whole and at the page's own width: scroll through it, switch between fit-to-width and actual size, then **Save** as PNG, JPG or WebP, **Copy**, or go on to **Crop** or **Annotate** in the same tab. Full-page captures are stitched locally: fixed headers and chat buttons appear once instead of on every slice, the scrollbar is left out, very tall pages are scaled before being cut, progress shows on the toolbar icon and **Esc** cancels. Start it from the panel, by right-clicking the toolbar icon, or with the `Alt+Shift+S` shortcut (customizable in `chrome://extensions/shortcuts`).
 
 ### ✂️ Editor
-Crop, rotate and flip with presets for aspect ratios, common resolutions, social networks (Instagram, Facebook, YouTube, X, LinkedIn, Pinterest), TMDB and TheTVDB. Pick the output size and format, then **Save** (`Ctrl/⌘ + S`) or **Copy** (`Ctrl/⌘ + C`) the result.
+The editor opens in a tab next to the page it came from. Crop, rotate and flip with presets for aspect ratios, common resolutions, social networks (Instagram, Facebook, YouTube, X, LinkedIn, Pinterest), TMDB and TheTVDB. Pick the output size and format, then **Save** (`Ctrl/⌘ + S`) or **Copy** (`Ctrl/⌘ + C`) the result.
 
 **Annotate** to redact or mark up before saving: **redact** with opaque colour (the sure way to hide data), **pixelate** (true block averages) and **blur** as softer effects, draw **boxes**, **arrows**, **text** (outlined so it reads on any background) and **highlights**, in six colours and three thicknesses, with undo/redo and one-key shortcuts (X P B R A T H). Marks scale with the image, and nothing changes until you press Apply (Ctrl+Enter).
 
 ### 📋 Copy & Paste
-Copy any image to the clipboard as PNG, ready to paste into Slack, Discord, Figma or any app. Paste an image (or an image URL) anywhere in the panel with **Ctrl/⌘ + V** to open it in Tools, or drag one in from a web page.
+Copy any image to the clipboard as PNG, ready to paste into Slack, Discord, Figma or any app, or copy its link. Paste an image (or an image URL) anywhere in the panel with **Ctrl/⌘ + V** to open it in Tools, or drag one in from a web page.
 
 ### 🧠 Format Advisor
 Load an image in Tools and see how large it would be as PNG, JPG and WebP next to the original — with a recommendation that respects transparency.
@@ -81,7 +83,7 @@ Select images and download them one by one (never one Save As dialog per image) 
 - Subfolder, file name pattern (original, system, custom prefix or a **template** with `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}` and `/` for folders, with a live preview), convert-on-download, ZIP by default
 - Editor presets: show or hide each group (aspect ratios, social media, common sizes, TMDB, TheTVDB) and add up to 24 sizes of your own
 - Optional, off-by-default Google Lens search
-- Auto / light / dark theme and 18 interface languages
+- Auto / light / dark theme (auto follows the system; the panel button switches between light and dark) and 18 interface languages
 
 ### 🌍 Multilingual
 18 languages, all fully translated (see [TRANSLATION_AUDIT.md](TRANSLATION_AUDIT.md)), with right-to-left layout for Arabic. The interface language can be overridden in Settings.
@@ -123,7 +125,8 @@ ImageToolkit/
 ├── content.js             Image scanner (injected on demand)
 ├── capture.js             Area-selection overlay (injected on demand)
 ├── popup.html/css/js      Panel UI: Images, Tools, Settings (popup and side panel)
-├── resize.html/css/js     Editor window (Cropper.js)
+├── resize.html/css/js     Editor tab (Cropper.js)
+├── view.html/css/js       Capture viewer tab: save, copy, crop, annotate
 ├── lib/
 │   ├── core.js            Pure helpers shared by every context (and unit-tested)
 │   ├── i18n.js            chrome.i18n-compatible language override
@@ -156,6 +159,7 @@ npm run check:contrast # WCAG AA for every text/background token pair, both them
 npm test           # unit tests (node:test, no dependencies)
 npm run build      # dist/imagetoolkit-<version>.zip with runtime files only
 npm run build:icons # re-render icons/*.png from docs/brand (needs Playwright Chromium)
+npm run store:shots # Web Store slides in docs/store/<locale> from the demo page (needs Playwright Chromium)
 
 npm ci && npx playwright install chromium
 npm run test:e2e   # loads the extension in Chromium and drives real flows

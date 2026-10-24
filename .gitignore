@@ -16,3 +16,6 @@ dist/
 
 # Metadata (Chrome Web Store)
 _metadata/
+
+# Raw UI captures from npm run store:shots (the slides are committed)
+docs/store/*/ui-*.png
