@@ -194,8 +194,15 @@
       if (link.href) addImage(link.href, 0, 0, '');
       if (link.imageSrcset) parseSrcset(link.imageSrcset).forEach((url) => addImage(url, 0, 0, ''));
     });
+    // Links to image files (often the full-size version of a thumbnail). A wiki's file page
+    // (/wiki/File:Flag.svg, Ficheiro:, Datei:… on Wikipedia, Commons, Fandom) ends like one but
+    // is an HTML page: a "Namespace:" prefix in the last segment gives it away.
     document.querySelectorAll('a[href]').forEach((a) => {
-      if (/\.(jpe?g|png|gif|svg|webp|avif)(\?|#|$)/i.test(a.href)) addImage(a.href, 0, 0, '');
+      if (!/\.(jpe?g|png|gif|svg|webp|avif)(\?|#|$)/i.test(a.href)) return;
+      let last = '';
+      try { last = decodeURIComponent(new URL(a.href).pathname.split('/').pop() || ''); } catch { return; }
+      if (/^[^.:]+:./.test(last)) return;
+      addImage(a.href, 0, 0, '');
     });
 
     return { images: results, truncated };

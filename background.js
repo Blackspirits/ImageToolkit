@@ -575,6 +575,12 @@ async function fetchImageBlob(imageUrl, { signal, maxBytes = MAX_FETCH_BYTES, co
       response = await fetch(imageUrl, { credentials: 'omit', signal: controller.signal });
     }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    // Automatic fetches stop at once on a web page or other text (a link that only looked like
+    // an image): nothing of it is downloaded. Actions the user asks for sniff the bytes instead.
+    if (!cookies && /^(text\/|application\/(json|xml|xhtml))/i.test(response.headers.get('content-type') || '')) {
+      response.body?.cancel().catch(() => {});
+      throw new Error('Not an image');
+    }
 
     const declared = ITK.parseSizeFromHeaders(response.headers);
     if (declared > maxBytes) {

@@ -1955,6 +1955,28 @@ test('editor: PNG keeps the quality row in place, disabled and labelled lossless
   await editor.close();
 });
 
+test('scanner: a wiki file page (Ficheiro:, File:) is not an image; real image links still are', async () => {
+  FIXTURES['wiki.html'] = Buffer.from('<!doctype html><title>wiki</title>'
+    + '<a href="/wiki/Ficheiro:Bandeira_de_Portugal.svg" class="mw-file-description"><img src="photo.png?wiki=1"></a>'
+    + '<a href="/wiki/File:Some%20Picture.JPG">file page</a><a href="https://commons.example/wiki/Datei:Karte.png">Datei</a>'
+    + '<a href="full/photo.png">full size</a>');
+  const page = await ctx.newPage();
+  await page.goto(base + 'wiki.html');
+  const { images } = await send({ action: 'collectImages', tabId: await tabIdOf(base + 'wiki.html') });
+  const srcs = images.map((i) => i.src);
+  assert.ok(srcs.includes(base + 'photo.png?wiki=1'));
+  assert.ok(srcs.includes(base + 'full/photo.png'), 'a link to an image file is kept');
+  assert.equal(srcs.filter((s) => /\/wiki\//.test(s)).length, 0, srcs.join());
+  await page.close();
+});
+
+test('automatic downloads stop at once on a web page that only looked like an image', async () => {
+  FIXTURES['looks-like.png.html'] = Buffer.from('<!doctype html><title>not an image</title>' + 'x'.repeat(50000));
+  const res = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'looks-like.png.html', automatic: true });
+  assert.equal(res.error, 'Not an image');
+  assert.equal(res.bytesRead, 0);
+});
+
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {
   const page = await screenPage('feed.html');
   const tabId = await tabIdOf(base + 'feed.html');

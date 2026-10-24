@@ -1761,7 +1761,8 @@ async function probeMissingDimensions() {
   const pending = state.images.filter((i) => !(i.width > 0 && i.height > 0)).slice(0, 160);
   if (!pending.length) return;
   let changed = false;
-  await ITK.mapLimit(pending, 8, async (img) => {
+  // Four at a time: gentle with image servers that limit bursts (Wikimedia, CDNs).
+  await ITK.mapLimit(pending, 4, async (img) => {
     // Without this fallback, hotlink-protected images keep 0×0 and vanish from size filters.
     const dims = await loadDimensionsWithFallback(img);
     if (dims?.width > 0 && dims?.height > 0) {
