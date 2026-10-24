@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 - Arabic (right-to-left): bringing a control into view (keyboard focus, a scrolled-to setting) could shift the whole panel 80 px sideways, cutting off one edge; the panel can no longer be scrolled sideways. The divider before the capture delay sits on the correct side, the screenshot size reads left to right like the editor's, and an annotation's text field ends at the click, where the text is drawn (it used to open on the other side of it).
+- Full-page capture at a fractional display scale (Windows at 125%, some page zoom levels) no longer leaves a thin line between slices: a slice that lands a pixel or two below the previous one is joined to it.
 - Long labels in some languages (German, Dutch, Russian, Ukrainian, Japanese) no longer push controls out of view: the panel's tabs and action bar drop their icons or labels only when they do not fit, the status bar wraps instead of overflowing, a long option stays inside its settings row, and the editor's Save button takes a row of its own when needed.
 - Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
 - Full-page capture can no longer hang: every step has a time limit and the whole capture a deadline; a page that stops scrolling ends it (with a notice that it may be incomplete); app-like pages are captured through their inner scrolling area; the page restores itself even if the extension stops midway.

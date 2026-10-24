@@ -251,6 +251,16 @@ const DEMO = `http://${DEMO_HOST}:${server.address().port}/`;
 // ---------- UI captures ----------
 // Headless Chromium can, rarely, tile a page into a screenshot right after it is resized: a capture
 // counts only when the next one is identical.
+// Every other page gets its size at 2× through its own emulation (Playwright's viewport would be
+// 1× in a context without one).
+// The sessions are kept: an override ends with its session.
+const emulations = [];
+async function at2x(page, width, height) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 2, mobile: false });
+  emulations.push(cdp);
+}
+
 async function stableShot(page) {
   let last = await page.screenshot();
   for (let i = 0; i < 8; i++) {
@@ -264,8 +274,11 @@ async function stableShot(page) {
 
 async function captureUi(locale) {
   const ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'itk-store-')), {
-    channel: 'chromium', headless: true, deviceScaleFactor: 2, viewport: { width: 1280, height: 800 },
-    args: [`--host-resolver-rules=MAP ${DEMO_HOST} 127.0.0.1`, `--disable-extensions-except=${ROOT}`, `--load-extension=${ROOT}`],
+    channel: 'chromium', headless: true, viewport: null,
+    // A real 2× display and a window the size of the demo page: the extension's own screenshots
+    // (full page) see the window itself, not Playwright's emulated viewport, which they would
+    // rescale (and misalign the slices of).
+    args: ['--force-device-scale-factor=2', '--screen-info={2600x1800}', '--window-size=1180,899', `--host-resolver-rules=MAP ${DEMO_HOST} 127.0.0.1`, `--disable-extensions-except=${ROOT}`, `--load-extension=${ROOT}`],
   });
   const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker');
   // After the install defaults are written (else they could overwrite these).
@@ -279,8 +292,17 @@ async function captureUi(locale) {
   const newPages = (known) => ctx.pages().filter((p) => !known.has(p));
 
   const demo = await ctx.newPage();
-  await demo.setViewportSize({ width: 1180, height: 760 });
   await demo.goto(DEMO);
+  // The window's own frame differs between Chromium builds: sized until the page is 1180×760.
+  for (let i = 0; i < 5; i++) {
+    const [w, h] = await demo.evaluate(() => [innerWidth, innerHeight]);
+    if (w === 1180 && h === 760) break;
+    await sw.evaluate(async ([dw, dh]) => {
+      const win = await chrome.windows.getCurrent();
+      await chrome.windows.update(win.id, { width: win.width + dw, height: win.height + dh });
+    }, [1180 - w, 760 - h]);
+    await wait(300);
+  }
   await demo.waitForFunction(() => [...document.images].every((img) => img.complete));
   await demo.bringToFront();
   await wait(500);
@@ -289,12 +311,15 @@ async function captureUi(locale) {
 
   // Panel: a real scan of the demo page.
   const panel = await ctx.newPage();
-  await panel.setViewportSize({ width: 400, height: 760 });
+  await at2x(panel, 400, 760);
   await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
   await panel.waitForSelector('#app[data-ready="true"]');
   await panel.evaluate(async (tab) => { state.tabId = tab.id; state.windowId = tab.windowId; setHost(tab.url, tab.title); await scan(); }, demoTab);
   await panel.waitForFunction(() => document.querySelectorAll('.gcard img').length >= 6 && [...document.querySelectorAll('.gcard img')].slice(0, 6).every((i) => i.complete && i.naturalWidth));
   await wait(400);
+  await at2x(panel, 400, 760); // re-applied after the page loaded
+  await wait(300);
+  await panel.waitForFunction(() => [...document.querySelectorAll('.gcard img')].slice(0, 6).every((i) => i.complete && i.naturalWidth));
   shots.panel = await panel.screenshot();
 
   // Filters open, two images selected: the selection bar shows.
@@ -306,6 +331,8 @@ async function captureUi(locale) {
     [...document.querySelectorAll('.gcard .gcheck')].slice(0, 2).forEach((b) => b.click());
   });
   await wait(500);
+  await at2x(panel, 400, 760); // re-applied: a click on the panel can reset it
+  await wait(200);
   shots.filters = await panel.screenshot();
   await panel.click('#btn-filters');
 
@@ -313,7 +340,7 @@ async function captureUi(locale) {
   let known = new Set(ctx.pages());
   await sw.evaluate(({ url, tab, site }) => openEditor(url, { opener: tab, site, title: tab.title }), { url: `${DEMO}post-10.jpg`, tab: demoTab, site: DEMO_HOST });
   const editor = await waitFor(async () => newPages(known).find((p) => p.url().includes('resize.html')));
-  await editor.setViewportSize({ width: 1200, height: 740 });
+  await at2x(editor, 1200, 740);
   await editor.waitForSelector('.cropper-container');
   await wait(400);
   await editor.click('[data-preset="1080x1350"]');
@@ -332,7 +359,7 @@ async function captureUi(locale) {
   known = new Set(ctx.pages());
   await sw.evaluate((tabId) => captureFullPage(tabId), demoTab.id);
   const viewer = await waitFor(async () => newPages(known).find((p) => p.url().includes('view.html')));
-  await viewer.setViewportSize({ width: 1200, height: 740 });
+  await at2x(viewer, 1200, 740);
   await viewer.waitForSelector('#app[data-ready="true"]');
   await wait(300);
   shots.viewer = await viewer.screenshot();
@@ -351,7 +378,7 @@ async function captureUi(locale) {
   known = new Set(ctx.pages());
   await sw.evaluate(({ url, site, title }) => openViewer(url, { site, title }), { url: `data:image/png;base64,${shots.demo.toString('base64')}`, site: DEMO_HOST, title: demoTab.title });
   const shot = await waitFor(async () => newPages(known).find((p) => p.url().includes('view.html')));
-  await shot.setViewportSize({ width: 1200, height: 740 });
+  await at2x(shot, 1200, 740);
   await shot.waitForSelector('#app[data-ready="true"]');
   await shot.click('#btn-annotate');
   await shot.waitForSelector('.annot-layer');
@@ -396,10 +423,14 @@ async function captureUi(locale) {
   await panel.click('#setting-theme .seg[data-value="light"]');
   await panel.evaluate(() => document.querySelectorAll('*').forEach((el) => { if (el.scrollTop) el.scrollTop = 0; }));
   await wait(400);
+  await at2x(panel, 400, 760); // re-applied: a click on the panel can reset it
+  await wait(200);
   shots.settings = await panel.screenshot();
   // Reference only (not on a slide): the Tools tab, to review every part of the UI per language.
   await panel.evaluate(() => document.querySelector('.tab[data-tab="tools"]').click());
   await wait(300);
+  await at2x(panel, 400, 760); // re-applied: a click on the panel can reset it
+  await wait(200);
   shots.tools = await panel.screenshot();
 
   await ctx.close();

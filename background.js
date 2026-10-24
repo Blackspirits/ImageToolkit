@@ -1071,8 +1071,15 @@ async function captureFullPage(tabId) {
     let finished = false;
     let coveredTo = origin;
     let grewTo = page.scrollHeight;
+    // Where the slice drawn last ends on the canvas. With a fractional pixel scale (Windows at
+    // 125%, page zoom) scroll positions round to device pixels, and a slice can land a pixel or
+    // two below the previous one: it is joined to it, never leaving an empty line between them.
+    let drawnTo = 0;
     for (let i = 0; i < maxSlices; i++) {
-      await offscreenRequest({ action: 'fullpage-draw', session, dataUrl: slice.dataUrl, crop, y: Math.round((slice.at.y - origin) * px * scale), scale }, 15000);
+      let y = Math.round((slice.at.y - origin) * px * scale);
+      if (y > drawnTo && y - drawnTo <= 2) y = drawnTo;
+      await offscreenRequest({ action: 'fullpage-draw', session, dataUrl: slice.dataUrl, crop, y, scale }, 15000);
+      drawnTo = Math.max(drawnTo, y + Math.round(crop.height * scale));
       grewTo = Math.max(grewTo, slice.at.scrollHeight || 0);
       const bottom = slice.at.y + viewHeight;
       coveredTo = Math.max(coveredTo, bottom);

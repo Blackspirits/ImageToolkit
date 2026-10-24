@@ -233,10 +233,12 @@ body.sidepanel .app{height:100vh}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .card-title+.row{border-top:0;padding-top:2px}
 .row>label,.row-label label{font-size:12.5px;font-weight:550}
+/* Long compound words (Größenänderungsverhalten) may break, so the control keeps its room */
+.row>label,.row-label{min-width:0;overflow-wrap:anywhere;hyphens:auto}
 .row-label{display:flex;flex-direction:column;gap:1px;min-width:0}
 /* A long option (Anpassen (Letterbox)) never pushes the select out of its row */
-.row-ctrl:has(>.select){flex:0 1 auto;min-width:0;max-width:62%}
-.row-ctrl>.select{min-width:0;max-width:100%}
+.row-ctrl:has(>.select){flex:none;max-width:62%}
+.row-ctrl>.select{min-width:0;max-width:100%;white-space:nowrap;text-overflow:ellipsis}
 .row-label small{font-size:11px;color:var(--text-3);line-height:1.35}
 .row-ctrl{display:flex;align-items:center;gap:8px;flex:none}
 
