@@ -29,7 +29,7 @@ const TEXT = {
   pt_PT: {
     slides: [
       ['ImageToolkit', '*Encontrar* imagens', 'Todas as imagens da página — mesmo as que carregam ao deslizar, dentro de frames ou em todos os separadores.'],
-      ['Filtros', '*Filtrar* e selecionar', 'Por tamanho, tipo, formato, site ou separador. Descarrega uma, várias ou um ZIP.'],
+      ['Filtros', '*Filtrar* e selecionar', 'Por tamanho, tipo, formato, site ou separador. Transfere uma, várias ou um ZIP.'],
       ['Editor', '*Recortar* e redimensionar', 'Tamanhos para redes sociais, TMDB e TheTVDB. Guarda em PNG, JPG ou WebP.'],
       ['Captura', '*Capturar* e ocultar', 'Capturas da página inteira; depois esconde dados privados com cor sólida antes de partilhar.'],
       ['Privacidade', '*Privacidade* de raiz', 'As imagens e capturas ficam no teu navegador.'],
