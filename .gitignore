@@ -17,5 +17,11 @@ dist/
 # Metadata (Chrome Web Store)
 _metadata/
 
-# Raw UI captures from npm run store:shots (the slides are committed)
+# npm run store:shots: raw UI captures, and the slides of the other 16 languages
+# (regenerated on demand; English and Portuguese are kept for the README)
 docs/store/*/ui-*.png
+docs/store/*/
+!docs/store/demo/
+!docs/store/en/
+!docs/store/pt_PT/
+!docs/store/promo/

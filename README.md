@@ -34,7 +34,7 @@ The mark is a single continuous image frame that opens into an export arrow: fin
   <img src="docs/store/en/05-privacy.png" alt="Settings and privacy" width="425">
 </p>
 
-The characters in the demo gallery are fictional. `npm run store:shots` regenerates these images (and the Portuguese set in [`docs/store/pt_PT`](docs/store/pt_PT)) from the real extension.
+The characters in the demo gallery are fictional. `npm run store:shots` renders these images from the real extension in all 18 languages, plus the store's promo tiles — see [`docs/store`](docs/store/README.md).
 
 ## ✨ Features
 
