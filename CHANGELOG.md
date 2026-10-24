@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
 
 ### Fixed
-- Arabic (right-to-left): bringing a control into view (keyboard focus, a scrolled-to setting) could shift the whole panel 80 px sideways, cutting off one edge; the panel can no longer be scrolled sideways.
+- Arabic (right-to-left): bringing a control into view (keyboard focus, a scrolled-to setting) could shift the whole panel 80 px sideways, cutting off one edge; the panel can no longer be scrolled sideways. The divider before the capture delay sits on the correct side, the screenshot size reads left to right like the editor's, and an annotation's text field ends at the click, where the text is drawn (it used to open on the other side of it).
 - Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
 - Full-page capture can no longer hang: every step has a time limit and the whole capture a deadline; a page that stops scrolling ends it (with a notice that it may be incomplete); app-like pages are captured through their inner scrolling area; the page restores itself even if the extension stops midway.
 - Captures stop if another tab comes to the front (even briefly) or the page navigates or reloads, so a screenshot never mixes in another page; a full-page capture talks only to the document it started in. The visible-tab capture brings its tab to the front first.

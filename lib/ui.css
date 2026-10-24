@@ -73,7 +73,7 @@ kbd{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:5px;b
 .icon-btn.active,.icon-btn[aria-expanded="true"]{color:var(--accent-text);background:var(--accent-soft)}
 .icon-btn-boxed{border:1px solid var(--line);background:var(--bg-elev);box-shadow:var(--shadow-sm)}
 .icon-btn-heart:hover{color:#f43f5e}
-.icon-btn .dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--bg-elev)}
+.icon-btn .dot{position:absolute;top:6px;inset-inline-end:6px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--bg-elev)}
 
 /* ---------- Inputs ---------- */
 .input,.select{height:32px;border:1px solid var(--control-line);border-radius:var(--r-sm);background:var(--bg-elev);color:var(--text);font-size:12.5px;padding:0 10px;transition:border-color .15s,box-shadow .15s;min-width:0}

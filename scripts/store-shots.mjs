@@ -54,7 +54,7 @@ const TEXT = {
       ['Filtros', '*Filtra* y selecciona', 'Por tamaño, tipo, forma, sitio o pestaña. Descarga una, varias o un ZIP.'],
       ['Editor', '*Recorta* y redimensiona', 'Tamaños para redes sociales, TMDB y TheTVDB. Guarda en PNG, JPG o WebP.'],
       ['Captura', '*Captura* y oculta', 'Capturas de página completa; después oculta los datos privados con color sólido antes de compartir.'],
-      ['Privacidad', '*Privada* por diseño', 'Las imágenes y capturas se quedan en tu navegador.'],
+      ['Privacidad', '*Privacidad* por diseño', 'Las imágenes y capturas se quedan en tu navegador.'],
     ],
     list: ['Procesado en tu navegador', 'Sin rastreo ni estadísticas', 'Sin cookies en las peticiones automáticas', 'Código abierto'],
     note: 'Privado',
@@ -65,7 +65,7 @@ const TEXT = {
       ['Filtres', '*Filtrez* et sélectionnez', 'Par taille, type, forme, site ou onglet. Téléchargez-en une, une sélection ou un ZIP.'],
       ['Éditeur', '*Recadrez* et redimensionnez', 'Formats pour les réseaux sociaux, TMDB et TheTVDB. Enregistrez en PNG, JPG ou WebP.'],
       ['Capture', '*Capturez* et masquez', 'Captures de page entière, puis masquez les données privées d’une couleur unie avant de partager.'],
-      ['Confidentialité', '*Privé* par conception', 'Les images et captures restent dans votre navigateur.'],
+      ['Confidentialité', '*Confidentialité* dès la conception', 'Les images et captures restent dans votre navigateur.'],
     ],
     list: ['Traitement dans votre navigateur', 'Aucun pistage, aucune statistique', 'Aucun cookie sur les requêtes automatiques', 'Open source'],
     note: 'Privé',
@@ -76,7 +76,7 @@ const TEXT = {
       ['Filtri', '*Filtra* e seleziona', 'Per dimensione, tipo, forma, sito o scheda. Scarica una, una selezione o uno ZIP.'],
       ['Editor', '*Ritaglia* e ridimensiona', 'Formati per i social, TMDB e TheTVDB. Salva in PNG, JPG o WebP.'],
       ['Cattura', '*Cattura* e oscura', 'Screenshot della pagina intera, poi nascondi i dati privati con un colore pieno prima di condividere.'],
-      ['Privacy', '*Privata* per natura', 'Immagini e screenshot restano nel tuo browser.'],
+      ['Privacy', '*Privacy* fin dalla progettazione', 'Immagini e screenshot restano nel tuo browser.'],
     ],
     list: ['Elaborazione nel browser', 'Nessun tracciamento né statistiche', 'Nessun cookie nelle richieste automatiche', 'Open source'],
     note: 'Privato',
@@ -98,7 +98,7 @@ const TEXT = {
       ['Filters', '*Filter* en selecteer', 'Op grootte, type, vorm, site of tabblad. Download er één, een selectie of een ZIP.'],
       ['Editor', '*Bijsnijden* en schalen', 'Formaten voor sociale media, TMDB en TheTVDB. Opslaan als PNG, JPG of WebP.'],
       ['Vastleggen', '*Vastleggen* en afschermen', 'Schermafbeeldingen van de hele pagina; scherm daarna privégegevens af met een effen kleur voordat je deelt.'],
-      ['Privacy', '*Privé* van nature', 'Afbeeldingen en schermafbeeldingen blijven in je browser.'],
+      ['Privacy', '*Privacy* voorop', 'Afbeeldingen en schermafbeeldingen blijven in je browser.'],
     ],
     list: ['Verwerkt in je browser', 'Geen tracking, geen statistieken', 'Geen cookies bij automatische verzoeken', 'Open source'],
     note: 'Privé',
@@ -108,19 +108,19 @@ const TEXT = {
       ['ImageToolkit', '*Znajdź* obrazy', 'Każdy obraz na stronie — także ładowane później, w ramkach lub we wszystkich kartach.'],
       ['Filtry', '*Filtruj* i zaznaczaj', 'Według rozmiaru, typu, kształtu, witryny lub karty. Pobierz jeden, kilka lub ZIP.'],
       ['Edytor', '*Kadruj* i skaluj', 'Rozmiary dla mediów społecznościowych, TMDB i TheTVDB. Zapisz jako PNG, JPG lub WebP.'],
-      ['Zrzut', '*Zrzut* i zakrywanie', 'Zrzuty całej strony, a potem zakryj prywatne dane jednolitym kolorem przed udostępnieniem.'],
+      ['Zrzut ekranu', '*Rób zrzuty* i zakrywaj', 'Zrzuty całej strony, a potem zakryj prywatne dane jednolitym kolorem przed udostępnieniem.'],
       ['Prywatność', '*Prywatność* od podstaw', 'Obrazy i zrzuty zostają w Twojej przeglądarce.'],
     ],
-    list: ['Przetwarzanie w przeglądarce', 'Bez śledzenia i statystyk', 'Bez ciasteczek w automatycznych żądaniach', 'Otwarte źródło'],
+    list: ['Przetwarzanie w przeglądarce', 'Bez śledzenia i statystyk', 'Bez ciasteczek w automatycznych żądaniach', 'Otwarty kod źródłowy'],
     note: 'Prywatne',
   },
   tr: {
     slides: [
-      ['ImageToolkit', '*Görselleri* bulun', 'Sayfadaki tüm görseller: sonradan yüklenenler, çerçevelerdekiler ve tüm sekmelerdekiler dahil.'],
+      ['ImageToolkit', 'Görselleri *bul*', 'Sayfadaki tüm görseller: sonradan yüklenenler, çerçevelerdekiler ve tüm sekmelerdekiler dahil.'],
       ['Filtreler', '*Filtrele* ve seç', 'Boyuta, türe, şekle, siteye veya sekmeye göre. Birini, bir seçimi veya ZIP olarak indir.'],
       ['Düzenleyici', '*Kırp* ve boyutlandır', 'Sosyal medya, TMDB ve TheTVDB için hazır boyutlar. PNG, JPG veya WebP olarak kaydet.'],
       ['Yakalama', '*Yakala* ve gizle', 'Tam sayfa ekran görüntüsü al, paylaşmadan önce özel bilgileri düz renkle gizle.'],
-      ['Gizlilik', '*Gizlilik* odaklı', 'Görseller ve ekran görüntüleri tarayıcınızda kalır.'],
+      ['Gizlilik', '*Gizlilik* odaklı', 'Görseller ve ekran görüntüleri tarayıcında kalır.'],
     ],
     list: ['Tarayıcıda işlenir', 'İzleme yok, istatistik yok', 'Otomatik isteklerde çerez yok', 'Açık kaynak'],
     note: 'Gizli',
@@ -129,7 +129,7 @@ const TEXT = {
     slides: [
       ['ImageToolkit', '*Находите* изображения', 'Все изображения на странице — даже с отложенной загрузкой, во фреймах и во всех вкладках.'],
       ['Фильтры', '*Фильтруйте* и выбирайте', 'По размеру, типу, форме, сайту или вкладке. Скачайте одно, несколько или ZIP.'],
-      ['Редактор', '*Обрезка* и масштаб', 'Размеры для соцсетей, TMDB и TheTVDB. Сохранение в PNG, JPG или WebP.'],
+      ['Редактор', '*Обрезайте* и масштабируйте', 'Размеры для соцсетей, TMDB и TheTVDB. Сохранение в PNG, JPG или WebP.'],
       ['Снимок', '*Снимайте* и скрывайте', 'Снимки всей страницы, а затем скрытие личных данных сплошным цветом перед отправкой.'],
       ['Приватность', '*Приватность* по умолчанию', 'Изображения и снимки остаются в вашем браузере.'],
     ],
@@ -140,7 +140,7 @@ const TEXT = {
     slides: [
       ['ImageToolkit', '*Знаходьте* зображення', 'Усі зображення на сторінці — навіть із відкладеним завантаженням, у фреймах і в усіх вкладках.'],
       ['Фільтри', '*Фільтруйте* й вибирайте', 'За розміром, типом, формою, сайтом або вкладкою. Завантажте одне, кілька або ZIP.'],
-      ['Редактор', '*Обрізання* й масштаб', 'Розміри для соцмереж, TMDB і TheTVDB. Збереження в PNG, JPG або WebP.'],
+      ['Редактор', '*Обрізайте* й масштабуйте', 'Розміри для соцмереж, TMDB і TheTVDB. Збереження в PNG, JPG або WebP.'],
       ['Знімок', '*Знімайте* й приховуйте', 'Знімки всієї сторінки, а потім приховування особистих даних суцільним кольором перед надсиланням.'],
       ['Приватність', '*Приватність* за замовчуванням', 'Зображення та знімки залишаються у вашому браузері.'],
     ],
@@ -153,7 +153,7 @@ const TEXT = {
       ['Bộ lọc', '*Lọc* và chọn', 'Theo kích thước, loại, hình dạng, trang web hoặc thẻ. Tải một ảnh, nhiều ảnh hoặc tệp ZIP.'],
       ['Trình chỉnh sửa', '*Cắt* và đổi cỡ', 'Kích thước cho mạng xã hội, TMDB và TheTVDB. Lưu dưới dạng PNG, JPG hoặc WebP.'],
       ['Chụp', '*Chụp* và che', 'Chụp toàn trang, rồi che thông tin riêng tư bằng màu đặc trước khi chia sẻ.'],
-      ['Quyền riêng tư', '*Riêng tư* từ gốc', 'Hình ảnh và ảnh chụp ở lại trong trình duyệt của bạn.'],
+      ['Quyền riêng tư', '*Quyền riêng tư* là trên hết', 'Hình ảnh và ảnh chụp ở lại trong trình duyệt của bạn.'],
     ],
     list: ['Xử lý trong trình duyệt', 'Không theo dõi, không thống kê', 'Không cookie trong yêu cầu tự động', 'Mã nguồn mở'],
     note: 'Riêng tư',
@@ -172,10 +172,10 @@ const TEXT = {
   ko: {
     slides: [
       ['ImageToolkit', '이미지 *찾기*', '지연 로딩 이미지, 프레임 속 이미지, 모든 탭의 이미지까지 페이지의 모든 이미지를 찾습니다.'],
-      ['필터', '*필터*와 선택', '크기, 형식, 모양, 사이트, 탭별로 필터링. 하나씩, 여러 개 또는 ZIP으로 다운로드.'],
+      ['필터', '*필터링*하고 선택', '크기, 형식, 모양, 사이트, 탭별로 필터링. 하나씩, 여러 개 또는 ZIP으로 다운로드.'],
       ['편집기', '*자르기*와 크기 조정', 'SNS, TMDB, TheTVDB용 프리셋. PNG, JPG, WebP로 저장.'],
       ['캡처', '*캡처*하고 가리기', '전체 페이지를 캡처하고, 공유하기 전에 개인 정보를 단색으로 가리세요.'],
-      ['개인정보', '*개인정보* 우선 설계', '이미지와 캡처는 브라우저 안에만 머뭅니다.'],
+      ['개인정보', '*개인정보 보호* 중심 설계', '이미지와 캡처는 브라우저 안에만 머뭅니다.'],
     ],
     list: ['브라우저에서 처리', '추적·분석 없음', '자동 요청에 쿠키 없음', '오픈 소스'],
     note: '비공개',
@@ -206,7 +206,7 @@ const TEXT = {
     slides: [
       ['ImageToolkit', '*اعثر* على الصور', 'كل صور الصفحة — حتى المحمّلة لاحقًا، وداخل الإطارات، وفي جميع علامات التبويب.'],
       ['التصفية', '*صفِّ* واختر', 'حسب الحجم أو النوع أو الشكل أو الموقع أو علامة التبويب. نزّل صورة أو مجموعة أو ملف ZIP.'],
-      ['المحرر', '*اقتصاص* وتغيير الحجم', 'مقاسات جاهزة لوسائل التواصل وTMDB وTheTVDB. احفظ بصيغة PNG أو JPG أو WebP.'],
+      ['المحرر', '*اقتصّ* وغيّر الحجم', 'مقاسات جاهزة لوسائل التواصل وTMDB وTheTVDB. احفظ بصيغة PNG أو JPG أو WebP.'],
       ['الالتقاط', '*التقط* وأخفِ', 'لقطات للصفحة كاملة، ثم أخفِ البيانات الخاصة بلون صلب قبل المشاركة.'],
       ['الخصوصية', '*الخصوصية* أولًا', 'تبقى الصور واللقطات داخل متصفحك.'],
     ],
@@ -327,10 +327,9 @@ async function captureUi(locale) {
     const img = document.getElementById('shot');
     const blob = await (await fetch(img.src)).blob();
     const data = await new Promise((resolve) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(blob); });
-    return { data: data.split(',')[1], width: img.naturalWidth, height: img.naturalHeight };
+    return { data: data.split(',')[1] };
   });
   shots.fullpage = Buffer.from(full.data, 'base64');
-  shots.fullpageRatio = full.width / full.height;
   await viewer.close();
 
   // Annotate the profile as it shows on screen (the clean page screenshot, opened in the
@@ -360,11 +359,16 @@ async function captureUi(locale) {
   await shot.click('.annot-color[data-color="#ef4444"]');
   await drag(target.x1 - 8, target.y1 - 8, target.x2 + 8, target.y2 + 8);
   await shot.click('.annot-tool[data-tool="arrow"]');
-  await drag(target.x2 + 150, target.y2 + 70, target.x2 + 12, (target.y1 + target.y2) / 2);
+  // Arrow and note to the right of the bar, where the page is empty (not over the avatars).
+  const mid = (target.y1 + target.y2) / 2;
+  await drag(target.x2 + 170, mid, target.x2 + 16, mid);
   await shot.click('.annot-tool[data-tool="text"]');
   await shot.click('.annot-size[data-size="thick"]');
-  await shot.mouse.click(...await at(target.x2 + 120, target.y2 + 80));
+  // Text starts at the click, or ends there in a right-to-left UI.
+  await shot.mouse.click(...await at(target.x2 + (locale === 'ar' ? 300 : 182), mid - 14));
   await shot.waitForSelector('.annot-text');
+  // The field takes the focus on the next frame: typing earlier loses the first letters.
+  await shot.waitForFunction(() => document.activeElement?.classList.contains('annot-text'));
   await shot.keyboard.type(TEXT[locale].note);
   await shot.keyboard.press('Enter'); // places the text
   await wait(300);
@@ -379,6 +383,10 @@ async function captureUi(locale) {
   await panel.evaluate(() => document.querySelectorAll('*').forEach((el) => { if (el.scrollTop) el.scrollTop = 0; }));
   await wait(400);
   shots.settings = await panel.screenshot();
+  // Reference only (not on a slide): the Tools tab, to review every part of the UI per language.
+  await panel.evaluate(() => document.querySelector('.tab[data-tab="tools"]').click());
+  await wait(300);
+  shots.tools = await panel.screenshot();
 
   await ctx.close();
   return shots;
@@ -395,8 +403,9 @@ function slideHtml(locale, index, theme, layout, shots) {
   const dark = theme === 'dark';
   const frames = {
     pair: () => `<img class="frame" style="left:46px;top:150px;width:560px" src="${png(shots.demo)}"><img class="frame" style="left:470px;top:110px;width:300px" src="${png(shots.panel)}">`,
-    // The whole page as captured, behind the editor redacting it.
-    capture: () => `<div class="frame page" style="left:56px;top:40px;width:${Math.round(720 * shots.fullpageRatio)}px;height:720px"><img src="${png(shots.fullpage)}"></div><img class="frame" style="left:216px;top:236px;width:600px" src="${png(shots.annotate)}">`,
+    // The full-page capture at a third of its size (faces stay legible), fading out where the
+    // page goes on, behind the editor redacting it.
+    capture: () => `<div class="frame page" style="left:40px;top:40px;width:400px;height:720px"><img src="${png(shots.fullpage)}"><i></i></div><img class="frame" style="left:236px;top:262px;width:584px" src="${png(shots.annotate)}">`,
     panel: () => `<img class="frame" style="left:150px;top:56px;width:376px" src="${png(shots.main)}">`,
     wide: () => `<img class="frame" style="left:46px;top:150px;width:760px" src="${png(shots.main)}">`,
   }[layout]();
@@ -414,6 +423,7 @@ function slideHtml(locale, index, theme, layout, shots) {
     .ko p,.ko li{word-break:keep-all}
     .page{overflow:hidden;background:#0b0b10}
     .page img{display:block;width:100%}
+    .page i{position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(transparent,#0b0b10)}
     .copy[dir="rtl"] li{flex-direction:row}
     .pill{display:inline-block;padding:10px 26px;border-radius:999px;background:#fff;color:#8b5cf6;font-weight:700;font-size:16px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
     h1{margin-top:34px;font-size:58px;line-height:1.05;font-weight:800;letter-spacing:-.02em}

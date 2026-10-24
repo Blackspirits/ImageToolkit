@@ -28,9 +28,9 @@ body.sidepanel .app{height:100vh}
   .statusbar .segmented-icons .seg{min-width:26px;padding:0 5px}
 }
 .header-actions{display:flex;align-items:center;gap:2px;flex:none}
-.split{display:flex;align-items:center;gap:0;padding:2px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-elev);box-shadow:var(--shadow-sm);margin-right:4px}
+.split{display:flex;align-items:center;gap:0;padding:2px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-elev);box-shadow:var(--shadow-sm);margin-inline-end:4px}
 .split .icon-btn{width:30px;height:28px}
-.delay-select{position:relative;display:flex;align-items:center;gap:2px;height:28px;padding:0 4px 0 6px;border-left:1px solid var(--line);color:var(--text-2);cursor:pointer}
+.delay-select{position:relative;display:flex;align-items:center;gap:2px;height:28px;padding-block:0;padding-inline:6px 4px;border-inline-start:1px solid var(--line);color:var(--text-2);cursor:pointer}
 .delay-select select{appearance:none;border:0;background:transparent;font-size:11px;font-weight:650;font-variant-numeric:tabular-nums;cursor:pointer;padding:0 2px;color:var(--text-2)}
 .delay-select select:focus-visible{box-shadow:var(--ring)}
 @supports (appearance:base-select){.delay-select select{appearance:base-select;min-height:0}}

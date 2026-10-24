@@ -2188,3 +2188,57 @@ test('right-to-left: bringing a control into view never shifts the whole panel s
     await setLocale('auto');
   }
 });
+
+test('right-to-left: annotation text ends at the click, on screen and in the saved image', async () => {
+  const setLocale = (locale) => sw.evaluate(async (locale) => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, locale } }); }, locale);
+  await setLocale('ar');
+  const known = new Set(ctx.pages());
+  try {
+    const dataUrl = await ui.evaluate(() => {
+      const c = document.createElement('canvas'); c.width = 400; c.height = 200;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 200);
+      return c.toDataURL('image/png');
+    });
+    await sw.evaluate((url) => openEditor(url), dataUrl);
+    const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+    await editor.setViewportSize({ width: 1200, height: 800 });
+    await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+    assert.equal(await editor.evaluate(() => document.documentElement.dir), 'rtl');
+    await editor.click('#btn-annotate');
+    await editor.waitForSelector('.annot-layer');
+    await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await editor.click('.annot-tool[data-tool="text"]');
+    await editor.waitForSelector('.annot-tool[data-tool="text"].active');
+    const box = await editor.locator('.annot-overlay').boundingBox();
+    const clickX = box.x + box.width * 0.75;
+    await editor.mouse.click(clickX, box.y + box.height * 0.5); // (300, 100)
+    await editor.waitForFunction(() => document.activeElement?.classList.contains('annot-text'));
+    await editor.keyboard.type('Hi');
+    // The field ends at the click too, so the text lands where it was typed.
+    const field = await editor.locator('.annot-text').boundingBox();
+    assert.ok(Math.abs(field.x + field.width - clickX) <= 3, `field ends at the click: ${field.x + field.width} vs ${clickX}`);
+    await editor.keyboard.press('Enter');
+    // Horizontal extent of everything that is not white in rows 100–140 of a 400×200 drawing.
+    const extent = (source) => editor.evaluate((source) => {
+      const c = document.createElement('canvas'); c.width = 400; c.height = 200;
+      const x = c.getContext('2d', { willReadFrequently: true });
+      x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 200);
+      x.drawImage(document.querySelector(source), 0, 0, 400, 200);
+      const d = x.getImageData(0, 100, 400, 40).data;
+      let min = 400, max = -1;
+      for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] < 700) { const px = (i / 4) % 400; min = Math.min(min, px); max = Math.max(max, px); }
+      return [min, max];
+    }, source);
+    const onScreen = await extent('.annot-canvas');
+    assert.ok(onScreen[1] >= 0, 'the text is drawn');
+    assert.ok(onScreen[1] <= 304 && onScreen[0] < 290, `the text ends at the click: ${onScreen}`);
+    await editor.keyboard.press('Control+Enter');
+    await editor.waitForSelector('.annot-layer', { state: 'detached' });
+    await waitFor(() => editor.evaluate(() => editor.cropper.ready && document.getElementById('cropper-img').complete));
+    const saved = await extent('#cropper-img');
+    assert.ok(Math.abs(saved[0] - onScreen[0]) <= 2 && Math.abs(saved[1] - onScreen[1]) <= 2, `same place in the image: ${saved} vs ${onScreen}`);
+    await editor.close();
+  } finally {
+    await setLocale('auto');
+  }
+});
