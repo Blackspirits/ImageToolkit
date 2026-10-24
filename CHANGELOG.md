@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - **Capture viewer**: every screenshot (area, visible page, full page) opens in a tab next to the page, shown whole at the tab's width with the page's own scroll (or at actual size), ready to **save** (PNG keeps the exact capture; JPG or WebP), **copy**, **crop** or **annotate** in the editor, in the same tab.
 - **The editor opens in a tab** next to the page instead of a separate window, with all the room of the browser. Its image is deleted when the tab closes or leaves for another page.
-- New Chrome Web Store screenshots in English and Portuguese, rendered from the real extension on a demo page with fictional characters (`npm run store:shots`).
+- New Chrome Web Store screenshots in all 18 languages and promo tiles, rendered from the real extension on a demo page with fictional characters (`npm run store:shots`).
 - **Full-page capture**: scrolls and captures the page screen by screen and stitches it locally. Fixed and sticky elements (headers, chat buttons, cookie bars) appear once instead of on every slice, the scrollbar is left out, animations pause, lazy images load, and the page returns to where you were. Progress shows on the toolbar icon and Esc cancels. Very tall pages are scaled down (to 50%) before being cut. From the panel, the toolbar-icon menu or an assignable shortcut.
 - **Annotate in the editor**: **redact** with opaque colour (the way to hide data for sure), pixelate (true block averages) and blur, draw boxes, arrows, outlined text and highlights; six colours, three thicknesses, undo/redo and one-key shortcuts. Pixel blocks and blur grow with the area covered. Works on the image as rotated/flipped and changes nothing until Apply (Ctrl+Enter).
 - **Images inside iframes**, same-origin and cross-origin, are listed with the page's own (and outlined there when selected).
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
 
 ### Fixed
+- Arabic (right-to-left): bringing a control into view (keyboard focus, a scrolled-to setting) could shift the whole panel 80 px sideways, cutting off one edge; the panel can no longer be scrolled sideways.
 - Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
 - Full-page capture can no longer hang: every step has a time limit and the whole capture a deadline; a page that stops scrolling ends it (with a notice that it may be incomplete); app-like pages are captured through their inner scrolling area; the page restores itself even if the extension stops midway.
 - Captures stop if another tab comes to the front (even briefly) or the page navigates or reloads, so a screenshot never mixes in another page; a full-page capture talks only to the document it started in. The visible-tab capture brings its tab to the front first.

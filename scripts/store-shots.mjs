@@ -376,6 +376,7 @@ async function captureUi(locale) {
   await panel.evaluate(() => document.querySelector('.tab[data-tab="settings"]').click());
   // In the light theme: the other slides already show the dark one.
   await panel.click('#setting-theme .seg[data-value="light"]');
+  await panel.evaluate(() => document.querySelectorAll('*').forEach((el) => { if (el.scrollTop) el.scrollTop = 0; }));
   await wait(400);
   shots.settings = await panel.screenshot();
 
@@ -389,6 +390,8 @@ const png = (buffer) => `data:image/png;base64,${buffer.toString('base64')}`;
 function slideHtml(locale, index, theme, layout, shots) {
   const [label, title, sub] = TEXT[locale].slides[index];
   const rtl = locale === 'ar';
+  // Titles without spaces (Japanese, Chinese) or short ones (Korean) stay on one line and shrink.
+  const cjk = ['ja', 'ko', 'zh_CN', 'zh_TW'].includes(locale) ? ` class="cjk ${locale}"` : '';
   const dark = theme === 'dark';
   const frames = {
     pair: () => `<img class="frame" style="left:46px;top:150px;width:560px" src="${png(shots.demo)}"><img class="frame" style="left:470px;top:110px;width:300px" src="${png(shots.panel)}">`,
@@ -407,6 +410,8 @@ function slideHtml(locale, index, theme, layout, shots) {
       color:${dark ? '#fff' : '#1b1b29'}}
     .frame{position:absolute;border-radius:22px;border:1px solid ${dark ? 'rgba(255,255,255,.35)' : 'rgba(20,20,40,.12)'};box-shadow:0 30px 70px -20px rgba(0,0,0,${dark ? '.75' : '.35'})}
     .copy{position:absolute;left:${copyLeft}px;right:${layout === 'panel' ? 120 : 44}px;top:50%;transform:translateY(-50%)}
+    .cjk h1{white-space:nowrap}
+    .ko p,.ko li{word-break:keep-all}
     .page{overflow:hidden;background:#0b0b10}
     .page img{display:block;width:100%}
     .copy[dir="rtl"] li{flex-direction:row}
@@ -417,7 +422,7 @@ function slideHtml(locale, index, theme, layout, shots) {
     ul{margin-top:26px;padding:24px 28px;list-style:none;border-radius:22px;background:#fff;color:#22223a;box-shadow:0 14px 40px rgba(0,0,0,.18)}
     li{display:flex;align-items:center;gap:14px;font-size:19px;font-weight:700;padding:6px 0}
     li::before{content:"";width:14px;height:14px;border-radius:50%;background:#22c55e;flex:none}
-  </style></head><body>${frames}<div class="copy"${rtl ? ' dir="rtl"' : ''}><span class="pill">${label}</span><h1>${heading}</h1><p>${sub}</p>${list}</div></body></html>`;
+  </style></head><body${cjk}>${frames}<div class="copy"${rtl ? ' dir="rtl"' : ''}><span class="pill">${label}</span><h1>${heading}</h1><p>${sub}</p>${list}</div></body></html>`;
 }
 
 // Long words (German, French, Russian…) shrink the title until it fits its column, and the

@@ -2166,3 +2166,25 @@ test('annotate: Esc drops a shape in progress but never the marks already made',
   assert.equal(await editor.locator('.annot-layer').count(), 0);
   await editor.close();
 });
+
+test('right-to-left: bringing a control into view never shifts the whole panel sideways', async () => {
+  const setLocale = (locale) => sw.evaluate(async (locale) => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, locale } }); }, locale);
+  await setLocale('ar');
+  const panel = await ctx.newPage();
+  try {
+    await panel.setViewportSize({ width: 400, height: 640 });
+    await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
+    await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+    assert.equal(await panel.evaluate(() => document.documentElement.dir), 'rtl');
+    await panel.evaluate(() => document.querySelector('.tab[data-tab="settings"]').click());
+    // The header glow reaches past the edges: a scrollable .app moved 80px when asked to show something.
+    const scrollLeft = await panel.evaluate(() => {
+      document.querySelector('#setting-theme .seg[data-value="light"]').scrollIntoView({ block: 'center', inline: 'center' });
+      return document.getElementById('app').scrollLeft;
+    });
+    assert.equal(scrollLeft, 0);
+  } finally {
+    await panel.close();
+    await setLocale('auto');
+  }
+});
