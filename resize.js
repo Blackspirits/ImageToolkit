@@ -361,14 +361,14 @@ function currentFormat() {
 function initFooter() {
   const group = $('resize-format');
   const range = $('resize-quality');
-  // PNG is lossless: the quality row stays in place (nothing below jumps) but is disabled and
-  // says why, instead of disappearing.
+  // PNG is lossless: the quality row stays in place (nothing below jumps), disabled, shown full
+  // (it is the best quality there is) and labelled why. The chosen value is kept for JPG/WebP.
   const paint = () => {
     const lossless = currentFormat() === 'png';
     range.disabled = lossless;
     $('quality-row').classList.toggle('is-off', lossless);
     $('resize-quality-value').textContent = lossless ? t('qualityLossless') : `${range.value}%`;
-    range.style.setProperty('--pct', `${((range.value - range.min) / (range.max - range.min)) * 100}%`);
+    range.style.setProperty('--pct', lossless ? '100%' : `${((range.value - range.min) / (range.max - range.min)) * 100}%`);
   };
   ui.setRadio(group, editor.settings.defaultFormat || 'webp');
   ui.initRadioGroup(group, paint);

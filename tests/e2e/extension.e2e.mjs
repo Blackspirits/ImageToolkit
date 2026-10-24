@@ -1935,6 +1935,8 @@ test('editor: PNG keeps the quality row in place, disabled and labelled lossless
     disabled: document.getElementById('resize-quality').disabled,
     label: document.getElementById('resize-quality-value').textContent,
     footTop: Math.round(document.getElementById('btn-save').getBoundingClientRect().top),
+    fill: document.getElementById('resize-quality').style.getPropertyValue('--pct'),
+    value: document.getElementById('resize-quality').value,
   }));
   await editor.click('#resize-format [data-value="webp"]');
   const webp = await state();
@@ -1943,6 +1945,10 @@ test('editor: PNG keeps the quality row in place, disabled and labelled lossless
   assert.deepEqual([webp.hidden, webp.disabled, webp.label.endsWith('%')], [false, false, true]);
   assert.deepEqual([png.hidden, png.disabled, png.label.endsWith('%')], [false, true, false]);
   assert.equal(png.footTop, webp.footTop, 'the buttons below do not move');
+  assert.equal(png.fill, '100%', 'lossless reads as full quality');
+  await editor.click('#resize-format [data-value="webp"]');
+  const back = await state();
+  assert.deepEqual([back.value, back.label, back.fill], [webp.value, webp.label, webp.fill], 'the chosen quality comes back');
   await editor.close();
 });
 
