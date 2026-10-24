@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const key = params.get('key');
   // The page the image or screenshot came from, for {site} and {title} in filename templates.
   editor.page = { host: params.get('site') || '', title: params.get('title') || '' };
+  editor.capture = params.get('capture') === '1';
+  // From the capture viewer's Annotate button: straight into the annotate layer once ready.
+  if (params.get('annotate') === '1') $('cropper-img').addEventListener('ready', () => annotate(), { once: true });
   const source = await handoff.get(key).catch(() => null);
   if (!source) { showStatus(t('errorNoImage'), true); return; }
   editor.source = typeof source === 'string' ? source : '';
@@ -431,7 +434,7 @@ async function save() {
     const s = editor.settings;
     const remote = /^https?:/i.test(editor.source);
     const filename = ITK.buildFilename(remote ? editor.source : 'data:,', {
-      format, cropWidth: width, cropHeight: height, sourceName: remote ? '' : 'imagetoolkit',
+      format, cropWidth: width, cropHeight: height, sourceName: remote ? '' : editor.capture ? 'screenshot' : 'imagetoolkit',
       pageHost: editor.page?.host || '', pageTitle: editor.page?.title || '',
       subfolder: s.subfolder, filenamePattern: s.filenamePattern, filenamePrefix: s.filenamePrefix, filenameTemplate: s.filenameTemplate,
       knownWidth: width, knownHeight: height,

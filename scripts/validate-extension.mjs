@@ -8,8 +8,8 @@ const args = new Set(process.argv.slice(2));
 const jsOnly = args.has('--js-only');
 const i18nOnly = args.has('--i18n-only');
 
-const JS_FILES = ['background.js', 'content.js', 'offscreen.js', 'popup.js', 'resize.js', 'capture.js', 'lib/core.js', 'lib/i18n.js', 'lib/ui.js', 'lib/handoff.js', 'lib/annotate.js'];
-const I18N_SOURCES = ['background.js', 'capture.js', 'popup.js', 'resize.js', 'lib/annotate.js', 'popup.html', 'resize.html', 'manifest.json'];
+const JS_FILES = ['background.js', 'content.js', 'offscreen.js', 'popup.js', 'resize.js', 'view.js', 'capture.js', 'lib/core.js', 'lib/i18n.js', 'lib/ui.js', 'lib/handoff.js', 'lib/annotate.js'];
+const I18N_SOURCES = ['background.js', 'capture.js', 'popup.js', 'resize.js', 'view.js', 'lib/annotate.js', 'popup.html', 'resize.html', 'view.html', 'manifest.json'];
 
 const errors = [];
 const fail = (message) => errors.push(message);
@@ -37,7 +37,7 @@ function checkManifest() {
     for (const [, file] of list.matchAll(/'([^']+)'/g)) if (!existsSync(file)) fail(`importScripts missing file: ${file}`);
   }
   for (const [, file] of sw.matchAll(/files:\s*\[[^\]]*?'([^']+\.js)'/g)) if (!existsSync(file)) fail(`executeScript missing file: ${file}`);
-  for (const html of ['popup.html', 'resize.html', 'offscreen.html']) {
+  for (const html of ['popup.html', 'resize.html', 'view.html', 'offscreen.html']) {
     const source = readFileSync(html, 'utf8');
     for (const [, file] of source.matchAll(/(?:src|href)="([^":#?]+\.(?:js|css|png|gif|svg))"/g)) {
       if (!existsSync(file)) fail(`${html} references missing file: ${file}`);

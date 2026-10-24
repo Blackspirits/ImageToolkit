@@ -885,5 +885,21 @@
   "qualityLossless": {
     "message": "無損",
     "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "螢幕截圖",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "符合寬度",
+    "description": "Button: show the screenshot fitted to the window width"
+  },
+  "zoomActual": {
+    "message": "實際大小",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "cropAction": {
+    "message": "裁切",
+    "description": "Short button: open the screenshot in the crop & resize editor"
   }
 }

@@ -886,5 +886,21 @@
   "qualityLossless": {
     "message": "Без втрат",
     "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Знімок екрана",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "За шириною",
+    "description": "Button: show the screenshot fitted to the window width"
+  },
+  "zoomActual": {
+    "message": "Реальний розмір",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "cropAction": {
+    "message": "Обрізати",
+    "description": "Short button: open the screenshot in the crop & resize editor"
   }
 }

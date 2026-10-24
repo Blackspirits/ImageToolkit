@@ -885,5 +885,21 @@
   "qualityLossless": {
     "message": "Sans perte",
     "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Capture d’écran",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Ajuster à la largeur",
+    "description": "Button: show the screenshot fitted to the window width"
+  },
+  "zoomActual": {
+    "message": "Taille réelle",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "cropAction": {
+    "message": "Recadrer",
+    "description": "Short button: open the screenshot in the crop & resize editor"
   }
 }

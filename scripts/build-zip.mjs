@@ -14,6 +14,7 @@ const RUNTIME = [
   'offscreen.html', 'offscreen.js',
   'popup.html', 'popup.css', 'popup.js',
   'resize.html', 'resize.css', 'resize.js',
+  'view.html', 'view.css', 'view.js',
   'lib', '_locales',
   'icons/icon16.png', 'icons/icon32.png', 'icons/icon48.png', 'icons/icon128.png', 'icons/logo128.png',
   'LICENSE', 'PRIVACY.md',

@@ -429,7 +429,7 @@ test('context-menu copy writes the image from the focused page', async () => {
   await page.close();
 });
 
-test('area capture crops the selection and opens the editor', async () => {
+test('area capture crops the selection and opens it in the viewer', async () => {
   const page = await screenPage('page.html');
   await page.bringToFront();
   const tabId = await sw.evaluate(async (url) => (await chrome.tabs.query({ url })).at(0).id, base + 'page.html');
@@ -440,8 +440,8 @@ test('area capture crops the selection and opens the editor', async () => {
   await page.mouse.down();
   await page.mouse.move(300, 250, { steps: 5 });
   await page.mouse.up();
-  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('resize.html') && p !== page), 10000);
-  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('view.html') && p !== page), 10000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 10000 });
   const info = await waitFor(() => editor.textContent('#info-text'));
   const dpr = await page.evaluate(() => devicePixelRatio);
   assert.equal(info, `${200 * dpr} × ${150 * dpr} px`);
@@ -854,7 +854,7 @@ test('area capture: a crop failure reports an error and never opens the whole sc
   const page = await ctx.newPage();
   await page.goto(base + 'page.html');
   await page.bringToFront();
-  const editors = () => ctx.pages().filter((p) => p.url().includes('resize.html')).length;
+  const editors = () => ctx.pages().filter((p) => p.url().includes('view.html')).length;
   const before = editors();
   for (const rect of [{ x: 1e6, y: 1e6, width: 50, height: 50 }, { x: 0, y: 0, width: NaN, height: 10 }]) {
     const result = await sw.evaluate(async ({ url, rect }) => {
@@ -1103,7 +1103,7 @@ test('page outlines follow the panel: gone when it moves to another tab or close
   await page.close();
 });
 
-test('closing the editor window forgets the handed-off image', async () => {
+test('closing the editor tab forgets the handed-off image', async () => {
   const known = new Set(ctx.pages());
   await sw.evaluate((url) => openEditor(url), base + 'wide.png');
   const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
@@ -1360,11 +1360,11 @@ test('full-page capture: slices in order, fixed header only once, scrollbar off,
   const known = new Set(ctx.pages());
   const res = await send({ action: 'captureFullPage', tabId });
   assert.equal(res.success, true, JSON.stringify(res));
-  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
-  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
   const { dpr, clientWidth } = await page.evaluate(() => ({ dpr: devicePixelRatio, clientWidth: document.documentElement.clientWidth }));
   const probe = await editor.evaluate(async (dpr) => {
-    const img = document.getElementById('cropper-img');
+    const img = document.getElementById('shot');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
@@ -1481,11 +1481,11 @@ test('full-page capture keeps sticky content where it belongs and never repeats 
   await page.bringToFront();
   const known = new Set(ctx.pages());
   assert.equal((await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'sticky.html') })).success, true);
-  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
-  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
   const dpr = await page.evaluate(() => devicePixelRatio);
   const px = await editor.evaluate((dpr) => {
-    const img = document.getElementById('cropper-img');
+    const img = document.getElementById('shot');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
@@ -1508,11 +1508,11 @@ test('full-page capture of an app-like layout follows its inner scrolling area',
   const known = new Set(ctx.pages());
   const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'app.html') });
   assert.equal(res.success, true, JSON.stringify(res));
-  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
-  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
   const dpr = await page.evaluate(() => devicePixelRatio);
   const probe = await editor.evaluate((dpr) => {
-    const img = document.getElementById('cropper-img');
+    const img = document.getElementById('shot');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
@@ -1537,7 +1537,7 @@ test('full-page capture ends on a page that refuses to scroll, and says it may b
   assert.equal(res.success, true, JSON.stringify(res));
   assert.equal(res.truncated, true);
   assert.ok(Date.now() - started < 20000, 'ends at once instead of looping');
-  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
   await editor.close();
   assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
   await page.close();
@@ -1553,11 +1553,11 @@ test('full-page capture of a page that jumps while scrolling (chats) has no hole
   const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'jumpy.html') });
   assert.equal(res.success, true, JSON.stringify(res));
   assert.equal(res.truncated, true);
-  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
-  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
   const dpr = await page.evaluate(() => devicePixelRatio);
   const probe = await editor.evaluate((dpr) => {
-    const img = document.getElementById('cropper-img');
+    const img = document.getElementById('shot');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const rows = [];
@@ -1608,7 +1608,7 @@ test('full-page capture stops when another tab comes to the front, and restores 
   const res = await pending;
   assert.equal(res.error, 'tabChanged', JSON.stringify(res));
   await new Promise((r) => setTimeout(r, 500));
-  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('resize.html')), false, 'no editor with a mixed capture');
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('view.html')), false, 'no editor with a mixed capture');
   assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
   assert.equal(await page.evaluate(() => scrollY), 0);
   await other.close();
@@ -1730,7 +1730,7 @@ test('full-page capture stops when the page reloads the same URL midway', async 
   const res = await pending;
   assert.ok(res.error, JSON.stringify(res));
   await new Promise((r) => setTimeout(r, 500));
-  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('resize.html')), false);
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('view.html')), false);
   await page.close();
 });
 
@@ -1743,11 +1743,11 @@ test('full-page capture ignores a hidden off-screen scrolling panel', async () =
   const known = new Set(ctx.pages());
   const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'panel.html') });
   assert.equal(res.success, true, JSON.stringify(res));
-  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')), 15000);
-  await editor.waitForSelector('.cropper-container', { timeout: 15000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
   const dpr = await page.evaluate(() => devicePixelRatio);
   const probe = await editor.evaluate((dpr) => {
-    const img = document.getElementById('cropper-img');
+    const img = document.getElementById('shot');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     return { h: img.naturalHeight, mid: [...x.getImageData(Math.round(400 * dpr), Math.round(300 * dpr), 1, 1).data.slice(0, 3)].join(',') };
@@ -1975,6 +1975,89 @@ test('automatic downloads stop at once on a web page that only looked like an im
   const res = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'looks-like.png.html', automatic: true });
   assert.equal(res.error, 'Not an image');
   assert.equal(res.bytesRead, 0);
+});
+
+test('the editor opens in a tab right next to the page, in the same window', async () => {
+  const page = await screenPage('page.html');
+  await page.bringToFront();
+  const opener = await sw.evaluate((u) => chrome.tabs.query({ url: u }).then((t) => t[0]), base + 'page.html');
+  const known = new Set(ctx.pages());
+  await sw.evaluate(({ url, opener }) => openEditor(url, { opener }), { url: base + 'wide.png', opener });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  const tab = await editor.evaluate(() => chrome.tabs.getCurrent());
+  const win = await sw.evaluate((id) => chrome.windows.get(id), tab.windowId);
+  assert.equal(win.type, 'normal');
+  assert.equal(tab.windowId, opener.windowId);
+  assert.equal(tab.index, opener.index + 1);
+  assert.equal(tab.active, true);
+  await editor.close();
+  await page.close();
+});
+
+test('capture viewer: whole capture, exact PNG, other formats, Crop and Annotate in the same tab', async () => {
+  // A tall capture made of four bands: red, green, blue, yellow (400×1600 device pixels).
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 1600;
+    const x = c.getContext('2d');
+    ['#ff0000', '#00ff00', '#0000ff', '#ffff00'].forEach((col, i) => { x.fillStyle = col; x.fillRect(0, i * 400, 400, 400); });
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openViewer(url, { site: 'example.org', title: 'Long page' }), dataUrl);
+  const viewer = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')));
+  await viewer.setViewportSize({ width: 1000, height: 700 });
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  assert.equal(await viewer.textContent('#info-text'), '400 × 1600 px');
+  // Fit: as wide as the page it came from (never enlarged), scrolling down.
+  const layout = await viewer.evaluate(() => {
+    const stage = document.getElementById('stage');
+    return { scrolls: stage.scrollHeight > stage.clientHeight, width: Math.round(document.getElementById('shot').getBoundingClientRect().width), dpr: devicePixelRatio };
+  });
+  assert.equal(layout.scrolls, true);
+  assert.equal(layout.width, Math.round(400 / layout.dpr));
+  // PNG keeps the exact bytes of the capture; JPG and WebP are encoded from it.
+  await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, saveAs: false } }); });
+  await viewer.reload();
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  const bytes = async (format) => {
+    const before = await sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
+    await viewer.click(`#view-format [data-value="${format}"]`);
+    await viewer.click('#btn-save');
+    const item = await waitFor(() => sw.evaluate((n) => chrome.downloads.search({ orderBy: ['-startTime'] }).then((d) => (d.length > n && d[0].state === 'complete' ? d[0] : null)), before), 15000);
+    return { name: item.filename.split(/[\\/]/).pop(), mime: item.mime, size: item.fileSize };
+  };
+  const png = await bytes('png');
+  assert.equal(png.mime, 'image/png');
+  assert.equal(png.size, Buffer.from(dataUrl.split(',')[1], 'base64').length, 'the exact PNG bytes');
+  const jpg = await bytes('jpeg');
+  assert.equal(jpg.mime, 'image/jpeg');
+  // Crop: the editor takes over in the same tab, with the same image and page details.
+  const key = new URL(viewer.url()).searchParams.get('key');
+  await viewer.click('#btn-crop');
+  await viewer.waitForURL(/resize\.html/);
+  await viewer.waitForSelector('.cropper-container', { timeout: 10000 });
+  const url = new URL(viewer.url());
+  assert.deepEqual([url.searchParams.get('key'), url.searchParams.get('site'), url.searchParams.get('capture')], [key, 'example.org', '1']);
+  assert.match(await viewer.textContent('#info-text'), /400 × 1600/);
+  // Annotate: straight into the annotate layer.
+  await viewer.goBack();
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  await viewer.click('#btn-annotate');
+  await viewer.waitForSelector('.annot-layer', { timeout: 10000 });
+  await viewer.close();
+  await waitFor(() => sw.evaluate((k) => ITK.handoff.get(k).then((v) => v == null), key));
+  await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, saveAs: true } }); });
+});
+
+test('leaving the viewer for another site forgets the capture', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openViewer(url), base + 'wide.png');
+  const viewer = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')));
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  const key = new URL(viewer.url()).searchParams.get('key');
+  await viewer.goto(base + 'page.html');
+  await waitFor(() => sw.evaluate((k) => ITK.handoff.get(k).then((v) => v == null), key));
+  await viewer.close();
 });
 
 test('auto-scroll runs once per page: a second request gets "busy"', async () => {

@@ -885,5 +885,21 @@
   "qualityLossless": {
     "message": "可逆圧縮",
     "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "スクリーンショット",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "幅に合わせる",
+    "description": "Button: show the screenshot fitted to the window width"
+  },
+  "zoomActual": {
+    "message": "実際のサイズ",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "cropAction": {
+    "message": "切り抜き",
+    "description": "Short button: open the screenshot in the crop & resize editor"
   }
 }

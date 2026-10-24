@@ -885,5 +885,21 @@
   "qualityLossless": {
     "message": "Không mất dữ liệu",
     "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Ảnh chụp màn hình",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Vừa chiều rộng",
+    "description": "Button: show the screenshot fitted to the window width"
+  },
+  "zoomActual": {
+    "message": "Kích thước thật",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "cropAction": {
+    "message": "Cắt",
+    "description": "Short button: open the screenshot in the crop & resize editor"
   }
 }

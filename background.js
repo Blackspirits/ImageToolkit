@@ -13,7 +13,6 @@ const t = i18n.t;
 // ---------- Constants ----------
 const MENU_FORMATS = ['png', 'jpg', 'webp', 'avif'];
 const MAX_FETCH_BYTES = ITK.MAX_IMAGE_BYTES;
-const EDITOR_WINDOW = { type: 'popup', width: 1440, height: 920 };
 
 const DEFAULT_SETTINGS = {
   defaultQuality: 85,
@@ -170,7 +169,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
-  if (id === 'custom-resize') { openEditor(imageUrl, { site: hostOf(tab?.url), title: tab?.title || '' }); return; }
+  if (id === 'custom-resize') { openEditor(imageUrl, { site: hostOf(tab?.url), title: tab?.title || '', opener: tab }); return; }
   if (id === 'google-lens') { openGoogleLens(imageUrl, tab); return; }
   if (id === 'copy-to-clipboard') { await copyImageUrl(imageUrl, tab?.id, settings); return; }
 
@@ -940,7 +939,7 @@ async function captureSelection(tab, rawRect, frameId = 0) {
     // Never fall back to the whole screenshot: the user asked for one area only.
     const { dataUrl: cropped } = await offscreenRequest({ action: 'offscreen-crop', dataUrl, rect }, 15000);
     if (!cropped || !cropped.startsWith('data:image/')) throw new Error('Crop failed');
-    await openEditor(cropped, { site: hostOf(tab.url), title: tab.title || '' });
+    await openViewer(cropped, { site: hostOf(tab.url), title: tab.title || '', opener: tab });
     return { success: true };
   } catch (err) {
     await loadSettingsAndLocale();
@@ -966,7 +965,7 @@ async function captureVisible(tabId, delaySeconds = 0) {
     watch = watchTab(tabId, tab.windowId);
     const dataUrl = await captureTab(tab.windowId);
     if (watch.changed || !(await isFrontTab(tabId, tab.windowId)) || watch.changed) throw tabChanged();
-    await openEditor(dataUrl, { site: hostOf(tab.url), title: tab.title || '' });
+    await openViewer(dataUrl, { site: hostOf(tab.url), title: tab.title || '', opener: tab });
     return { success: true };
   } catch (err) {
     await loadSettingsAndLocale();
@@ -1096,7 +1095,7 @@ async function captureFullPage(tabId) {
     session = null;
     await run(fullPageRestore).catch(() => {});
     prepared = false;
-    await openEditorWithKey(key, { site: hostOf(startUrl), title: tab.title || '' });
+    await openHandoffPage('view.html', key, { site: hostOf(startUrl), title: tab.title || '', opener: tab, capture: true });
     if (cut || incomplete || grew) {
       await loadSettingsAndLocale();
       notify(cut ? t('fullPageCut', [String(Math.round(height / px / scale))]) : t('fullPageIncomplete'));
@@ -1250,32 +1249,56 @@ function fullPageRestore() {
   window.__imagetoolkitFullPageRestore?.();
 }
 
-// ---------- Editor Window ----------
-// The handed-off image (a screenshot can be private) only lives as long as its editor
-// window, reloads included. The window → key map is in session storage so it survives a
-// service worker restart; a 12-hour expiry stays as a safety net.
-const editorKeyName = (windowId) => `editor:${windowId}`;
+// ---------- Editor and capture viewer ----------
+// Both open in a tab next to the page they came from. The handed-off image (a screenshot can be
+// private) lives as long as that tab shows one of these two pages, reloads and viewer → editor
+// included: closing the tab, or leaving for any other page, deletes it. The tab → key map is in
+// session storage so it survives a service worker restart; a 12-hour expiry stays as a safety net.
+const handoffTabName = (tabId) => `handoff-tab:${tabId}`;
+const HANDOFF_PAGES = ['resize.html', 'view.html'].map((page) => chrome.runtime.getURL(page));
 
-// meta (optional): { site, title } of the page a screenshot came from, for filename templates.
+// meta (optional): { site, title } of the page the image came from (filename templates),
+// opener: the tab to open next to, capture: true for screenshots.
 async function openEditor(imageUrl, meta) {
   if (!imageUrl) return;
-  await openEditorWithKey(await handoff.put(imageUrl, { maxAge: handoff.EDITOR_MAX_AGE_MS }), meta);
+  await openHandoffPage('resize.html', await handoff.put(imageUrl, { maxAge: handoff.EDITOR_MAX_AGE_MS }), meta);
 }
 
-async function openEditorWithKey(key, meta = {}) {
+// Screenshots first open in the viewer: the whole capture at full width, ready to save or copy,
+// with Crop and Annotate one click away.
+async function openViewer(imageUrl, meta) {
+  if (!imageUrl) return;
+  await openHandoffPage('view.html', await handoff.put(imageUrl, { maxAge: handoff.EDITOR_MAX_AGE_MS }), { ...meta, capture: true });
+}
+
+async function openHandoffPage(page, key, meta = {}) {
   const params = new URLSearchParams({ key });
   if (meta.site) params.set('site', String(meta.site).slice(0, 253));
   if (meta.title) params.set('title', String(meta.title).slice(0, 200));
-  const win = await chrome.windows.create({ url: `resize.html?${params}`, ...EDITOR_WINDOW, focused: true });
-  if (win?.id != null) await chrome.storage.session.set({ [editorKeyName(win.id)]: key }).catch(() => {});
+  if (meta.capture) params.set('capture', '1');
+  const url = `${page}?${params}`;
+  let near = meta.opener;
+  if (!near) [near] = await chrome.tabs.query({ active: true, lastFocusedWindow: true }).catch(() => []);
+  let tab = null;
+  if (Number.isInteger(near?.id) && near.id >= 0) {
+    tab = await chrome.tabs.create({ url, active: true, windowId: near.windowId, index: near.index + 1, openerTabId: near.id }).catch(() => null);
+  }
+  tab ??= await chrome.tabs.create({ url, active: true }); // e.g. the opener sits in a popup window
+  if (tab?.id != null) await chrome.storage.session.set({ [handoffTabName(tab.id)]: key }).catch(() => {});
+  if (tab?.windowId != null) chrome.windows.update(tab.windowId, { focused: true }).catch(() => {});
 }
 
-chrome.windows.onRemoved.addListener(async (windowId) => {
-  const name = editorKeyName(windowId);
+async function forgetTabHandoff(tabId) {
+  const name = handoffTabName(tabId);
   const { [name]: key } = await chrome.storage.session.get(name).catch(() => ({}));
   if (!key) return;
   await chrome.storage.session.remove(name).catch(() => {});
   await handoff.remove(key).catch(() => {});
+}
+
+chrome.tabs.onRemoved.addListener((tabId) => { forgetTabHandoff(tabId); });
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.url && !HANDOFF_PAGES.some((page) => info.url.startsWith(page))) forgetTabHandoff(tabId);
 });
 
 function openGoogleLens(imageUrl, tab) {
