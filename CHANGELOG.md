@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The editor knows the page an image or screenshot came from, so `{site}` and `{title}` work there, and screenshots no longer get a made-up `local` domain.
 - Long file names keep their extension when shortened.
 - Editor: while annotating, everything behind the layer is inert (no Tab, click or screen reader reaches Save or Copy), and Save/Copy refuse to run until Apply or Cancel: an image could otherwise be exported without the redaction shown on screen.
+- **Load all images** reaches the real bottom of the page on systems with classic scrollbars (Windows): a horizontal scrollbar used to stop it 15–17 px short, so infinite feeds never loaded their next batch. The end-to-end tests now run with real scrollbars, like those systems.
 - All tabs + **Load all images** keeps the images a feed unloaded while scrolling, as the single-tab scope already did.
 - A failed preview download is charged for the bytes it really received, so the per-scan preview budget caps traffic even when downloads fail.
 - Editor: the stage takes the shape of a rotated, annotated image; a click outside a text field only confirms it; memory of full-resolution copies is freed at once.

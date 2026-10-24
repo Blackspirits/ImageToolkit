@@ -90,8 +90,9 @@ Select images and download them one by one (never one Save As dialog per image) 
 
 ## 🔒 Privacy
 
-- **Zero data collection** — all processing happens locally in your browser
+- **Nothing goes to the author** — no servers, no account; images and screenshots are processed locally in your browser
 - **No analytics, no tracking, no remote scripts** — everything is bundled
+- **No cookies on automatic requests** — thumbnails and size checks go only to the image addresses found in the page, without your cookies
 - **`host_permissions: <all_urls>`** — needed to scan pages and to fetch cross-origin images for conversion. Optional actions such as Google Lens only run when enabled and clicked.
 
 See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
@@ -128,6 +129,7 @@ ImageToolkit/
 │   ├── i18n.js            chrome.i18n-compatible language override
 │   ├── ui.js / ui.css     Design tokens and shared UI components
 │   ├── handoff.js         IndexedDB handoff of images between contexts
+│   ├── annotate.js        Editor annotations: redact, pixelate, blur, boxes, arrows, text
 │   └── jszip / cropper    Bundled third-party libraries (MIT)
 ├── _locales/              18 language packs
 ├── tests/                 Unit (node:test) and end-to-end (Playwright) tests

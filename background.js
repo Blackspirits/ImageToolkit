@@ -434,7 +434,10 @@ async function autoScrollPage(budgetMs, maxItems, maxChars) {
     if (best) scroller = best;
   }
   const isPage = scroller === page;
-  const viewHeight = () => (isPage ? innerHeight : scroller.clientHeight);
+  // The height really shown: clientHeight leaves out a horizontal scrollbar (classic scrollbars
+  // on Windows take 15–17 px); innerHeight would stop that much short of the bottom, where an
+  // infinite feed waits to load more.
+  const viewHeight = () => scroller.clientHeight;
   const top = () => (isPage ? scrollY : scroller.scrollTop);
   const scrollTo = (y, x) => (isPage ? window : scroller).scrollTo({ top: y, left: x, behavior: 'instant' });
   const startY = top(), startX = isPage ? scrollX : scroller.scrollLeft;

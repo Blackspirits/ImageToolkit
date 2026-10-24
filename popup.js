@@ -909,7 +909,8 @@ const syncHighlights = debounce(() => {
     highlightPort = null;
   }
   if (!highlightPort) {
-    if (!urls.length || state.tabId == null) return;
+    // A real web tab only (no tab, or TAB_ID_NONE = -1, makes tabs.connect throw).
+    if (!urls.length || !Number.isInteger(state.tabId) || state.tabId < 0) return;
     const port = chrome.tabs.connect(state.tabId, { name: 'imagetoolkit-highlight' });
     port.onDisconnect.addListener(() => {
       void chrome.runtime.lastError; // no scanner in that tab (yet), or the page navigated away
@@ -1198,6 +1199,8 @@ function currentPreview() {
   return state.previewSrc ? state.images.find((i) => i.src === state.previewSrc) : null;
 }
 
+let previewErrorWatch = null;
+
 function openPreview(src) {
   const img = state.images.find((i) => i.src === src);
   if (!img) return;
@@ -1205,9 +1208,17 @@ function openPreview(src) {
   state.previewSrc = src;
   const stage = $('preview-img');
   const direct = state.directImages || img.src.startsWith('data:');
-  if (img.thumb || direct) stage.src = img.thumb || img.src;
-  else stage.removeAttribute('src'); // empty until the cookie-less copy arrives (src='' would load the page itself)
-  if (!img.thumb && !direct) fetchViaExtension(img.src).then((dataUrl) => { if (dataUrl && state.previewSrc === src) stage.src = dataUrl; });
+  const viaCopy = () => fetchViaExtension(img.src).then((dataUrl) => { if (dataUrl && state.previewSrc === src) stage.src = dataUrl; });
+  previewErrorWatch?.abort(); // one listener for the image shown, never one per image browsed
+  previewErrorWatch = new AbortController();
+  if (img.thumb || direct) {
+    stage.src = img.thumb || img.src;
+    // A host that refuses direct loads (hotlink protection) still shows through the copy.
+    if (!img.thumb && /^https?:/i.test(img.src)) stage.addEventListener('error', () => { if (state.previewSrc === src) viaCopy(); }, { once: true, signal: previewErrorWatch.signal });
+  } else {
+    stage.removeAttribute('src'); // empty until the cookie-less copy arrives (src='' would load the page itself)
+    viaCopy();
+  }
   stage.alt = img.alt || img.name;
   $('preview-filename').textContent = img.name;
   $('preview-filename').title = img.src;
@@ -1423,12 +1434,15 @@ async function setToolSource(src, name, size = 0) {
   const stale = () => token !== toolToken;
   state.tool = { src, name, ratio: 0, size };
   $('tool-url-input').value = src.startsWith('data:') ? '' : src;
-  $('tool-preview-img').src = src;
+  // A web address loads directly only once the no-cookie rule is confirmed (as in the grid).
+  const direct = state.directImages || !/^https?:/i.test(src);
+  if (direct) $('tool-preview-img').src = src;
+  else $('tool-preview-img').removeAttribute('src');
   $('tool-preview-name').textContent = name;
   $('tool-preview-info').textContent = '…';
   $('tool-preview').hidden = false;
 
-  let dims = await loadDimensions(src).catch(() => null);
+  let dims = direct ? await loadDimensions(src).catch(() => null) : null;
   if (stale()) return;
   if (!dims && !src.startsWith('data:')) {
     const dataUrl = await fetchViaExtension(src);

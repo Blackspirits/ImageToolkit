@@ -249,6 +249,9 @@ before(async () => {
   ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'itk-')), {
     channel: 'chromium',
     headless: true,
+    // Real scrollbars, as on Windows and most Linux desktops: they take room (a horizontal one
+    // shortens the visible height), which headless Chromium otherwise hides.
+    ignoreDefaultArgs: ['--hide-scrollbars'],
     acceptDownloads: true,
     // itk-other.test is the same local server under another origin (cross-origin iframes).
     args: ['--screen-info={1600x1200}', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--host-resolver-rules=MAP itk-other.test 127.0.0.1'],
@@ -311,7 +314,7 @@ test('fit mode letterboxes with transparency', async () => {
   const alpha = await ui.evaluate(async (src) => {
     const img = new Image(); img.src = src; await img.decode();
     const c = document.createElement('canvas'); c.width = 20; c.height = 20;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     return [x.getImageData(10, 0, 1, 1).data[3], x.getImageData(10, 10, 1, 1).data[3]];
   }, r.dataUrl);
   assert.deepEqual(alpha, [0, 255]);
@@ -972,7 +975,7 @@ async function openMenuPage() {
   if (menuPage) return menuPage;
   FIXTURES['photo.jpg'] = Buffer.from((await ui.evaluate(() => {
     const c = document.createElement('canvas'); c.width = 48; c.height = 32;
-    const g = c.getContext('2d'); g.fillStyle = '#0080ff'; g.fillRect(0, 0, 48, 32);
+    const g = c.getContext('2d', { willReadFrequently: true }); g.fillStyle = '#0080ff'; g.fillRect(0, 0, 48, 32);
     return c.toDataURL('image/jpeg', 0.9);
   })).split(',')[1], 'base64');
   await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
@@ -1363,7 +1366,7 @@ test('full-page capture: slices in order, fixed header only once, scrollbar off,
   const probe = await editor.evaluate(async (dpr) => {
     const img = document.getElementById('cropper-img');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
     return { w: img.naturalWidth, h: img.naturalHeight, src: img.src.slice(0, 5), header: at(20), band1: at(300), seam: at(615), band2: at(900), band3: at(1500), band4: at(2100), band5: at(2990) };
   }, dpr);
@@ -1383,7 +1386,7 @@ test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on 
   // 200×100: a fine black/white checker on the left half, plain red on the right.
   const dataUrl = await ui.evaluate(() => {
     const c = document.createElement('canvas'); c.width = 200; c.height = 100;
-    const x = c.getContext('2d');
+    const x = c.getContext('2d', { willReadFrequently: true });
     x.fillStyle = '#ff0000'; x.fillRect(100, 0, 100, 100);
     for (let i = 0; i < 100; i += 2) for (let j = 0; j < 100; j += 2) { x.fillStyle = (i + j) % 4 ? '#000' : '#fff'; x.fillRect(i, j, 2, 2); }
     return c.toDataURL('image/png');
@@ -1408,10 +1411,10 @@ test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on 
     await editor.mouse.move(...at(x2, y2), { steps: 4 });
     await editor.mouse.up();
   };
-  const pixel = (x, y) => editor.evaluate(([x, y]) => [...document.querySelector('.annot-canvas').getContext('2d').getImageData(x, y, 1, 1).data.slice(0, 3)], [x, y]);
+  const pixel = (x, y) => editor.evaluate(([x, y]) => [...document.querySelector('.annot-canvas').getContext('2d', { willReadFrequently: true }).getImageData(x, y, 1, 1).data.slice(0, 3)], [x, y]);
   // After rotating left, the checker (formerly the left half) is the bottom half.
   const variance = () => editor.evaluate(() => {
-    const d = document.querySelector('.annot-canvas').getContext('2d').getImageData(20, 120, 40, 40).data;
+    const d = document.querySelector('.annot-canvas').getContext('2d', { willReadFrequently: true }).getImageData(20, 120, 40, 40).data;
     let min = 255, max = 0;
     for (let i = 0; i < d.length; i += 4) { min = Math.min(min, d[i]); max = Math.max(max, d[i]); }
     return max - min;
@@ -1484,7 +1487,7 @@ test('full-page capture keeps sticky content where it belongs and never repeats 
   const px = await editor.evaluate((dpr) => {
     const img = document.getElementById('cropper-img');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
     return { heading: at(1230), afterHeading: at(1300), slice3top: at(1805), blue: at(3000) };
   }, dpr);
@@ -1511,7 +1514,7 @@ test('full-page capture of an app-like layout follows its inner scrolling area',
   const probe = await editor.evaluate((dpr) => {
     const img = document.getElementById('cropper-img');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
     return { h: img.naturalHeight, top: at(5), red: at(300), green: at(900), blue: at(1500), end: at(1795) };
   }, dpr);
@@ -1556,7 +1559,7 @@ test('full-page capture of a page that jumps while scrolling (chats) has no hole
   const probe = await editor.evaluate((dpr) => {
     const img = document.getElementById('cropper-img');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     const rows = [];
     for (let y = 50; y < img.naturalHeight / dpr; y += 100) rows.push(x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data[3]);
     return { h: Math.round(img.naturalHeight / dpr), transparentRows: rows.filter((a) => a < 255).length };
@@ -1746,7 +1749,7 @@ test('full-page capture ignores a hidden off-screen scrolling panel', async () =
   const probe = await editor.evaluate((dpr) => {
     const img = document.getElementById('cropper-img');
     const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     return { h: img.naturalHeight, mid: [...x.getImageData(Math.round(400 * dpr), Math.round(300 * dpr), 1, 1).data.slice(0, 3)].join(',') };
   }, dpr);
   assert.equal(probe.h, Math.round(600 * dpr), 'the visible page, not the hidden panel');
@@ -1966,7 +1969,7 @@ test('auto-scroll runs once per page: a second request gets "busy"', async () =>
 test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies, the stage takes the new shape', async () => {
   const dataUrl = await ui.evaluate(() => {
     const c = document.createElement('canvas'); c.width = 400; c.height = 100;
-    const x = c.getContext('2d');
+    const x = c.getContext('2d', { willReadFrequently: true });
     x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 100);
     x.fillStyle = '#000'; x.font = '700 70px sans-serif'; x.textBaseline = 'top'; x.fillText('SECRET', 10, 15);
     return c.toDataURL('image/png');
@@ -1995,7 +1998,7 @@ test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies
   };
   await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const region = (x, y, w, h) => editor.evaluate(([x, y, w, h]) => {
-    const d = document.querySelector('.annot-canvas').getContext('2d').getImageData(x, y, w, h).data;
+    const d = document.querySelector('.annot-canvas').getContext('2d', { willReadFrequently: true }).getImageData(x, y, w, h).data;
     const colours = new Set();
     for (let i = 0; i < d.length; i += 4) colours.add(`${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}`);
     return [...colours];
