@@ -109,7 +109,7 @@ async function captureUi(locale) {
 
   // Editor: a portrait with the Instagram 4:5 preset.
   let known = new Set(ctx.pages());
-  await sw.evaluate(({ url, tab, site }) => openEditor(url, { opener: tab, site, title: tab.title }), { url: `${DEMO}post-01.jpg`, tab: demoTab, site: DEMO_HOST });
+  await sw.evaluate(({ url, tab, site }) => openEditor(url, { opener: tab, site, title: tab.title }), { url: `${DEMO}post-10.jpg`, tab: demoTab, site: DEMO_HOST });
   const editor = await waitFor(async () => newPages(known).find((p) => p.url().includes('resize.html')));
   await editor.setViewportSize({ width: 1200, height: 740 });
   await editor.waitForSelector('.cropper-container');

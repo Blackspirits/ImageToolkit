@@ -34,7 +34,10 @@
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
   .grid img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
   .grid figure{margin:0;position:relative}
+  .grid .wide{grid-column:span 2}
+  .grid .wide img{aspect-ratio:auto;height:100%}
   .grid figcaption{position:absolute;left:10px;bottom:8px;font-size:12px;font-weight:600;text-shadow:0 1px 4px #000}
+  .foot{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:40px;opacity:.9}
   .note{margin:34px 0 0;text-align:center;color:var(--muted);font-size:12px}
 </style>
 </head>
@@ -48,7 +51,7 @@
       <div class="avatar"><img src="post-03.jpg" alt="Nyx, profile picture"></div>
       <div class="who">
         <h1>rain.editorials <button class="btn">Follow</button><button class="btn alt">Message</button></h1>
-        <div class="stats"><span><b>8</b> posts</span><span><b>18.4k</b> followers</span><span><b>128</b> following</span></div>
+        <div class="stats"><span><b>15</b> posts</span><span><b>18.4k</b> followers</span><span><b>128</b> following</span></div>
         <div class="bio"><strong>Rain Editorials</strong><br>Night portraits in the rain · fictional characters<br>Demo gallery for ImageToolkit screenshots · no real people</div>
       </div>
     </section>
@@ -57,21 +60,26 @@
       <span class="story"><i><img src="post-06.jpg" alt=""></i>Dario</span>
       <span class="story"><i><img src="post-03.jpg" alt=""></i>Nyx</span>
       <span class="story"><i><img src="post-05.jpg" alt=""></i>Kai</span>
-      <span class="story"><i><img src="post-04.jpg" alt=""></i>Neon</span>
-      <span class="story"><i><img src="post-08.jpg" alt=""></i>Rain</span>
+      <span class="story"><i><img src="post-10.jpg" alt=""></i>Vera</span>
+      <span class="story"><i><img src="post-09.jpg" alt=""></i>Ezra</span>
     </nav>
     <div class="tabs"><span class="on">POSTS</span><span>SAVED</span><span>TAGGED</span></div>
     <section class="grid">
       <figure><img src="post-01.jpg" alt="Luna under neon rain"></figure>
       <figure><img src="post-02.jpg" alt="Dario, close-up"></figure>
       <figure><img src="post-03.jpg" alt="Nyx at a crossing"></figure>
-      <figure><img src="post-04.jpg" alt="Luna, close-up"></figure>
+      <figure class="wide"><img src="post-11.jpg" alt="Rooftop at blue hour"></figure>
+      <figure><img src="post-10.jpg" alt="Vera by the café window"></figure>
+      <figure><img src="post-09.jpg" alt="Ezra in blue neon"></figure>
+      <figure class="wide"><img src="post-12.jpg" alt="The long street"></figure>
+      <figure><img src="post-13.jpg" alt="Under a clear umbrella"></figure>
       <figure><img src="post-05.jpg" alt="Kai in the downpour"></figure>
+      <figure><img src="post-04.jpg" alt="Luna, close-up"></figure>
       <figure><img src="post-06.jpg" alt="Dario by the wall"></figure>
       <figure><img src="post-07.jpg" alt="Nyx, close-up"></figure>
       <figure><img src="post-08.jpg" alt="Kai, close-up"></figure>
-      <figure><img src="post-01.jpg" alt="Luna, city lights"></figure>
     </section>
+    <footer class="foot"><img src="logo.png" alt="rain.editorials" width="180" height="48"><img src="mark.svg" alt="" width="24" height="24"></footer>
     <p class="note">Fictional characters created for this demo.</p>
   </main>
 </body>
