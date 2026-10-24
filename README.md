@@ -191,7 +191,6 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 If you find this extension useful, consider supporting development (the ♥ button in the extension lists the same options):
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white&labelColor=313244)](https://ko-fi.com/blackspirits)
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor-EA4AAA?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=313244)](https://github.com/sponsors/Blackspirits)
 [![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=flat-square&logo=paypal&logoColor=white&labelColor=313244)](https://www.paypal.com/paypalme/filipemota)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=black&labelColor=313244)](https://buymeacoffee.com/blackspirits28)
 

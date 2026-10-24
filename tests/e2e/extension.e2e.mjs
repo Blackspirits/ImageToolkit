@@ -2303,7 +2303,7 @@ test('support: the heart opens a dialog with every way to help; Esc closes it an
   await ui.waitForSelector('#support-modal:not([hidden])');
   assert.equal(await ui.evaluate(() => document.activeElement.id), 'support-close');
   const links = await ui.$$eval('#support-modal a.support-row:not([hidden])', (as) => as.map((a) => [a.textContent.trim(), a.href, a.target]));
-  assert.deepEqual(links.map(([text]) => text), ['Ko-fi', 'GitHub Sponsors', 'PayPal', 'Buy Me a Coffee', 'Star it on GitHub', 'Report a bug or suggest an idea', 'Help translate']);
+  assert.deepEqual(links.map(([text]) => text), ['Ko-fi', 'PayPal', 'Buy Me a Coffee', 'Star it on GitHub', 'Report a bug or suggest an idea', 'Help translate']);
   assert.ok(links.every(([, href, target]) => href.startsWith('https://') && target === '_blank'), 'every link opens a new tab on https');
   // Rating needs a Web Store install: hidden for an unpacked copy.
   assert.equal(await ui.isHidden('#support-rate'), true);
