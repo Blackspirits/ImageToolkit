@@ -249,6 +249,19 @@ const DEMO_HOST = 'rain-editorials.example';
 const DEMO = `http://${DEMO_HOST}:${server.address().port}/`;
 
 // ---------- UI captures ----------
+// Headless Chromium can, rarely, tile a page into a screenshot right after it is resized: a capture
+// counts only when the next one is identical.
+async function stableShot(page) {
+  let last = await page.screenshot();
+  for (let i = 0; i < 8; i++) {
+    await wait(300);
+    const next = await page.screenshot();
+    if (next.equals(last)) return next;
+    last = next;
+  }
+  throw new Error('The page never settled for a screenshot');
+}
+
 async function captureUi(locale) {
   const ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'itk-store-')), {
     channel: 'chromium', headless: true, deviceScaleFactor: 2, viewport: { width: 1280, height: 800 },
@@ -270,7 +283,8 @@ async function captureUi(locale) {
   await demo.goto(DEMO);
   await demo.waitForFunction(() => [...document.images].every((img) => img.complete));
   await demo.bringToFront();
-  shots.demo = await demo.screenshot();
+  await wait(500);
+  shots.demo = await stableShot(demo);
   const demoTab = await sw.evaluate((url) => chrome.tabs.query({ url }).then((t) => t[0]), DEMO);
 
   // Panel: a real scan of the demo page.

@@ -2242,3 +2242,40 @@ test('right-to-left: annotation text ends at the click, on screen and in the sav
     await setLocale('auto');
   }
 });
+
+test('long labels (Ukrainian, Russian) never push a control out of the panel or the editor', async () => {
+  const setLocale = (locale) => sw.evaluate(async (locale) => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, locale } }); }, locale);
+  const inside = (page) => page.evaluate(() => {
+    const W = document.documentElement.clientWidth;
+    return [...document.querySelectorAll('button, select, .tab')]
+      .filter((el) => el.checkVisibility() && el.getBoundingClientRect().width)
+      .filter((el) => { const r = el.getBoundingClientRect(); return r.right > W + 1 || r.left < -1; })
+      .map((el) => el.id || el.textContent.trim());
+  });
+  try {
+    await setLocale('uk');
+    const panel = await ctx.newPage();
+    await panel.setViewportSize({ width: 360, height: 640 });
+    await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
+    await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+    await panel.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }, { src: b + 'wide.png', width: 40, height: 20 }]), base);
+    await panel.evaluate(() => document.querySelectorAll('.gcard .gcheck').forEach((b) => b.click()));
+    await panel.waitForSelector('#action-bar:not([hidden])');
+    await panel.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    assert.deepEqual(await inside(panel), []);
+    assert.equal(await panel.evaluate(() => { const t = document.querySelector('.tabs'); return t.scrollWidth <= t.clientWidth; }), true, 'the tabs fit');
+    assert.equal(await panel.evaluate(() => { const i = document.querySelector('.action-bar-inner'); return i.scrollWidth <= i.clientWidth; }), true, 'the action bar fits');
+    await panel.close();
+
+    await setLocale('ru');
+    const known = new Set(ctx.pages());
+    await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+    const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+    await editor.setViewportSize({ width: 1024, height: 700 });
+    await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+    assert.deepEqual(await inside(editor), []);
+    await editor.close();
+  } finally {
+    await setLocale('auto');
+  }
+});

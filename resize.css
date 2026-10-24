@@ -90,7 +90,10 @@ details.panel:not([open]) .chev{transform:rotate(-90deg)}
 .foot-label{font-size:11px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
 .quality{display:flex;align-items:center;gap:10px}
 .quality .range{flex:1;width:auto}
-.foot-actions{display:grid;grid-template-columns:auto 1fr;gap:8px}
+/* Save takes the rest of the row, or a row of its own when its label is long (Сохранить изображение) */
+.foot-actions{display:flex;flex-wrap:wrap;gap:8px}
+.foot-actions #btn-copy{flex:none}
+.foot-actions #btn-save{flex:1 1 auto}
 .foot-actions .btn{height:40px;font-size:13px}
 
 @media (max-width:860px){

@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   chrome.runtime.onMessage.addListener(onRuntimeMessage);
   if (VIEW_MODE === 'sidepanel') watchTabs();
+  fitTabs();
   $('app').dataset.ready = 'true'; // every control is wired (tests wait for this)
 });
 
@@ -525,6 +526,7 @@ function setImages(list, error) {
   $('image-grid').replaceChildren();
   $('grid-loading').hidden = true;
   $('tab-count').textContent = state.images.length ? String(state.images.length) : '';
+  fitTabs();
   $('dup-count').textContent = String(state.images.filter((i) => i.isDuplicate).length);
 
   if (!state.images.length) {
@@ -1061,7 +1063,29 @@ function updateActionBar() {
   const show = state.selected.size > 0 && activeTab() === 'images';
   $('action-bar').hidden = !show && $('batch-progress').hidden;
   $('app').classList.toggle('has-action-bar', !$('action-bar').hidden);
+  fitActionBar();
 }
+
+// Labels are longer in some languages (Herunterladen, Налаштування, ダウンロード) than the widths
+// the layout was drawn for: while `inner` overflows, apply the classes in `steps` to `box` one at a
+// time, and refit whenever the box changes size.
+const fitObservers = new WeakSet();
+function fitBox(box, steps, inner = box) {
+  if (!fitObservers.has(box)) {
+    fitObservers.add(box);
+    new ResizeObserver(() => fitBox(box, steps, inner)).observe(box);
+  }
+  box.classList.remove(...steps);
+  if (box.hidden) return;
+  for (const step of steps) {
+    if (inner.scrollWidth <= inner.clientWidth) break;
+    box.classList.add(step);
+  }
+}
+// The action bar drops the word "selected", then the Download label (it stays the accessible name).
+const fitActionBar = () => fitBox($('action-bar'), ['fit-count', 'fit-download'], $('action-bar').querySelector('.action-bar-inner'));
+// The tabs drop their icons, then shorten their labels.
+const fitTabs = () => fitBox(document.querySelector('.tabs'), ['fit-icons', 'fit-shrink']);
 
 let batchRunning = false;
 
