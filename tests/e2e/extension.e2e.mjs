@@ -2354,10 +2354,17 @@ test('capture viewer: annotations applied in the editor are there after Back and
   assert.equal(new URL(tab.url()).searchParams.has('annotate'), false, 'opened once: a reload will not reopen the layer');
   await tab.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   await tab.click('.annot-tool[data-tool="redact"]');
+  await tab.waitForSelector('.annot-tool[data-tool="redact"].active');
   await tab.click('.annot-color[data-color="#111111"]');
-  const box = await tab.locator('.annot-overlay').boundingBox();
-  await tab.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.25); await tab.mouse.down();
-  await tab.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.75, { steps: 4 }); await tab.mouse.up();
+  // Positions read at every step, from the board as it is now (it is fitted after opening).
+  const at = async (fx, fy) => { const b = await tab.locator('.annot-overlay').boundingBox(); return [b.x + b.width * fx, b.y + b.height * fy]; };
+  await tab.mouse.move(...await at(0.25, 0.25)); await tab.mouse.down();
+  await tab.mouse.move(...await at(0.75, 0.75), { steps: 4 }); await tab.mouse.up();
+  const marked = await tab.evaluate(() => {
+    const c = document.querySelector('.annot-canvas');
+    return [...c.getContext('2d', { willReadFrequently: true }).getImageData(c.width / 2, c.height / 2, 1, 1).data.slice(0, 3)];
+  });
+  assert.deepEqual(marked, [17, 17, 17], 'the mark is drawn');
   await tab.keyboard.press('Control+Enter');
   await tab.waitForSelector('.annot-layer', { state: 'detached' });
 
