@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
 
 ### Fixed
+- Capture viewer: saving and copying show their confirmation or error again (the page had no place for notices).
+- Annotations applied in the editor stay with the image: a reload keeps them (and no longer reopens the annotate layer), and Back to screenshot shows the annotated capture in the viewer, ready to save or copy.
+- A reload during a full-page capture reopens the page where the user was, not where the capture had scrolled to.
+- The panel's dialogs (image preview, support) open one at a time; the panel behind stays inert until the last one closes.
 - Arabic (right-to-left): bringing a control into view (keyboard focus, a scrolled-to setting) could shift the whole panel 80 px sideways, cutting off one edge; the panel can no longer be scrolled sideways. The divider before the capture delay sits on the correct side, the screenshot size reads left to right like the editor's, and an annotation's text field ends at the click, where the text is drawn (it used to open on the other side of it).
 - Full-page capture at a fractional display scale (Windows at 125%, some page zoom levels) no longer leaves a thin line between slices: a slice that lands a pixel or two below the previous one is joined to it.
 - Long labels in some languages (German, Dutch, Russian, Ukrainian, Japanese) no longer push controls out of view: the panel's tabs and action bar drop their icons or labels only when they do not fit, the status bar wraps instead of overflowing, a long option stays inside its settings row, and the editor's Save button takes a row of its own when needed.

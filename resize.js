@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const params = new URLSearchParams(location.search);
   const key = params.get('key');
+  editor.key = key;
   // The page the image or screenshot came from, for {site} and {title} in filename templates.
   editor.page = { host: params.get('site') || '', title: params.get('title') || '' };
   editor.capture = params.get('capture') === '1';
@@ -47,8 +48,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (params.get('from') === 'view') {
     const back = $('btn-back');
     back.hidden = false;
-    back.addEventListener('click', () => {
+    back.addEventListener('click', async () => {
       if (annotating()) return;
+      await editor.stored; // the annotated image is in place before the viewer reads it
       if (history.length > 1 && document.referrer.includes('/view.html')) { history.back(); return; }
       const viewParams = new URLSearchParams(params);
       viewParams.delete('annotate');
@@ -57,7 +59,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
   // From the capture viewer's Annotate button: straight into the annotate layer once ready.
-  if (params.get('annotate') === '1') $('cropper-img').addEventListener('ready', () => annotate(), { once: true });
+  if (params.get('annotate') === '1') {
+    $('cropper-img').addEventListener('ready', () => annotate(), { once: true });
+    // Once: a reload later shows the image as it is now, not the annotate layer again.
+    const once = new URLSearchParams(params);
+    once.delete('annotate');
+    history.replaceState(history.state, '', `?${once}`);
+  }
   const source = await handoff.get(key).catch(() => null);
   if (!source) { showStatus(t('errorNoImage'), true); return; }
   editor.source = typeof source === 'string' ? source : '';
@@ -222,6 +230,9 @@ async function annotate() {
   const { width, height } = base;
   base.width = base.height = 0; // a full-resolution copy: free it now
   if (!blob) return;
+  // The marks belong to this tab's image from now on: a reload, and the capture viewer this
+  // editor came from, show them too.
+  editor.stored = handoff.update(editor.key, blob).catch(() => {});
   const url = URL.createObjectURL(blob);
   const img = $('cropper-img');
   // A rotated image changes shape: size the stage for it before Cropper measures it.

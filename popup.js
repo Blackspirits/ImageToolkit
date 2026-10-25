@@ -1200,8 +1200,12 @@ async function downloadZip(files) {
 // Preview
 // ============================================================
 let previewReturnFocus = null;
-// Everything behind the dialog; made inert while it is open.
+// Everything behind the dialogs; inert while any of them is open.
 const BACKGROUND_REGIONS = ['.header', '.tabs', '.views', '#action-bar'];
+function syncInert() {
+  const open = !$('preview-modal').hidden || !$('support-modal').hidden;
+  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.toggleAttribute('inert', open));
+}
 
 function initPreview() {
   $('preview-backdrop').addEventListener('click', closePreview);
@@ -1240,16 +1244,17 @@ function initSupport() {
 
 function openSupport() {
   if (!$('support-modal').hidden) return;
+  closePreview(); // one dialog at a time
   supportReturnFocus = document.activeElement;
   $('support-modal').hidden = false;
-  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.setAttribute('inert', ''));
+  syncInert();
   $('support-close').focus();
 }
 
 function closeSupport() {
   if ($('support-modal').hidden) return;
   $('support-modal').hidden = true;
-  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.removeAttribute('inert'));
+  syncInert();
   supportReturnFocus?.focus?.();
 }
 
@@ -1284,8 +1289,9 @@ function openPreview(src) {
   $('preview-link').hidden = !/^https?:/i.test(img.src);
   refreshPreviewMeta();
   if ($('preview-modal').hidden) {
+    closeSupport(); // one dialog at a time
     $('preview-modal').hidden = false;
-    BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.setAttribute('inert', ''));
+    syncInert();
     $('preview-close').focus();
   }
 }
@@ -1313,7 +1319,7 @@ function stepPreview(delta) {
 function closePreview() {
   if ($('preview-modal').hidden) return;
   $('preview-modal').hidden = true;
-  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.removeAttribute('inert'));
+  syncInert();
   state.previewSrc = '';
   previewReturnFocus?.focus?.();
 }

@@ -1722,15 +1722,20 @@ test('full-page capture stops when the page reloads the same URL midway', async 
   FIXTURES['reload.html'] = Buffer.from('<!doctype html><title>reload</title><style>body{margin:0}div{height:6000px;background:linear-gradient(#0f0,#f0f)}</style><body><div></div></body>');
   const page = await screenPage('reload.html');
   await page.bringToFront();
+  await page.evaluate(() => scrollTo(0, 280));
   const known = new Set(ctx.pages());
   const tabId = await tabIdOf(base + 'reload.html');
   const pending = send({ action: 'captureFullPage', tabId });
-  await new Promise((r) => setTimeout(r, 1200));
+  await waitFor(() => page.evaluate(() => scrollY > 600)); // the capture has moved down the page
   await sw.evaluate((id) => chrome.tabs.reload(id), tabId);
   const res = await pending;
-  assert.ok(res.error, JSON.stringify(res));
+  assert.ok(res.error || res.cancelled, JSON.stringify(res)); // stopped, however early the reload came
   await new Promise((r) => setTimeout(r, 500));
   assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('view.html')), false);
+  // The reloaded page opens where the user was, not where the capture had got to.
+  await page.waitForLoadState('load');
+  await new Promise((r) => setTimeout(r, 300));
+  assert.equal(await page.evaluate(() => Math.round(scrollY)), 280);
   await page.close();
 });
 
@@ -2041,6 +2046,8 @@ test('capture viewer: whole capture, exact PNG, other formats, Crop and Annotate
   };
   const png = await bytes('png');
   assert.equal(png.mime, 'image/png');
+  // The viewer says what happened (its toast host used to be missing: saves were silent).
+  await viewer.waitForSelector('#toasts .toast', { timeout: 5000 });
   assert.equal(png.size, Buffer.from(dataUrl.split(',')[1], 'base64').length, 'the exact PNG bytes');
   const jpg = await bytes('jpeg');
   assert.equal(jpg.mime, 'image/jpeg');
@@ -2303,7 +2310,9 @@ test('support: the heart opens a dialog with every way to help; Esc closes it an
   await ui.waitForSelector('#support-modal:not([hidden])');
   assert.equal(await ui.evaluate(() => document.activeElement.id), 'support-close');
   const links = await ui.$$eval('#support-modal a.support-row:not([hidden])', (as) => as.map((a) => [a.textContent.trim(), a.href, a.target]));
-  assert.deepEqual(links.map(([text]) => text), ['Ko-fi', 'PayPal', 'Buy Me a Coffee', 'Star it on GitHub', 'Report a bug or suggest an idea', 'Help translate']);
+  // Labels in the interface language, whatever the browser's is.
+  const free = await ui.evaluate(() => ['supportStar', 'supportIssue', 'supportTranslate'].map((k) => ITK.i18n.t(k)));
+  assert.deepEqual(links.map(([text]) => text), ['Ko-fi', 'PayPal', 'Buy Me a Coffee', ...free]);
   assert.ok(links.every(([, href, target]) => href.startsWith('https://') && target === '_blank'), 'every link opens a new tab on https');
   // Rating needs a Web Store install: hidden for an unpacked copy.
   assert.equal(await ui.isHidden('#support-rate'), true);
@@ -2319,4 +2328,60 @@ test('support: the heart opens a dialog with every way to help; Esc closes it an
   await ui.click('#support-backdrop', { position: { x: 5, y: 5 } });
   await ui.waitForSelector('#support-modal', { state: 'hidden' });
   await ui.evaluate(() => document.querySelector('.tab[data-tab="images"]').click());
+});
+
+test('capture viewer: annotations applied in the editor are there after Back and after a reload', async () => {
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 300;
+    const x = c.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, 400, 300);
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openViewer(url, { site: 'example.org', title: 'Page' }), dataUrl);
+  const tab = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')));
+  await tab.setViewportSize({ width: 1100, height: 760 });
+  await tab.waitForSelector('#app[data-ready="true"]');
+  const centre = () => tab.evaluate(async () => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    return [...x.getImageData(c.width / 2, c.height / 2, 1, 1).data.slice(0, 3)];
+  });
+  assert.deepEqual(await centre(), [255, 255, 255]);
+
+  await tab.click('#btn-annotate');
+  await tab.waitForSelector('.annot-layer', { timeout: 10000 });
+  assert.equal(new URL(tab.url()).searchParams.has('annotate'), false, 'opened once: a reload will not reopen the layer');
+  await tab.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await tab.click('.annot-tool[data-tool="redact"]');
+  await tab.click('.annot-color[data-color="#111111"]');
+  const box = await tab.locator('.annot-overlay').boundingBox();
+  await tab.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.25); await tab.mouse.down();
+  await tab.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.75, { steps: 4 }); await tab.mouse.up();
+  await tab.keyboard.press('Control+Enter');
+  await tab.waitForSelector('.annot-layer', { state: 'detached' });
+
+  // A reload keeps the marks, and no annotate layer comes back.
+  await tab.reload();
+  await tab.waitForSelector('.cropper-container', { timeout: 10000 });
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(await tab.locator('.annot-layer').count(), 0);
+
+  // Back to the viewer: the capture is the annotated one, ready to save or copy.
+  await tab.click('#btn-back');
+  await tab.waitForURL(/view\.html/);
+  await tab.waitForSelector('#app[data-ready="true"]');
+  assert.deepEqual(await centre(), [17, 17, 17]);
+  await tab.close();
+});
+
+test('panel dialogs: one at a time, and the panel behind stays inert until the last one closes', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }]), base);
+  await ui.evaluate((b) => openPreview(b + 'photo.png'), base);
+  await ui.evaluate(() => openSupport());
+  assert.equal(await ui.isHidden('#preview-modal'), true, 'opening one closes the other');
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').inert), true);
+  await ui.evaluate(() => closeSupport());
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').inert), false);
 });

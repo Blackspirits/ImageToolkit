@@ -1167,6 +1167,7 @@ async function fullPagePrepare() {
     clearTimeout(state.timer);
     style.remove();
     removeEventListener('keydown', onKey, true);
+    removeEventListener('pagehide', restore);
     for (const [el, property, value, priority] of state.changed.reverse()) {
       if (value) el.style.setProperty(property, value, priority);
       else el.style.removeProperty(property);
@@ -1183,6 +1184,9 @@ async function fullPagePrepare() {
   window.__imagetoolkitFullPage = state;
   window.__imagetoolkitFullPageRestore = restore;
   addEventListener('keydown', onKey, true);
+  // A reload or navigation midway: the page goes back to where the user was before it leaves,
+  // so the browser does not reopen it where the capture had scrolled to.
+  addEventListener('pagehide', restore);
 
   // Sticky headers and sidebars become ordinary content: each appears once, where it belongs,
   // instead of following every slice (hiding them would lose what they contain).

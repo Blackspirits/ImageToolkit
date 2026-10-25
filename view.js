@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Kept while the page may come back from the back/forward cache (Back from the editor).
 addEventListener('pagehide', (e) => { if (!e.persisted && view.url) URL.revokeObjectURL(view.url); });
+// Back from the editor: the image may have been annotated there since; show it as it is now.
+addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
 
 function showStatus(message, isError = false) {
   const status = $('stage-status');
