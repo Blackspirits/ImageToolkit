@@ -6,6 +6,81 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [2.5.0] - 2026-10-21
+
+### Added
+- **Capture viewer**: every screenshot (area, visible page, full page) opens in a tab next to the page, shown at the page's own size with its scroll, or all of it in the window as an overview (button or a click on the image), ready to **save** (PNG keeps the exact capture; JPG or WebP), **copy**, **crop** or **annotate** in the editor, in the same tab, with a **Back to screenshot** button there.
+- **Support dialog**: the ♥ button opens a small dialog with every way to help — donations (Ko-fi, PayPal, Buy Me a Coffee) and free ones (star on GitHub, report a bug or suggest an idea, help translate, and rate on the Chrome Web Store for store installs) — instead of going straight to Ko-fi.
+- **The editor opens in a tab** next to the page instead of a separate window, with all the room of the browser. Its image is deleted when the tab closes or leaves for another page.
+- New Chrome Web Store screenshots in all 18 languages and promo tiles, rendered from the real extension on a demo page with fictional characters (`npm run store:shots`).
+- **Full-page capture**: scrolls and captures the page screen by screen and stitches it locally. Fixed and sticky elements (headers, chat buttons, cookie bars) appear once instead of on every slice, the scrollbar is left out, animations pause, lazy images load, and the page returns to where you were. Progress shows on the toolbar icon and Esc cancels. Very tall pages are scaled down (to 50%) before being cut. From the panel, the toolbar-icon menu or an assignable shortcut.
+- **Annotate in the editor**: **redact** with opaque colour (the way to hide data for sure), pixelate (true block averages) and blur, draw boxes, arrows, outlined text and highlights; six colours, three thicknesses, undo/redo and one-key shortcuts. Pixel blocks and blur grow with the area covered. Works on the image as rotated/flipped and changes nothing until Apply (Ctrl+Enter).
+- **Images inside iframes**, same-origin and cross-origin, are listed with the page's own (and outlined there when selected).
+- **All tabs at once**: a scan scope that lists the images of every web page in the window, without duplicates, with a Tab filter. Each image keeps its page's site and title.
+- **Load all images**: scrolls the page (or the scrolling area of app-like pages) to the end, wakes lazy images, waits for infinite scroll and collects images at every step, so feeds that unload old items lose nothing. Progress bar and Stop.
+- **Copy image link** from a card or the preview (web images only).
+- **File name templates**: `{name}` `{site}` `{domain}` `{title}` `{index}` `{width}` `{height}` `{format}` `{date}` `{time}`, `/` for folders (never outside Downloads), clickable variables and a live preview. Used by single downloads, batches, ZIP entries (never colliding) and the editor.
+
+### Fixed
+- Capture viewer: saving and copying show their confirmation or error again (the page had no place for notices).
+- Annotations applied in the editor stay with the image: a reload keeps them (and no longer reopens the annotate layer), and Back to screenshot shows the annotated capture in the viewer, ready to save or copy.
+- A reload during a full-page capture reopens the page where the user was, not where the capture had scrolled to.
+- The panel's dialogs (image preview, support) open one at a time; the panel behind stays inert until the last one closes.
+- Arabic (right-to-left): bringing a control into view (keyboard focus, a scrolled-to setting) could shift the whole panel 80 px sideways, cutting off one edge; the panel can no longer be scrolled sideways. The divider before the capture delay sits on the correct side, the screenshot size reads left to right like the editor's, and an annotation's text field ends at the click, where the text is drawn (it used to open on the other side of it).
+- Full-page capture at a fractional display scale (Windows at 125%, some page zoom levels) no longer leaves a thin line between slices: a slice that lands a pixel or two below the previous one is joined to it.
+- Long labels in some languages (German, Dutch, Russian, Ukrainian, Japanese) no longer push controls out of view: the panel's tabs and action bar drop their icons or labels only when they do not fit, the status bar wraps instead of overflowing, a long option stays inside its settings row, and the editor's Save button takes a row of its own when needed.
+- Tabs left open from an earlier version are scanned correctly after the update (an old scanner left in the page no longer blocks the new one).
+- Full-page capture can no longer hang: every step has a time limit and the whole capture a deadline; a page that stops scrolling ends it (with a notice that it may be incomplete); app-like pages are captured through their inner scrolling area; the page restores itself even if the extension stops midway.
+- Captures stop if another tab comes to the front (even briefly) or the page navigates or reloads, so a screenshot never mixes in another page; a full-page capture talks only to the document it started in. The visible-tab capture brings its tab to the front first.
+- Full-page capture never picks a hidden or off-screen scrolling panel, and a slice outside the screenshot is an error instead of a blank result; abandoned stitching canvases free themselves after five minutes.
+- "Hide duplicates" no longer merges different pictures: only the host's case, the parameter order and tracking tags (`utm_*`, `fbclid`…) are ignored; the origin, the exact path and every other parameter count (`?id=1`/`?id=2`, `/Photo.png`/`/photo.png`, two ports, two timestamps stay apart).
+- Two inline images with the same length and ending are both listed.
+- All tabs: an image shown on several pages belongs to each of them, in the Tab filter and for `{site}`/`{title}`.
+- Stop ends auto-scroll in the tab it runs in, even after switching tabs.
+- The editor knows the page an image or screenshot came from, so `{site}` and `{title}` work there, and screenshots no longer get a made-up `local` domain.
+- Long file names keep their extension when shortened.
+- Editor: while annotating, everything behind the layer is inert (no Tab, click or screen reader reaches Save or Copy), and Save/Copy refuse to run until Apply or Cancel: an image could otherwise be exported without the redaction shown on screen.
+- **Load all images** reaches the real bottom of the page on systems with classic scrollbars (Windows): a horizontal scrollbar used to stop it 15–17 px short, so infinite feeds never loaded their next batch. The end-to-end tests now run with real scrollbars, like those systems.
+- Wiki pages (Wikipedia, Commons, Fandom) no longer list their file pages (`/wiki/File:…png`, `Ficheiro:…`) as broken images: links whose last part is a `Namespace:` page are skipped. Automatic downloads stop at once when a server answers with a web page instead of an image, and dimension checks run four at a time, gentler with image servers.
+- All tabs + **Load all images** keeps the images a feed unloaded while scrolling, as the single-tab scope already did.
+- A failed preview download is charged for the bytes it really received, so the per-scan preview budget caps traffic even when downloads fail.
+- Editor: the stage takes the shape of a rotated, annotated image; a click outside a text field only confirms it; memory of full-resolution copies is freed at once.
+
+### Changed
+- The header theme button flips between light and dark; **Automatic** (follows Windows/macOS or Chrome) is chosen in Settings. The icon shows the theme on screen.
+- Transparency background in the image grid: **checkerboard** (follows the theme), **white**, **grey** or **black**, like the editor's; the button shows the one in use.
+- Editor: with PNG (lossless) the quality row stays in place, disabled and labelled **Lossless**, instead of disappearing and moving the buttons below.
+- The editor opens with the whole image selected, so saving a capture straight away never trims its edges.
+- **AVIF is offered as an output only where the browser can write it** (Chrome cannot yet: it used to silently produce WebP). It appears by itself the day it can. Reading, listing, filtering and downloading AVIF images as they are is unchanged; a saved "AVIF" default becomes WebP.
+- The capture delay also applies to **Capture visible page** (time to open a menu or hover something) and counts down on the toolbar icon.
+- **Esc** cancels a full-page capture from the side panel too; from the toolbar popup, the popup closes so Esc reaches the page.
+- Full-page captures of chats and virtual lists (Discord, Slack…) never contain empty bands: the capture stops where the page jumps and the image is trimmed to what was captured, with the "may be incomplete" notice.
+- The panel's count, duplicates, background and layout bar stays under the search bar while the images scroll.
+- Nothing the extension loads by itself carries cookies or can set them: thumbnails, previews, size and type checks and the hotlink fallback (a `declarativeNetRequest` rule limited to the extension's own image requests, plus `credentials: 'omit'` on its automatic fetches). The panel shows no thumbnail before that rule is in place (if Chrome refuses it, thumbnails come only through the cookie-less download). Only the actions you ask for send cookies. Every image download has a total and an idle time limit.
+- The offscreen document answers only the service worker, through direct replies; requests time out instead of waiting forever.
+- Every screen capture respects Chrome's rate limit (two per second), queued, and retries once when refused.
+- Large images handed to the editor travel as Blobs and are shown through `blob:` URLs, without a base64 copy; an open editor keeps its image for up to 12 hours.
+
+## [2.4.1] - 2026-10-20
+
+### Added
+- **Editor presets in Settings**: show or hide each preset group (aspect ratios, social media, common sizes, TMDB, TheTVDB) and add up to 24 sizes of your own, which appear first in the editor as "My presets". Synced with your other settings, in all 18 languages.
+
+### Fixed
+- Drop-down lists open as rounded menus in the theme's colours (Chrome 135+), the capture delay included, instead of a square white system list.
+- Selected images are no longer left outlined on the page after the panel closes or moves to another tab.
+- The image handed to the editor (a screenshot can be private) is deleted as soon as the editor window closes, instead of up to 30 minutes later.
+- Large ZIPs and edited images no longer depend on the page that started them: the action popup closing on Save As can no longer cut the download.
+- The selection bar fits every panel width (down to Chrome's 320 px side panel); the header and toolbar no longer overlap or overflow there, and the last row of images is never hidden under the bar.
+- A page with no images (or one the browser does not let extensions read) now shows 0 images, and "Select all" no longer acts on the previous page.
+- Files opened from disk in Tools keep their own name when converted or resized (e.g. `holiday.webp`, not `image.webp`); `blob:` images no longer get a random id as their name.
+
+### Changed
+- English interface text uses sentence case throughout, like Chrome's own menus.
+- Format names read the same everywhere (`WebP`, not `WEBP`); the Format advisor no longer uses an emoji.
+- Unchecked selection boxes on image cards are easier to see on the light theme.
+- Portuguese (Portugal): consistent "tu" form, sentence case, "Cinzento", "Esc".
+
 ## [2.4.0] - 2026-10-01
 
 ### Added

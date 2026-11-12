@@ -14,15 +14,26 @@ body.sidepanel .app{height:100vh}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-logo{width:30px;height:30px;filter:drop-shadow(0 3px 6px rgba(90,84,240,.45))}
 .brand-text{min-width:0}
-.brand-title{font-size:15px;font-weight:750;letter-spacing:-.01em;line-height:1.2}
+.brand-title{font-size:15px;font-weight:750;letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-sub{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:479px){.brand-sub{display:none}.brand-title{font-size:16px}}
+/* Chrome's narrowest side panel (320 px): the logo alone names the app, controls get tighter */
+@media (max-width:359px){
+  .brand-text{display:none}
+  .search-kbd{display:none}
+  .search input{padding-inline-end:10px}
+  .statusbar{gap:4px}
+  .statusbar .chip{padding:0 8px}
+  .statusbar .chip-icon{padding:0}
+  .statusbar .segmented-icons .seg{min-width:26px;padding:0 5px}
+}
 .header-actions{display:flex;align-items:center;gap:2px;flex:none}
-.split{display:flex;align-items:center;gap:0;padding:2px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-elev);box-shadow:var(--shadow-sm);margin-right:4px}
+.split{display:flex;align-items:center;gap:0;padding:2px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-elev);box-shadow:var(--shadow-sm);margin-inline-end:4px}
 .split .icon-btn{width:30px;height:28px}
-.delay-select{position:relative;display:flex;align-items:center;gap:2px;height:28px;padding:0 4px 0 6px;border-left:1px solid var(--line);color:var(--text-2);cursor:pointer}
+.delay-select{position:relative;display:flex;align-items:center;gap:2px;height:28px;padding-block:0;padding-inline:6px 4px;border-inline-start:1px solid var(--line);color:var(--text-2);cursor:pointer}
 .delay-select select{appearance:none;border:0;background:transparent;font-size:11px;font-weight:650;font-variant-numeric:tabular-nums;cursor:pointer;padding:0 2px;color:var(--text-2)}
 .delay-select select:focus-visible{box-shadow:var(--ring)}
+@supports (appearance:base-select){.delay-select select{appearance:base-select;min-height:0}}
 
 /* ---------- Tabs (segmented) ---------- */
 .tabs{display:flex;gap:2px;margin:0 14px 10px;padding:3px;border-radius:var(--r-md);background:var(--bg-sunken);border:1px solid var(--line)}
@@ -32,19 +43,24 @@ body.sidepanel .app{height:100vh}
 .tab.active .i{color:var(--accent)}
 .tab-badge{font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums;min-width:18px;padding:0 5px;height:17px;line-height:17px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent-text)}
 .tab-badge:empty{display:none}
+/* Steps for long labels (set by fitTabs): no icons, then shortened labels */
+.tabs.fit-icons .tab>.i{display:none}
+.tabs.fit-shrink .tab{min-width:0;padding:0 4px}
+.tabs.fit-shrink .tab>span:not(.tab-badge){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ---------- Views ---------- */
 .views{flex:1;min-height:0;position:relative}
 .view{display:none;height:100%;overflow-y:auto;overflow-x:hidden;padding:0 14px 16px;scrollbar-gutter:stable}
 .view.active{display:block;animation:viewIn .22s var(--ease)}
-body.popup #tab-images.view{padding-bottom:80px}
+/* Room for the floating selection bar, so the last row is never hidden under it */
+#tab-images.view:has(.grid.has-selection){padding-bottom:80px}
 @keyframes viewIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* ---------- Images toolbar ---------- */
-.toolbar{display:flex;gap:6px;align-items:center;position:sticky;top:0;z-index:5;padding:2px 0 8px;background:linear-gradient(var(--bg) 80%,transparent)}
+.toolbar{display:flex;gap:6px;align-items:center;position:sticky;top:0;z-index:5;padding:2px 0 8px;background:var(--bg)}
 .search{flex:1;position:relative;display:flex;align-items:center;min-width:0}
 .search-icon{position:absolute;inset-inline-start:10px;color:var(--text-3);pointer-events:none}
-.search input{width:100%;height:34px;border:1px solid var(--control-line);border-radius:var(--r-sm);background:var(--bg-elev);padding:0 34px;font-size:12.5px;box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s}
+.search input{width:100%;height:34px;text-overflow:ellipsis;border:1px solid var(--control-line);border-radius:var(--r-sm);background:var(--bg-elev);padding:0 34px;font-size:12.5px;box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s}
 .search input:hover{border-color:var(--accent-line)}
 .search input:focus{outline:none;border-color:var(--accent);box-shadow:var(--ring)}
 .search input::placeholder{color:var(--text-3)}
@@ -68,16 +84,25 @@ body.popup #tab-images.view{padding-bottom:80px}
 .dims-x{color:var(--text-3);font-weight:600}
 .dims .input-num{width:72px}
 
-.statusbar{display:flex;align-items:center;gap:6px;margin-bottom:10px;min-height:30px}
-.statusbar-host{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* Stays under the search bar while the grid scrolls: count, duplicates, background, layout. */
+.statusbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px;min-height:30px;position:sticky;top:var(--toolbar-h,44px);z-index:4;padding:2px 0 6px;background:linear-gradient(var(--bg) 85%,transparent)}
+.statusbar .spacer{display:none} /* the host label fills the gap, shrinking first so the bar wraps only when it must */
+.statusbar-host{flex:1 1 0;font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--r-pill);border:1px solid var(--control-line);background:var(--bg-elev);font-size:12px;font-weight:650;color:var(--text-2);font-variant-numeric:tabular-nums;transition:all .15s;flex:none}
 .chip:hover{color:var(--text);border-color:var(--accent-line)}
 .chip[aria-pressed="true"]{color:var(--accent-text);border-color:var(--accent-line);background:var(--accent-soft)}
 .chip-icon{width:28px;padding:0;justify-content:center}
-/* Transparency background: follows the theme unless the viewer picks light or dark. */
-.app.app[data-checker="light"]{--checker:repeating-conic-gradient(#d9d9e3 0 25%,#f6f6fa 0 50%) 0 0/14px 14px}
-.app.app[data-checker="dark"]{--checker:repeating-conic-gradient(#15151d 0 25%,#22222d 0 50%) 0 0/14px 14px}
+/* Transparency background: a checkerboard that follows the theme, or plain white, grey or black. */
+.app.app[data-checker="white"]{--checker:#ffffff}
+.app.app[data-checker="gray"]{--checker:#808080}
+.app.app[data-checker="black"]{--checker:#000000}
+.bg-swatch{width:13px;height:13px;border-radius:4px;background:var(--swatch);box-shadow:inset 0 0 0 1px var(--control-line)}
 
+.autoscroll{margin-bottom:10px;padding:8px 12px 10px;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-text);font-size:12px;font-weight:650;animation:viewIn .25s var(--ease)}
+.autoscroll-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.autoscroll-head .link-btn{margin-inline-start:auto;padding:0}
+.autoscroll .progress-fill{transition:width .3s var(--ease)}
+#btn-autoscroll[aria-pressed="true"]{color:var(--accent-text);background:var(--accent-soft);border-color:var(--accent-line)}
 .new-banner{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:10px;padding:8px 12px;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-text);font-size:12px;font-weight:650;text-align:start;animation:viewIn .25s var(--ease)}
 .new-banner-cta{margin-inline-start:auto;text-decoration:underline;text-underline-offset:2px}
 
@@ -101,7 +126,7 @@ body.popup #tab-images.view{padding-bottom:80px}
 .gthumb-broken{color:var(--text-3)}
 .gthumb-broken .i{width:28px;height:28px;stroke-width:1.5}
 
-.gcheck{position:absolute;top:8px;inset-inline-start:8px;width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(15,15,25,.45);border:1.5px solid rgba(255,255,255,.85);color:transparent;backdrop-filter:blur(6px);opacity:0;transform:scale(.9);transition:opacity .15s,transform .15s,background .15s}
+.gcheck{position:absolute;top:8px;inset-inline-start:8px;width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(15,15,25,.45);border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(15,15,25,.28),0 1px 3px rgba(15,15,25,.25);color:transparent;backdrop-filter:blur(6px);opacity:0;transform:scale(.9);transition:opacity .15s,transform .15s,background .15s}
 .gcheck .i{width:14px;height:14px;stroke-width:3}
 .gcard:hover .gcheck,.gcard:focus-within .gcheck,.gcard.selected .gcheck,.grid.has-selection .gcheck{opacity:1;transform:none}
 .gcard.selected .gcheck{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -208,9 +233,39 @@ body.popup #tab-images.view{padding-bottom:80px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .card-title+.row{border-top:0;padding-top:2px}
 .row>label,.row-label label{font-size:12.5px;font-weight:550}
+/* Long compound words (Größenänderungsverhalten) may break, so the control keeps its room */
+.row>label,.row-label{min-width:0;overflow-wrap:anywhere;hyphens:auto}
 .row-label{display:flex;flex-direction:column;gap:1px;min-width:0}
+/* A long option (Anpassen (Letterbox)) never pushes the select out of its row */
+.row-ctrl:has(>.select){flex:none;max-width:62%}
+.row-ctrl>.select{min-width:0;max-width:100%;white-space:nowrap;text-overflow:ellipsis}
 .row-label small{font-size:11px;color:var(--text-3);line-height:1.35}
 .row-ctrl{display:flex;align-items:center;gap:8px;flex:none}
+
+.row-template{flex-direction:column;align-items:stretch;gap:8px}
+.template-head{display:flex;flex-direction:column;gap:1px}
+.template-head label{font-size:12.5px;font-weight:550}
+.template-head small{font-size:11px;color:var(--text-3)}
+.template-input{width:100%;font-family:var(--mono);font-size:12px}
+.token-chips{display:flex;flex-wrap:wrap;gap:5px}
+.token{height:24px;padding:0 8px;border-radius:var(--r-pill);border:1px solid var(--control-line);background:var(--bg-elev);font-family:var(--mono);font-size:11px;color:var(--text-2);transition:color .15s,border-color .15s,background .15s}
+.token:hover{color:var(--accent-text);border-color:var(--accent-line);background:var(--accent-soft)}
+.template-preview{font-size:11.5px;color:var(--text-2);padding:7px 10px;border-radius:var(--r-sm);background:var(--bg-sunken);border:1px dashed var(--line-strong);unicode-bidi:plaintext}
+.template-preview b{display:block;margin-top:2px;font-family:var(--mono);font-weight:600;color:var(--text);overflow-wrap:anywhere}
+.card-hint{font-size:11.5px;color:var(--text-3);margin:-6px 0 4px}
+.presets-mine{padding-top:10px;border-top:1px solid var(--line)}
+.presets-title{font-size:12.5px;font-weight:650;margin-bottom:8px}
+.preset-list{list-style:none;display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.preset-list:empty{display:none}
+.preset-item{display:flex;align-items:center;gap:8px;height:34px;padding:0 4px 0 10px;border-radius:var(--r-sm);background:var(--bg-sunken);border:1px solid var(--line)}
+.preset-name{flex:1;min-width:0;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;unicode-bidi:plaintext}
+.preset-size{font-size:11.5px;color:var(--text-2);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.preset-item .icon-btn{width:28px;height:28px}
+.preset-item .icon-btn:hover{color:var(--danger);background:var(--danger-soft)}
+#custom-presets-empty{margin-bottom:8px}
+.preset-form{display:grid;grid-template-columns:minmax(0,1fr) 64px auto 64px auto;align-items:center;gap:6px}
+.preset-form .input{width:100%;min-width:0}
+.preset-form .btn{width:30px;padding:0}
 
 .about{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 16px}
 .about-logo{filter:drop-shadow(0 8px 14px rgba(90,84,240,.45));margin-bottom:4px}
@@ -220,15 +275,39 @@ body.popup #tab-images.view{padding-bottom:80px}
 .about-shortcut{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
 .about-links{display:flex;gap:8px;margin-top:6px}
 
+/* ---------- Support dialog ---------- */
+.support-box{max-width:400px}
+.support-heart{color:#f43f5e;flex:none}
+.support-body{padding:14px 16px 16px;overflow-y:auto}
+.support-intro{font-size:12.5px;line-height:1.5;color:var(--text-2)}
+.support-heading{margin:16px 0 8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.support-list{display:flex;flex-direction:column;gap:6px}
+.support-row{display:flex;align-items:center;gap:12px;min-height:40px;padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:13px;font-weight:600;text-decoration:none;transition:border-color .15s,background .15s}
+.support-row:hover,.support-row:focus-visible{border-color:var(--accent-line);background:var(--accent-soft)}
+.support-row>.i:first-child{color:var(--accent);flex:none}
+.support-row>span{flex:1;min-width:0}
+.support-ext{color:var(--text-3);flex:none}
+.support-row[hidden]{display:none}
+
 /* ---------- Action bar ---------- */
-.action-bar{position:absolute;left:10px;right:10px;bottom:10px;z-index:50;border-radius:var(--r-lg);background:var(--bg-glass);border:1px solid var(--line-strong);box-shadow:var(--shadow-lg);backdrop-filter:blur(16px) saturate(1.4);animation:barIn .28s var(--ease)}
+.action-bar{position:absolute;left:10px;right:10px;bottom:10px;z-index:50;container-type:inline-size;border-radius:var(--r-lg);background:var(--bg-glass);border:1px solid var(--line-strong);box-shadow:var(--shadow-lg);backdrop-filter:blur(16px) saturate(1.4);animation:barIn .28s var(--ease)}
 @keyframes barIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .action-bar-inner{display:flex;align-items:center;gap:6px;padding:8px}
 .action-bar .icon-btn-boxed{width:30px;height:30px}
 .action-count{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px 0 8px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent-text);font-size:12.5px;white-space:nowrap;flex:none}
 .action-count strong{color:inherit}
 .action-count .i{stroke-width:2.6;width:13px;height:13px}
-body.popup .action-count-label{display:none}
+/* The bar shrinks with the panel: drop the word "selected", then the Download label
+   (it stays the accessible name), so no control is ever cut off. */
+@container (max-width:439px){.action-count-label{display:none}}
+@container (max-width:359px){
+  #action-download{width:30px;padding:0}
+  #action-download span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+}
+/* The same steps when longer labels overflow at any width (set by fitActionBar) */
+.action-bar.fit-count .action-count-label{display:none}
+.action-bar.fit-download #action-download{width:30px;padding:0}
+.action-bar.fit-download #action-download span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .action-bar .select{flex:none;width:auto}
 .action-bar .btn,.action-bar .icon-btn{flex:none}
 .action-count strong{font-variant-numeric:tabular-nums}

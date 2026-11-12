@@ -54,10 +54,10 @@
     "message": "Đang phân tích ảnh..."
   },
   "advisorAlpha": {
-    "message": "🔍 Ảnh có độ trong suốt → Khuyến nghị PNG hoặc WebP"
+    "message": "Ảnh có độ trong suốt → Khuyến nghị PNG hoặc WebP"
   },
   "advisorSmallest": {
-    "message": "🔍 Nhỏ nhất: {format} ({size})"
+    "message": "Nhỏ nhất: {format} ({size})"
   },
   "scanning": {
     "message": "Đang tìm..."
@@ -233,9 +233,6 @@
   "titleDownloadAs": {
     "message": "Tải xuống dưới dạng..."
   },
-  "donate": {
-    "message": "Ủng hộ"
-  },
   "labelType": {
     "message": "Loại:"
   },
@@ -283,9 +280,6 @@
   },
   "titleCapture": {
     "message": "Chụp vùng"
-  },
-  "titleKofi": {
-    "message": "Ủng hộ trên Ko-fi"
   },
   "bgWhite": {
     "message": "Trắng"
@@ -634,5 +628,312 @@
   },
   "downloadZip": {
     "message": "Tải xuống dạng ZIP"
+  },
+  "editorPresets": {
+    "message": "Cài đặt sẵn của trình chỉnh sửa"
+  },
+  "editorPresetsHint": {
+    "message": "Chọn nhóm hiển thị trong trình chỉnh sửa và thêm kích thước của riêng bạn."
+  },
+  "presetMine": {
+    "message": "Cài đặt sẵn của tôi"
+  },
+  "presetsEmpty": {
+    "message": "Bạn chưa có cài đặt sẵn riêng nào."
+  },
+  "presetName": {
+    "message": "Tên"
+  },
+  "presetWidth": {
+    "message": "Chiều rộng"
+  },
+  "presetHeight": {
+    "message": "Chiều cao"
+  },
+  "presetAdd": {
+    "message": "Thêm cài đặt sẵn"
+  },
+  "presetRemove": {
+    "message": "Xóa $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Bạn có thể lưu tối đa $COUNT$ cài đặt sẵn.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "Mẫu"
+  },
+  "settingTemplate": {
+    "message": "Mẫu tên tệp"
+  },
+  "settingTemplateHint": {
+    "message": "Nhấp vào biến để chèn. Dùng / để tạo thư mục."
+  },
+  "templatePreview": {
+    "message": "Ví dụ: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Tên tệp gốc"
+  },
+  "tokSite": {
+    "message": "Trang web của trang"
+  },
+  "tokDomain": {
+    "message": "Máy chủ của ảnh"
+  },
+  "tokTitle": {
+    "message": "Tiêu đề trang"
+  },
+  "tokIndex": {
+    "message": "Số thứ tự trong lô (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Chiều rộng (pixel)"
+  },
+  "tokHeight": {
+    "message": "Chiều cao (pixel)"
+  },
+  "tokFormat": {
+    "message": "Định dạng (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Ngày hôm nay (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Giờ hiện tại (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Tải tất cả hình ảnh"
+  },
+  "autoScrollHint": {
+    "message": "Cuộn trang đến cuối để ảnh tải chậm xuất hiện rồi quét lại"
+  },
+  "autoScrollRunning": {
+    "message": "Đang tải hình ảnh… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Dừng"
+  },
+  "autoScrollNothing": {
+    "message": "Không còn ảnh nào để tải trên trang này"
+  },
+  "scopeLabel": {
+    "message": "Quét"
+  },
+  "scopeTab": {
+    "message": "Tab này"
+  },
+  "scopeWindow": {
+    "message": "Tất cả tab"
+  },
+  "labelTab": {
+    "message": "Tab:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Tab không đọc được: $COUNT$ (trang của trình duyệt hoặc tab đang ngủ)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "Chụp toàn bộ trang"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Chụp toàn bộ trang"
+  },
+  "captureFullRunning": {
+    "message": "Đang chụp toàn bộ trang… hãy giữ tab này mở (nhấn Esc để hủy)"
+  },
+  "fullPageCut": {
+    "message": "Trang quá dài: ảnh chụp dừng ở $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "Chú thích"
+  },
+  "annotateHint": {
+    "message": "Chú thích: làm mờ, làm nhòe điểm ảnh, khung, mũi tên, chữ"
+  },
+  "toolPixelate": {
+    "message": "Làm nhòe điểm ảnh"
+  },
+  "toolBlur": {
+    "message": "Làm mờ"
+  },
+  "toolBox": {
+    "message": "Khung"
+  },
+  "toolArrow": {
+    "message": "Mũi tên"
+  },
+  "toolText": {
+    "message": "Chữ"
+  },
+  "toolHighlight": {
+    "message": "Tô sáng"
+  },
+  "annotColor": {
+    "message": "Màu"
+  },
+  "annotSize": {
+    "message": "Độ dày"
+  },
+  "sizeFine": {
+    "message": "Mảnh"
+  },
+  "sizeMedium": {
+    "message": "Vừa"
+  },
+  "sizeThick": {
+    "message": "Dày"
+  },
+  "undo": {
+    "message": "Hoàn tác"
+  },
+  "redo": {
+    "message": "Làm lại"
+  },
+  "cancel": {
+    "message": "Hủy"
+  },
+  "textPlaceholder": {
+    "message": "Nhập rồi nhấn Enter"
+  },
+  "captureTabChanged": {
+    "message": "Đã dừng chụp: thẻ đã thay đổi. Hãy giữ thẻ ở phía trước trong khi chụp.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Trang đã ngừng cuộn trước khi đến cuối: ảnh chụp có thể chưa đầy đủ.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Che bằng màu đặc",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Ô cờ",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Sao chép liên kết ảnh",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Đã sao chép liên kết",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Không mất dữ liệu",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Ảnh chụp màn hình",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Vừa cửa sổ",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "Kích thước thật",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Quay lại ảnh chụp",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "Cắt",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "Ủng hộ ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Ủng hộ",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit miễn phí và mã nguồn mở, không quảng cáo, không theo dõi. Nếu nó giúp bạn tiết kiệm thời gian, đây là vài cách để ủng hộ.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Quyên góp",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Ủng hộ miễn phí",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "Gắn sao trên GitHub",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Báo lỗi hoặc đề xuất ý tưởng",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Giúp dịch",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Đánh giá trên Chrome Web Store",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

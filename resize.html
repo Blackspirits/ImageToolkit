@@ -4,13 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title data-i18n="customResizeTitle">Adjust Image</title>
+  <title data-i18n="customResizeTitle">Custom resize</title>
   <link rel="stylesheet" href="lib/cropper.min.css">
   <link rel="stylesheet" href="lib/ui.css">
   <link rel="stylesheet" href="resize.css">
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+    <symbol id="i-annotate" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-tool-redact" viewBox="0 0 24 24"><path d="M4 5h10M4 19h13"/><rect x="3" y="9" width="18" height="6" rx="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-tool-pixelate" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/></symbol>
+    <symbol id="i-tool-blur" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="2.5 2.5"/><circle cx="12" cy="12" r="4.5"/></symbol>
+    <symbol id="i-tool-box" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/></symbol>
+    <symbol id="i-tool-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5"/><path d="M9 5h10v10"/></symbol>
+    <symbol id="i-tool-text" viewBox="0 0 24 24"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></symbol>
+    <symbol id="i-tool-highlight" viewBox="0 0 24 24"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
     <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
     <symbol id="i-flip-h" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7 3 12l5 5V7Z"/><path d="M16 7l5 5-5 5V7Z" stroke-dasharray="2 2.2"/></symbol>
     <symbol id="i-flip-v" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8l5-5 5 5H7Z"/><path d="M7 16l5 5 5-5H7Z" stroke-dasharray="2 2.2"/></symbol>
@@ -36,8 +47,9 @@
   <div class="app" id="app">
     <header class="topbar">
       <div class="topbar-brand">
+        <button id="btn-back" class="btn btn-ghost btn-sm topbar-back" hidden><svg class="i i-sm"><use href="#i-arrow-left"/></svg><span data-i18n="backToCapture">Back to screenshot</span></button>
         <img src="icons/icon48.png" alt="" class="topbar-logo" width="28" height="28">
-        <h1 data-i18n="customResizeTitle">Adjust Image</h1>
+        <h1 data-i18n="customResizeTitle">Custom resize</h1>
       </div>
       <div class="topbar-info">
         <span id="info-text" class="pill"></span>
@@ -56,6 +68,8 @@
           <button class="icon-btn" id="btn-flip-h" data-i18n-title="pFlipH" title="Flip horizontal"><svg class="i"><use href="#i-flip-h"/></svg></button>
           <button class="icon-btn" id="btn-flip-v" data-i18n-title="pFlipV" title="Flip vertical"><svg class="i"><use href="#i-flip-v"/></svg></button>
           <span class="tool-sep"></span>
+          <button class="icon-btn" id="btn-annotate" data-i18n-title="annotateHint" title="Annotate: blur, pixelate, boxes, arrows, text"><svg class="i"><use href="#i-annotate"/></svg></button>
+          <span class="tool-sep"></span>
           <button class="icon-btn" id="btn-reset" data-i18n-title="resetCrop" title="Reset"><svg class="i"><use href="#i-reset"/></svg></button>
           <div class="bg-group" id="bg-group" role="group" data-i18n-aria="bgPreview" aria-label="Background Preview" hidden>
             <span class="tool-sep"></span>
@@ -70,7 +84,7 @@
       <aside class="sidebar">
         <div class="sidebar-scroll">
           <section class="panel">
-            <h2 class="panel-title" data-i18n="cropArea">Crop Area</h2>
+            <h2 class="panel-title" data-i18n="cropArea">Crop area</h2>
             <div class="dims">
               <label class="dim"><span data-i18n="placeholderWidth">W</span><input type="number" id="crop-w" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
               <button id="btn-lock" class="icon-btn lock active" aria-pressed="true" data-i18n-title="titleLockRatio" title="Lock ratio"><svg class="i i-sm"><use href="#i-lock"/></svg></button>
@@ -80,7 +94,7 @@
           </section>
 
           <section class="panel">
-            <h2 class="panel-title" data-i18n="outputSize">Output Size</h2>
+            <h2 class="panel-title" data-i18n="outputSize">Output size</h2>
             <div class="dims">
               <label class="dim"><span data-i18n="placeholderWidth">W</span><input type="number" id="out-w" class="input input-num" min="1" max="16384" inputmode="numeric"></label>
               <span class="dims-x">×</span>
@@ -88,8 +102,13 @@
             </div>
           </section>
 
-          <details class="panel" open>
-            <summary class="panel-title"><span data-i18n="presetAspectRatio">Aspect Ratio</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+          <details class="panel" id="custom-presets-panel" open hidden>
+            <summary class="panel-title"><span data-i18n="presetMine">My presets</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+            <div class="chips" id="custom-presets"></div>
+          </details>
+
+          <details class="panel" data-group="ratio" open>
+            <summary class="panel-title"><span data-i18n="presetAspectRatio">Aspect ratio</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips ratio-grid">
               <button class="ratio ratio-wide" data-preset="free"><svg class="i"><use href="#i-image"/></svg><span data-i18n="pOriginal">Original</span></button>
               <button class="ratio ratio-wide" data-preset="custom"><svg class="i"><use href="#i-ratio-free"/></svg><span data-i18n="pCustom">Custom</span></button>
@@ -104,8 +123,8 @@
             </div>
           </details>
 
-          <details class="panel" open>
-            <summary class="panel-title"><span data-i18n="presetSocial">Social Media</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+          <details class="panel" data-group="social" open>
+            <summary class="panel-title"><span data-i18n="presetSocial">Social media</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="1080x1080" title="Instagram · 1080×1080"><svg class="i i-sm"><use href="#i-instagram"/></svg><span data-i18n="pPost">Post</span></button>
               <button class="chip-btn" data-preset="1080x1350" title="Instagram · 1080×1350"><svg class="i i-sm"><use href="#i-instagram"/></svg>4:5</button>
@@ -118,8 +137,8 @@
             </div>
           </details>
 
-          <details class="panel" open>
-            <summary class="panel-title"><span data-i18n="presetCommon">Common Sizes</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
+          <details class="panel" data-group="common" open>
+            <summary class="panel-title"><span data-i18n="presetCommon">Common sizes</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="3840x2160" title="3840×2160">4K</button>
               <button class="chip-btn" data-preset="2560x1440" title="2560×1440">2K</button>
@@ -130,7 +149,7 @@
             </div>
           </details>
 
-          <details class="panel">
+          <details class="panel" data-group="tmdb">
             <summary class="panel-title"><span>TMDB</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="2000x3000" data-i18n="pPoster" title="2000×3000">Poster</button>
@@ -140,7 +159,7 @@
             </div>
           </details>
 
-          <details class="panel">
+          <details class="panel" data-group="tvdb">
             <summary class="panel-title"><span>TheTVDB</span><svg class="i i-sm chev"><use href="#i-chevron-down"/></svg></summary>
             <div class="chips">
               <button class="chip-btn" data-preset="680x1000" data-i18n="pPoster" title="680×1000">Poster</button>
@@ -161,7 +180,7 @@
           <div class="foot-row">
             <span class="foot-label" id="format-label" data-i18n="formatLabel">Format</span>
             <div class="segmented segmented-block" id="resize-format" role="radiogroup" aria-labelledby="format-label">
-              <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg active" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" role="radio">AVIF</button>
+              <button class="seg" data-value="png" role="radio">PNG</button><button class="seg" data-value="jpeg" role="radio">JPG</button><button class="seg active" data-value="webp" role="radio">WebP</button><button class="seg" data-value="avif" data-output-avif role="radio">AVIF</button>
             </div>
           </div>
           <div class="foot-row" id="quality-row">
@@ -170,7 +189,7 @@
           </div>
           <div class="foot-actions">
             <button id="btn-copy" class="btn btn-ghost" data-i18n-title="copyImage" title="Copy image"><svg class="i i-sm"><use href="#i-copy"/></svg><span data-i18n="copyClipboard">Copy</span></button>
-            <button id="btn-save" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="saveImage">Save Image</span></button>
+            <button id="btn-save" class="btn btn-primary"><svg class="i i-sm"><use href="#i-download"/></svg><span data-i18n="saveImage">Save image</span></button>
           </div>
         </footer>
       </aside>
@@ -181,6 +200,7 @@
   <script src="lib/i18n.js"></script>
   <script src="lib/ui.js"></script>
   <script src="lib/handoff.js"></script>
+  <script src="lib/annotate.js"></script>
   <script src="lib/cropper.min.js"></script>
   <script src="resize.js"></script>
 </body>

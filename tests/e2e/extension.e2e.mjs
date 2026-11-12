@@ -88,6 +88,20 @@ const FIXTURES = {
     + 'const add=(mb,i)=>{const img=new Image();img.alt="h"+i;img.src="data:image/png;base64,"+String.fromCharCode(65+i).repeat(mb*1024*1024);document.body.append(img)};'
     + 'add(9,0);for(let i=1;i<=5;i++)add(6,i);</script></body>'),
   'holey.png': pngWithHole(2000, { x: 1000, y: 700, size: 4 }),
+  'frame.html': Buffer.from('<!doctype html><title>fr</title><body><img src="anim.gif?inframe=1"><div style="width:40px;height:40px;background:url(wide.png?inframebg=1)"></div></body>'),
+  // Infinite feed: reaching the end appends a batch and drops the oldest (like virtualised
+  // timelines), three times. A lazy image sits far below the first screen.
+  'feed.html': Buffer.from('<!doctype html><title>f</title><body style="margin:0">'
+    + '<img src="photo.png?feed=0" style="display:block;height:300px">'
+    + '<div style="height:3000px"></div><img loading="lazy" src="wide.png?lazy=1" style="display:block;height:50px">'
+    + '<div id="list"></div><div id="end" style="height:10px"></div><script>'
+    + 'let batch=0;const list=document.getElementById("list");'
+    + 'new IntersectionObserver((e)=>{if(!e[0].isIntersecting||batch>=3)return;batch++;'
+    + 'const box=document.createElement("div");box.className="batch";'
+    + 'box.innerHTML=`<img src="photo.png?feed=${batch}a" style="display:block;height:900px"><img src="photo.png?feed=${batch}b" style="display:block;height:900px">`;'
+    + 'list.append(box);[...list.children].slice(0,-1).forEach((b)=>b.querySelectorAll("img").forEach((i)=>{const d=document.createElement("div");d.style.height="900px";i.replaceWith(d);}));'
+    + '}).observe(document.getElementById("end"));'
+    + '</script></body>'),
   'page.html': Buffer.from('<!doctype html><title>t</title><body><img src="anim.gif"><img src="logo.svg"><img src="photo.png" srcset="photo.png 1x, wide.png 2x"><div style="position:fixed;inset:0 auto auto 0;width:50px;height:50px;background:url(wide.png)"></div><a href="javascript:alert(1)//x.png">x</a></body>'),
   // Right-click targets: every way a page can show an image the context menu may be used on.
   // The page also builds a data: and a blob: copy of a PNG with its own script.
@@ -104,10 +118,11 @@ const TYPES = { gif: 'image/gif', svg: 'image/svg+xml', png: 'image/png', jpg: '
 const TYPE_OVERRIDES = { 'plain.svg': 'text/plain', 'fake.jpg': 'text/html', 'mislabel.png': 'text/plain', typed: 'image/png' };
 
 let server, base, ctx, sw, id, ui;
+const cookieLog = [];
 const hits = new Map(); // GET requests per path, to check that work is not repeated
 const fetchHits = new Map(); // the same, without <img> loads (grid thumbnails): extension fetches only
 let hugeBytesSent = 0;   // bytes the "huge" endpoint managed to push before the client hung up
-const traffic = { nolenBytes: 0, nolenGets: 0, hotBytes: 0, hotGets: 0 };
+const traffic = { nolenBytes: 0, nolenGets: 0, hotBytes: 0, hotGets: 0, overGets: 0 };
 
 async function send(message) {
   return ui.evaluate((m) => chrome.runtime.sendMessage(m), message);
@@ -182,6 +197,27 @@ before(async () => {
       res.end(body);
       return;
     }
+    // Sends the headers and a first chunk, then nothing more: only a time limit ends it.
+    if (name === 'stall.png') {
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      res.write(FIXTURES['wide.png'].subarray(0, 64));
+      res.on('close', () => res.destroy());
+      return;
+    }
+    // 9 KiB with no Content-Length: only reading tells it is too big for a small preview cap.
+    if (name.startsWith('over/')) {
+      traffic.overGets++;
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+      res.end(Buffer.alloc(9 * 1024));
+      return;
+    }
+    // Records the cookies each image load carried.
+    if (name.startsWith('echo/')) {
+      cookieLog.push({ name, cookie: req.headers.cookie || '', dest: req.headers['sec-fetch-dest'] || '' });
+      res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store', 'set-cookie': 'tracker=1; Path=/' });
+      res.end(FIXTURES['wide.png']);
+      return;
+    }
     // Needs the session cookie, like an image behind a login.
     if (name === 'auth/cookie.png') {
       if (!/(?:^|;\s*)itk=1(?:;|$)/.test(req.headers.cookie || '')) { res.writeHead(401); res.end(); return; }
@@ -213,8 +249,12 @@ before(async () => {
   ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'itk-')), {
     channel: 'chromium',
     headless: true,
+    // Real scrollbars, as on Windows and most Linux desktops: they take room (a horizontal one
+    // shortens the visible height), which headless Chromium otherwise hides.
+    ignoreDefaultArgs: ['--hide-scrollbars'],
     acceptDownloads: true,
-    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
+    // itk-other.test is the same local server under another origin (cross-origin iframes).
+    args: ['--screen-info={1600x1200}', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--host-resolver-rules=MAP itk-other.test 127.0.0.1'],
   });
   sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker');
   id = new URL(sw.url()).host;
@@ -274,7 +314,7 @@ test('fit mode letterboxes with transparency', async () => {
   const alpha = await ui.evaluate(async (src) => {
     const img = new Image(); img.src = src; await img.decode();
     const c = document.createElement('canvas'); c.width = 20; c.height = 20;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
     return [x.getImageData(10, 0, 1, 1).data[3], x.getImageData(10, 10, 1, 1).data[3]];
   }, r.dataUrl);
   assert.deepEqual(alpha, [0, 255]);
@@ -389,10 +429,8 @@ test('context-menu copy writes the image from the focused page', async () => {
   await page.close();
 });
 
-test('area capture crops the selection and opens the editor', async () => {
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: 800, height: 600 });
-  await page.goto(base + 'page.html');
+test('area capture crops the selection and opens it in the viewer', async () => {
+  const page = await screenPage('page.html');
   await page.bringToFront();
   const tabId = await sw.evaluate(async (url) => (await chrome.tabs.query({ url })).at(0).id, base + 'page.html');
   assert.deepEqual(await send({ action: 'startCapture', tabId }), { success: true });
@@ -402,8 +440,8 @@ test('area capture crops the selection and opens the editor', async () => {
   await page.mouse.down();
   await page.mouse.move(300, 250, { steps: 5 });
   await page.mouse.up();
-  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('resize.html') && p !== page), 10000);
-  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const editor = await waitFor(() => ctx.pages().find((p) => p.url().includes('view.html') && p !== page), 10000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 10000 });
   const info = await waitFor(() => editor.textContent('#info-text'));
   const dpr = await page.evaluate(() => devicePixelRatio);
   assert.equal(info, `${200 * dpr} × ${150 * dpr} px`);
@@ -435,7 +473,7 @@ test('batch download from the panel saves every image without dialogs', async ()
 async function freshPanel() {
   await ui.bringToFront();
   await ui.reload();
-  await ui.waitForSelector('#image-grid', { state: 'attached' });
+  await ui.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
 }
 
 test('preview actions follow the image, not its position, when the grid re-sorts', async () => {
@@ -624,6 +662,20 @@ test('editor: crop and output sizes use the same rounding', async () => {
 // ---------- Release hardening ----------
 const countDownloadsAll = () => sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
 const tabIdOf = (url) => sw.evaluate(async (u) => (await chrome.tabs.query({ url: u })).at(0).id, url);
+// A screenshot shows what the window really displays: it must be at least as large as the
+// emulated viewport, or the bottom of each screen is never visible.
+async function screenPage(name, width = 800, height = 600) {
+  const page = await ctx.newPage();
+  await page.goto(base + name);
+  const shown = await sw.evaluate(async (u) => {
+    const tab = (await chrome.tabs.query({ url: u })).at(0);
+    const win = await chrome.windows.update(tab.windowId, { left: 0, top: 0, width: 1200, height: 1000, state: 'normal' }).catch((e) => e.message);
+    return win;
+  }, base + name);
+  if (typeof shown === 'string') throw new Error(shown);
+  await page.setViewportSize({ width, height });
+  return page;
+}
 
 test('scan payload is bounded: an oversized inline image is skipped and the total stays in budget', async () => {
   const page = await ctx.newPage();
@@ -802,7 +854,7 @@ test('area capture: a crop failure reports an error and never opens the whole sc
   const page = await ctx.newPage();
   await page.goto(base + 'page.html');
   await page.bringToFront();
-  const editors = () => ctx.pages().filter((p) => p.url().includes('resize.html')).length;
+  const editors = () => ctx.pages().filter((p) => p.url().includes('view.html')).length;
   const before = editors();
   for (const rect of [{ x: 1e6, y: 1e6, width: 50, height: 50 }, { x: 0, y: 0, width: NaN, height: 10 }]) {
     const result = await sw.evaluate(async ({ url, rect }) => {
@@ -923,7 +975,7 @@ async function openMenuPage() {
   if (menuPage) return menuPage;
   FIXTURES['photo.jpg'] = Buffer.from((await ui.evaluate(() => {
     const c = document.createElement('canvas'); c.width = 48; c.height = 32;
-    const g = c.getContext('2d'); g.fillStyle = '#0080ff'; g.fillRect(0, 0, 48, 32);
+    const g = c.getContext('2d', { willReadFrequently: true }); g.fillStyle = '#0080ff'; g.fillRect(0, 0, 48, 32);
     return c.toDataURL('image/jpeg', 0.9);
   })).split(',')[1], 'base64');
   await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
@@ -1017,4 +1069,1326 @@ test('context menu: a Referer-protected image fails with a clear error and no fi
   const r = await saveFromMenu('referer', 'jpg');
   assert.equal(r.download, null);
   assert.ok(r.notes.some((n) => /HTTP 403/.test(n)), JSON.stringify(r.notes));
+});
+
+// ---------- 2.4.1 ----------
+
+test('page outlines follow the panel: gone when it moves to another tab or closes', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  const tabId = await tabIdOf(base + 'page.html');
+  const outlined = () => page.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length);
+  const styled = () => page.evaluate(() => !!document.getElementById('imagetoolkit-highlight-style'));
+
+  const panel = await ctx.newPage();
+  await panel.goto(`chrome-extension://${id}/popup.html`);
+  await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+  const select = () => panel.evaluate(async ({ tabId, src }) => {
+    state.tabId = tabId;
+    await scan();
+    state.selected.add(src);
+    updateSelectionUI();
+  }, { tabId, src: base + 'photo.png' });
+
+  await select();
+  await waitFor(async () => (await outlined()) === 1);
+  // The panel follows another tab: the page it left is cleaned up.
+  await panel.evaluate(() => { state.tabId = -1; updateSelectionUI(); });
+  await waitFor(async () => (await outlined()) === 0 && !(await styled()));
+
+  await select();
+  await waitFor(async () => (await outlined()) === 1);
+  await panel.close();
+  await waitFor(async () => (await outlined()) === 0 && !(await styled()));
+  await page.close();
+});
+
+test('closing the editor tab forgets the handed-off image', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const key = new URL(editor.url()).searchParams.get('key');
+  assert.equal(await sw.evaluate((k) => ITK.handoff.get(k), key), base + 'wide.png');
+  await editor.close();
+  await waitFor(() => sw.evaluate((k) => ITK.handoff.get(k).then((v) => v == null), key));
+});
+
+test('a large download completes even when the page that started it closes at once', async () => {
+  const page = await ctx.newPage();
+  await page.goto(`chrome-extension://${id}/popup.html`);
+  await page.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+  const res = await page.evaluate(() => ITK.ui.saveBlob(new Blob([new Uint8Array(37 * 1024 * 1024)], { type: 'application/zip' }), 'closing-test.zip', false));
+  assert.equal(res.via, 'blob');
+  await page.close();
+  const item = await waitFor(() => sw.evaluate(async (downloadId) => {
+    const [d] = await chrome.downloads.search({ id: downloadId });
+    return d && d.state !== 'in_progress' ? d : null;
+  }, res.downloadId), 20000);
+  assert.equal(item.state, 'complete');
+  assert.equal(item.fileSize, 37 * MiB);
+  // The file was taken out of the handoff store once the offscreen document picked it up.
+  assert.equal(await sw.evaluate(() => new Promise((resolve) => {
+    const req = indexedDB.open('imagetoolkit');
+    req.onsuccess = () => {
+      const all = req.result.transaction('handoff').objectStore('handoff').getAll();
+      all.onsuccess = () => { resolve(all.result.filter((e) => e.value instanceof Blob).length); req.result.close(); };
+    };
+  })), 0);
+});
+
+test('a page with no images resets the count and "Select all" acts on nothing', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }, { src: b + 'wide.png', width: 40, height: 20 }]), base);
+  await ui.evaluate(() => setImages([], 'restricted'));
+  assert.match(await ui.textContent('#grid-count'), /^0\b/);
+  await ui.evaluate(() => toggleSelectAll());
+  assert.equal(await ui.evaluate(() => state.selected.size), 0);
+  assert.equal(await ui.isHidden('#action-bar'), true);
+});
+
+test('files without a name in their URL keep their own name when saved from Tools', async () => {
+  const res = await ui.evaluate(async (b) => {
+    const blob = await (await fetch(b + 'photo.png')).blob();
+    const dataUrl = await ITK.ui.blobToDataUrl(blob);
+    return chrome.runtime.sendMessage({ action: 'processAndSave', imageUrl: dataUrl, instructions: { format: 'png', saveAs: false, silent: true, sourceName: 'holiday.photo.png' } });
+  }, base);
+  assert.equal(res.filename, 'holiday.photo.png');
+});
+
+test('editor presets: groups can be hidden and your own sizes added, used and removed', async () => {
+  await freshPanel();
+  await ui.evaluate(() => switchTab('settings'));
+  // Hide two groups and add a preset from the Settings card.
+  await ui.click('#preset-group-tmdb');
+  await ui.click('#preset-group-social');
+  await ui.fill('#preset-name', 'Blog cover');
+  await ui.fill('#preset-w', '1200');
+  await ui.fill('#preset-h', '630');
+  await ui.click('#preset-form button[type="submit"]');
+  // Invalid input is refused, nothing is added.
+  await ui.fill('#preset-name', 'Broken');
+  await ui.fill('#preset-w', '0');
+  await ui.fill('#preset-h', '10');
+  await ui.click('#preset-form button[type="submit"]');
+  const saved = await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) =>
+    settings.customPresets?.length && settings.presetGroups?.social === false ? settings : null)));
+  assert.deepEqual(saved.customPresets, [{ name: 'Blog cover', w: 1200, h: 630 }]);
+  assert.equal(saved.presetGroups.tmdb, false);
+  assert.equal(await ui.locator('#custom-presets .preset-item').count(), 1);
+
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const visible = await editor.evaluate(() => [...document.querySelectorAll('details.panel')].filter((d) => !d.hidden).map((d) => d.dataset.group || d.id));
+  assert.deepEqual(visible, ['custom-presets-panel', 'ratio', 'common', 'tvdb']);
+  await editor.click('#custom-presets [data-preset="1200x630"]');
+  assert.deepEqual([await editor.inputValue('#out-w'), await editor.inputValue('#out-h')], ['1200', '630']);
+  await editor.close();
+
+  // Remove it again and restore the groups.
+  await ui.click('#custom-presets .preset-item button');
+  await ui.click('#preset-group-tmdb');
+  await ui.click('#preset-group-social');
+  const restored = await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) =>
+    !settings.customPresets?.length && settings.presetGroups?.social === true && settings.presetGroups?.tmdb === true ? settings : null)));
+  assert.ok(restored);
+  assert.equal(await ui.isVisible('#custom-presets-empty'), true);
+});
+
+test('filename template: chips insert variables, preview matches, downloads and ZIP use it', async () => {
+  await freshPanel();
+  await ui.evaluate(() => switchTab('settings'));
+  await ui.selectOption('#setting-filename', 'template');
+  assert.equal(await ui.isVisible('#template-row'), true);
+  await ui.fill('#setting-template', 'shots/');
+  await ui.click('#template-tokens .token:has-text("{name}")');
+  await ui.click('#template-tokens .token:has-text("{index}")');
+  assert.equal(await ui.inputValue('#setting-template'), 'shots/{name}{index}');
+  await ui.fill('#setting-template', 'shots/{name}_{width}x{height}_{index}');
+  await ui.dispatchEvent('#setting-template', 'change');
+  assert.match(await ui.textContent('#template-preview'), /shots\/sunset_1920x1080_001\.\w+/);
+  await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) => settings.filenameTemplate === 'shots/{name}_{width}x{height}_{index}')));
+
+  // A single download: real size of the produced image, no index outside a batch.
+  const single = await send({ action: 'processAndSave', imageUrl: base + 'wide.png', instructions: { format: 'png', saveAs: false, silent: true } });
+  assert.equal(single.filename, 'shots/wide_40x20.png');
+
+  // ZIP entries follow the template and never collide.
+  const names = await ui.evaluate((b) => {
+    state.settings.filenamePattern = 'template';
+    state.settings.filenameTemplate = '{name}';
+    const used = new Set();
+    const img = { src: b + 'wide.png', width: 40, height: 20 };
+    return [1, 2].map((i) => zipEntryName(img, buildInstructions('png', img, i), { format: 'png', width: 40, height: 20 }, i, used));
+  }, base);
+  assert.deepEqual(names, ['wide.png', 'wide (2).png']);
+
+  await ui.selectOption('#setting-filename', 'original');
+  await waitFor(() => ui.evaluate(() => chrome.storage.sync.get('settings').then(({ settings }) => settings.filenamePattern === 'original')));
+});
+
+test('auto-scroll loads lazy and infinite-scroll images, keeps the ones a feed unloads, and returns', async () => {
+  const page = await screenPage('feed.html');
+  await page.evaluate(() => window.scrollTo(0, 120));
+  const tabId = await tabIdOf(base + 'feed.html');
+  const before = await send({ action: 'collectImages', tabId });
+  assert.ok(!before.images.some((i) => i.src.includes('feed=1a')));
+  const res = await send({ action: 'autoScroll', tabId });
+  const srcs = res.images.map((i) => new URL(i.src).search);
+  for (const q of ['?feed=0', '?lazy=1', '?feed=1a', '?feed=1b', '?feed=2a', '?feed=3b']) assert.ok(srcs.includes(q), `missing ${q}: ${srcs}`);
+  // The page itself only holds the last batch's images now: the others were collected on the way.
+  assert.equal(await page.locator('#list img').count(), 2);
+  assert.equal(await page.evaluate(() => scrollY), 120);
+  assert.equal(res.stopped, false);
+  await page.close();
+});
+
+test('auto-scroll can be stopped from the panel', async () => {
+  const page = await screenPage('feed.html');
+  const tabId = await tabIdOf(base + 'feed.html');
+  const running = send({ action: 'autoScroll', tabId });
+  await new Promise((r) => setTimeout(r, 400));
+  await send({ action: 'stopAutoScroll', tabId });
+  const res = await running;
+  assert.equal(res.stopped, true);
+  assert.equal(await page.evaluate(() => scrollY), 0);
+  await page.close();
+});
+
+test('images inside iframes are listed, same-origin and cross-origin, and outlined there too', async () => {
+  const port = new URL(base).port;
+  FIXTURES['frames.html'] = Buffer.from('<!doctype html><title>frames</title><body><img src="photo.png?top=1">'
+    + `<iframe src="frame.html" width="200" height="120"></iframe><iframe src="http://itk-other.test:${port}/frame.html?x=1" width="200" height="120"></iframe></body>`);
+  const page = await ctx.newPage();
+  await page.goto(base + 'frames.html');
+  await page.waitForTimeout(300);
+  const tabId = await tabIdOf(base + 'frames.html');
+  const { images } = await send({ action: 'collectImages', tabId });
+  const srcs = images.map((i) => i.src);
+  assert.equal(srcs[0], base + 'photo.png?top=1', 'the page itself comes first');
+  assert.ok(srcs.includes(base + 'anim.gif?inframe=1'), srcs.join(' '));
+  assert.ok(srcs.includes(base + 'wide.png?inframebg=1'));
+  assert.ok(srcs.includes(`http://itk-other.test:${port}/anim.gif?inframe=1`), 'cross-origin frame');
+  // A second scan does not inject again or duplicate anything.
+  assert.equal((await send({ action: 'collectImages', tabId })).images.length, images.length);
+
+  // Outlines reach the frames through the same port.
+  const panel = await ctx.newPage();
+  await panel.goto(`chrome-extension://${id}/popup.html`);
+  await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+  await panel.evaluate(async ({ tabId, src }) => { state.tabId = tabId; await scan(); state.selected.add(src); updateSelectionUI(); }, { tabId, src: `http://itk-other.test:${port}/anim.gif?inframe=1` });
+  const frame = page.frames().find((f) => f.url().startsWith('http://itk-other.test'));
+  await waitFor(() => frame.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length === 1));
+  await panel.close();
+  await waitFor(() => frame.evaluate(() => document.querySelectorAll('[data-imagetoolkit-selected]').length === 0));
+  await page.close();
+});
+
+test('all tabs of a window: merged, tagged with their page, browser pages skipped, tab filter', async () => {
+  const win = await sw.evaluate(async (urls) => {
+    const w = await chrome.windows.create({ url: urls, focused: false });
+    return { id: w.id, tabs: w.tabs.map((t) => t.id) };
+  }, [base + 'page.html', base + 'frames.html', base + 'feed.html', 'chrome://version']);
+  await waitFor(() => sw.evaluate(async (id) => (await chrome.tabs.query({ windowId: id })).every((t) => t.status === 'complete'), win.id), 10000);
+
+  const res = await send({ action: 'collectWindowImages', windowId: win.id });
+  assert.equal(res.tabs, 3);
+  assert.equal(res.skipped, 1);
+  const bySrc = new Map(res.images.map((i) => [i.src, i]));
+  assert.ok(bySrc.has(base + 'anim.gif'), 'page.html');
+  assert.ok(bySrc.has(base + 'photo.png?top=1'), 'frames.html');
+  assert.ok(bySrc.has(base + 'photo.png?feed=0'), 'feed.html');
+  assert.equal(bySrc.get(base + 'photo.png?top=1').pageTitle, 'frames');
+  assert.equal(bySrc.get(base + 'photo.png?top=1').pageHost, '127.0.0.1');
+  assert.equal(new Set(res.images.map((i) => i.src)).size, res.images.length, 'no duplicates across tabs');
+
+  // The panel: switch scope, then filter one tab.
+  await freshPanel();
+  await ui.evaluate(async (windowId) => { state.windowId = windowId; setScope('window', false); await scan(); }, win.id);
+  assert.equal(await ui.isVisible('#filter-tab-field', { strict: false }) || await ui.evaluate(() => !document.getElementById('filter-tab-field').hidden), true);
+  assert.equal(await ui.locator('#filter-tab option').count(), 4); // Any + 3 tabs
+  const feedTab = await ui.evaluate(() => [...document.querySelectorAll('#filter-tab option')].find((o) => o.textContent.startsWith('f ('))?.value);
+  await ui.evaluate((v) => { const s = document.getElementById('filter-tab'); s.value = v; s.dispatchEvent(new Event('change')); }, feedTab);
+  assert.ok(await ui.evaluate(() => state.filtered.length > 0 && state.filtered.every((i) => i.pages.some((p) => p.pageTitle === 'f'))));
+  assert.match(await ui.textContent('#scan-host'), /3/);
+  await ui.evaluate(() => setScope('tab', false));
+  await sw.evaluate((id) => chrome.windows.remove(id), win.id);
+});
+
+test('all tabs: an image on two pages belongs to both, for the filter and for file names', async () => {
+  FIXTURES['shareA.html'] = Buffer.from('<!doctype html><title>Alpha</title><img src="photo.png?shared=1"><img src="wide.png?onlyA=1">');
+  FIXTURES['shareB.html'] = Buffer.from('<!doctype html><title>Beta</title><img src="photo.png?shared=1">');
+  const win = await sw.evaluate(async (urls) => {
+    const w = await chrome.windows.create({ url: urls, focused: false });
+    return { id: w.id, tabs: w.tabs.map((t) => t.id) };
+  }, [base + 'shareA.html', base + 'shareB.html']);
+  await waitFor(() => sw.evaluate(async (id) => (await chrome.tabs.query({ windowId: id })).every((t) => t.status === 'complete'), win.id), 10000);
+  await freshPanel();
+  await ui.evaluate(async (windowId) => { state.windowId = windowId; setScope('window', false); await scan(); }, win.id);
+  const betaTab = await ui.evaluate(() => [...document.querySelectorAll('#filter-tab option')].find((o) => o.textContent.startsWith('Beta ('))?.value);
+  assert.ok(betaTab, 'the page with only shared images is in the filter');
+  await ui.evaluate((v) => { const s = document.getElementById('filter-tab'); s.value = v; s.dispatchEvent(new Event('change')); }, betaTab);
+  const shown = await ui.evaluate(() => state.filtered.map((i) => i.src));
+  assert.deepEqual(shown, [base + 'photo.png?shared=1']);
+  const title = await ui.evaluate(() => buildInstructions('png', state.filtered[0], 1).pageTitle);
+  assert.equal(title, 'Beta');
+  await ui.evaluate(() => setScope('tab', false));
+  await sw.evaluate((id) => chrome.windows.remove(id), win.id);
+});
+
+test('scanner: inline images with the same length and ending are both listed', async () => {
+  const svg = (color) => `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="#${color}"/><!--${'x'.repeat(120)}--></svg>`;
+  const src = (color) => 'data:image/svg+xml;base64,' + Buffer.from(svg(color)).toString('base64');
+  FIXTURES['inline2.html'] = Buffer.from(`<!doctype html><title>inline</title><img src="${src('ff0000')}"><img src="${src('8b4513')}">`);
+  const page = await ctx.newPage();
+  await page.goto(base + 'inline2.html');
+  const { images } = await send({ action: 'collectImages', tabId: await tabIdOf(base + 'inline2.html') });
+  assert.equal(images.filter((i) => i.src.startsWith('data:image/svg+xml')).length, 2);
+  await page.close();
+});
+
+test('full-page capture: slices in order, fixed header only once, scrollbar off, position restored', async () => {
+  FIXTURES['long.html'] = Buffer.from('<!doctype html><title>long</title><style>body{margin:0}div.b{height:600px}</style><body>'
+    + '<header style="position:fixed;top:0;left:0;right:0;height:40px;background:#000"></header>'
+    + ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'].map((c) => `<div class="b" style="background:${c}"></div>`).join('') + '</body>');
+  const page = await screenPage('long.html');
+  await page.evaluate(() => window.scrollTo(0, 250));
+  await page.bringToFront();
+  const tabId = await tabIdOf(base + 'long.html');
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId });
+  assert.equal(res.success, true, JSON.stringify(res));
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
+  const { dpr, clientWidth } = await page.evaluate(() => ({ dpr: devicePixelRatio, clientWidth: document.documentElement.clientWidth }));
+  const probe = await editor.evaluate(async (dpr) => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
+    return { w: img.naturalWidth, h: img.naturalHeight, src: img.src.slice(0, 5), header: at(20), band1: at(300), seam: at(615), band2: at(900), band3: at(1500), band4: at(2100), band5: at(2990) };
+  }, dpr);
+  assert.equal(probe.src, 'blob:');
+  assert.equal(probe.w, Math.round(clientWidth * dpr));
+  assert.equal(probe.h, Math.round(3000 * dpr));
+  assert.deepEqual([probe.header, probe.band1, probe.seam, probe.band2, probe.band3, probe.band4, probe.band5],
+    ['0,0,0', '255,0,0', '0,255,0', '0,255,0', '0,0,255', '255,255,0', '255,0,255']);
+  assert.equal(await page.evaluate(() => scrollY), 250);
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('header')).visibility), 'visible');
+  await editor.close();
+  await page.close();
+});
+
+test('annotate: pixelate hides detail, box and text draw, undo/redo, applies on a rotated image', async () => {
+  // 200×100: a fine black/white checker on the left half, plain red on the right.
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 200; c.height = 100;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.fillStyle = '#ff0000'; x.fillRect(100, 0, 100, 100);
+    for (let i = 0; i < 100; i += 2) for (let j = 0; j < 100; j += 2) { x.fillStyle = (i + j) % 4 ? '#000' : '#fff'; x.fillRect(i, j, 2, 2); }
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), dataUrl);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.setViewportSize({ width: 1200, height: 800 });
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-rotate-left'); // annotations work on the image as it is now oriented
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  const canvasSize = await editor.evaluate(() => { const c = document.querySelector('.annot-canvas'); return [c.width, c.height]; });
+  assert.deepEqual(canvasSize, [100, 200]);
+
+  // Drag helper in image pixels.
+  const drag = async (x1, y1, x2, y2) => {
+    const box = await editor.locator('.annot-overlay').boundingBox();
+    const at = (x, y) => [box.x + (x / 100) * box.width, box.y + (y / 200) * box.height];
+    await editor.mouse.move(...at(x1, y1));
+    await editor.mouse.down();
+    await editor.mouse.move(...at(x2, y2), { steps: 4 });
+    await editor.mouse.up();
+  };
+  const pixel = (x, y) => editor.evaluate(([x, y]) => [...document.querySelector('.annot-canvas').getContext('2d', { willReadFrequently: true }).getImageData(x, y, 1, 1).data.slice(0, 3)], [x, y]);
+  // After rotating left, the checker (formerly the left half) is the bottom half.
+  const variance = () => editor.evaluate(() => {
+    const d = document.querySelector('.annot-canvas').getContext('2d', { willReadFrequently: true }).getImageData(20, 120, 40, 40).data;
+    let min = 255, max = 0;
+    for (let i = 0; i < d.length; i += 4) { min = Math.min(min, d[i]); max = Math.max(max, d[i]); }
+    return max - min;
+  });
+  assert.equal(await variance(), 255);
+  await editor.keyboard.press('p');
+  await editor.waitForSelector('.annot-tool[data-tool="pixelate"].active');
+  await drag(10, 110, 90, 190);
+  assert.ok(await variance() < 60, 'the checker is pixelated');
+  await editor.keyboard.press('r');
+  await editor.waitForSelector('.annot-tool[data-tool="box"].active');
+  await editor.click('.annot-color[data-color="#3b82f6"]');
+  await drag(10, 10, 90, 90);
+  const edge = await pixel(10, 50);
+  assert.ok(edge[2] > 180 && edge[0] < 120, `box edge is blue: ${edge}`);
+  await editor.keyboard.press('Control+z');
+  assert.deepEqual(await pixel(10, 50), [255, 0, 0]);
+  await editor.keyboard.press('Control+y');
+  assert.ok((await pixel(10, 50))[2] > 180);
+  // Text: click, type, Enter.
+  await editor.keyboard.press('t');
+  await editor.waitForSelector('.annot-tool[data-tool="text"].active');
+  const box = await editor.locator('.annot-overlay').boundingBox();
+  await editor.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.3);
+  await editor.locator('.annot-text').fill('Hi');
+  await editor.keyboard.press('Enter');
+  assert.equal(await editor.locator('.annot-text').count(), 0);
+
+  await editor.click('.annot-bar .btn-primary'); // Apply
+  await editor.waitForSelector('.annot-layer', { state: 'detached' });
+  await waitFor(() => editor.evaluate(() => document.getElementById('cropper-img').src.startsWith('blob:')));
+  const result = await waitFor(() => editor.evaluate(() => {
+    const img = document.getElementById('cropper-img');
+    return img.naturalWidth === 100 && editor.cropper.ready ? { w: img.naturalWidth, h: img.naturalHeight, rotate: editor.cropper.getData().rotate } : null;
+  }));
+  assert.deepEqual(result, { w: 100, h: 200, rotate: 0 });
+  assert.match(await editor.textContent('#info-text'), /100 × 200/);
+  // Saving still works on the annotated image.
+  const countPng = () => sw.evaluate(() => chrome.downloads.search({ mime: 'image/png' }).then((d) => d.length));
+  const before = await countPng();
+  await editor.evaluate(async () => { document.querySelector('#resize-format [data-value="png"]').click(); await save(); });
+  await waitFor(async () => (await countPng()) > before);
+  await editor.close();
+});
+
+// ---------- Review of 2.5.0 ----------
+
+test('a scanner left in the page by an older version does not block the new one', async () => {
+  const page = await ctx.newPage();
+  await page.goto(base + 'page.html');
+  const tabId = await tabIdOf(base + 'page.html');
+  // 2.4.x marked its scanner with this flag and had no scan function.
+  await sw.evaluate((tabId) => chrome.scripting.executeScript({ target: { tabId }, func: () => { window.__imagetoolkitScanner = true; } }), tabId);
+  const { images, error } = await send({ action: 'collectImages', tabId });
+  assert.equal(error, undefined);
+  assert.ok(images.some((i) => i.src === base + 'photo.png'));
+  await page.close();
+});
+
+test('full-page capture keeps sticky content where it belongs and never repeats it', async () => {
+  FIXTURES['sticky.html'] = Buffer.from('<!doctype html><title>sticky</title><style>body{margin:0}section{height:1200px;background:#00ff00}h2{position:sticky;top:0;margin:0;height:60px;background:#ff0000}</style><body>'
+    + '<section></section><section><h2></h2></section><section style="background:#0000ff"></section></body>');
+  const page = await screenPage('sticky.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  assert.equal((await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'sticky.html') })).success, true);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const px = await editor.evaluate((dpr) => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
+    return { heading: at(1230), afterHeading: at(1300), slice3top: at(1805), blue: at(3000) };
+  }, dpr);
+  // The heading sits at the top of its section (y 1200–1260), once; nowhere else is red.
+  assert.deepEqual(px, { heading: '255,0,0', afterHeading: '0,255,0', slice3top: '0,255,0', blue: '0,0,255' });
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('h2')).position), 'sticky');
+  await editor.close();
+  await page.close();
+});
+
+test('full-page capture of an app-like layout follows its inner scrolling area', async () => {
+  FIXTURES['app.html'] = Buffer.from('<!doctype html><title>app</title><style>html,body{margin:0;height:100%;overflow:hidden}'
+    + 'header{height:50px;background:#000}main{height:calc(100% - 50px);overflow:auto}main div{height:600px}</style><body><header></header><main>'
+    + ['#ff0000', '#00ff00', '#0000ff'].map((c) => `<div style="background:${c}"></div>`).join('') + '</main></body>');
+  const page = await screenPage('app.html');
+  await page.evaluate(() => { document.querySelector('main').scrollTop = 120; });
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'app.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const probe = await editor.evaluate((dpr) => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    const at = (y) => [...x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data.slice(0, 3)].join(',');
+    return { h: img.naturalHeight, top: at(5), red: at(300), green: at(900), blue: at(1500), end: at(1795) };
+  }, dpr);
+  // The whole scrolling area (3 × 600 px), not one screen of it; the header is not part of it.
+  assert.equal(probe.h, Math.round(1800 * dpr));
+  assert.deepEqual([probe.top, probe.red, probe.green, probe.blue, probe.end], ['255,0,0', '255,0,0', '0,255,0', '0,0,255', '0,0,255']);
+  assert.equal(await page.evaluate(() => document.querySelector('main').scrollTop), 120);
+  await editor.close();
+  await page.close();
+});
+
+test('full-page capture ends on a page that refuses to scroll, and says it may be incomplete', async () => {
+  FIXTURES['stuck.html'] = Buffer.from('<!doctype html><title>stuck</title><style>body{margin:0}div{height:4000px;background:#ff0000}</style><body><div></div>'
+    + '<script>addEventListener("scroll", () => scrollTo(0, 0));</script></body>');
+  const page = await screenPage('stuck.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const started = Date.now();
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'stuck.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.equal(res.truncated, true);
+  assert.ok(Date.now() - started < 20000, 'ends at once instead of looping');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.close();
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  await page.close();
+});
+
+test('full-page capture of a page that jumps while scrolling (chats) has no holes: it stops at the jump and is trimmed', async () => {
+  FIXTURES['jumpy.html'] = Buffer.from('<!doctype html><title>jumpy</title><style>body{margin:0}div{height:600px}</style><body>'
+    + ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#000000'].map((c) => `<div style="background:${c}"></div>`).join('')
+    + '<script>addEventListener("scroll", () => { if (scrollY > 900 && scrollY < 2500) scrollTo(0, 3000); });</script></body>');
+  const page = await screenPage('jumpy.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'jumpy.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  assert.equal(res.truncated, true);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const probe = await editor.evaluate((dpr) => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    const rows = [];
+    for (let y = 50; y < img.naturalHeight / dpr; y += 100) rows.push(x.getImageData(Math.round(400 * dpr), Math.round(y * dpr), 1, 1).data[3]);
+    return { h: Math.round(img.naturalHeight / dpr), transparentRows: rows.filter((a) => a < 255).length };
+  }, dpr);
+  assert.ok(probe.h <= 1200 && probe.h >= 600, `trimmed to what was captured: ${probe.h}`);
+  assert.equal(probe.transparentRows, 0, 'no empty band anywhere');
+  await editor.close();
+  await page.close();
+});
+
+test('Esc in the panel cancels a full-page capture; the page is restored and no editor opens', async () => {
+  FIXTURES['esc.html'] = Buffer.from('<!doctype html><title>esc</title><style>body{margin:0}div{height:8000px;background:linear-gradient(#f00,#00f)}</style><body><div></div></body>');
+  const page = await screenPage('esc.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const tabId = await tabIdOf(base + 'esc.html');
+  // The side panel keeps the focus after its button is clicked: Esc there must cancel.
+  const panel = await ctx.newPage();
+  await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
+  await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+  await page.bringToFront();
+  await panel.evaluate((id) => { state.tabId = id; document.getElementById('btn-capture-full').click(); }, tabId);
+  await new Promise((r) => setTimeout(r, 1200));
+  await panel.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+  await waitFor(() => panel.evaluate(() => !state.fullPageRunning), 15000);
+  await new Promise((r) => setTimeout(r, 500));
+  known.add(panel);
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('resize.html')), false);
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  assert.equal(await page.evaluate(() => scrollY), 0);
+  await panel.close();
+  await page.close();
+});
+
+test('full-page capture stops when another tab comes to the front, and restores the page', async () => {
+  FIXTURES['tall.html'] = Buffer.from('<!doctype html><title>tall</title><style>body{margin:0}div{height:6000px;background:linear-gradient(#f00,#00f)}</style><body><div></div></body>');
+  const page = await screenPage('tall.html');
+  FIXTURES['other.html'] = Buffer.from('<!doctype html><title>other</title><body>other</body>');
+  const other = await ctx.newPage();
+  await other.goto(base + 'other.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const pending = send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'tall.html') });
+  await new Promise((r) => setTimeout(r, 1200));
+  await other.bringToFront();
+  const res = await pending;
+  assert.equal(res.error, 'tabChanged', JSON.stringify(res));
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('view.html')), false, 'no editor with a mixed capture');
+  assert.equal(await page.evaluate(() => !!document.getElementById('imagetoolkit-fullpage-style')), false);
+  assert.equal(await page.evaluate(() => scrollY), 0);
+  await other.close();
+  await page.close();
+});
+
+test('automatic preview fetches never send cookies; a fetch the user asks for does', async () => {
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  const automatic = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'auth/cookie.png', automatic: true });
+  assert.ok(!automatic?.dataUrl, JSON.stringify(automatic).slice(0, 120));
+  const asked = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'auth/cookie.png' });
+  assert.ok(asked?.dataUrl?.startsWith('data:image/png'), 'the editor and downloads still reach images behind a login');
+});
+
+test('a download that stalls ends with a time-out instead of hanging', async () => {
+  const started = Date.now();
+  const message = await sw.evaluate((url) => fetchImageBlob(url, { totalMs: 1500 }).then(() => 'resolved', (err) => err.message), base + 'stall.png');
+  assert.equal(message, 'Download timed out');
+  assert.ok(Date.now() - started < 8000);
+});
+
+test('auto-scroll: Stop goes to the tab being scrolled, not the one now active', async () => {
+  await freshPanel();
+  const calls = await ui.evaluate(async () => {
+    const calls = [];
+    const original = chrome.runtime.sendMessage;
+    chrome.runtime.sendMessage = (message) => { calls.push(message); return Promise.resolve({}); };
+    try {
+      Object.assign(state, { autoScrolling: true, autoScrollTab: 111, tabId: 222 });
+      await toggleAutoScroll();
+    } finally {
+      chrome.runtime.sendMessage = original;
+      state.autoScrolling = false;
+    }
+    return calls;
+  });
+  assert.deepEqual(calls.map((m) => [m.action, m.tabId]), [['stopAutoScroll', 111]]);
+});
+
+test('the panel loads thumbnails directly only once the no-cookie rule is confirmed', async () => {
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  await freshPanel();
+  assert.deepEqual(await send({ action: 'imagesReady' }), { ok: true });
+  assert.equal(await ui.evaluate(() => state.directImages), true);
+  // Without the rule (Chrome refused it): no direct load at all, only the cookie-less download.
+  cookieLog.length = 0;
+  await ui.evaluate((b) => { state.directImages = false; setImages([{ src: b + 'echo/norule.png', width: 0, height: 0 }]); }, base);
+  await waitFor(() => cookieLog.length > 0, 10000);
+  await waitFor(() => ui.evaluate(() => document.querySelector('.gthumb img')?.src.startsWith('data:')), 10000);
+  await new Promise((r) => setTimeout(r, 300));
+  assert.ok(cookieLog.every((e) => e.dest !== 'image' && !/itk=1/.test(e.cookie)), JSON.stringify(cookieLog));
+});
+
+test('thumbnails and previews the panel loads by itself carry no cookies and cannot set any', async () => {
+  await ctx.addCookies([{ name: 'itk', value: '1', url: base }]);
+  await freshPanel();
+  cookieLog.length = 0;
+  await ui.evaluate((b) => setImages([{ src: b + 'echo/thumb.png', width: 0, height: 0 }]), base);
+  await waitFor(() => cookieLog.length > 0, 10000);
+  await new Promise((r) => setTimeout(r, 500));
+  assert.ok(cookieLog.every((entry) => !/itk=1/.test(entry.cookie)), JSON.stringify(cookieLog));
+  assert.equal((await ctx.cookies(base)).some((c) => c.name === 'tracker'), false, 'no cookie set through a thumbnail');
+  // The page itself still sends its cookies: only the extension's own loads are changed.
+  cookieLog.length = 0;
+  FIXTURES['echo.html'] = Buffer.from('<!doctype html><title>echo</title><img src="echo/page.png">');
+  const page = await ctx.newPage();
+  await page.goto(base + 'echo.html');
+  await waitFor(() => cookieLog.some((e) => e.name === 'echo/page.png'), 10000);
+  assert.ok(cookieLog.find((e) => e.name === 'echo/page.png').cookie.includes('itk=1'));
+  await page.close();
+});
+
+test('capture watch: a tab that leaves and comes back, or reloads the same URL, stays marked', async () => {
+  FIXTURES['w1.html'] = Buffer.from('<!doctype html><title>w1</title>');
+  FIXTURES['w2.html'] = Buffer.from('<!doctype html><title>w2</title>');
+  const a = await ctx.newPage(); await a.goto(base + 'w1.html');
+  const b = await ctx.newPage(); await b.goto(base + 'w2.html');
+  await a.bringToFront();
+  const ids = { a: await tabIdOf(base + 'w1.html'), b: await tabIdOf(base + 'w2.html') };
+  const awayAndBack = await sw.evaluate(async ({ a, b }) => {
+    const tab = await chrome.tabs.get(a);
+    const watch = watchTab(a, tab.windowId);
+    await chrome.tabs.update(b, { active: true });
+    await chrome.tabs.update(a, { active: true });
+    await new Promise((r) => setTimeout(r, 200));
+    watch.stop();
+    return { changed: watch.changed, front: (await chrome.tabs.get(a)).active };
+  }, ids);
+  assert.deepEqual(awayAndBack, { changed: true, front: true });
+  const quiet = await sw.evaluate(async ({ a }) => {
+    const tab = await chrome.tabs.get(a);
+    const watch = watchTab(a, tab.windowId);
+    await new Promise((r) => setTimeout(r, 300));
+    watch.stop();
+    return watch.changed;
+  }, ids);
+  assert.equal(quiet, false);
+  const reloaded = await sw.evaluate(async ({ a }) => {
+    const tab = await chrome.tabs.get(a);
+    const watch = watchTab(a, tab.windowId);
+    await chrome.tabs.reload(a);
+    await new Promise((r) => setTimeout(r, 500));
+    watch.stop();
+    return watch.changed;
+  }, ids);
+  assert.equal(reloaded, true);
+  await a.close(); await b.close();
+});
+
+test('full-page capture stops when the page reloads the same URL midway', async () => {
+  FIXTURES['reload.html'] = Buffer.from('<!doctype html><title>reload</title><style>body{margin:0}div{height:6000px;background:linear-gradient(#0f0,#f0f)}</style><body><div></div></body>');
+  const page = await screenPage('reload.html');
+  await page.bringToFront();
+  await page.evaluate(() => scrollTo(0, 280));
+  const known = new Set(ctx.pages());
+  const tabId = await tabIdOf(base + 'reload.html');
+  const pending = send({ action: 'captureFullPage', tabId });
+  await waitFor(() => page.evaluate(() => scrollY > 600)); // the capture has moved down the page
+  await sw.evaluate((id) => chrome.tabs.reload(id), tabId);
+  const res = await pending;
+  assert.ok(res.error || res.cancelled, JSON.stringify(res)); // stopped, however early the reload came
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(ctx.pages().some((p) => !known.has(p) && p.url().includes('view.html')), false);
+  // The reloaded page opens where the user was, not where the capture had got to.
+  await page.waitForLoadState('load');
+  await new Promise((r) => setTimeout(r, 300));
+  assert.equal(await page.evaluate(() => Math.round(scrollY)), 280);
+  await page.close();
+});
+
+test('full-page capture ignores a hidden off-screen scrolling panel', async () => {
+  FIXTURES['panel.html'] = Buffer.from('<!doctype html><title>panel</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#00ff00}'
+    + 'aside{position:fixed;top:900px;left:0;width:700px;height:700px;overflow:auto;visibility:hidden;background:#f00}aside div{height:5000px}</style>'
+    + '<body><aside><div></div></aside></body>');
+  const page = await screenPage('panel.html');
+  await page.bringToFront();
+  const known = new Set(ctx.pages());
+  const res = await send({ action: 'captureFullPage', tabId: await tabIdOf(base + 'panel.html') });
+  assert.equal(res.success, true, JSON.stringify(res));
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')), 15000);
+  await editor.waitForSelector('#app[data-ready="true"]', { timeout: 15000 });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const probe = await editor.evaluate((dpr) => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    return { h: img.naturalHeight, mid: [...x.getImageData(Math.round(400 * dpr), Math.round(300 * dpr), 1, 1).data.slice(0, 3)].join(',') };
+  }, dpr);
+  assert.equal(probe.h, Math.round(600 * dpr), 'the visible page, not the hidden panel');
+  assert.equal(probe.mid, '0,255,0');
+  await editor.close();
+  await page.close();
+});
+
+test('offscreen: at most two stitching sessions live at once; a slice outside the screenshot is an error', async () => {
+  const result = await sw.evaluate(async () => {
+    const begin = () => offscreenRequest({ action: 'fullpage-begin', width: 10, height: 10 }).then((r) => r.session);
+    const s1 = await begin(); const s2 = await begin(); const s3 = await begin();
+    const tiny = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYPj/HwADAgH/eL9GtQAAAABJRU5ErkJggg==';
+    const draw = (session, crop) => offscreenRequest({ action: 'fullpage-draw', session, dataUrl: tiny, crop, y: 0, scale: 1 }).then(() => 'ok', (e) => e.message);
+    const out = {
+      oldest: await draw(s1, { x: 0, y: 0, width: 1, height: 1 }),
+      newest: await draw(s3, { x: 0, y: 0, width: 1, height: 1 }),
+      outside: await draw(s3, { x: 0, y: 5, width: 1, height: 1 }),
+    };
+    for (const session of [s2, s3]) await offscreenRequest({ action: 'fullpage-cancel', session });
+    return out;
+  });
+  assert.deepEqual(result, { oldest: 'Capture expired', newest: 'ok', outside: 'Capture area is outside the screenshot' });
+});
+
+test('the header theme button flips light/dark; Automatic is only chosen in Settings', async () => {
+  await freshPanel();
+  await ui.evaluate(() => applyTheme('auto'));
+  const shownDark = await ui.evaluate(() => document.getElementById('app').classList.contains('dark'));
+  const seen = [];
+  for (let i = 0; i < 3; i++) {
+    await ui.click('#btn-theme');
+    seen.push(await ui.evaluate(() => ({ theme: document.getElementById('app').dataset.theme, icon: document.getElementById('theme-icon').getAttribute('href') })));
+  }
+  const first = shownDark ? 'light' : 'dark';
+  const second = shownDark ? 'dark' : 'light';
+  const icon = (t) => (t === 'dark' ? '#i-moon' : '#i-sun');
+  assert.deepEqual(seen, [first, second, first].map((theme) => ({ theme, icon: icon(theme) })));
+  await waitFor(async () => (await sw.evaluate(async () => (await chrome.storage.sync.get('settings')).settings.theme)) === first);
+  await ui.evaluate(() => { applyTheme('auto'); saveSettings({ theme: 'auto' }); });
+});
+
+test('transparency background: checkerboard, white, grey, black, shown on the button', async () => {
+  await freshPanel();
+  await ui.evaluate(() => setChecker('auto', false));
+  const seen = [];
+  for (let i = 0; i < 4; i++) {
+    await ui.click('#btn-checker');
+    seen.push(await ui.evaluate(() => ({
+      mode: document.querySelector('.app').dataset.checker || 'auto',
+      bg: getComputedStyle(document.querySelector('.app')).getPropertyValue('--checker').trim(),
+      swatch: !!document.querySelector('#btn-checker .bg-swatch'),
+    })));
+  }
+  assert.deepEqual(seen.map((s) => [s.mode, s.swatch]), [['white', true], ['gray', true], ['black', true], ['auto', false]]);
+  assert.deepEqual(seen.slice(0, 3).map((s) => s.bg), ['#ffffff', '#808080', '#000000']);
+  assert.match(await ui.getAttribute('#btn-checker', 'title'), /:/);
+});
+
+test('the editor starts with the whole image selected, so saving never trims a capture', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const r = await waitFor(() => editor.evaluate(() => {
+    if (!editor.cropper?.ready) return null;
+    const img = document.getElementById('cropper-img');
+    const d = editor.cropper.getData(true);
+    return { x: d.x, y: d.y, w: d.width, h: d.height, nw: img.naturalWidth, nh: img.naturalHeight };
+  }));
+  assert.deepEqual([r.x, r.y, r.w, r.h], [0, 0, r.nw, r.nh]);
+  await editor.close();
+});
+
+test('copy link: one image address from the card or the preview; never for inline images', async () => {
+  await freshPanel();
+  await ui.evaluate(() => {
+    window.__copied = [];
+    window.copyText = async (text) => { window.__copied.push(text); };
+    setImages([{ src: 'https://example.com/a.png', width: 10, height: 10 }, { src: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="9" height="9"><!--' + 'x'.repeat(120) + '--></svg>'), width: 9, height: 9 }]);
+  });
+  const cards = ui.locator('.gcard');
+  assert.equal(await cards.nth(0).locator('[data-act="link"]').count(), 1);
+  assert.equal(await cards.nth(1).locator('[data-act="link"]').count(), 0, 'no link for an inline image');
+  await ui.evaluate(() => document.querySelector('.gcard [data-act="link"]').click());
+  await ui.evaluate(() => openPreview('https://example.com/a.png'));
+  assert.equal(await ui.isHidden('#preview-link'), false);
+  await ui.click('#preview-link');
+  assert.deepEqual(await ui.evaluate(() => window.__copied), ['https://example.com/a.png', 'https://example.com/a.png']);
+  await ui.evaluate(() => closePreview());
+});
+
+test('AVIF is offered as an output only if the browser can write it; reading AVIF is unaffected', async () => {
+  const canWrite = await sw.evaluate(async () => (await ITK.encodableFormats()).has('avif'));
+  await freshPanel();
+  const panel = await ui.evaluate(() => ({
+    convert: !!document.querySelector('#convert-format [data-value="avif"]'),
+    defaultFormat: !!document.querySelector('#setting-default-format [data-value="avif"]'),
+    selection: !!document.querySelector('#action-format option[value="avif"]'),
+    preview: !!document.querySelector('#preview-format option[value="avif"]'),
+    typeFilter: !!document.querySelector('#filter-type option[value="avif"]'), // finding AVIF images stays
+  }));
+  assert.deepEqual(panel, { convert: canWrite, defaultFormat: canWrite, selection: canWrite, preview: canWrite, typeFilter: true });
+  await ui.evaluate((b) => { setImages([{ src: b + 'photo.png', width: 10, height: 10 }]); document.querySelector('.gcard [data-act="download"]').click(); }, base);
+  const menu = await ui.evaluate(() => [...document.querySelectorAll('.menu .menu-item span')].map((s) => s.textContent));
+  assert.equal(menu.includes('AVIF'), canWrite);
+  await ui.evaluate(() => closeMenu());
+  const menuItem = await sw.evaluate(() => new Promise((resolve) => chrome.contextMenus.update('save-as-avif', {}, () => resolve(!chrome.runtime.lastError))));
+  assert.equal(menuItem, canWrite, 'right-click menu');
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  assert.equal(await editor.evaluate(() => !!document.querySelector('#resize-format [data-value="avif"]')), canWrite);
+  await editor.close();
+});
+
+test('annotate: nothing behind the layer can be reached by keyboard, and Save/Copy wait for Apply', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  assert.equal(await editor.evaluate(() => document.querySelector('.sidebar').inert && document.querySelector('.topbar').inert), true);
+  const reached = new Set();
+  for (let i = 0; i < 40; i++) {
+    await editor.keyboard.press('Tab');
+    reached.add(await editor.evaluate(() => {
+      const a = document.activeElement;
+      return a?.closest('.annot-layer') ? 'layer' : a?.closest('.sidebar') ? 'sidebar' : a?.closest('.topbar') ? 'topbar' : a === document.body ? 'body' : 'other';
+    }));
+  }
+  assert.ok(!reached.has('sidebar') && !reached.has('topbar') && !reached.has('other'), [...reached].join());
+  const count = () => sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
+  const before = await count();
+  await editor.evaluate(async () => { await save(); await copy(); });
+  await new Promise((r) => setTimeout(r, 800));
+  assert.equal(await count(), before, 'no export while the marks are not applied');
+  await editor.click('.annot-bar .btn-ghost'); // Cancel
+  assert.equal(await editor.evaluate(() => document.querySelector('.sidebar').inert), false);
+  await editor.close();
+});
+
+test('all tabs + load all images keeps what a feed unloaded while scrolling', async () => {
+  FIXTURES['unload.html'] = Buffer.from('<!doctype html><title>unload</title><body style="margin:0"><img id="first" src="photo.png?first=1" width="50" height="50"><div style="height:2600px"></div>'
+    + '<img src="photo.png?last=1" width="50" height="50"><script>addEventListener("scroll", () => { if (scrollY > 300) document.getElementById("first")?.remove(); });</script></body>');
+  const page = await screenPage('unload.html');
+  await page.bringToFront();
+  const tabId = await tabIdOf(base + 'unload.html');
+  const windowId = await sw.evaluate((id) => chrome.tabs.get(id).then((t) => t.windowId), tabId);
+  await freshPanel();
+  await ui.evaluate(async ({ tabId, windowId }) => { state.tabId = tabId; state.windowId = windowId; setScope('window', false); await toggleAutoScroll(); }, { tabId, windowId });
+  const srcs = await ui.evaluate(() => state.images.map((i) => i.src));
+  assert.ok(srcs.includes(base + 'photo.png?first=1'), 'the unloaded image is kept');
+  assert.ok(srcs.includes(base + 'photo.png?last=1'));
+  const first = await ui.evaluate((src) => state.images.find((i) => i.src === src)?.pages?.map((p) => p.pageTitle), base + 'photo.png?first=1');
+  assert.deepEqual(first, ['unload'], 'and still belongs to its tab');
+  await ui.evaluate(() => setScope('tab', false));
+  await page.close();
+});
+
+test('failed previews are charged for the bytes they downloaded: the preview budget really caps traffic', async () => {
+  await freshPanel();
+  traffic.overGets = 0;
+  const left = await ui.evaluate(async (b) => {
+    LIMITS.fallbackFetches = 8; LIMITS.fallbackItemBytes = 8 * 1024; LIMITS.fallbackBytes = 16 * 1024;
+    resetViaExtension();
+    await Promise.all(Array.from({ length: 8 }, (_, i) => fetchViaExtension(`${b}over/${i}.png`)));
+    const out = viaExtensionBudget.bytes;
+    LIMITS.fallbackFetches = 40; LIMITS.fallbackItemBytes = 8 * 1024 * 1024; LIMITS.fallbackBytes = 48 * 1024 * 1024;
+    resetViaExtension();
+    return out;
+  }, base);
+  assert.ok(traffic.overGets <= 2, `downloads started: ${traffic.overGets}`);
+  assert.ok(left < 16 * 1024, `budget left: ${left}`);
+});
+
+test('editor: PNG keeps the quality row in place, disabled and labelled lossless', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  const state = async () => editor.evaluate(() => ({
+    hidden: document.getElementById('quality-row').hidden,
+    disabled: document.getElementById('resize-quality').disabled,
+    label: document.getElementById('resize-quality-value').textContent,
+    footTop: Math.round(document.getElementById('btn-save').getBoundingClientRect().top),
+    fill: document.getElementById('resize-quality').style.getPropertyValue('--pct'),
+    value: document.getElementById('resize-quality').value,
+  }));
+  await editor.click('#resize-format [data-value="webp"]');
+  const webp = await state();
+  await editor.click('#resize-format [data-value="png"]');
+  const png = await state();
+  assert.deepEqual([webp.hidden, webp.disabled, webp.label.endsWith('%')], [false, false, true]);
+  assert.deepEqual([png.hidden, png.disabled, png.label.endsWith('%')], [false, true, false]);
+  assert.equal(png.footTop, webp.footTop, 'the buttons below do not move');
+  assert.equal(png.fill, '100%', 'lossless reads as full quality');
+  await editor.click('#resize-format [data-value="webp"]');
+  const back = await state();
+  assert.deepEqual([back.value, back.label, back.fill], [webp.value, webp.label, webp.fill], 'the chosen quality comes back');
+  await editor.close();
+});
+
+test('scanner: a wiki file page (Ficheiro:, File:) is not an image; real image links still are', async () => {
+  FIXTURES['wiki.html'] = Buffer.from('<!doctype html><title>wiki</title>'
+    + '<a href="/wiki/Ficheiro:Bandeira_de_Portugal.svg" class="mw-file-description"><img src="photo.png?wiki=1"></a>'
+    + '<a href="/wiki/File:Some%20Picture.JPG">file page</a><a href="https://commons.example/wiki/Datei:Karte.png">Datei</a>'
+    + '<a href="full/photo.png">full size</a>');
+  const page = await ctx.newPage();
+  await page.goto(base + 'wiki.html');
+  const { images } = await send({ action: 'collectImages', tabId: await tabIdOf(base + 'wiki.html') });
+  const srcs = images.map((i) => i.src);
+  assert.ok(srcs.includes(base + 'photo.png?wiki=1'));
+  assert.ok(srcs.includes(base + 'full/photo.png'), 'a link to an image file is kept');
+  assert.equal(srcs.filter((s) => /\/wiki\//.test(s)).length, 0, srcs.join());
+  await page.close();
+});
+
+test('automatic downloads stop at once on a web page that only looked like an image', async () => {
+  FIXTURES['looks-like.png.html'] = Buffer.from('<!doctype html><title>not an image</title>' + 'x'.repeat(50000));
+  const res = await send({ action: 'fetchAsDataUrl', imageUrl: base + 'looks-like.png.html', automatic: true });
+  assert.equal(res.error, 'Not an image');
+  assert.equal(res.bytesRead, 0);
+});
+
+test('the editor opens in a tab right next to the page, in the same window', async () => {
+  const page = await screenPage('page.html');
+  await page.bringToFront();
+  const opener = await sw.evaluate((u) => chrome.tabs.query({ url: u }).then((t) => t[0]), base + 'page.html');
+  const known = new Set(ctx.pages());
+  await sw.evaluate(({ url, opener }) => openEditor(url, { opener }), { url: base + 'wide.png', opener });
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  const tab = await editor.evaluate(() => chrome.tabs.getCurrent());
+  const win = await sw.evaluate((id) => chrome.windows.get(id), tab.windowId);
+  assert.equal(win.type, 'normal');
+  assert.equal(tab.windowId, opener.windowId);
+  assert.equal(tab.index, opener.index + 1);
+  assert.equal(tab.active, true);
+  await editor.close();
+  await page.close();
+});
+
+test('capture viewer: whole capture, exact PNG, other formats, Crop and Annotate in the same tab', async () => {
+  // A tall capture made of four bands: red, green, blue, yellow (400×1600 device pixels).
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 1600;
+    const x = c.getContext('2d');
+    ['#ff0000', '#00ff00', '#0000ff', '#ffff00'].forEach((col, i) => { x.fillStyle = col; x.fillRect(0, i * 400, 400, 400); });
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openViewer(url, { site: 'example.org', title: 'Long page' }), dataUrl);
+  const viewer = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')));
+  await viewer.setViewportSize({ width: 1000, height: 700 });
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  assert.equal(await viewer.textContent('#info-text'), '400 × 1600 px');
+  // Fit: as wide as the page it came from (never enlarged), scrolling down.
+  const layout = await viewer.evaluate(() => {
+    const stage = document.getElementById('stage');
+    return { scrolls: stage.scrollHeight > stage.clientHeight, width: Math.round(document.getElementById('shot').getBoundingClientRect().width), dpr: devicePixelRatio };
+  });
+  assert.equal(layout.scrolls, true);
+  assert.equal(layout.width, Math.round(400 / layout.dpr));
+  // Fit to window: the whole capture in view, an overview (it differs even when the page size
+  // is close to the tab's width); a click on the image switches back.
+  const shotBox = () => viewer.evaluate(() => {
+    const r = document.getElementById('shot').getBoundingClientRect(), s = document.getElementById('stage').getBoundingClientRect();
+    return { inside: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, height: Math.round(r.height) };
+  });
+  assert.equal(await viewer.isDisabled('#btn-zoom'), false);
+  await viewer.click('#btn-zoom');
+  const whole = await shotBox();
+  assert.equal(whole.inside, true, 'all of it in the window');
+  assert.equal(await viewer.getAttribute('#btn-zoom', 'aria-pressed'), 'true');
+  await viewer.click('#shot');
+  assert.ok((await shotBox()).height > whole.height * 1.5, 'back at page size');
+  // PNG keeps the exact bytes of the capture; JPG and WebP are encoded from it.
+  await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, saveAs: false } }); });
+  await viewer.reload();
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  const bytes = async (format) => {
+    const before = await sw.evaluate(() => chrome.downloads.search({}).then((d) => d.length));
+    await viewer.click(`#view-format [data-value="${format}"]`);
+    await viewer.click('#btn-save');
+    const item = await waitFor(() => sw.evaluate((n) => chrome.downloads.search({ orderBy: ['-startTime'] }).then((d) => (d.length > n && d[0].state === 'complete' ? d[0] : null)), before), 15000);
+    return { name: item.filename.split(/[\\/]/).pop(), mime: item.mime, size: item.fileSize };
+  };
+  const png = await bytes('png');
+  assert.equal(png.mime, 'image/png');
+  // The viewer says what happened (its toast host used to be missing: saves were silent).
+  await viewer.waitForSelector('#toasts .toast', { timeout: 5000 });
+  assert.equal(png.size, Buffer.from(dataUrl.split(',')[1], 'base64').length, 'the exact PNG bytes');
+  const jpg = await bytes('jpeg');
+  assert.equal(jpg.mime, 'image/jpeg');
+  // Crop: the editor takes over in the same tab, with the same image and page details.
+  const key = new URL(viewer.url()).searchParams.get('key');
+  await viewer.click('#btn-crop');
+  await viewer.waitForURL(/resize\.html/);
+  await viewer.waitForSelector('.cropper-container', { timeout: 10000 });
+  const url = new URL(viewer.url());
+  assert.deepEqual([url.searchParams.get('key'), url.searchParams.get('site'), url.searchParams.get('capture')], [key, 'example.org', '1']);
+  assert.match(await viewer.textContent('#info-text'), /400 × 1600/);
+  // The editor's Back button returns to the viewer, in the same tab.
+  assert.equal(await viewer.isVisible('#btn-back'), true);
+  await viewer.click('#btn-back');
+  await viewer.waitForURL(/view\.html/);
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  assert.equal(new URL(viewer.url()).searchParams.get('key'), key);
+  // Annotate: straight into the annotate layer.
+  await viewer.click('#btn-annotate');
+  await viewer.waitForSelector('.annot-layer', { timeout: 10000 });
+  await viewer.close();
+  await waitFor(() => sw.evaluate((k) => ITK.handoff.get(k).then((v) => v == null), key));
+  await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, saveAs: true } }); });
+});
+
+test('leaving the viewer for another site forgets the capture', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openViewer(url), base + 'wide.png');
+  const viewer = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')));
+  await viewer.waitForSelector('#app[data-ready="true"]');
+  const key = new URL(viewer.url()).searchParams.get('key');
+  await viewer.goto(base + 'page.html');
+  await waitFor(() => sw.evaluate((k) => ITK.handoff.get(k).then((v) => v == null), key));
+  await viewer.close();
+});
+
+test('auto-scroll runs once per page: a second request gets "busy"', async () => {
+  const page = await screenPage('feed.html');
+  const tabId = await tabIdOf(base + 'feed.html');
+  const first = send({ action: 'autoScroll', tabId });
+  await new Promise((r) => setTimeout(r, 300));
+  const second = await send({ action: 'autoScroll', tabId });
+  assert.equal(second.error, 'busy');
+  assert.ok((await first).images.length > 0);
+  await page.close();
+});
+
+test('annotate: Redact is opaque, a click confirms text, only Ctrl+Enter applies, the stage takes the new shape', async () => {
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 100;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 100);
+    x.fillStyle = '#000'; x.font = '700 70px sans-serif'; x.textBaseline = 'top'; x.fillText('SECRET', 10, 15);
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), dataUrl);
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.setViewportSize({ width: 1200, height: 800 });
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-rotate-left'); // 400×100 becomes 100×400
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  // Positions are read at every step, from the board as it is now (it is fitted after opening).
+  const at = async (x, y) => {
+    const box = await editor.locator('.annot-overlay').boundingBox();
+    return [box.x + (x / 100) * box.width, box.y + (y / 400) * box.height];
+  };
+  const drag = async (x1, y1, x2, y2) => {
+    await editor.mouse.move(...await at(x1, y1)); await editor.mouse.down();
+    await editor.mouse.move(...await at(x2, y2), { steps: 4 }); await editor.mouse.up();
+  };
+  // Tools are picked with their button and confirmed active before anything is drawn.
+  const pick = async (tool) => {
+    await editor.click(`.annot-tool[data-tool="${tool}"]`);
+    await editor.waitForSelector(`.annot-tool[data-tool="${tool}"].active`);
+  };
+  await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  const region = (x, y, w, h) => editor.evaluate(([x, y, w, h]) => {
+    const d = document.querySelector('.annot-canvas').getContext('2d', { willReadFrequently: true }).getImageData(x, y, w, h).data;
+    const colours = new Set();
+    for (let i = 0; i < d.length; i += 4) colours.add(`${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}`);
+    return [...colours];
+  }, [x, y, w, h]);
+
+  await pick('redact');
+  await editor.click('.annot-color[data-color="#111111"]');
+  await drag(5, 5, 95, 395);
+  assert.deepEqual(await region(10, 10, 80, 380), ['17,17,17,255'], 'nothing of the text is left');
+
+  // Text: a click outside the open field confirms it and does not open another one.
+  await pick('text');
+  await editor.mouse.click(...await at(50, 100));
+  await editor.locator('.annot-text').fill('Hi');
+  await editor.mouse.click(...await at(50, 300));
+  assert.equal(await editor.locator('.annot-text').count(), 0);
+
+  await editor.keyboard.press('x'); // the shortcut picks the tool too
+  await editor.waitForSelector('.annot-tool[data-tool="redact"].active');
+  await editor.keyboard.press('Enter');
+  assert.equal(await editor.locator('.annot-layer').count(), 1, 'Enter alone does not apply');
+  await editor.keyboard.press('Control+Enter');
+  await editor.waitForSelector('.annot-layer', { state: 'detached' });
+  await waitFor(() => editor.evaluate(() => editor.cropper.ready && document.getElementById('cropper-img').naturalWidth === 100));
+  const ratio = await editor.evaluate(() => { const r = document.querySelector('.crop-inner').getBoundingClientRect(); return r.width / r.height; });
+  assert.ok(Math.abs(ratio - 0.25) < 0.02, `the stage is shaped like the new image: ${ratio}`);
+  await editor.close();
+});
+
+test('the editor knows the page an image or screenshot came from', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url, { site: 'example.org', title: 'My page' }), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  assert.deepEqual(await editor.evaluate(() => editor.page), { host: 'example.org', title: 'My page' });
+  await editor.close();
+});
+
+test('annotate: Esc drops a shape in progress but never the marks already made', async () => {
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+  const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+  await editor.setViewportSize({ width: 1000, height: 700 });
+  await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  const box = await editor.locator('.annot-overlay').boundingBox();
+  await editor.mouse.move(box.x + 5, box.y + 5);
+  await editor.mouse.down();
+  await editor.mouse.move(box.x + box.width - 5, box.y + box.height - 5, { steps: 3 });
+  await editor.mouse.up();
+  await editor.keyboard.press('Escape');
+  assert.equal(await editor.locator('.annot-layer').count(), 1, 'still annotating');
+  await editor.click('.annot-bar .btn-ghost'); // Cancel
+  assert.equal(await editor.locator('.annot-layer').count(), 0);
+  // With nothing drawn, Esc simply leaves.
+  await editor.click('#btn-annotate');
+  await editor.waitForSelector('.annot-layer');
+  await editor.keyboard.press('Escape');
+  assert.equal(await editor.locator('.annot-layer').count(), 0);
+  await editor.close();
+});
+
+test('right-to-left: bringing a control into view never shifts the whole panel sideways', async () => {
+  const setLocale = (locale) => sw.evaluate(async (locale) => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, locale } }); }, locale);
+  await setLocale('ar');
+  const panel = await ctx.newPage();
+  try {
+    await panel.setViewportSize({ width: 400, height: 640 });
+    await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
+    await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+    assert.equal(await panel.evaluate(() => document.documentElement.dir), 'rtl');
+    await panel.evaluate(() => document.querySelector('.tab[data-tab="settings"]').click());
+    // The header glow reaches past the edges: a scrollable .app moved 80px when asked to show something.
+    const scrollLeft = await panel.evaluate(() => {
+      document.querySelector('#setting-theme .seg[data-value="light"]').scrollIntoView({ block: 'center', inline: 'center' });
+      return document.getElementById('app').scrollLeft;
+    });
+    assert.equal(scrollLeft, 0);
+  } finally {
+    await panel.close();
+    await setLocale('auto');
+  }
+});
+
+test('right-to-left: annotation text ends at the click, on screen and in the saved image', async () => {
+  const setLocale = (locale) => sw.evaluate(async (locale) => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, locale } }); }, locale);
+  await setLocale('ar');
+  const known = new Set(ctx.pages());
+  try {
+    const dataUrl = await ui.evaluate(() => {
+      const c = document.createElement('canvas'); c.width = 400; c.height = 200;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 200);
+      return c.toDataURL('image/png');
+    });
+    await sw.evaluate((url) => openEditor(url), dataUrl);
+    const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+    await editor.setViewportSize({ width: 1200, height: 800 });
+    await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+    assert.equal(await editor.evaluate(() => document.documentElement.dir), 'rtl');
+    await editor.click('#btn-annotate');
+    await editor.waitForSelector('.annot-layer');
+    await editor.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await editor.click('.annot-tool[data-tool="text"]');
+    await editor.waitForSelector('.annot-tool[data-tool="text"].active');
+    const box = await editor.locator('.annot-overlay').boundingBox();
+    const clickX = box.x + box.width * 0.75;
+    await editor.mouse.click(clickX, box.y + box.height * 0.5); // (300, 100)
+    await editor.waitForFunction(() => document.activeElement?.classList.contains('annot-text'));
+    await editor.keyboard.type('Hi');
+    // The field ends at the click too, so the text lands where it was typed.
+    const field = await editor.locator('.annot-text').boundingBox();
+    assert.ok(Math.abs(field.x + field.width - clickX) <= 3, `field ends at the click: ${field.x + field.width} vs ${clickX}`);
+    await editor.keyboard.press('Enter');
+    // Horizontal extent of everything that is not white in rows 100–140 of a 400×200 drawing.
+    const extent = (source) => editor.evaluate((source) => {
+      const c = document.createElement('canvas'); c.width = 400; c.height = 200;
+      const x = c.getContext('2d', { willReadFrequently: true });
+      x.fillStyle = '#fff'; x.fillRect(0, 0, 400, 200);
+      x.drawImage(document.querySelector(source), 0, 0, 400, 200);
+      const d = x.getImageData(0, 100, 400, 40).data;
+      let min = 400, max = -1;
+      for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] < 700) { const px = (i / 4) % 400; min = Math.min(min, px); max = Math.max(max, px); }
+      return [min, max];
+    }, source);
+    const onScreen = await extent('.annot-canvas');
+    assert.ok(onScreen[1] >= 0, 'the text is drawn');
+    assert.ok(onScreen[1] <= 304 && onScreen[0] < 290, `the text ends at the click: ${onScreen}`);
+    await editor.keyboard.press('Control+Enter');
+    await editor.waitForSelector('.annot-layer', { state: 'detached' });
+    await waitFor(() => editor.evaluate(() => editor.cropper.ready && document.getElementById('cropper-img').complete));
+    const saved = await extent('#cropper-img');
+    assert.ok(Math.abs(saved[0] - onScreen[0]) <= 2 && Math.abs(saved[1] - onScreen[1]) <= 2, `same place in the image: ${saved} vs ${onScreen}`);
+    await editor.close();
+  } finally {
+    await setLocale('auto');
+  }
+});
+
+test('long labels (Ukrainian, Russian) never push a control out of the panel or the editor', async () => {
+  const setLocale = (locale) => sw.evaluate(async (locale) => { const { settings } = await chrome.storage.sync.get('settings'); await chrome.storage.sync.set({ settings: { ...settings, locale } }); }, locale);
+  const inside = (page) => page.evaluate(() => {
+    const W = document.documentElement.clientWidth;
+    return [...document.querySelectorAll('button, select, .tab')]
+      .filter((el) => el.checkVisibility() && el.getBoundingClientRect().width)
+      .filter((el) => { const r = el.getBoundingClientRect(); return r.right > W + 1 || r.left < -1; })
+      .map((el) => el.id || el.textContent.trim());
+  });
+  try {
+    await setLocale('uk');
+    const panel = await ctx.newPage();
+    await panel.setViewportSize({ width: 360, height: 640 });
+    await panel.goto(`chrome-extension://${id}/popup.html?mode=sidepanel`);
+    await panel.waitForSelector('#app[data-ready="true"]', { state: 'attached' });
+    await panel.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }, { src: b + 'wide.png', width: 40, height: 20 }]), base);
+    await panel.evaluate(() => document.querySelectorAll('.gcard .gcheck').forEach((b) => b.click()));
+    await panel.waitForSelector('#action-bar:not([hidden])');
+    await panel.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    assert.deepEqual(await inside(panel), []);
+    assert.equal(await panel.evaluate(() => { const t = document.querySelector('.tabs'); return t.scrollWidth <= t.clientWidth; }), true, 'the tabs fit');
+    assert.equal(await panel.evaluate(() => { const i = document.querySelector('.action-bar-inner'); return i.scrollWidth <= i.clientWidth; }), true, 'the action bar fits');
+    await panel.close();
+
+    await setLocale('ru');
+    const known = new Set(ctx.pages());
+    await sw.evaluate((url) => openEditor(url), base + 'wide.png');
+    const editor = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('resize.html')));
+    await editor.setViewportSize({ width: 1024, height: 700 });
+    await editor.waitForSelector('.cropper-container', { timeout: 10000 });
+    assert.deepEqual(await inside(editor), []);
+    await editor.close();
+  } finally {
+    await setLocale('auto');
+  }
+});
+
+test('support: the heart opens a dialog with every way to help; Esc closes it and gives the focus back', async () => {
+  await freshPanel();
+  await ui.click('#btn-support');
+  await ui.waitForSelector('#support-modal:not([hidden])');
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'support-close');
+  const links = await ui.$$eval('#support-modal a.support-row:not([hidden])', (as) => as.map((a) => [a.textContent.trim(), a.href, a.target]));
+  // Labels in the interface language, whatever the browser's is.
+  const free = await ui.evaluate(() => ['supportStar', 'supportIssue', 'supportTranslate'].map((k) => ITK.i18n.t(k)));
+  assert.deepEqual(links.map(([text]) => text), ['Ko-fi', 'PayPal', 'Buy Me a Coffee', ...free]);
+  assert.ok(links.every(([, href, target]) => href.startsWith('https://') && target === '_blank'), 'every link opens a new tab on https');
+  // Rating needs a Web Store install: hidden for an unpacked copy.
+  assert.equal(await ui.isHidden('#support-rate'), true);
+  // Behind the dialog nothing takes the focus or the keys.
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').inert), true);
+  await ui.keyboard.press('Escape');
+  await ui.waitForSelector('#support-modal', { state: 'hidden' });
+  assert.equal(await ui.evaluate(() => document.activeElement.id), 'btn-support');
+  // The About button opens the same dialog.
+  await ui.evaluate(() => document.querySelector('.tab[data-tab="settings"]').click());
+  await ui.click('#btn-support-about');
+  await ui.waitForSelector('#support-modal:not([hidden])');
+  await ui.click('#support-backdrop', { position: { x: 5, y: 5 } });
+  await ui.waitForSelector('#support-modal', { state: 'hidden' });
+  await ui.evaluate(() => document.querySelector('.tab[data-tab="images"]').click());
+});
+
+test('capture viewer: annotations applied in the editor are there after Back and after a reload', async () => {
+  const dataUrl = await ui.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 300;
+    const x = c.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, 400, 300);
+    return c.toDataURL('image/png');
+  });
+  const known = new Set(ctx.pages());
+  await sw.evaluate((url) => openViewer(url, { site: 'example.org', title: 'Page' }), dataUrl);
+  const tab = await waitFor(() => ctx.pages().find((p) => !known.has(p) && p.url().includes('view.html')));
+  await tab.setViewportSize({ width: 1100, height: 760 });
+  await tab.waitForSelector('#app[data-ready="true"]');
+  const centre = () => tab.evaluate(async () => {
+    const img = document.getElementById('shot');
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0);
+    return [...x.getImageData(c.width / 2, c.height / 2, 1, 1).data.slice(0, 3)];
+  });
+  assert.deepEqual(await centre(), [255, 255, 255]);
+
+  await tab.click('#btn-annotate');
+  await tab.waitForSelector('.annot-layer', { timeout: 10000 });
+  assert.equal(new URL(tab.url()).searchParams.has('annotate'), false, 'opened once: a reload will not reopen the layer');
+  await tab.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await tab.click('.annot-tool[data-tool="redact"]');
+  await tab.waitForSelector('.annot-tool[data-tool="redact"].active');
+  await tab.click('.annot-color[data-color="#111111"]');
+  // Positions read at every step, from the board as it is now (it is fitted after opening).
+  const at = async (fx, fy) => { const b = await tab.locator('.annot-overlay').boundingBox(); return [b.x + b.width * fx, b.y + b.height * fy]; };
+  await tab.mouse.move(...await at(0.25, 0.25)); await tab.mouse.down();
+  await tab.mouse.move(...await at(0.75, 0.75), { steps: 4 }); await tab.mouse.up();
+  const marked = await tab.evaluate(() => {
+    const c = document.querySelector('.annot-canvas');
+    return [...c.getContext('2d', { willReadFrequently: true }).getImageData(c.width / 2, c.height / 2, 1, 1).data.slice(0, 3)];
+  });
+  assert.deepEqual(marked, [17, 17, 17], 'the mark is drawn');
+  await tab.keyboard.press('Control+Enter');
+  await tab.waitForSelector('.annot-layer', { state: 'detached' });
+
+  // A reload keeps the marks, and no annotate layer comes back.
+  await tab.reload();
+  await tab.waitForSelector('.cropper-container', { timeout: 10000 });
+  await new Promise((r) => setTimeout(r, 500));
+  assert.equal(await tab.locator('.annot-layer').count(), 0);
+
+  // Back to the viewer: the capture is the annotated one, ready to save or copy.
+  await tab.click('#btn-back');
+  await tab.waitForURL(/view\.html/);
+  await tab.waitForSelector('#app[data-ready="true"]');
+  assert.deepEqual(await centre(), [17, 17, 17]);
+  await tab.close();
+});
+
+test('panel dialogs: one at a time, and the panel behind stays inert until the last one closes', async () => {
+  await freshPanel();
+  await ui.evaluate((b) => setImages([{ src: b + 'photo.png', width: 30, height: 20 }]), base);
+  await ui.evaluate((b) => openPreview(b + 'photo.png'), base);
+  await ui.evaluate(() => openSupport());
+  assert.equal(await ui.isHidden('#preview-modal'), true, 'opening one closes the other');
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').inert), true);
+  await ui.evaluate(() => closeSupport());
+  assert.equal(await ui.evaluate(() => document.querySelector('.views').inert), false);
 });

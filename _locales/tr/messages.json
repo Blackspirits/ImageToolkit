@@ -55,10 +55,10 @@
     "message": "Resim analiz ediliyor..."
   },
   "advisorAlpha": {
-    "message": "🔍 Resim şeffaflık içeriyor → PNG veya WebP önerilir"
+    "message": "Resim şeffaflık içeriyor → PNG veya WebP önerilir"
   },
   "advisorSmallest": {
-    "message": "🔍 En küçük: {format} ({size})"
+    "message": "En küçük: {format} ({size})"
   },
   "scanning": {
     "message": "Aranıyor..."
@@ -234,9 +234,6 @@
   "titleDownloadAs": {
     "message": "Farklı kaydet..."
   },
-  "donate": {
-    "message": "Bağış yap"
-  },
   "labelType": {
     "message": "Tür:"
   },
@@ -284,9 +281,6 @@
   },
   "titleCapture": {
     "message": "Alan yakala"
-  },
-  "titleKofi": {
-    "message": "Ko-fi'de destekle"
   },
   "bgWhite": {
     "message": "Beyaz"
@@ -635,5 +629,312 @@
   },
   "downloadZip": {
     "message": "ZIP olarak indir"
+  },
+  "editorPresets": {
+    "message": "Düzenleyici hazır ayarları"
+  },
+  "editorPresetsHint": {
+    "message": "Düzenleyicide hangi grupların görüneceğini seçin ve kendi boyutlarınızı ekleyin."
+  },
+  "presetMine": {
+    "message": "Hazır ayarlarım"
+  },
+  "presetsEmpty": {
+    "message": "Henüz kendi hazır ayarınız yok."
+  },
+  "presetName": {
+    "message": "Ad"
+  },
+  "presetWidth": {
+    "message": "Genişlik"
+  },
+  "presetHeight": {
+    "message": "Yükseklik"
+  },
+  "presetAdd": {
+    "message": "Hazır ayar ekle"
+  },
+  "presetRemove": {
+    "message": "$NAME$ öğesini kaldır",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "En fazla $COUNT$ hazır ayar kaydedebilirsiniz.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "Şablon"
+  },
+  "settingTemplate": {
+    "message": "Ad şablonu"
+  },
+  "settingTemplateHint": {
+    "message": "Eklemek için bir değişkene tıklayın. Klasör oluşturmak için / kullanın."
+  },
+  "templatePreview": {
+    "message": "Örnek: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Özgün dosya adı"
+  },
+  "tokSite": {
+    "message": "Sayfanın sitesi"
+  },
+  "tokDomain": {
+    "message": "Görselin sunucusu"
+  },
+  "tokTitle": {
+    "message": "Sayfa başlığı"
+  },
+  "tokIndex": {
+    "message": "Toplu işteki sıra (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Piksel cinsinden genişlik"
+  },
+  "tokHeight": {
+    "message": "Piksel cinsinden yükseklik"
+  },
+  "tokFormat": {
+    "message": "Biçim (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Bugünün tarihi (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Şu anki saat (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Tüm görselleri yükle"
+  },
+  "autoScrollHint": {
+    "message": "Gecikmeli yüklenen görsellerin görünmesi için sayfayı sonuna kadar kaydırır ve yeniden tarar"
+  },
+  "autoScrollRunning": {
+    "message": "Görseller yükleniyor… %$PCT$",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Durdur"
+  },
+  "autoScrollNothing": {
+    "message": "Bu sayfada yüklenecek başka görsel yok"
+  },
+  "scopeLabel": {
+    "message": "Tara"
+  },
+  "scopeTab": {
+    "message": "Bu sekme"
+  },
+  "scopeWindow": {
+    "message": "Tüm sekmeler"
+  },
+  "labelTab": {
+    "message": "Sekme:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ sekme",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ sekme",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Okunamayan sekmeler: $COUNT$ (tarayıcı sayfaları veya uyku modundaki sekmeler)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "Sayfanın tamamını yakala"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Sayfanın tamamını yakala"
+  },
+  "captureFullRunning": {
+    "message": "Sayfanın tamamı yakalanıyor… bu sekmeyi açık tutun (Esc iptal eder)"
+  },
+  "fullPageCut": {
+    "message": "Sayfa çok uzun: yakalama $PX$ px'te durur.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "Açıklama ekle"
+  },
+  "annotateHint": {
+    "message": "Açıklama: bulanıklaştır, pikselleştir, kutu, ok, metin"
+  },
+  "toolPixelate": {
+    "message": "Pikselleştir"
+  },
+  "toolBlur": {
+    "message": "Bulanıklaştır"
+  },
+  "toolBox": {
+    "message": "Kutu"
+  },
+  "toolArrow": {
+    "message": "Ok"
+  },
+  "toolText": {
+    "message": "Metin"
+  },
+  "toolHighlight": {
+    "message": "Vurgula"
+  },
+  "annotColor": {
+    "message": "Renk"
+  },
+  "annotSize": {
+    "message": "Kalınlık"
+  },
+  "sizeFine": {
+    "message": "İnce"
+  },
+  "sizeMedium": {
+    "message": "Orta"
+  },
+  "sizeThick": {
+    "message": "Kalın"
+  },
+  "undo": {
+    "message": "Geri al"
+  },
+  "redo": {
+    "message": "Yinele"
+  },
+  "cancel": {
+    "message": "İptal"
+  },
+  "textPlaceholder": {
+    "message": "Yazın ve Enter'a basın"
+  },
+  "captureTabChanged": {
+    "message": "Yakalama durdu: sekme değişti. Yakalama sırasında sekmeyi önde tutun.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "Sayfa sonuna gelmeden kaydırma durdu: yakalama eksik olabilir.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Düz renkle kapat",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Dama deseni",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Görsel bağlantısını kopyala",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Bağlantı kopyalandı",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Kayıpsız",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Ekran görüntüsü",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Pencereye sığdır",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "Gerçek boyut",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Ekran görüntüsüne dön",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "Kırp",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "ImageToolkit'i destekle",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Destekle",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit ücretsiz ve açık kaynaklıdır; reklam ve izleme yoktur. Size zaman kazandırıyorsa, destek olmanın birkaç yolu var.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Bağış yap",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Ücretsiz destek",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "GitHub'da yıldız ver",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Hata bildir veya fikir öner",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Çeviriye yardım et",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Chrome Web Mağazası'nda değerlendir",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

@@ -1,6 +1,6 @@
 // ============================================================
 // ImageToolkit – Popup & Side Panel UI
-// Requires lib/core.js, lib/i18n.js and lib/jszip.min.js.
+// Requires lib/core.js, lib/i18n.js, lib/ui.js, lib/handoff.js and lib/jszip.min.js.
 // ============================================================
 
 'use strict';
@@ -19,8 +19,13 @@ const UI_KEY = 'imagetoolkit-ui';
 const state = {
   settings: {},
   tabId: null,
+  directImages: false, // thumbnails may load straight from their URL (the no-cookie rule is in place)
+  avif: false,         // the browser can write AVIF (Chrome cannot today)
+  autoScrollTab: null, // the tab auto-scroll runs in (Stop goes there)
+  fullPageRunning: false, // a full-page capture started from this panel (Esc cancels it)
   windowId: null,
   host: '',
+  pageTitle: '',
   images: [],
   filtered: [],
   selected: new Set(),
@@ -31,6 +36,9 @@ const state = {
   previewSrc: '',
   focusSrc: '',      // the grid's single Tab stop (roving tabindex)
   newImages: 0,
+  autoScrolling: false,
+  scope: 'tab',      // 'tab' | 'window' (every tab of this window)
+  scanInfo: '',
   checker: 'auto',
   tool: { src: '', name: '', ratio: 0, size: 0 },
   cards: new Map(),
@@ -80,8 +88,9 @@ function saveSettings(patch) {
 
 // ---------- Theme ----------
 function applyTheme(theme = 'auto') {
-  ui.applyTheme($('app'), theme);
-  $('theme-icon').setAttribute('href', theme === 'auto' ? '#i-contrast' : theme === 'dark' ? '#i-moon' : '#i-sun');
+  const dark = ui.applyTheme($('app'), theme);
+  // The icon shows the theme on screen, Automatic included.
+  $('theme-icon').setAttribute('href', dark ? '#i-moon' : '#i-sun');
   setSegmented($('setting-theme'), theme);
 }
 
@@ -109,7 +118,16 @@ function localize() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadSettings();
+  // Nothing remote is shown before the no-cookie rule for the extension's images is in place.
+  const [ready, formats] = await Promise.all([send({ action: 'imagesReady' }), ITK.encodableFormats(), loadSettings()]);
+  state.directImages = ready?.ok === true;
+  state.avif = formats.has('avif');
+  if (!state.avif) {
+    // Offered nowhere as an output; a saved AVIF choice falls back to WebP, as it did in practice.
+    document.querySelectorAll('[data-output-avif]').forEach((node) => node.remove());
+    if (state.settings.defaultFormat === 'avif') saveSettings({ defaultFormat: 'webp' });
+    if (state.settings.convertOnDl === 'avif') saveSettings({ convertOnDl: 'webp' });
+  }
   await i18n.load(state.settings.locale);
   localize();
   applyTheme(state.settings.theme);
@@ -120,7 +138,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   initImages();
   initTools();
   initSettings();
+  initPresetSettings();
   initPreview();
+  initSupport();
   initActionBar();
   initKeyboard();
   initPaste();
@@ -129,15 +149,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   state.tabId = tab?.id ?? null;
   state.windowId = tab?.windowId ?? null;
-  setHost(tab?.url);
+  setHost(tab?.url, tab?.title);
   scan();
 
   chrome.runtime.onMessage.addListener(onRuntimeMessage);
   if (VIEW_MODE === 'sidepanel') watchTabs();
+  fitTabs();
+  $('app').dataset.ready = 'true'; // every control is wired (tests wait for this)
 });
 
 function onRuntimeMessage(msg) {
-  if (msg?.action !== 'newImagesAvailable' || msg.tabId !== state.tabId || !(msg.count > 0)) return;
+  if (msg?.action === 'autoScrollProgressUpdate' && msg.tabId === state.autoScrollTab && state.autoScrolling) {
+    setAutoScrollUI(true, msg.pct);
+    return;
+  }
+  if (msg?.action !== 'newImagesAvailable' || !(msg.count > 0)) return;
+  if (state.scope === 'window' ? msg.windowId !== state.windowId : msg.tabId !== state.tabId) return;
   state.newImages += msg.count;
   $('new-images-text').textContent = i18n.plural(state.newImages, 'newImagesOne', 'newImagesOther');
   $('new-images-banner').hidden = false;
@@ -146,31 +173,46 @@ function onRuntimeMessage(msg) {
 // The side panel stays open across tabs: follow the active tab and page loads.
 function watchTabs() {
   const rescan = debounce(() => scan(), 350);
+  // Other tabs finishing a load refresh the list in place, without the loading skeleton.
+  const rescanWindow = debounce(() => scan({ keepSelection: true, quiet: true }), 1200);
   chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
     if (state.windowId != null && windowId !== state.windowId) return;
     state.tabId = tabId;
-    chrome.tabs.get(tabId).then((tab) => setHost(tab.url)).catch(() => setHost(''));
-    rescan();
+    chrome.tabs.get(tabId).then((tab) => setHost(tab.url, tab.title)).catch(() => setHost(''));
+    // With every tab in view, switching tabs changes nothing in the list.
+    if (state.scope !== 'window') rescan();
   });
   chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+    if (state.scope === 'window') {
+      if (tab?.windowId === state.windowId && info.status === 'complete') rescanWindow();
+      if (tabId === state.tabId && (info.url || info.title)) setHost(tab?.url, tab?.title);
+      return;
+    }
     if (tabId !== state.tabId) return;
-    if (info.url) setHost(info.url);
-    if (info.status === 'complete') { setHost(tab?.url); rescan(); }
+    if (info.url || info.title) setHost(tab?.url, tab?.title);
+    if (info.status === 'complete') { setHost(tab?.url, tab?.title); rescan(); }
   });
 }
 
-function setHost(url) {
+function setHost(url, title = '') {
   try { state.host = url ? new URL(url).hostname : ''; } catch { state.host = ''; }
-  $('scan-host').textContent = state.host ? `· ${state.host}` : '';
+  state.pageTitle = title || '';
+  updateScanHost();
+}
+
+function updateScanHost() {
+  const text = state.scope === 'window' ? state.scanInfo : state.host;
+  $('scan-host').textContent = text ? `· ${text}` : '';
 }
 
 // ============================================================
 // Header
 // ============================================================
 function initHeader() {
+  // The header button flips between light and dark (from Automatic too: to the opposite of what
+  // is shown now). Automatic, which follows Windows/macOS or Chrome, is chosen in Settings.
   $('btn-theme').addEventListener('click', () => {
-    const order = ['auto', 'light', 'dark'];
-    const next = order[(order.indexOf($('app').dataset.theme || 'auto') + 1) % order.length];
+    const next = $('app').classList.contains('dark') ? 'light' : 'dark';
     applyTheme(next);
     saveSettings({ theme: next });
   });
@@ -184,10 +226,37 @@ function initHeader() {
     if (VIEW_MODE === 'popup') window.close();
   });
 
-  $('btn-capture-visible').addEventListener('click', async () => {
-    const res = await send({ action: 'captureVisible', tabId: state.tabId });
-    if (res?.error) toast(t('errorRestrictedPage'), 'error');
+  $('btn-capture-full').addEventListener('click', async () => {
+    const pending = send({ action: 'captureFullPage', tabId: state.tabId });
+    // The action popup closes so the page has the keyboard (Esc there cancels); the side panel
+    // stays and cancels with Esc itself. Errors are also reported as notifications.
+    if (VIEW_MODE === 'popup') { window.close(); return; }
+    toast(t('captureFullRunning'), 'info');
+    state.fullPageRunning = true;
+    const res = await pending;
+    state.fullPageRunning = false;
+    if (res?.error === 'restricted') toast(t('errorRestrictedPage'), 'error');
   });
+
+  $('btn-capture-visible').addEventListener('click', async () => {
+    const delay = parseInt($('capture-delay').value, 10) || 0;
+    const pending = send({ action: 'captureVisible', tabId: state.tabId, delay });
+    if (delay > 0) {
+      // Time to open a menu or hover something; the popup gets out of the way.
+      if (VIEW_MODE === 'popup') { window.close(); return; }
+      toast(`${t('captureVisible')} · ${delay}s`, 'info');
+    }
+    const res = await pending;
+    if (res?.error === 'restricted') toast(t('errorRestrictedPage'), 'error');
+  });
+
+  // Esc in the side panel stops a full-page capture started from it.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !state.fullPageRunning) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    send({ action: 'cancelFullPage' });
+  }, true);
 }
 
 // ============================================================
@@ -242,7 +311,9 @@ function initImages() {
   setChecker(ui.checker || 'auto', false);
   setFiltersOpen(!!ui.filtersOpen);
 
-  ['filter-type', 'filter-layout', 'filter-domain'].forEach((id) => $(id).addEventListener('change', applyFilters));
+  ['filter-type', 'filter-layout', 'filter-domain', 'filter-tab'].forEach((id) => $(id).addEventListener('change', applyFilters));
+  onSegmented($('scan-scope'), (value) => setScope(value));
+  setScope(ui.scope, false);
   $('filter-size').addEventListener('change', () => {
     $('atleast-row').hidden = $('filter-size').value !== 'atleast';
     applyFilters();
@@ -265,6 +336,8 @@ function initImages() {
   $('btn-filters').addEventListener('click', () => setFiltersOpen($('filters-panel').hidden));
   $('btn-reset-filters').addEventListener('click', resetFilters);
   $('btn-refresh').addEventListener('click', () => scan());
+  $('btn-autoscroll').addEventListener('click', toggleAutoScroll);
+  $('btn-autoscroll-stop').addEventListener('click', toggleAutoScroll);
   $('btn-retry').addEventListener('click', () => scan());
   $('new-images-banner').addEventListener('click', () => scan({ keepSelection: true }));
 
@@ -277,7 +350,7 @@ function initImages() {
   $('btn-select-all').addEventListener('click', toggleSelectAll);
 
   $('btn-checker').addEventListener('click', () => {
-    const order = ['auto', 'light', 'dark'];
+    const order = Object.keys(CHECKER_MODES);
     setChecker(order[(order.indexOf(state.checker) + 1) % order.length]);
   });
 
@@ -296,7 +369,7 @@ function setFiltersOpen(open) {
 }
 
 function resetFilters() {
-  ['filter-type', 'filter-size', 'filter-layout', 'filter-domain'].forEach((id) => { $(id).value = 'all'; });
+  ['filter-type', 'filter-size', 'filter-layout', 'filter-domain', 'filter-tab'].forEach((id) => { $(id).value = 'all'; });
   $('filter-url').value = '';
   $('atleast-row').hidden = true;
   state.hideDups = false;
@@ -317,14 +390,21 @@ function setLayout(layout, persist = true) {
   if (persist) writeUiState({ layout: state.layout });
 }
 
-// Black icons vanish on the dark checkerboard and white ones on the light one: let the viewer switch.
+// Behind transparent images: a checkerboard that follows the theme (shows what is transparent),
+// or plain white, grey or black, to judge a logo on the background it will be used on.
+const CHECKER_MODES = { auto: null, white: '#ffffff', gray: '#808080', black: '#000000' };
+
 function setChecker(mode, persist = true) {
-  state.checker = ['light', 'dark'].includes(mode) ? mode : 'auto';
+  state.checker = mode in CHECKER_MODES ? mode : 'auto';
   const app = document.querySelector('.app');
   if (state.checker === 'auto') delete app.dataset.checker;
   else app.dataset.checker = state.checker;
-  const label = t('titleTransparency', [t({ auto: 'themeAuto', light: 'themeLight', dark: 'themeDark' }[state.checker])]);
+  // Literal keys, so the i18n check sees every one in use.
+  const label = t('titleTransparency', [{ auto: t('bgChecker'), white: t('bgWhite'), gray: t('bgGray'), black: t('bgBlack') }[state.checker]]);
   const btn = $('btn-checker');
+  // The button shows the background in use: the usual icon for the checkerboard, else a swatch.
+  const colour = CHECKER_MODES[state.checker];
+  btn.replaceChildren(colour ? el('span', { class: 'bg-swatch', style: `--swatch:${colour}` }) : icon('contrast'));
   btn.title = label;
   btn.setAttribute('aria-label', label);
   btn.setAttribute('aria-pressed', String(state.checker !== 'auto'));
@@ -340,18 +420,79 @@ function showSkeleton() {
   $('grid-empty').hidden = true;
 }
 
-async function scan({ keepSelection = false } = {}) {
+// ---------- Auto-scroll ----------
+// Scrolls the page to its end (images collected on the way), then shows everything found.
+// A second click, or Stop, ends it early with what was found so far.
+async function toggleAutoScroll() {
+  // Stop goes to the tab being scrolled, even if another tab is now the active one.
+  if (state.autoScrolling) {
+    send({ action: 'stopAutoScroll', tabId: state.autoScrollTab });
+    return;
+  }
+  const tabId = state.tabId;
+  state.autoScrollTab = tabId;
+  const before = new Set(state.images.map((i) => i.src));
   const token = ++scanToken;
-  showSkeleton();
+  state.autoScrolling = true;
+  setAutoScrollUI(true, 0);
+  const res = await send({ action: 'autoScroll', tabId });
+  state.autoScrolling = false;
+  setAutoScrollUI(false);
+  if (token !== scanToken || tabId !== state.tabId) return;
+  if (res?.error === 'busy') return; // another panel is already scrolling this page
+  if (!res || res.error) {
+    toast(t(res?.error === 'restricted' ? 'errorRestrictedPage' : 'errorNoImage'), 'error');
+    return;
+  }
+  if (state.scope === 'window') {
+    // The other tabs are scanned again; this one keeps everything auto-scroll gathered.
+    await scan({ keepSelection: true, extra: { tabId, images: res.images || [] } });
+  } else {
+    setImages(res.images || []);
+    if (res.truncated) toast(t('scanTruncated'), 'info');
+  }
+  const added = state.images.filter((i) => !before.has(i.src)).length;
+  toast(added ? i18n.plural(added, 'newImagesOne', 'newImagesOther') : t('autoScrollNothing'), added ? 'success' : 'info');
+}
+
+function setAutoScrollUI(running, pct = 0) {
+  $('autoscroll-status').hidden = !running;
+  $('btn-autoscroll').setAttribute('aria-pressed', String(running));
+  $('btn-autoscroll').querySelector('use').setAttribute('href', running ? '#i-stop' : '#i-scroll-down');
+  if (running) {
+    $('autoscroll-text').textContent = t('autoScrollRunning', [String(pct)]);
+    $('autoscroll-fill').style.width = `${Math.max(4, pct)}%`;
+  }
+}
+
+async function scan({ keepSelection = false, quiet = false, extra = null } = {}) {
+  const token = ++scanToken;
+  if (!quiet) showSkeleton();
   $('new-images-banner').hidden = true;
   state.newImages = 0;
 
-  const res = await send({ action: 'collectImages', tabId: state.tabId });
+  const windowScope = state.scope === 'window';
+  const res = windowScope
+    ? await send({ action: 'collectWindowImages', windowId: state.windowId, extra })
+    : await send({ action: 'collectImages', tabId: state.tabId });
   if (token !== scanToken) return;
   if (!keepSelection) state.selected.clear();
   resetViaExtension();
+  state.scanInfo = windowScope ? i18n.plural(res?.tabs || 0, 'tabsOne', 'tabsOther') : '';
+  updateScanHost();
   setImages(res?.images || [], res?.error);
   if (res?.truncated) toast(t('scanTruncated'), 'info');
+  if (windowScope && res?.skipped > 0) toast(t('tabsSkipped', [String(res.skipped)]), 'info');
+}
+
+function setScope(scope, rescan = true) {
+  state.scope = scope === 'window' ? 'window' : 'tab';
+  setSegmented($('scan-scope'), state.scope);
+  $('filter-tab-field').hidden = state.scope !== 'window';
+  $('filter-tab').value = 'all';
+  writeUiState({ scope: state.scope });
+  updateScanHost();
+  if (rescan) scan();
 }
 
 function setImages(list, error) {
@@ -372,6 +513,10 @@ function setImages(list, error) {
       isDuplicate,
       index,
       thumb: '',
+      tabId: img.tabId ?? null,
+      pageHost: img.pageHost || '',
+      pageTitle: img.pageTitle || '',
+      pages: Array.isArray(img.pages) ? img.pages : img.tabId != null ? [{ tabId: img.tabId, pageHost: img.pageHost || '', pageTitle: img.pageTitle || '' }] : [],
     };
     updateDerived(item);
     return item;
@@ -382,9 +527,11 @@ function setImages(list, error) {
   $('image-grid').replaceChildren();
   $('grid-loading').hidden = true;
   $('tab-count').textContent = state.images.length ? String(state.images.length) : '';
+  fitTabs();
   $('dup-count').textContent = String(state.images.filter((i) => i.isDuplicate).length);
 
   if (!state.images.length) {
+    state.filtered = []; // otherwise the count and "Select all" still act on the previous page
     $('image-grid').hidden = true;
     $('grid-empty').hidden = false;
     $('empty-title').textContent = error === 'restricted' ? t('errorRestrictedPage') : t('noImagesFound');
@@ -396,6 +543,7 @@ function setImages(list, error) {
   $('grid-empty').hidden = true;
   $('image-grid').hidden = false;
   populateDomains();
+  populateTabs();
   applyFilters({ animate: true });
   probeTypes();
   probeFileSizes();
@@ -426,9 +574,37 @@ function populateDomains() {
   select.value = counts.has(current) ? current : 'all';
 }
 
+// The page an image is named after: the tab the list is filtered on, else the first one.
+function pageOf(img) {
+  const pages = img?.pages || [];
+  const tab = $('filter-tab')?.value || 'all';
+  return pages.find((p) => String(p.tabId) === tab) || pages[0] || img;
+}
+
+// Tab filter (all-tabs scope): one entry per tab, named after its page, in tab order.
+function populateTabs() {
+  const select = $('filter-tab');
+  const current = select.value;
+  const tabs = new Map();
+  for (const img of state.images) {
+    for (const page of img.pages) {
+      const entry = tabs.get(page.tabId) || { label: page.pageTitle || page.pageHost || String(page.tabId), n: 0 };
+      entry.n++;
+      tabs.set(page.tabId, entry);
+    }
+  }
+  const options = [el('option', { value: 'all', text: t('filterAny') })];
+  for (const [tabId, { label, n }] of tabs) {
+    const short = label.length > 34 ? label.slice(0, 32) + '…' : label;
+    options.push(el('option', { value: String(tabId), text: `${short} (${n})` }));
+  }
+  select.replaceChildren(...options);
+  select.value = tabs.has(Number(current)) ? current : 'all';
+}
+
 function activeFilterCount() {
   let n = 0;
-  for (const id of ['filter-type', 'filter-size', 'filter-layout', 'filter-domain']) if ($(id).value !== 'all') n++;
+  for (const id of ['filter-type', 'filter-size', 'filter-layout', 'filter-domain', 'filter-tab']) if ($(id).value !== 'all') n++;
   return n;
 }
 
@@ -437,6 +613,7 @@ function matchesFilters(img) {
   const size = $('filter-size').value;
   const shape = $('filter-layout').value;
   const domain = $('filter-domain').value;
+  const tab = $('filter-tab').value;
   const query = $('filter-url').value.trim().toLowerCase();
 
   if (state.hideDups && img.isDuplicate) return false;
@@ -458,6 +635,7 @@ function matchesFilters(img) {
   }
   if (shape !== 'all' && img.shape !== shape) return false;
   if (domain !== 'all' && img.domain !== domain) return false;
+  if (tab !== 'all' && !img.pages.some((p) => String(p.tabId) === tab)) return false;
   if (query && !img.src.toLowerCase().includes(query) && !img.name.toLowerCase().includes(query) && !img.alt.toLowerCase().includes(query)) return false;
   return true;
 }
@@ -513,8 +691,12 @@ function createCard(img) {
       queueRefresh();
     }
   });
-  pic.addEventListener('error', () => thumbFallback(img, pic), { once: true });
-  pic.src = img.src;
+  if (state.directImages || img.src.startsWith('data:')) {
+    pic.addEventListener('error', () => thumbFallback(img, pic), { once: true });
+    pic.src = img.src;
+  } else {
+    thumbFallback(img, pic); // cookie-less fetch only
+  }
 
   const thumb = el('div', { class: 'gthumb' }, pic);
   const check = el('button', { class: 'gcheck', 'data-act': 'select', tabindex: '-1', role: 'checkbox', 'aria-checked': 'false', 'aria-label': img.name }, icon('check'));
@@ -526,6 +708,8 @@ function createCard(img) {
     el('button', { class: 'gact', 'data-act': 'copy', tabindex: '-1', title: t('copyImage'), 'aria-label': t('copyImage') }, icon('copy')),
     el('button', { class: 'gact', 'data-act': 'download', tabindex: '-1', title: t('titleDownloadAs'), 'aria-label': t('titleDownloadAs') }, icon('download')),
     el('button', { class: 'gact gact-extra', 'data-act': 'open', tabindex: '-1', title: t('titleOpenTab'), 'aria-label': t('titleOpenTab') }, icon('external')),
+    // Only web addresses can be shared as a link (an inline image's data: URL is the whole file).
+    /^https?:/i.test(img.src) && el('button', { class: 'gact gact-extra', 'data-act': 'link', tabindex: '-1', title: t('copyLink'), 'aria-label': t('copyLink') }, icon('link')),
     el('button', { class: 'gact gact-extra', 'data-act': 'lens', tabindex: '-1', title: t('titleSearchSimilar'), 'aria-label': t('titleSearchSimilar') }, icon('lens')),
   ]);
 
@@ -544,11 +728,11 @@ function updateCard(card, img) {
   name.textContent = img.name;
   name.title = img.src;
 
-  const badges = [el('span', { class: 'gbadge', text: img.type === 'other' ? '?' : img.type.toUpperCase() })];
+  const badges = [el('span', { class: 'gbadge', text: img.type === 'other' ? '?' : ITK.formatLabel(img.type) })];
   if (img.isDuplicate) badges.push(el('span', { class: 'gbadge gbadge-dup', text: 'DUP' }));
   card.querySelector('.gbadges').replaceChildren(...badges);
 
-  const meta = [el('span', { class: 'gmeta-type', text: img.type === 'other' ? '?' : img.type.toUpperCase() }), el('span', { class: 'sep' })];
+  const meta = [el('span', { class: 'gmeta-type', text: img.type === 'other' ? '?' : ITK.formatLabel(img.type) }), el('span', { class: 'sep' })];
   meta.push(img.width && img.height ? el('span', { text: `${img.width} × ${img.height}` }) : el('span', { class: 'pending' }));
   meta.push(el('span', { class: 'sep' }));
   meta.push(img.fileSize > 0 ? el('span', { text: ITK.formatBytes(img.fileSize) }) : el('span', { class: 'pending' }));
@@ -595,11 +779,13 @@ function pumpViaExtension() {
     budget.fetches--;
     budget.bytes -= maxBytes;
     viaExtensionActive++;
-    send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes })
+    send({ action: 'fetchAsDataUrl', imageUrl: src, maxBytes, automatic: true })
       .then((res) => {
-        budget.bytes += maxBytes - Math.min(maxBytes, res?.dataUrl ? res.size || 0 : 0);
+        // Only bytes that were never downloaded go back; when that is unknown, nothing does.
+        const used = res?.dataUrl ? res.size || 0 : Number.isFinite(res?.bytesRead) ? res.bytesRead : maxBytes;
+        budget.bytes += maxBytes - Math.min(maxBytes, used);
         resolve(res?.dataUrl || null);
-      }, () => { budget.bytes += maxBytes; resolve(null); })
+      }, () => resolve(null))
       .finally(() => { viaExtensionActive--; pumpViaExtension(); });
   }
 }
@@ -614,7 +800,7 @@ async function thumbFallback(img, pic) {
 
 // Direct load first; hotlink-protected images fall back to the extension fetch.
 async function loadDimensionsWithFallback(img) {
-  const direct = await loadDimensions(img.thumb || img.src).catch(() => null);
+  const direct = state.directImages || img.thumb || img.src.startsWith('data:') ? await loadDimensions(img.thumb || img.src).catch(() => null) : null;
   if (direct?.width > 0) return direct;
   const dataUrl = await fetchViaExtension(img.src);
   if (!dataUrl) return null;
@@ -645,6 +831,7 @@ function onGridClick(e) {
   if (action === 'copy') { copyImage(img.src); return; }
   if (action === 'download') { openDownloadMenu(e.target.closest('[data-act]'), img); return; }
   if (action === 'open') { chrome.tabs.create({ url: img.src, active: false }); return; }
+  if (action === 'link') { copyLink(img.src); return; }
   if (action === 'lens') { openLens(img.src); return; }
   openPreview(img.src);
 }
@@ -713,8 +900,32 @@ function updateSelectionUI() {
   syncHighlights();
 }
 
+// The page outlines the selected images only while this port is open. Chrome disconnects it
+// when the panel closes, and moving to another tab disconnects it on purpose, so a page never
+// keeps outlines from a panel that is gone.
+let highlightPort = null;
+
 const syncHighlights = debounce(() => {
-  if (state.tabId != null) send({ action: 'highlightImages', tabId: state.tabId, urls: [...state.selected] });
+  const urls = [...state.selected];
+  if (highlightPort && highlightPort.tabId !== state.tabId) {
+    highlightPort.port.disconnect();
+    highlightPort = null;
+  }
+  if (!highlightPort) {
+    // A real web tab only (no tab, or TAB_ID_NONE = -1, makes tabs.connect throw).
+    if (!urls.length || !Number.isInteger(state.tabId) || state.tabId < 0) return;
+    const port = chrome.tabs.connect(state.tabId, { name: 'imagetoolkit-highlight' });
+    port.onDisconnect.addListener(() => {
+      void chrome.runtime.lastError; // no scanner in that tab (yet), or the page navigated away
+      if (highlightPort?.port === port) highlightPort = null;
+    });
+    highlightPort = { tabId: state.tabId, port };
+  }
+  try {
+    highlightPort.port.postMessage({ urls });
+  } catch {
+    highlightPort = null;
+  }
 }, 120);
 
 // ---------- Download menu ----------
@@ -727,8 +938,8 @@ function closeMenu() {
 
 function openDownloadMenu(anchor, img) {
   closeMenu();
-  const typeLabel = img.type === 'other' ? '?' : img.type.toUpperCase();
-  const items = [['original', t('originalFormat'), typeLabel], ['png', 'PNG'], ['jpeg', 'JPG'], ['webp', 'WebP'], ['avif', 'AVIF']];
+  const typeLabel = img.type === 'other' ? '?' : ITK.formatLabel(img.type);
+  const items = [['original', t('originalFormat'), typeLabel], ['png', 'PNG'], ['jpeg', 'JPG'], ['webp', 'WebP'], ...(state.avif ? [['avif', 'AVIF']] : [])];
   const menu = el('div', { class: 'menu', role: 'menu' }, items.map(([value, label, hint]) =>
     el('button', { class: 'menu-item', role: 'menuitem', onclick: () => { closeMenu(); downloadOne(img, value); } },
       [el('span', { text: label }), hint ? el('small', { text: hint }) : null])));
@@ -747,7 +958,8 @@ document.addEventListener('pointerdown', (e) => { if (openMenu && !openMenu.cont
 // ============================================================
 // Downloads
 // ============================================================
-function buildInstructions(format) {
+// `img` and `index` only feed the file name ({width}, {index}…); they never change the image.
+function buildInstructions(format, img = null, index = 0) {
   const s = state.settings;
   let fmt = format;
   // "Convert on download" only applies when the user asked for the original format.
@@ -755,12 +967,20 @@ function buildInstructions(format) {
   // "Original" keeps the exact bytes; the background picks the extension from the real content type.
   const ins = fmt === 'original' ? { passthrough: true } : { format: fmt === 'jpg' ? 'jpeg' : fmt, quality: s.defaultQuality / 100 };
   ins.silent = true;
+  const page = pageOf(img);
+  Object.assign(ins, {
+    pageHost: page?.pageHost || state.host,
+    pageTitle: page?.pageTitle || state.pageTitle,
+    knownWidth: img?.width || 0,
+    knownHeight: img?.height || 0,
+    index,
+  });
   return ins;
 }
 
 async function downloadOne(img, format) {
   try {
-    const r = await call({ action: 'processAndSave', imageUrl: img.src, instructions: buildInstructions(format) });
+    const r = await call({ action: 'processAndSave', imageUrl: img.src, instructions: buildInstructions(format, img) });
     if (r.cancelled) return;
     toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + sizeSummary(r));
   } catch (err) {
@@ -794,6 +1014,15 @@ async function copyImage(src) {
   }
 }
 
+async function copyLink(src) {
+  try {
+    await copyText(src);
+    toast(t('linkCopied'));
+  } catch (err) {
+    toast(`${t('errorCopyFailed')}: ${err.message}`, 'error');
+  }
+}
+
 async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -808,8 +1037,9 @@ function openLens(src) {
   chrome.tabs.create({ url: `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(src)}`, active: true });
 }
 
-function openEditor(src) {
-  send({ action: 'openEditor', imageUrl: src });
+function openEditor(src, img) {
+  const page = img ? pageOf(img) : null;
+  send({ action: 'openEditor', imageUrl: src, site: page?.pageHost || state.host || '', title: page?.pageTitle || state.pageTitle || '' });
 }
 
 // ============================================================
@@ -834,7 +1064,29 @@ function updateActionBar() {
   const show = state.selected.size > 0 && activeTab() === 'images';
   $('action-bar').hidden = !show && $('batch-progress').hidden;
   $('app').classList.toggle('has-action-bar', !$('action-bar').hidden);
+  fitActionBar();
 }
+
+// Labels are longer in some languages (Herunterladen, Налаштування, ダウンロード) than the widths
+// the layout was drawn for: while `inner` overflows, apply the classes in `steps` to `box` one at a
+// time, and refit whenever the box changes size.
+const fitObservers = new WeakSet();
+function fitBox(box, steps, inner = box) {
+  if (!fitObservers.has(box)) {
+    fitObservers.add(box);
+    new ResizeObserver(() => fitBox(box, steps, inner)).observe(box);
+  }
+  box.classList.remove(...steps);
+  if (box.hidden) return;
+  for (const step of steps) {
+    if (inner.scrollWidth <= inner.clientWidth) break;
+    box.classList.add(step);
+  }
+}
+// The action bar drops the word "selected", then the Download label (it stays the accessible name).
+const fitActionBar = () => fitBox($('action-bar'), ['fit-count', 'fit-download'], $('action-bar').querySelector('.action-bar-inner'));
+// The tabs drop their icons, then shorten their labels.
+const fitTabs = () => fitBox(document.querySelector('.tabs'), ['fit-icons', 'fit-shrink']);
 
 let batchRunning = false;
 
@@ -855,13 +1107,14 @@ async function batchDownload(zip) {
   buttons.forEach((b) => { b.disabled = true; });
 
   const files = [];
+  const zipNames = new Set();
   let failed = 0;
   let zipBytes = 0;
   let overLimit = false;
   for (let i = 0; i < items.length; i++) {
     count.textContent = `${i + 1}/${items.length}`;
     label.textContent = zip ? t('preparingZip') : t('processing');
-    const ins = buildInstructions(format);
+    const ins = buildInstructions(format, items[i], i + 1);
     // One file per image: never open a Save As dialog or a notification for each one.
     ins.saveAs = false;
     try {
@@ -871,7 +1124,7 @@ async function batchDownload(zip) {
         const bytes = new Uint8Array(await (await fetch(r.dataUrl)).arrayBuffer());
         zipBytes += bytes.byteLength;
         if (zipBytes > LIMITS.zipBytes) { overLimit = true; break; }
-        files.push({ name: zipEntryName(items[i].src, r.format, i), bytes });
+        files.push({ name: zipEntryName(items[i], ins, r, i + 1, zipNames), bytes });
       }
     } catch {
       failed++;
@@ -912,13 +1165,27 @@ async function batchDownload(zip) {
   setTimeout(() => { progress.hidden = true; updateActionBar(); }, 2200);
 }
 
-function zipEntryName(url, format, i) {
-  let base = 'image';
-  try {
-    base = decodeURIComponent(new URL(url).pathname.split('/').pop() || '').replace(/\.[^.]+$/, '') || 'image';
-  } catch {}
-  base = ITK.sanitizeFilename(base).replace(/\s+/g, '_').slice(0, 40) || 'image';
-  return `${String(i + 1).padStart(3, '0')}_${base}.${ITK.extensionFor(format)}`;
+// Entries follow the same naming settings as single downloads (a template may create folders
+// inside the archive). Other patterns keep the selection order visible with a 001_ prefix.
+// A ZIP cannot hold two entries with one name, so later duplicates are numbered.
+function zipEntryName(img, ins, result, index, used) {
+  const s = state.settings;
+  let name = ITK.buildFilename(img.src, {
+    ...ins,
+    filenamePattern: s.filenamePattern,
+    filenamePrefix: s.filenamePrefix,
+    filenameTemplate: s.filenameTemplate,
+    subfolder: '',
+    format: result.format,
+    knownWidth: result.width || img.width,
+    knownHeight: result.height || img.height,
+  });
+  if (s.filenamePattern !== 'template') name = `${String(index).padStart(3, '0')}_${name}`;
+  const dot = name.lastIndexOf('.');
+  let candidate = name;
+  for (let n = 2; used.has(candidate.toLowerCase()); n++) candidate = `${name.slice(0, dot)} (${n})${name.slice(dot)}`;
+  used.add(candidate.toLowerCase());
+  return candidate;
 }
 
 async function downloadZip(files) {
@@ -933,8 +1200,12 @@ async function downloadZip(files) {
 // Preview
 // ============================================================
 let previewReturnFocus = null;
-// Everything behind the dialog; made inert while it is open.
+// Everything behind the dialogs; inert while any of them is open.
 const BACKGROUND_REGIONS = ['.header', '.tabs', '.views', '#action-bar'];
+function syncInert() {
+  const open = !$('preview-modal').hidden || !$('support-modal').hidden;
+  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.toggleAttribute('inert', open));
+}
 
 function initPreview() {
   $('preview-backdrop').addEventListener('click', closePreview);
@@ -946,15 +1217,52 @@ function initPreview() {
   const withImage = (fn) => () => { const img = currentPreview(); if (img) fn(img); };
   $('preview-download').addEventListener('click', withImage((img) => withBusy($('preview-download'), () => downloadOne(img, $('preview-format').value))));
   $('preview-copy').addEventListener('click', withImage((img) => copyImage(img.src)));
-  $('preview-resize').addEventListener('click', withImage((img) => { openEditor(img.src); closePreview(); }));
+  $('preview-link').addEventListener('click', withImage((img) => copyLink(img.src)));
+  $('preview-resize').addEventListener('click', withImage((img) => { openEditor(img.src, img); closePreview(); }));
   $('preview-open').addEventListener('click', withImage((img) => chrome.tabs.create({ url: img.src, active: false })));
   $('preview-lens').addEventListener('click', withImage((img) => openLens(img.src)));
   $('preview-modal').addEventListener('keydown', trapFocus);
 }
 
+// ============================================================
+// Support: donations and free ways to help, in a small dialog (the links open in new tabs)
+// ============================================================
+let supportReturnFocus = null;
+
+function initSupport() {
+  for (const id of ['btn-support', 'btn-support-about']) $(id).addEventListener('click', openSupport);
+  $('support-backdrop').addEventListener('click', closeSupport);
+  $('support-close').addEventListener('click', closeSupport);
+  $('support-modal').addEventListener('keydown', trapFocus);
+  // Rating only makes sense for a copy installed from the Chrome Web Store.
+  chrome.management.getSelf().then((self) => {
+    if (self.installType !== 'normal' || !/clients2\.google\.com/.test(self.updateUrl || '')) return;
+    $('support-rate').href = `https://chromewebstore.google.com/detail/${chrome.runtime.id}/reviews`;
+    $('support-rate').hidden = false;
+  }).catch(() => {});
+}
+
+function openSupport() {
+  if (!$('support-modal').hidden) return;
+  closePreview(); // one dialog at a time
+  supportReturnFocus = document.activeElement;
+  $('support-modal').hidden = false;
+  syncInert();
+  $('support-close').focus();
+}
+
+function closeSupport() {
+  if ($('support-modal').hidden) return;
+  $('support-modal').hidden = true;
+  syncInert();
+  supportReturnFocus?.focus?.();
+}
+
 function currentPreview() {
   return state.previewSrc ? state.images.find((i) => i.src === state.previewSrc) : null;
 }
+
+let previewErrorWatch = null;
 
 function openPreview(src) {
   const img = state.images.find((i) => i.src === src);
@@ -962,15 +1270,28 @@ function openPreview(src) {
   if ($('preview-modal').hidden) previewReturnFocus = document.activeElement;
   state.previewSrc = src;
   const stage = $('preview-img');
-  stage.src = img.thumb || img.src;
+  const direct = state.directImages || img.src.startsWith('data:');
+  const viaCopy = () => fetchViaExtension(img.src).then((dataUrl) => { if (dataUrl && state.previewSrc === src) stage.src = dataUrl; });
+  previewErrorWatch?.abort(); // one listener for the image shown, never one per image browsed
+  previewErrorWatch = new AbortController();
+  if (img.thumb || direct) {
+    stage.src = img.thumb || img.src;
+    // A host that refuses direct loads (hotlink protection) still shows through the copy.
+    if (!img.thumb && /^https?:/i.test(img.src)) stage.addEventListener('error', () => { if (state.previewSrc === src) viaCopy(); }, { once: true, signal: previewErrorWatch.signal });
+  } else {
+    stage.removeAttribute('src'); // empty until the cookie-less copy arrives (src='' would load the page itself)
+    viaCopy();
+  }
   stage.alt = img.alt || img.name;
   $('preview-filename').textContent = img.name;
   $('preview-filename').title = img.src;
   $('preview-lens').hidden = !state.settings.enableGoogleLens || img.src.startsWith('data:');
+  $('preview-link').hidden = !/^https?:/i.test(img.src);
   refreshPreviewMeta();
   if ($('preview-modal').hidden) {
+    closeSupport(); // one dialog at a time
     $('preview-modal').hidden = false;
-    BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.setAttribute('inert', ''));
+    syncInert();
     $('preview-close').focus();
   }
 }
@@ -980,7 +1301,7 @@ function refreshPreviewMeta() {
   const img = currentPreview();
   if (!img) return;
   const index = state.filtered.findIndex((i) => i.src === img.src);
-  const meta = [img.type === 'other' ? '' : img.type.toUpperCase()];
+  const meta = [img.type === 'other' ? '' : ITK.formatLabel(img.type)];
   if (img.width && img.height) meta.push(`${img.width} × ${img.height}`);
   if (img.fileSize > 0) meta.push(ITK.formatBytes(img.fileSize));
   if (index >= 0) meta.push(`${index + 1}/${state.filtered.length}`);
@@ -998,7 +1319,7 @@ function stepPreview(delta) {
 function closePreview() {
   if ($('preview-modal').hidden) return;
   $('preview-modal').hidden = true;
-  BACKGROUND_REGIONS.forEach((sel) => document.querySelector(sel)?.removeAttribute('inert'));
+  syncInert();
   state.previewSrc = '';
   previewReturnFocus?.focus?.();
 }
@@ -1006,7 +1327,7 @@ function closePreview() {
 // Keep Tab and Shift+Tab inside the dialog.
 function trapFocus(e) {
   if (e.key !== 'Tab') return;
-  const focusable = [...$('preview-modal').querySelectorAll('button, select, [tabindex]:not([tabindex="-1"])')]
+  const focusable = [...e.currentTarget.querySelectorAll('button, select, a[href], [tabindex]:not([tabindex="-1"])')]
     .filter((node) => !node.disabled && !node.hidden && node.offsetParent !== null);
   if (!focusable.length) return;
   const first = focusable[0], last = focusable[focusable.length - 1];
@@ -1026,9 +1347,11 @@ function initKeyboard() {
     if (e.key === 'Escape') {
       if (openMenu) { closeMenu(); return; }
       if (!$('preview-modal').hidden) { closePreview(); return; }
+      if (!$('support-modal').hidden) { closeSupport(); return; }
       if (state.selected.size && !isTyping(e.target)) { state.selected.clear(); updateSelectionUI(); }
       return;
     }
+    if (!$('support-modal').hidden) return; // nothing behind the dialog reacts to keys
     if (!$('preview-modal').hidden) {
       const rtl = document.documentElement.dir === 'rtl';
       if (e.key === 'ArrowRight') { e.preventDefault(); stepPreview(rtl ? -1 : 1); }
@@ -1177,12 +1500,15 @@ async function setToolSource(src, name, size = 0) {
   const stale = () => token !== toolToken;
   state.tool = { src, name, ratio: 0, size };
   $('tool-url-input').value = src.startsWith('data:') ? '' : src;
-  $('tool-preview-img').src = src;
+  // A web address loads directly only once the no-cookie rule is confirmed (as in the grid).
+  const direct = state.directImages || !/^https?:/i.test(src);
+  if (direct) $('tool-preview-img').src = src;
+  else $('tool-preview-img').removeAttribute('src');
   $('tool-preview-name').textContent = name;
   $('tool-preview-info').textContent = '…';
   $('tool-preview').hidden = false;
 
-  let dims = await loadDimensions(src).catch(() => null);
+  let dims = direct ? await loadDimensions(src).catch(() => null) : null;
   if (stale()) return;
   if (!dims && !src.startsWith('data:')) {
     const dataUrl = await fetchViaExtension(src);
@@ -1218,7 +1544,7 @@ async function convertTool() {
   const format = segmentedValue($('convert-format')) || 'webp';
   await withBusy($('btn-convert-url'), async () => {
     try {
-      const r = await call({ action: 'processAndSave', imageUrl: state.tool.src, instructions: { format, quality: state.settings.defaultQuality / 100, silent: true } });
+      const r = await call({ action: 'processAndSave', imageUrl: state.tool.src, instructions: { format, quality: state.settings.defaultQuality / 100, silent: true, sourceName: state.tool.name } });
       if (r.cancelled) return;
       toast(t('notifSavedAs', [ITK.formatLabel(r.format)]) + sizeSummary(r));
     } catch (err) {
@@ -1240,7 +1566,7 @@ async function resizeTool() {
     return;
   }
 
-  const ins = { format: state.settings.defaultFormat || 'webp', quality: state.settings.defaultQuality / 100, silent: true };
+  const ins = { format: state.settings.defaultFormat || 'webp', quality: state.settings.defaultQuality / 100, silent: true, sourceName: state.tool.name };
   if (!isLocked() && height >= 1) {
     Object.assign(ins, { cropWidth: width, cropHeight: height, fitMode: $('resize-mode').value === 'fit' });
   } else {
@@ -1309,6 +1635,7 @@ function initSettings() {
   setSegmented($('setting-default-format'), s.defaultFormat || 'webp');
   onSegmented($('setting-default-format'), (value) => {
     saveSettings({ defaultFormat: value });
+    renderTemplatePreview();
     setSegmented($('convert-format'), value);
   });
 
@@ -1333,9 +1660,15 @@ function initSettings() {
   bind('setting-prefix', 'filenamePrefix', ...asValue('img_'));
   bind('setting-convert-dl', 'convertOnDl', ...asValue('none'));
 
-  const prefixRow = () => { $('custom-prefix-row').hidden = $('setting-filename').value !== 'custom'; };
+  bind('setting-template', 'filenameTemplate', ...asValue('{name}'));
+  initTemplateEditor();
+  const prefixRow = () => {
+    $('custom-prefix-row').hidden = $('setting-filename').value !== 'custom';
+    $('template-row').hidden = $('setting-filename').value !== 'template';
+  };
   prefixRow();
   $('setting-filename').addEventListener('change', prefixRow);
+  $('setting-filename').addEventListener('change', renderTemplatePreview);
   $('setting-resize-behavior').addEventListener('change', () => { $('resize-mode').value = $('setting-resize-behavior').value; });
   $('setting-google-lens').addEventListener('change', () => { state.settings.enableGoogleLens = $('setting-google-lens').checked; renderGrid(false); });
 
@@ -1348,7 +1681,108 @@ function initSettings() {
     state.cards.clear();
     populateDomains();
     applyFilters();
+    renderCustomPresets();
+    renderTemplateTokens();
+    renderTemplatePreview();
   });
+}
+
+// ---------- Filename template ----------
+// Variables are chips that insert themselves at the cursor; the preview shows the exact
+// name a download would get right now (same code as the real download).
+// Literal t('…') calls so the i18n check can see every key in use.
+const tokenLabel = (token) => ({
+  name: t('tokName'), site: t('tokSite'), domain: t('tokDomain'), title: t('tokTitle'), index: t('tokIndex'),
+  width: t('tokWidth'), height: t('tokHeight'), format: t('tokFormat'), date: t('tokDate'), time: t('tokTime'),
+})[token];
+
+function initTemplateEditor() {
+  renderTemplateTokens();
+  $('setting-template').addEventListener('input', renderTemplatePreview);
+  $('setting-subfolder').addEventListener('input', renderTemplatePreview);
+  renderTemplatePreview();
+}
+
+function renderTemplateTokens() {
+  const input = $('setting-template');
+  $('template-tokens').replaceChildren(...ITK.TEMPLATE_TOKENS.map((token) => el('button', {
+    type: 'button', class: 'token', text: `{${token}}`, title: tokenLabel(token), 'aria-label': `{${token}} · ${tokenLabel(token)}`,
+    onclick: () => {
+      const start = input.selectionStart ?? input.value.length, end = input.selectionEnd ?? start;
+      input.setRangeText(`{${token}}`, start, end, 'end');
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('change'));
+    },
+  })));
+}
+
+function renderTemplatePreview() {
+  const name = ITK.buildFilename('https://images.example.com/photos/sunset.jpg', {
+    format: state.settings.defaultFormat || 'webp',
+    filenamePattern: 'template',
+    filenameTemplate: $('setting-template').value || '{name}',
+    subfolder: $('setting-subfolder').value,
+    pageHost: state.host || 'example.com',
+    pageTitle: state.pageTitle || 'Example page',
+    index: 1,
+    knownWidth: 1920,
+    knownHeight: 1080,
+  });
+  const [before, after] = t('templatePreview', ['\uE000']).split('\uE000');
+  $('template-preview').replaceChildren(before || '', el('b', { text: name }), after || '');
+}
+
+// ---------- Editor presets ----------
+// Which built-in groups the editor shows, and the sizes the user adds. Saved with the other
+// settings (so they sync); the editor reads them when it opens.
+function initPresetSettings() {
+  document.querySelectorAll('[data-preset-group]').forEach((input) => {
+    const group = input.dataset.presetGroup;
+    input.checked = ITK.presetGroupEnabled(state.settings, group);
+    input.addEventListener('change', () => {
+      saveSettings({ presetGroups: { ...(state.settings.presetGroups || {}), [group]: input.checked } });
+    });
+  });
+
+  $('preset-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('preset-name').value.trim();
+    const w = Number($('preset-w').value), h = Number($('preset-h').value);
+    const validSide = (n) => Number.isInteger(n) && n >= 1 && n <= ITK.MAX_SIDE;
+    if (!name) { flashError($('preset-name')); return; }
+    if (!validSide(w)) { flashError($('preset-w')); return; }
+    if (!validSide(h)) { flashError($('preset-h')); return; }
+    const list = ITK.sanitizeCustomPresets(state.settings.customPresets);
+    if (list.length >= ITK.MAX_CUSTOM_PRESETS) {
+      toast(t('presetLimit', [String(ITK.MAX_CUSTOM_PRESETS)]), 'error');
+      return;
+    }
+    saveSettings({ customPresets: [...list, { name: name.slice(0, ITK.MAX_PRESET_NAME), w, h }] });
+    $('preset-form').reset();
+    renderCustomPresets();
+    $('preset-name').focus();
+  });
+  renderCustomPresets();
+}
+
+function renderCustomPresets() {
+  const list = ITK.sanitizeCustomPresets(state.settings.customPresets);
+  $('custom-presets-empty').hidden = list.length > 0;
+  $('custom-presets').replaceChildren(...list.map((preset, index) => {
+    const label = t('presetRemove', [preset.name]);
+    return el('li', { class: 'preset-item' }, [
+      el('span', { class: 'preset-name', text: preset.name, title: preset.name }),
+      el('span', { class: 'preset-size', text: `${preset.w} × ${preset.h}` }),
+      el('button', {
+        type: 'button', class: 'icon-btn', title: label, 'aria-label': label,
+        onclick: () => {
+          saveSettings({ customPresets: list.filter((_, i) => i !== index) });
+          renderCustomPresets();
+        },
+      }, icon('x')),
+    ]);
+  }));
 }
 
 function showAbout() {
@@ -1393,7 +1827,8 @@ async function probeMissingDimensions() {
   const pending = state.images.filter((i) => !(i.width > 0 && i.height > 0)).slice(0, 160);
   if (!pending.length) return;
   let changed = false;
-  await ITK.mapLimit(pending, 8, async (img) => {
+  // Four at a time: gentle with image servers that limit bursts (Wikimedia, CDNs).
+  await ITK.mapLimit(pending, 4, async (img) => {
     // Without this fallback, hotlink-protected images keep 0×0 and vanish from size filters.
     const dims = await loadDimensionsWithFallback(img);
     if (dims?.width > 0 && dims?.height > 0) {

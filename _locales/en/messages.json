@@ -12,7 +12,7 @@
     "description": "Extension description for the store"
   },
   "menuParent": {
-    "message": "Save Image As..."
+    "message": "Save image as…"
   },
   "menuSaveAs": {
     "message": "Save as $FORMAT$",
@@ -24,13 +24,13 @@
     }
   },
   "menuCopyClipboard": {
-    "message": "Copy to Clipboard"
+    "message": "Copy to clipboard"
   },
   "menuResize1080": {
     "message": "Save resized (1080px)"
   },
   "menuCustomResize": {
-    "message": "Custom Resize..."
+    "message": "Custom resize…"
   },
   "popupSubtitle": {
     "message": "Convert · Download · Resize · Optimize"
@@ -45,28 +45,28 @@
     "message": "Paste image URL here..."
   },
   "convertAndSave": {
-    "message": "Convert & Save"
+    "message": "Convert & save"
   },
   "copyClipboard": {
     "message": "Copy"
   },
   "formatAdvisor": {
-    "message": "Format Advisor"
+    "message": "Format advisor"
   },
   "analyzing": {
     "message": "Analyzing image..."
   },
   "advisorAlpha": {
-    "message": "🔍 Image has transparency → PNG or WebP recommended"
+    "message": "Image has transparency → PNG or WebP recommended"
   },
   "advisorSmallest": {
-    "message": "🔍 Smallest: {format} ({size})"
+    "message": "Smallest: {format} ({size})"
   },
   "scanning": {
     "message": "Scanning..."
   },
   "filterAll": {
-    "message": "All Types"
+    "message": "All types"
   },
   "filterOther": {
     "message": "Other"
@@ -99,16 +99,16 @@
     "message": "Preferences"
   },
   "settingQuality": {
-    "message": "Default Quality"
+    "message": "Default quality"
   },
   "settingDefaultFormat": {
-    "message": "Default Format"
+    "message": "Default format"
   },
   "settingResizeBehavior": {
-    "message": "Resize Behavior"
+    "message": "Resize behavior"
   },
   "settingCrop": {
-    "message": "Center Crop"
+    "message": "Center crop"
   },
   "settingFit": {
     "message": "Fit (Letterbox)"
@@ -132,7 +132,7 @@
     "message": "Dark"
   },
   "localProcessing": {
-    "message": "100% Local Processing"
+    "message": "100% local processing"
   },
   "noTracking": {
     "message": "No login. No tracking. External actions only run when you click them."
@@ -152,13 +152,13 @@
     "message": "Image copied to clipboard!"
   },
   "customResizeTitle": {
-    "message": "Custom Resize"
+    "message": "Custom resize"
   },
   "formatLabel": {
     "message": "Format"
   },
   "saveImage": {
-    "message": "Save Image"
+    "message": "Save image"
   },
   "loadingImageInfo": {
     "message": "Loading image info..."
@@ -173,7 +173,7 @@
     "message": "Copy failed"
   },
   "settingOpenSidePanel": {
-    "message": "Open as Side Panel"
+    "message": "Open as side panel"
   },
   "sortPixels": {
     "message": "Pixel size"
@@ -191,7 +191,7 @@
     "message": "Square"
   },
   "filterByUrl": {
-    "message": "Filter by URL or filename..."
+    "message": "Filter by URL or filename…"
   },
   "titleToggleTheme": {
     "message": "Toggle theme"
@@ -219,7 +219,7 @@
     "message": "Toggle layout"
   },
   "resizeAndSave": {
-    "message": "Resize & Save"
+    "message": "Resize & save"
   },
   "placeholderWidth": {
     "message": "W"
@@ -231,7 +231,7 @@
     "message": "Open in new tab"
   },
   "titleDownloadAs": {
-    "message": "Download as..."
+    "message": "Download as…"
   },
   "labelType": {
     "message": "Type:"
@@ -245,20 +245,17 @@
   "labelDomain": {
     "message": "Domain:"
   },
-  "donate": {
-    "message": "Donate"
-  },
   "bgPreview": {
-    "message": "Background Preview"
+    "message": "Background preview"
   },
   "bgTransparent": {
     "message": "Transparent"
   },
   "cropArea": {
-    "message": "Crop Area"
+    "message": "Crop area"
   },
   "outputSize": {
-    "message": "Output Size"
+    "message": "Output size"
   },
   "applyDimensions": {
     "message": "Apply"
@@ -279,13 +276,10 @@
     "message": "Resize"
   },
   "openCropTool": {
-    "message": "Open Crop Tool"
+    "message": "Open crop tool"
   },
   "titleCapture": {
     "message": "Capture area"
-  },
-  "titleKofi": {
-    "message": "Support on Ko-fi"
   },
   "bgWhite": {
     "message": "White"
@@ -306,7 +300,7 @@
     "message": "Capture delay"
   },
   "downloadOptions": {
-    "message": "Download Options"
+    "message": "Download options"
   },
   "settingSubfolder": {
     "message": "Subfolder"
@@ -357,7 +351,7 @@
     "message": "Large (500–1199px)"
   },
   "filterXLargeLabel": {
-    "message": "Extra Large (≥ 1200px)"
+    "message": "Extra large (≥ 1200px)"
   },
   "filterAtLeast": {
     "message": "At least…"
@@ -369,13 +363,13 @@
     "message": "Saved"
   },
   "presetAspectRatio": {
-    "message": "Aspect Ratio"
+    "message": "Aspect ratio"
   },
   "presetCommon": {
-    "message": "Common Sizes"
+    "message": "Common sizes"
   },
   "presetSocial": {
-    "message": "Social Media"
+    "message": "Social media"
   },
   "pOriginal": {
     "message": "Original"
@@ -438,7 +432,7 @@
     "message": "Only applies when downloading as Original format"
   },
   "settingSubfolderNote": {
-    "message": "Works best with '$OPTION$' turned off",
+    "message": "Works best with “$OPTION$” turned off",
     "placeholders": {
       "OPTION": {
         "content": "$1",
@@ -456,7 +450,7 @@
     "message": "Flip vertical"
   },
   "captureHint": {
-    "message": "Draw a rectangle to capture · ESC to cancel"
+    "message": "Draw a rectangle to capture · Esc to cancel"
   },
   "settingGoogleLens": {
     "message": "Google Lens search"
@@ -634,5 +628,312 @@
   },
   "downloadZip": {
     "message": "Download as ZIP"
+  },
+  "editorPresets": {
+    "message": "Editor presets"
+  },
+  "editorPresetsHint": {
+    "message": "Choose which groups the editor shows and add sizes of your own."
+  },
+  "presetMine": {
+    "message": "My presets"
+  },
+  "presetsEmpty": {
+    "message": "No presets of your own yet."
+  },
+  "presetName": {
+    "message": "Name"
+  },
+  "presetWidth": {
+    "message": "Width"
+  },
+  "presetHeight": {
+    "message": "Height"
+  },
+  "presetAdd": {
+    "message": "Add preset"
+  },
+  "presetRemove": {
+    "message": "Remove $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "You can keep up to $COUNT$ presets.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "Template"
+  },
+  "settingTemplate": {
+    "message": "Name template"
+  },
+  "settingTemplateHint": {
+    "message": "Click a variable to insert it. Use / to create folders."
+  },
+  "templatePreview": {
+    "message": "Example: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Original file name"
+  },
+  "tokSite": {
+    "message": "Site of the page"
+  },
+  "tokDomain": {
+    "message": "Server of the image"
+  },
+  "tokTitle": {
+    "message": "Page title"
+  },
+  "tokIndex": {
+    "message": "Number in the batch (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Width in pixels"
+  },
+  "tokHeight": {
+    "message": "Height in pixels"
+  },
+  "tokFormat": {
+    "message": "Format (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Today's date (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Current time (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Load all images"
+  },
+  "autoScrollHint": {
+    "message": "Scroll the page to the end so lazy-loaded images appear, then scan again"
+  },
+  "autoScrollRunning": {
+    "message": "Loading images… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Stop"
+  },
+  "autoScrollNothing": {
+    "message": "No more images to load on this page"
+  },
+  "scopeLabel": {
+    "message": "Scan"
+  },
+  "scopeTab": {
+    "message": "This tab"
+  },
+  "scopeWindow": {
+    "message": "All tabs"
+  },
+  "labelTab": {
+    "message": "Tab:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ tab",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ tabs",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Tabs not read: $COUNT$ (browser pages or sleeping tabs)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "Capture full page"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Capture the full page"
+  },
+  "captureFullRunning": {
+    "message": "Capturing the whole page… keep this tab open (Esc cancels)"
+  },
+  "fullPageCut": {
+    "message": "The page is very tall: the capture stops at $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "Annotate"
+  },
+  "annotateHint": {
+    "message": "Annotate: blur, pixelate, boxes, arrows, text"
+  },
+  "toolPixelate": {
+    "message": "Pixelate"
+  },
+  "toolBlur": {
+    "message": "Blur"
+  },
+  "toolBox": {
+    "message": "Box"
+  },
+  "toolArrow": {
+    "message": "Arrow"
+  },
+  "toolText": {
+    "message": "Text"
+  },
+  "toolHighlight": {
+    "message": "Highlight"
+  },
+  "annotColor": {
+    "message": "Colour"
+  },
+  "annotSize": {
+    "message": "Thickness"
+  },
+  "sizeFine": {
+    "message": "Fine"
+  },
+  "sizeMedium": {
+    "message": "Medium"
+  },
+  "sizeThick": {
+    "message": "Thick"
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "redo": {
+    "message": "Redo"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "textPlaceholder": {
+    "message": "Type, then press Enter"
+  },
+  "captureTabChanged": {
+    "message": "Capture stopped: the tab changed. Keep it in front while capturing.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "The page stopped scrolling before its end: the capture may be incomplete.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Redact with solid colour",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Checkerboard",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copy image link",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Link copied",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Lossless",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Screenshot",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Fit to window",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "Actual size",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Back to screenshot",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "Crop",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "Support ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Support",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit is free and open source, with no ads and no tracking. If it saves you time, here are a few ways to help it grow.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Donate",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Free ways to help",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "Star it on GitHub",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Report a bug or suggest an idea",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Help translate",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Rate it on the Chrome Web Store",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

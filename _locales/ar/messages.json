@@ -54,10 +54,10 @@
     "message": "جاري تحليل الصورة..."
   },
   "advisorAlpha": {
-    "message": "🔍 الصورة تحتوي على شفافية → PNG أو WebP موصى به"
+    "message": "الصورة تحتوي على شفافية → PNG أو WebP موصى به"
   },
   "advisorSmallest": {
-    "message": "🔍 الأصغر: {format} ({size})"
+    "message": "الأصغر: {format} ({size})"
   },
   "scanning": {
     "message": "جاري البحث..."
@@ -233,9 +233,6 @@
   "titleDownloadAs": {
     "message": "تنزيل بصيغة..."
   },
-  "donate": {
-    "message": "تبرع"
-  },
   "labelType": {
     "message": "النوع:"
   },
@@ -283,9 +280,6 @@
   },
   "titleCapture": {
     "message": "التقاط منطقة"
-  },
-  "titleKofi": {
-    "message": "ادعم على Ko-fi"
   },
   "bgWhite": {
     "message": "أبيض"
@@ -634,5 +628,312 @@
   },
   "downloadZip": {
     "message": "تنزيل كملف ZIP"
+  },
+  "editorPresets": {
+    "message": "إعدادات المحرر المسبقة"
+  },
+  "editorPresetsHint": {
+    "message": "اختر المجموعات التي يعرضها المحرر وأضف مقاساتك الخاصة."
+  },
+  "presetMine": {
+    "message": "إعداداتي المسبقة"
+  },
+  "presetsEmpty": {
+    "message": "لا توجد إعدادات مسبقة خاصة بك بعد."
+  },
+  "presetName": {
+    "message": "الاسم"
+  },
+  "presetWidth": {
+    "message": "العرض"
+  },
+  "presetHeight": {
+    "message": "الارتفاع"
+  },
+  "presetAdd": {
+    "message": "إضافة إعداد مسبق"
+  },
+  "presetRemove": {
+    "message": "إزالة $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "يمكنك حفظ ما يصل إلى $COUNT$ إعدادًا مسبقًا.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "قالب"
+  },
+  "settingTemplate": {
+    "message": "قالب الاسم"
+  },
+  "settingTemplateHint": {
+    "message": "انقر على متغيّر لإدراجه. استخدم / لإنشاء مجلدات."
+  },
+  "templatePreview": {
+    "message": "مثال: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "اسم الملف الأصلي"
+  },
+  "tokSite": {
+    "message": "موقع الصفحة"
+  },
+  "tokDomain": {
+    "message": "خادم الصورة"
+  },
+  "tokTitle": {
+    "message": "عنوان الصفحة"
+  },
+  "tokIndex": {
+    "message": "الرقم ضمن الدفعة (001، 002…)"
+  },
+  "tokWidth": {
+    "message": "العرض بالبكسل"
+  },
+  "tokHeight": {
+    "message": "الارتفاع بالبكسل"
+  },
+  "tokFormat": {
+    "message": "الصيغة (jpg، webp…)"
+  },
+  "tokDate": {
+    "message": "تاريخ اليوم (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "الوقت الحالي (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "تحميل كل الصور"
+  },
+  "autoScrollHint": {
+    "message": "يمرّر الصفحة حتى النهاية لتظهر الصور المؤجَّلة ثم يفحص من جديد"
+  },
+  "autoScrollRunning": {
+    "message": "جارٍ تحميل الصور… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "إيقاف"
+  },
+  "autoScrollNothing": {
+    "message": "لا توجد صور أخرى لتحميلها في هذه الصفحة"
+  },
+  "scopeLabel": {
+    "message": "الفحص"
+  },
+  "scopeTab": {
+    "message": "علامة التبويب هذه"
+  },
+  "scopeWindow": {
+    "message": "كل علامات التبويب"
+  },
+  "labelTab": {
+    "message": "علامة التبويب:"
+  },
+  "tabsOne": {
+    "message": "علامات التبويب: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "علامات التبويب: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "علامات تبويب لم تُقرأ: $COUNT$ (صفحات المتصفح أو علامات تبويب نائمة)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "التقاط الصفحة كاملة"
+  },
+  "cmdCaptureFullPage": {
+    "message": "التقاط الصفحة كاملة"
+  },
+  "captureFullRunning": {
+    "message": "جارٍ التقاط الصفحة كاملة… أبقِ علامة التبويب مفتوحة (Esc يلغي)"
+  },
+  "fullPageCut": {
+    "message": "الصفحة طويلة جدًا: يتوقف الالتقاط عند $PX$ بكسل.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "تعليقات توضيحية"
+  },
+  "annotateHint": {
+    "message": "تعليقات: تمويه، بكسلة، مربعات، أسهم، نص"
+  },
+  "toolPixelate": {
+    "message": "بكسلة"
+  },
+  "toolBlur": {
+    "message": "تمويه"
+  },
+  "toolBox": {
+    "message": "مربع"
+  },
+  "toolArrow": {
+    "message": "سهم"
+  },
+  "toolText": {
+    "message": "نص"
+  },
+  "toolHighlight": {
+    "message": "تمييز"
+  },
+  "annotColor": {
+    "message": "اللون"
+  },
+  "annotSize": {
+    "message": "السُّمك"
+  },
+  "sizeFine": {
+    "message": "رفيع"
+  },
+  "sizeMedium": {
+    "message": "متوسط"
+  },
+  "sizeThick": {
+    "message": "عريض"
+  },
+  "undo": {
+    "message": "تراجع"
+  },
+  "redo": {
+    "message": "إعادة"
+  },
+  "cancel": {
+    "message": "إلغاء"
+  },
+  "textPlaceholder": {
+    "message": "اكتب ثم اضغط Enter"
+  },
+  "captureTabChanged": {
+    "message": "توقف الالتقاط: تغيّرت علامة التبويب. أبقها في المقدمة أثناء الالتقاط.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "توقفت الصفحة عن التمرير قبل نهايتها: قد يكون الالتقاط غير مكتمل.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "حجب بلون مصمت",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "رقعة شطرنج",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "نسخ رابط الصورة",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "تم نسخ الرابط",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "بدون فقدان",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "لقطة الشاشة",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "ملاءمة النافذة",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "الحجم الفعلي",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "العودة إلى اللقطة",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "قص",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "ادعم ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "ادعم",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit مجاني ومفتوح المصدر، بلا إعلانات ولا تتبّع. إن كان يوفّر وقتك، فهذه بعض طرق الدعم.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "تبرّع",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "طرق مجانية للمساعدة",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "ضع نجمة على GitHub",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "أبلغ عن خطأ أو اقترح فكرة",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "ساعد في الترجمة",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "قيّمه في سوق Chrome الإلكتروني",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

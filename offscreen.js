@@ -1,13 +1,14 @@
 // ============================================================
 // ImageToolkit – Offscreen Engine
 // Canvas-based conversion · Resize · Crop · Clipboard fallback
-// Requires lib/core.js.
+// Requires lib/core.js and lib/handoff.js.
 // ============================================================
 
 'use strict';
 
-// Only the service worker (or another extension page) may drive this document.
+// Only this extension's service worker drives this document.
 const EXTENSION_ORIGIN = chrome.runtime.getURL('');
+const SERVICE_WORKER_URL = chrome.runtime.getURL('background.js');
 
 const OFFSCREEN_HANDLERS = {
   'offscreen-process': (message) => handleProcess(message),
@@ -15,17 +16,27 @@ const OFFSCREEN_HANDLERS = {
   'offscreen-copy': (message) => handleCopy(message).then(() => ({ copied: true })),
   'offscreen-copy-text': (message) => handleCopyText(message).then(() => ({ copied: true })),
   'offscreen-crop': (message) => handleCrop(message).then((dataUrl) => ({ dataUrl })),
+  'offscreen-object-url': (message) => objectUrlFromHandoff(message.key),
+  'image-size': async (message) => { const img = await loadImage(message.dataUrl); return { width: img.naturalWidth, height: img.naturalHeight }; },
+  'fullpage-begin': async (message) => fullPageBegin(message),
+  'fullpage-draw': (message) => fullPageDraw(message),
+  'fullpage-end': (message) => fullPageEnd(message),
+  'fullpage-cancel': async (message) => { dropFullPage(message.session); return { success: true }; },
+  'offscreen-revoke': async (message) => { revokeObjectUrl(message.url); return { success: true }; },
 };
 
-chrome.runtime.onMessage.addListener((message, sender) => {
-  if (!ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN)) return false;
-  const handler = OFFSCREEN_HANDLERS[message?.action];
+// Each request is answered on its own message channel (sendResponse), so an answer can never
+// be matched to another request, not even one made after the service worker restarted.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!ITK.isExtensionSender(sender, chrome.runtime.id, EXTENSION_ORIGIN) || sender.url !== SERVICE_WORKER_URL) return false;
+  const handler = Object.prototype.hasOwnProperty.call(OFFSCREEN_HANDLERS, message?.action) ? OFFSCREEN_HANDLERS[message.action] : null;
   if (!handler) return false;
 
-  handler(message)
-    .then((result) => chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, ...result }))
-    .catch((err) => chrome.runtime.sendMessage({ action: 'offscreen-response', id: message.id, error: err?.message || 'Processing failed' }));
-  return false;
+  Promise.resolve()
+    .then(() => handler(message))
+    .then((result) => sendResponse(result ?? { success: true }))
+    .catch((err) => sendResponse({ error: err?.message || 'Processing failed' }));
+  return true;
 });
 
 // ---------- Main Processing Pipeline ----------
@@ -195,6 +206,101 @@ async function convertBlobToPng(blob) {
   canvas.height = img.naturalHeight;
   canvas.getContext('2d').drawImage(img, 0, 0);
   return canvasToBlob(canvas, 'image/png');
+}
+
+// ---------- Full-page capture ----------
+// One canvas per capture; slices are drawn as they arrive, so no message ever carries more
+// than one screen. The finished PNG goes straight to the handoff store for the editor.
+const fullPages = new Map();
+
+// A capture whose service worker stopped midway is never finished: each session frees its own
+// pixels after five minutes without a slice, and at most two exist at once.
+const FULLPAGE_IDLE_MS = 5 * 60 * 1000;
+const FULLPAGE_MAX_SESSIONS = 2;
+
+function dropFullPage(session) {
+  const entry = fullPages.get(session);
+  if (!entry) return;
+  clearTimeout(entry.timer);
+  entry.canvas.width = entry.canvas.height = 0;
+  fullPages.delete(session);
+}
+
+function touchFullPage(session) {
+  const entry = fullPages.get(session);
+  if (!entry) return null;
+  clearTimeout(entry.timer);
+  entry.timer = setTimeout(() => dropFullPage(session), FULLPAGE_IDLE_MS);
+  return entry;
+}
+
+function fullPageBegin({ width, height }) {
+  if (!(width >= 1 && height >= 1) || width > 16384 || height > 16384 || width * height > ITK.MAX_AREA) throw new Error('Invalid capture size');
+  // Oldest first (a Map keeps insertion order).
+  while (fullPages.size >= FULLPAGE_MAX_SESSIONS) dropFullPage(fullPages.keys().next().value);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const session = crypto.randomUUID();
+  fullPages.set(session, { canvas, timer: null });
+  touchFullPage(session);
+  return { session };
+}
+
+async function fullPageDraw({ session, dataUrl, crop, y, scale }) {
+  const canvas = touchFullPage(session)?.canvas;
+  if (!canvas) throw new Error('Capture expired');
+  const img = await loadImage(dataUrl);
+  const x0 = Math.max(0, Math.round(crop.x) || 0), y0 = Math.max(0, Math.round(crop.y) || 0);
+  const w = Math.min(crop.width, img.naturalWidth - x0), h = Math.min(crop.height, img.naturalHeight - y0);
+  // A slice that lies outside the screenshot is an error, never an empty success.
+  if (!(w >= 1 && h >= 1)) throw new Error('Capture area is outside the screenshot');
+  canvas.getContext('2d').drawImage(img, x0, y0, w, h, 0, y, Math.round(w * scale), Math.round(h * scale));
+  return { success: true };
+}
+
+// `height`: how much of the canvas was really filled (a capture that stopped early is trimmed,
+// so the image never ends in an empty band).
+async function fullPageEnd({ session, height }) {
+  const entry = fullPages.get(session);
+  if (!entry) throw new Error('Capture expired');
+  clearTimeout(entry.timer);
+  fullPages.delete(session);
+  let canvas = entry.canvas;
+  const used = Math.round(Number(height));
+  if (used >= 1 && used < canvas.height) {
+    const trimmed = document.createElement('canvas');
+    trimmed.width = canvas.width;
+    trimmed.height = used;
+    trimmed.getContext('2d').drawImage(canvas, 0, 0);
+    canvas.width = canvas.height = 0;
+    canvas = trimmed;
+  }
+  const blob = await canvasToBlob(canvas, 'image/png');
+  canvas.width = canvas.height = 0; // free the pixels now
+  return { key: await ITK.handoff.put(blob, { maxAge: ITK.handoff.EDITOR_MAX_AGE_MS }) };
+}
+
+// ---------- Large downloads ----------
+// Serves a file a page parked in the handoff store as a blob: URL owned by this document, which
+// lives on after that page closes. Released when the download ends, or after 30 minutes at most.
+const OBJECT_URL_MAX_AGE_MS = 30 * 60 * 1000;
+const objectUrls = new Map(); // url → safety timer
+
+async function objectUrlFromHandoff(key) {
+  const blob = await ITK.handoff.get(key);
+  await ITK.handoff.remove(key).catch(() => {});
+  if (!(blob instanceof Blob)) throw new Error('Download source not found');
+  const url = URL.createObjectURL(blob);
+  objectUrls.set(url, setTimeout(() => revokeObjectUrl(url), OBJECT_URL_MAX_AGE_MS));
+  return { url };
+}
+
+function revokeObjectUrl(url) {
+  if (!objectUrls.has(url)) return;
+  clearTimeout(objectUrls.get(url));
+  objectUrls.delete(url);
+  URL.revokeObjectURL(url);
 }
 
 // ---------- Screenshot Crop ----------

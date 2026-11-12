@@ -54,10 +54,10 @@
     "message": "分析圖片中..."
   },
   "advisorAlpha": {
-    "message": "🔍 圖片含透明通道 → 建議PNG或WebP"
+    "message": "圖片含透明通道 → 建議PNG或WebP"
   },
   "advisorSmallest": {
-    "message": "🔍 最小: {format} ({size})"
+    "message": "最小: {format} ({size})"
   },
   "scanning": {
     "message": "掃描中..."
@@ -233,9 +233,6 @@
   "titleDownloadAs": {
     "message": "下載為..."
   },
-  "donate": {
-    "message": "捐贈"
-  },
   "labelType": {
     "message": "類型："
   },
@@ -283,9 +280,6 @@
   },
   "titleCapture": {
     "message": "擷取區域"
-  },
-  "titleKofi": {
-    "message": "在Ko-fi上支持"
   },
   "bgWhite": {
     "message": "白色"
@@ -634,5 +628,312 @@
   },
   "downloadZip": {
     "message": "以 ZIP 下載"
+  },
+  "editorPresets": {
+    "message": "編輯器預設"
+  },
+  "editorPresetsHint": {
+    "message": "選擇編輯器中顯示的群組，並新增你自己的尺寸。"
+  },
+  "presetMine": {
+    "message": "我的預設"
+  },
+  "presetsEmpty": {
+    "message": "你還沒有自己的預設。"
+  },
+  "presetName": {
+    "message": "名稱"
+  },
+  "presetWidth": {
+    "message": "寬度"
+  },
+  "presetHeight": {
+    "message": "高度"
+  },
+  "presetAdd": {
+    "message": "新增預設"
+  },
+  "presetRemove": {
+    "message": "移除 $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "最多可儲存 $COUNT$ 個預設。",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "範本"
+  },
+  "settingTemplate": {
+    "message": "檔名範本"
+  },
+  "settingTemplateHint": {
+    "message": "點擊變數即可插入。使用 / 建立資料夾。"
+  },
+  "templatePreview": {
+    "message": "範例：$NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "原始檔名"
+  },
+  "tokSite": {
+    "message": "頁面所在網站"
+  },
+  "tokDomain": {
+    "message": "圖片所在伺服器"
+  },
+  "tokTitle": {
+    "message": "頁面標題"
+  },
+  "tokIndex": {
+    "message": "批次序號（001、002…）"
+  },
+  "tokWidth": {
+    "message": "寬度（像素）"
+  },
+  "tokHeight": {
+    "message": "高度（像素）"
+  },
+  "tokFormat": {
+    "message": "格式（jpg、webp…）"
+  },
+  "tokDate": {
+    "message": "今天的日期（2026-10-20）"
+  },
+  "tokTime": {
+    "message": "目前時間（14-05-07）"
+  },
+  "autoScroll": {
+    "message": "載入全部圖片"
+  },
+  "autoScrollHint": {
+    "message": "將頁面捲動到底部以載入延遲載入的圖片，然後重新掃描"
+  },
+  "autoScrollRunning": {
+    "message": "正在載入圖片… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "停止"
+  },
+  "autoScrollNothing": {
+    "message": "此頁面沒有更多可載入的圖片"
+  },
+  "scopeLabel": {
+    "message": "掃描範圍"
+  },
+  "scopeTab": {
+    "message": "目前分頁"
+  },
+  "scopeWindow": {
+    "message": "所有分頁"
+  },
+  "labelTab": {
+    "message": "分頁："
+  },
+  "tabsOne": {
+    "message": "$COUNT$ 個分頁",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ 個分頁",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "未讀取的分頁：$COUNT$（瀏覽器頁面或休眠中的分頁）",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "擷取整個頁面"
+  },
+  "cmdCaptureFullPage": {
+    "message": "擷取整個頁面"
+  },
+  "captureFullRunning": {
+    "message": "正在擷取整個頁面…請保持此分頁開啟（按 Esc 取消）"
+  },
+  "fullPageCut": {
+    "message": "頁面過長：擷取在 $PX$ 像素處截止。",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "標註"
+  },
+  "annotateHint": {
+    "message": "標註：模糊、馬賽克、方框、箭頭、文字"
+  },
+  "toolPixelate": {
+    "message": "馬賽克"
+  },
+  "toolBlur": {
+    "message": "模糊"
+  },
+  "toolBox": {
+    "message": "方框"
+  },
+  "toolArrow": {
+    "message": "箭頭"
+  },
+  "toolText": {
+    "message": "文字"
+  },
+  "toolHighlight": {
+    "message": "螢光筆"
+  },
+  "annotColor": {
+    "message": "顏色"
+  },
+  "annotSize": {
+    "message": "粗細"
+  },
+  "sizeFine": {
+    "message": "細"
+  },
+  "sizeMedium": {
+    "message": "中"
+  },
+  "sizeThick": {
+    "message": "粗"
+  },
+  "undo": {
+    "message": "復原"
+  },
+  "redo": {
+    "message": "重做"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "textPlaceholder": {
+    "message": "輸入後按 Enter"
+  },
+  "captureTabChanged": {
+    "message": "擷取已停止：分頁已切換。擷取期間請讓該分頁保持在前景。",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "頁面在到達底部前停止捲動：擷取可能不完整。",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "用純色遮蓋",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "棋盤格",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "複製圖片連結",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "已複製連結",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "無損",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "螢幕截圖",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "符合視窗大小",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "實際大小",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "返回擷取畫面",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "裁切",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "支持 ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "支持",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit 免費且開放原始碼，沒有廣告，也不追蹤。如果它為你節省了時間，可以透過以下方式支持。",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "捐款",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "免費支持方式",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "在 GitHub 上給星星",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "回報問題或提出建議",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "協助翻譯",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "在 Chrome 線上應用程式商店評分",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

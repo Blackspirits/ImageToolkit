@@ -6,9 +6,10 @@
 (() => {
   'use strict';
 
-  // Injected again after the extension reloads or when the panel rescans: keep one instance.
-  if (window.__imagetoolkitScanner) return;
-  window.__imagetoolkitScanner = true;
+  // Injected again when the panel rescans: keep one instance. The guard is the scan function
+  // itself, so a scanner left in the page by an older version (before an update) never
+  // blocks this one from installing.
+  if (typeof globalThis.__imagetoolkitScan === 'function') return;
 
   const { isAllowedImageSrc, parseSrcset, extractBgUrls, svgPixelSize, SCAN_MAX_ITEM_CHARS, SCAN_MAX_TOTAL_CHARS, SCAN_MAX_ITEMS } = globalThis.ITK;
 
@@ -16,23 +17,22 @@
   const LAZY_ATTRS = ['data-src', 'data-lazy-src', 'data-original', 'data-srcset', 'data-lazy-srcset'];
   const OBSERVER_IDLE_MS = 5 * 60 * 1000;
 
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (sender.id !== chrome.runtime.id) return false;
+  // The service worker scans every frame with this (via scripting.executeScript, which runs in
+  // this same isolated world), and so does the auto-scroll at every step. What it returns
+  // counts as seen for the "new images" notice.
+  globalThis.__imagetoolkitScan = () => {
+    const result = collectImages();
+    result.images.forEach((img) => remember(keyOf(img.src)));
+    startObserver();
+    return result;
+  };
 
-    if (message.action === 'getImages') {
-      const { images, truncated } = collectImages();
-      known = new Set(images.map((img) => keyOf(img.src)));
-      sendResponse({ images, truncated });
-      startObserver();
-      return false;
-    }
-
-    if (message.action === 'highlightImages') {
-      highlightImages(message.urls || []);
-      sendResponse({ success: true });
-      return false;
-    }
-    return false;
+  // The panel outlines its selection over a port. The port disconnects when the panel closes
+  // or moves to another tab, and the outlines go with it.
+  chrome.runtime.onConnect.addListener((port) => {
+    if (port.name !== 'imagetoolkit-highlight' || port.sender?.id !== chrome.runtime.id) return;
+    port.onMessage.addListener((msg) => highlightImages(Array.isArray(msg?.urls) ? msg.urls : []));
+    port.onDisconnect.addListener(() => highlightImages([]));
   });
 
   // ---------- Inline SVG ----------
@@ -57,8 +57,11 @@
     const markup = new XMLSerializer().serializeToString(clone);
     if (markup.length <= 50) return null; // trivial SVGs
     // Base64 grows by a third; a copy that cannot fit one scan item is not worth encoding.
-    if (markup.length * 4 / 3 > SCAN_MAX_ITEM_CHARS) return { tooLarge: true };
-    return { dataUrl: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(markup))), ...size };
+    const bytes = new TextEncoder().encode(markup);
+    if (bytes.length * 4 / 3 > SCAN_MAX_ITEM_CHARS) return { tooLarge: true };
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { dataUrl: 'data:image/svg+xml;base64,' + btoa(binary), ...size };
   }
 
   // ---------- Collection ----------
@@ -95,9 +98,9 @@
       const alt = String(rawAlt || '').slice(0, 300);
       if (src.startsWith('data:')) {
         if (!src.startsWith('data:image/') || src.length < 100) return; // skip non-images and tracking pixels
-        const key = 'data:' + src.length + ':' + src.slice(-64);
-        if (seen.has(key)) return;
-        seen.add(key);
+        // The whole string: two inline images can share their length and their ending.
+        if (seen.has(src)) return;
+        seen.add(src);
         if (!fits(src, alt)) return;
         results.push({ src, width: width || 0, height: height || 0, alt, fileSize: Math.round((src.length - src.indexOf(',') - 1) * 0.75) });
         return;
@@ -191,8 +194,15 @@
       if (link.href) addImage(link.href, 0, 0, '');
       if (link.imageSrcset) parseSrcset(link.imageSrcset).forEach((url) => addImage(url, 0, 0, ''));
     });
+    // Links to image files (often the full-size version of a thumbnail). A wiki's file page
+    // (/wiki/File:Flag.svg, Ficheiro:, Datei:… on Wikipedia, Commons, Fandom) ends like one but
+    // is an HTML page: a "Namespace:" prefix in the last segment gives it away.
     document.querySelectorAll('a[href]').forEach((a) => {
-      if (/\.(jpe?g|png|gif|svg|webp|avif)(\?|#|$)/i.test(a.href)) addImage(a.href, 0, 0, '');
+      if (!/\.(jpe?g|png|gif|svg|webp|avif)(\?|#|$)/i.test(a.href)) return;
+      let last = '';
+      try { last = decodeURIComponent(new URL(a.href).pathname.split('/').pop() || ''); } catch { return; }
+      if (/^[^.:]+:./.test(last)) return;
+      addImage(a.href, 0, 0, '');
     });
 
     return { images: results, truncated };
@@ -206,12 +216,27 @@
   let debounceTimer = null;
   let known = new Set();
 
-  // Same identity collectImages() uses, so a re-render of a known image is not "new".
+  // FNV-1a over the whole string: inline images are remembered without keeping their bytes.
+  function hashOf(text) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+    return (h >>> 0).toString(36);
+  }
+
+  // One identity for scan results and observed changes, so a re-render of a known image is not "new".
   function keyOf(rawSrc) {
     const src = String(rawSrc || '').trim();
     if (!src) return '';
-    if (src.startsWith('data:')) return 'data:' + src.length + ':' + src.slice(-64);
+    if (src.startsWith('data:')) return 'data:' + src.length + ':' + hashOf(src); // all of it, kept small
     try { return new URL(src, document.baseURI).href; } catch { return ''; }
+  }
+
+  // Every URL the panel has seen, for the "new images" notice. Bounded: a gallery that keeps
+  // changing src would otherwise grow it forever; the oldest half goes first.
+  const KNOWN_MAX = 10000;
+  function remember(key) {
+    known.add(key);
+    if (known.size > KNOWN_MAX) known = new Set([...known].slice(known.size - KNOWN_MAX / 2));
   }
 
   function countSrc(src) {
@@ -219,7 +244,7 @@
     if (src.startsWith('data:') && (!src.startsWith('data:image/') || src.length < 100)) return 0; // as in collectImages
     const key = keyOf(src);
     if (!key || known.has(key) || (!key.startsWith('data:') && !isAllowedImageSrc(key))) return 0;
-    known.add(key);
+    remember(key);
     return 1;
   }
 
@@ -293,6 +318,7 @@
   function stopObserver() {
     observer?.disconnect();
     observer = null;
+    known = new Set(); // the next scan starts from what the page shows then
     clearTimeout(debounceTimer);
     newImageCount = 0;
   }
@@ -302,6 +328,14 @@
   const HIGHLIGHT_STYLE_ID = 'imagetoolkit-highlight-style';
 
   function highlightImages(selectedUrls) {
+    if (!selectedUrls.length) {
+      // Nothing selected: leave the page exactly as it was.
+      document.getElementById(HIGHLIGHT_STYLE_ID)?.remove();
+      const clear = (root) => root.querySelectorAll(`[${HIGHLIGHT_ATTR}]`).forEach((img) => img.removeAttribute(HIGHLIGHT_ATTR));
+      clear(document);
+      forEachShadowRoot(clear);
+      return;
+    }
     if (!document.getElementById(HIGHLIGHT_STYLE_ID)) {
       const style = document.createElement('style');
       style.id = HIGHLIGHT_STYLE_ID;
@@ -326,10 +360,14 @@
     };
 
     document.querySelectorAll('img').forEach(toggle);
+    forEachShadowRoot((root) => root.querySelectorAll('img').forEach(toggle));
+  }
+
+  function forEachShadowRoot(fn) {
     const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_ELEMENT, null);
     let node;
     while ((node = walker.nextNode())) {
-      if (node.shadowRoot) node.shadowRoot.querySelectorAll('img').forEach(toggle);
+      if (node.shadowRoot) fn(node.shadowRoot);
     }
   }
 })();

@@ -56,10 +56,10 @@
     "message": "Analizando imagen..."
   },
   "advisorAlpha": {
-    "message": "🔍 La imagen tiene transparencia → PNG o WebP recomendado"
+    "message": "La imagen tiene transparencia → PNG o WebP recomendado"
   },
   "advisorSmallest": {
-    "message": "🔍 Más pequeño: {format} ({size})"
+    "message": "Más pequeño: {format} ({size})"
   },
   "scanning": {
     "message": "Buscando..."
@@ -235,9 +235,6 @@
   "titleDownloadAs": {
     "message": "Descargar como..."
   },
-  "donate": {
-    "message": "Donar"
-  },
   "labelType": {
     "message": "Tipo:"
   },
@@ -285,9 +282,6 @@
   },
   "titleCapture": {
     "message": "Capturar área"
-  },
-  "titleKofi": {
-    "message": "Apoyar en Ko-fi"
   },
   "bgWhite": {
     "message": "Blanco"
@@ -636,5 +630,312 @@
   },
   "downloadZip": {
     "message": "Descargar como ZIP"
+  },
+  "editorPresets": {
+    "message": "Ajustes predefinidos del editor"
+  },
+  "editorPresetsHint": {
+    "message": "Elige qué grupos muestra el editor y añade tus propios tamaños."
+  },
+  "presetMine": {
+    "message": "Mis ajustes predefinidos"
+  },
+  "presetsEmpty": {
+    "message": "Aún no tienes ajustes predefinidos propios."
+  },
+  "presetName": {
+    "message": "Nombre"
+  },
+  "presetWidth": {
+    "message": "Ancho"
+  },
+  "presetHeight": {
+    "message": "Alto"
+  },
+  "presetAdd": {
+    "message": "Añadir ajuste predefinido"
+  },
+  "presetRemove": {
+    "message": "Quitar $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Puedes guardar hasta $COUNT$ ajustes predefinidos.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "Plantilla"
+  },
+  "settingTemplate": {
+    "message": "Plantilla del nombre"
+  },
+  "settingTemplateHint": {
+    "message": "Haz clic en una variable para insertarla. Usa / para crear carpetas."
+  },
+  "templatePreview": {
+    "message": "Ejemplo: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Nombre original del archivo"
+  },
+  "tokSite": {
+    "message": "Sitio de la página"
+  },
+  "tokDomain": {
+    "message": "Servidor de la imagen"
+  },
+  "tokTitle": {
+    "message": "Título de la página"
+  },
+  "tokIndex": {
+    "message": "Número en el lote (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Ancho en píxeles"
+  },
+  "tokHeight": {
+    "message": "Alto en píxeles"
+  },
+  "tokFormat": {
+    "message": "Formato (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Fecha de hoy (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Hora actual (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Cargar todas las imágenes"
+  },
+  "autoScrollHint": {
+    "message": "Desplaza la página hasta el final para que aparezcan las imágenes de carga diferida y vuelve a analizar"
+  },
+  "autoScrollRunning": {
+    "message": "Cargando imágenes… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Detener"
+  },
+  "autoScrollNothing": {
+    "message": "No hay más imágenes que cargar en esta página"
+  },
+  "scopeLabel": {
+    "message": "Analizar"
+  },
+  "scopeTab": {
+    "message": "Esta pestaña"
+  },
+  "scopeWindow": {
+    "message": "Todas las pestañas"
+  },
+  "labelTab": {
+    "message": "Pestaña:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ pestaña",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ pestañas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Pestañas no leídas: $COUNT$ (páginas del navegador o pestañas en suspensión)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "Capturar la página completa"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Capturar la página completa"
+  },
+  "captureFullRunning": {
+    "message": "Capturando la página completa… mantén esta pestaña abierta (Esc cancela)"
+  },
+  "fullPageCut": {
+    "message": "La página es muy larga: la captura se detiene en $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "Anotar"
+  },
+  "annotateHint": {
+    "message": "Anotar: desenfocar, pixelar, cuadros, flechas, texto"
+  },
+  "toolPixelate": {
+    "message": "Pixelar"
+  },
+  "toolBlur": {
+    "message": "Desenfocar"
+  },
+  "toolBox": {
+    "message": "Cuadro"
+  },
+  "toolArrow": {
+    "message": "Flecha"
+  },
+  "toolText": {
+    "message": "Texto"
+  },
+  "toolHighlight": {
+    "message": "Resaltar"
+  },
+  "annotColor": {
+    "message": "Color"
+  },
+  "annotSize": {
+    "message": "Grosor"
+  },
+  "sizeFine": {
+    "message": "Fino"
+  },
+  "sizeMedium": {
+    "message": "Medio"
+  },
+  "sizeThick": {
+    "message": "Grueso"
+  },
+  "undo": {
+    "message": "Deshacer"
+  },
+  "redo": {
+    "message": "Rehacer"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "textPlaceholder": {
+    "message": "Escribe y pulsa Intro"
+  },
+  "captureTabChanged": {
+    "message": "Captura detenida: la pestaña cambió. Mantenla al frente durante la captura.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "La página dejó de desplazarse antes del final: la captura puede estar incompleta.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Ocultar con color sólido",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Cuadrícula",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copiar enlace de la imagen",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Enlace copiado",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Sin pérdida",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Captura de pantalla",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Ajustar a la ventana",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "Tamaño real",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Volver a la captura",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "Recortar",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "Apoyar ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Apoyar",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit es gratuito y de código abierto, sin anuncios ni rastreo. Si te ahorra tiempo, hay varias formas de ayudar.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Hacer un donativo",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Sin gastar nada",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "Dar una estrella en GitHub",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Informar de un error o sugerir una idea",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Ayudar a traducir",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Valorar en Chrome Web Store",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

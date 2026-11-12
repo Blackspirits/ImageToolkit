@@ -76,9 +76,32 @@ test('extractBgUrls handles quotes and multiple layers', () => {
   assert.deepEqual(core.extractBgUrls('none'), []);
 });
 
-test('dedupeKey ignores cache-busting but keeps size parameters', () => {
-  assert.equal(core.dedupeKey('https://a.test/img.jpg?v=1'), core.dedupeKey('https://a.test/img.jpg?v=2'));
-  assert.notEqual(core.dedupeKey('https://a.test/img.jpg?w=100'), core.dedupeKey('https://a.test/img.jpg?w=200'));
+test('dedupeKey ignores tracking tags and parameter order only', () => {
+  const key = core.dedupeKey;
+  assert.equal(key('https://a.test/img.jpg?utm_source=x&fbclid=1'), key('https://a.test/img.jpg'));
+  assert.equal(key('https://A.TEST/p.png?b=2&a=1'), key('https://a.test/p.png?a=1&b=2'));
+  assert.notEqual(key('https://a.test/img.jpg?w=100'), key('https://a.test/img.jpg?w=200'));
+});
+
+test('dedupeKey never merges different pictures', () => {
+  const key = core.dedupeKey;
+  assert.notEqual(key('https://a.test/image?id=1'), key('https://a.test/image?id=2'));
+  assert.notEqual(key('https://a.test/Photo.png'), key('https://a.test/photo.png'));
+  assert.notEqual(key('https://a.test/frame.jpg?t=10'), key('https://a.test/frame.jpg?t=20'));
+  assert.notEqual(key('https://a.test/frame.jpg?t=1700000000'), key('https://a.test/frame.jpg?t=1700000060'), 'a timestamp can pick a frame');
+  assert.notEqual(key('https://a.test/img.jpg?rev=5f3a9c2e7b1d'), key('https://a.test/img.jpg?rev=0a1b2c3d4e5f'));
+  assert.notEqual(key('https://a.test/render'), key('https://a.test/render/'), 'the exact path counts');
+  assert.notEqual(key('http://host:8000/a.png'), key('http://host:8001/a.png'), 'the port is part of the origin');
+  assert.notEqual(key('http://a.test/a.png'), key('https://a.test/a.png'));
+  assert.notEqual(key('https://a.test/a.png?q=a%26b%3Dc'), key('https://a.test/a.png?q=a&b=c'), 'values stay encoded');
+  assert.notEqual(key('https://a.test/icons.svg#red'), key('https://a.test/icons.svg#blue'), 'SVG views');
+  assert.notEqual(key('https://a.test/i.svg#svgView(viewBox(0,0,24,24))'), key('https://a.test/i.svg#svgView(viewBox(24,0,24,24))'));
+});
+
+test('sanitizeFilename keeps the extension when it shortens a long name', () => {
+  const cleaned = core.sanitizeFilename('a'.repeat(80) + '.png');
+  assert.equal([...cleaned].length, 60);
+  assert.ok(cleaned.endsWith('.png'));
 });
 
 test('sanitizeFilename strips unsafe characters and keeps Unicode', () => {
@@ -100,6 +123,13 @@ test('buildFilename uses the real format and options', () => {
   assert.equal(core.buildFilename('https://a.test/p/photo.jpg', { format: 'png', filenamePattern: 'custom', filenamePrefix: 'x_' }), 'x_photo.png');
   assert.equal(core.buildFilename('https://a.test/p/photo.jpg', { format: 'png', filenamePattern: 'system' }, 42), 'imagetoolkit_42.png');
   assert.equal(core.buildFilename('data:image/png;base64,AAAA', { format: 'png' }), 'image.png');
+  // Local files and page blobs have no name in their URL: the file's own name is kept.
+  assert.equal(core.buildFilename('data:image/png;base64,AAAA', { format: 'webp', sourceName: 'Férias 2026.PNG' }), 'Férias 2026.webp');
+  assert.equal(core.buildFilename('blob:https://a.test/3f2c9c1e-4d6b-4a59-9a5e-1c2b3d4e5f60', { format: 'jpeg' }), 'image.jpg');
+  assert.equal(core.buildFilename('blob:https://a.test/3f2c9c1e-4d6b-4a59-9a5e-1c2b3d4e5f60', { format: 'png', sourceName: 'chart.svg' }), 'chart.png');
+  // A URL's own name wins over sourceName.
+  assert.equal(core.buildFilename('https://a.test/p/photo.jpg', { format: 'png', sourceName: 'other.png' }), 'photo.png');
+  assert.equal(core.sanitizeInstructions({ sourceName: 'x'.repeat(300) }).sourceName.length, 120);
 });
 
 test('calculateDimensions covers crop, fit and resize', () => {
@@ -232,4 +262,49 @@ test('parseSizeFromHeaders reads the full size of a ranged answer, not the slice
   assert.equal(core.parseSizeFromHeaders(h({ 'content-length': '1', 'content-range': 'bytes 0-0/*' })), 0);
   assert.equal(core.parseSizeFromHeaders(h({ 'content-length': '2048' })), 2048);
   assert.equal(core.parseSizeFromHeaders(h({})), 0);
+});
+
+test('editor presets: groups default to on, custom presets are validated and capped', () => {
+  assert.equal(core.presetGroupEnabled({}, 'tmdb'), true);
+  assert.equal(core.presetGroupEnabled({ presetGroups: { tmdb: false } }, 'tmdb'), false);
+  assert.equal(core.presetGroupEnabled({ presetGroups: { tmdb: false } }, 'social'), true);
+  assert.deepEqual(core.sanitizeCustomPresets(null), []);
+  assert.deepEqual(core.sanitizeCustomPresets([
+    { name: '  Blog  ', w: 1200, h: '630' },
+    { name: '', w: 10, h: 10 },
+    { name: 'Too big', w: 20000, h: 10 },
+    { name: 'Zero', w: 0, h: 10 },
+    { name: 'x'.repeat(40), w: 1, h: 1 },
+    'junk',
+  ]), [{ name: 'Blog', w: 1200, h: 630 }, { name: 'x'.repeat(24), w: 1, h: 1 }]);
+  const many = Array.from({ length: 40 }, (_, i) => ({ name: `P${i}`, w: 10, h: 10 }));
+  assert.equal(core.sanitizeCustomPresets(many).length, core.MAX_CUSTOM_PRESETS);
+});
+
+test('filename templates: tokens, cleanup and safe paths', () => {
+  const now = new Date(2026, 9, 20, 9, 5, 7).getTime();
+  const name = (template, extra = {}) => core.buildFilename('https://cdn.example.com/a/photo.jpg', { format: 'webp', filenamePattern: 'template', filenameTemplate: template, ...extra }, now);
+  assert.equal(name('{site}/{date}_{name}_{index}', { pageHost: 'news.test', index: 3 }), 'news.test/2026-10-20_photo_003.webp');
+  assert.equal(name('{name}_{index}'), 'photo.webp'); // empty token: no dangling "_"
+  assert.equal(name('{title} - {width}x{height}', { pageTitle: 'A/B: test?', knownWidth: 800, knownHeight: 600 }), 'A-B test - 800x600.webp');
+  assert.equal(name('{domain}/{time}_{format}'), 'cdn.example.com/09-05-07_webp.webp');
+  assert.equal(name('../../{name}'), 'photo.webp');        // never climbs out of Downloads
+  assert.equal(name('{Name}'), 'photo.webp');              // tokens are case-insensitive
+  assert.equal(name('{typo}'), '{typo}.webp');             // unknown tokens stay visible
+  assert.equal(name(''), 'photo.webp');
+  assert.equal(name('{index}', { subfolder: 'imgs' }), 'imgs/photo.webp');
+  assert.equal(core.buildFilename('data:image/png;base64,AAAA', { format: 'png', filenamePattern: 'template', filenameTemplate: '{domain}{name}', sourceName: 'shot.png' }, now), 'shot.png');
+  const ins = core.sanitizeInstructions({ index: 7, knownWidth: '640', knownHeight: -1, pageTitle: 'x'.repeat(300), filenameTemplate: '{name}' });
+  assert.deepEqual([ins.index, ins.knownWidth, ins.knownHeight, ins.pageTitle.length, ins.filenameTemplate], [7, 640, undefined, 120, '{name}']);
+  assert.equal(ins.width, undefined, 'naming hints never resize');
+});
+
+test('templates: a screenshot or inline image takes {domain} from its page, never a made-up host', () => {
+  const name = core.buildFilename('data:,', {
+    filenamePattern: 'template', filenameTemplate: '{domain}/{title}/{name}',
+    sourceName: 'imagetoolkit', pageHost: 'example.org', pageTitle: 'My page', format: 'png',
+  });
+  assert.equal(name, 'example.org/My page/imagetoolkit.png');
+  const remote = core.buildFilename('https://cdn.test/a/photo.jpg', { filenamePattern: 'template', filenameTemplate: '{domain}/{name}', pageHost: 'example.org', format: 'jpeg' });
+  assert.equal(remote, 'cdn.test/photo.jpg');
 });

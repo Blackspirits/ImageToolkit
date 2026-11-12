@@ -57,10 +57,10 @@
     "message": "A analisar imagem..."
   },
   "advisorAlpha": {
-    "message": "🔍 A imagem tem transparência → PNG ou WebP recomendado"
+    "message": "A imagem tem transparência → PNG ou WebP recomendado"
   },
   "advisorSmallest": {
-    "message": "🔍 Mais pequeno: {format} ({size})"
+    "message": "Mais pequeno: {format} ({size})"
   },
   "scanning": {
     "message": "A procurar..."
@@ -216,7 +216,7 @@
     }
   },
   "titleToggleLayout": {
-    "message": "Alternar layout"
+    "message": "Alternar disposição"
   },
   "resizeAndSave": {
     "message": "Redimensionar e guardar"
@@ -245,20 +245,17 @@
   "labelDomain": {
     "message": "Domínio:"
   },
-  "donate": {
-    "message": "Doar"
-  },
   "bgPreview": {
-    "message": "Pré-visualizar Fundo"
+    "message": "Pré-visualizar fundo"
   },
   "bgTransparent": {
     "message": "Transparente"
   },
   "cropArea": {
-    "message": "Área de Recorte"
+    "message": "Área de recorte"
   },
   "outputSize": {
-    "message": "Tamanho Final"
+    "message": "Tamanho final"
   },
   "applyDimensions": {
     "message": "Aplicar"
@@ -284,14 +281,11 @@
   "titleCapture": {
     "message": "Capturar área"
   },
-  "titleKofi": {
-    "message": "Apoiar no Ko-fi"
-  },
   "bgWhite": {
     "message": "Branco"
   },
   "bgGray": {
-    "message": "Cinza"
+    "message": "Cinzento"
   },
   "bgBlack": {
     "message": "Preto"
@@ -357,7 +351,7 @@
     "message": "Grande (500–1199px)"
   },
   "filterXLargeLabel": {
-    "message": "Extra Grande (≥ 1200px)"
+    "message": "Extra grande (≥ 1200px)"
   },
   "filterAtLeast": {
     "message": "Pelo menos…"
@@ -372,10 +366,10 @@
     "message": "Proporção"
   },
   "presetCommon": {
-    "message": "Tamanhos Comuns"
+    "message": "Tamanhos comuns"
   },
   "presetSocial": {
-    "message": "Redes Sociais"
+    "message": "Redes sociais"
   },
   "pOriginal": {
     "message": "Original"
@@ -456,7 +450,7 @@
     "message": "Inverter verticalmente"
   },
   "captureHint": {
-    "message": "Desenhe um retângulo para capturar · ESC para cancelar"
+    "message": "Desenha um retângulo para capturar · Esc para cancelar"
   },
   "settingGoogleLens": {
     "message": "Pesquisa Google Lens"
@@ -634,5 +628,312 @@
   },
   "downloadZip": {
     "message": "Transferir como ZIP"
+  },
+  "editorPresets": {
+    "message": "Predefinições do editor"
+  },
+  "editorPresetsHint": {
+    "message": "Escolhe que grupos o editor mostra e adiciona os teus próprios tamanhos."
+  },
+  "presetMine": {
+    "message": "As minhas predefinições"
+  },
+  "presetsEmpty": {
+    "message": "Ainda não tens predefinições tuas."
+  },
+  "presetName": {
+    "message": "Nome"
+  },
+  "presetWidth": {
+    "message": "Largura"
+  },
+  "presetHeight": {
+    "message": "Altura"
+  },
+  "presetAdd": {
+    "message": "Adicionar predefinição"
+  },
+  "presetRemove": {
+    "message": "Remover $NAME$",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "Podes guardar até $COUNT$ predefinições.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "Modelo"
+  },
+  "settingTemplate": {
+    "message": "Modelo do nome"
+  },
+  "settingTemplateHint": {
+    "message": "Clica numa variável para a inserir. Usa / para criar pastas."
+  },
+  "templatePreview": {
+    "message": "Exemplo: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "Nome original do ficheiro"
+  },
+  "tokSite": {
+    "message": "Site da página"
+  },
+  "tokDomain": {
+    "message": "Servidor da imagem"
+  },
+  "tokTitle": {
+    "message": "Título da página"
+  },
+  "tokIndex": {
+    "message": "Número no lote (001, 002…)"
+  },
+  "tokWidth": {
+    "message": "Largura em píxeis"
+  },
+  "tokHeight": {
+    "message": "Altura em píxeis"
+  },
+  "tokFormat": {
+    "message": "Formato (jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "Data de hoje (2026-10-20)"
+  },
+  "tokTime": {
+    "message": "Hora atual (14-05-07)"
+  },
+  "autoScroll": {
+    "message": "Carregar todas as imagens"
+  },
+  "autoScrollHint": {
+    "message": "Percorre a página até ao fim para aparecerem as imagens carregadas a pedido e volta a analisar"
+  },
+  "autoScrollRunning": {
+    "message": "A carregar imagens… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "Parar"
+  },
+  "autoScrollNothing": {
+    "message": "Não há mais imagens para carregar nesta página"
+  },
+  "scopeLabel": {
+    "message": "Analisar"
+  },
+  "scopeTab": {
+    "message": "Este separador"
+  },
+  "scopeWindow": {
+    "message": "Todos os separadores"
+  },
+  "labelTab": {
+    "message": "Separador:"
+  },
+  "tabsOne": {
+    "message": "$COUNT$ separador",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "$COUNT$ separadores",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "Separadores não lidos: $COUNT$ (páginas do navegador ou separadores em suspensão)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "Capturar a página inteira"
+  },
+  "cmdCaptureFullPage": {
+    "message": "Capturar a página inteira"
+  },
+  "captureFullRunning": {
+    "message": "A capturar a página inteira… mantém este separador aberto (Esc cancela)"
+  },
+  "fullPageCut": {
+    "message": "A página é muito comprida: a captura para nos $PX$ px.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "Anotar"
+  },
+  "annotateHint": {
+    "message": "Anotar: desfocar, pixelizar, caixas, setas, texto"
+  },
+  "toolPixelate": {
+    "message": "Pixelizar"
+  },
+  "toolBlur": {
+    "message": "Desfocar"
+  },
+  "toolBox": {
+    "message": "Caixa"
+  },
+  "toolArrow": {
+    "message": "Seta"
+  },
+  "toolText": {
+    "message": "Texto"
+  },
+  "toolHighlight": {
+    "message": "Realçar"
+  },
+  "annotColor": {
+    "message": "Cor"
+  },
+  "annotSize": {
+    "message": "Espessura"
+  },
+  "sizeFine": {
+    "message": "Fina"
+  },
+  "sizeMedium": {
+    "message": "Média"
+  },
+  "sizeThick": {
+    "message": "Grossa"
+  },
+  "undo": {
+    "message": "Anular"
+  },
+  "redo": {
+    "message": "Refazer"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "textPlaceholder": {
+    "message": "Escreve e carrega em Enter"
+  },
+  "captureTabChanged": {
+    "message": "Captura interrompida: o separador mudou. Mantém-no à frente durante a captura.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "A página deixou de deslizar antes do fim: a captura pode estar incompleta.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "Ocultar com cor sólida",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "Xadrez",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "Copiar link da imagem",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "Link copiado",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "Sem perdas",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "Captura de ecrã",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "Ajustar à janela",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "Tamanho real",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "Voltar à captura",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "Recortar",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "Apoiar o ImageToolkit",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "Apoiar",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "O ImageToolkit é gratuito e de código aberto, sem anúncios nem rastreio. Se te poupa tempo, há várias formas de ajudar.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "Fazer um donativo",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "Sem gastar nada",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "Dar uma estrela no GitHub",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "Reportar um erro ou sugerir uma ideia",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "Ajudar a traduzir",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Avaliar na Chrome Web Store",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }

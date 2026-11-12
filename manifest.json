@@ -3,7 +3,7 @@
   "name": "__MSG_extName__",
   "short_name": "__MSG_extShortName__",
   "description": "__MSG_extDescription__",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "default_locale": "en",
   "minimum_chrome_version": "116",
   "permissions": [
@@ -13,6 +13,7 @@
     "notifications",
     "offscreen",
     "clipboardWrite",
+    "declarativeNetRequestWithHostAccess",
     "scripting",
     "sidePanel"
   ],
@@ -47,6 +48,9 @@
         "mac": "Alt+Shift+S"
       },
       "description": "__MSG_cmdCaptureArea__"
+    },
+    "capture-full-page": {
+      "description": "__MSG_cmdCaptureFullPage__"
     }
   }
 }

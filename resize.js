@@ -28,12 +28,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   ui.followSystemTheme(app, () => ui.applyTheme(app, 'auto'));
   await i18n.load(editor.settings.locale);
   i18n.apply();
+  if (!(await ITK.encodableFormats()).has('avif')) {
+    $('resize-format')?.querySelector('[data-output-avif]')?.remove();
+    if (editor.settings.defaultFormat === 'avif') editor.settings.defaultFormat = 'webp';
+  }
 
   initFooter();
+  applyPresetSettings();
   initControls();
   initKeyboard();
 
-  const key = new URLSearchParams(location.search).get('key');
+  const params = new URLSearchParams(location.search);
+  const key = params.get('key');
+  editor.key = key;
+  // The page the image or screenshot came from, for {site} and {title} in filename templates.
+  editor.page = { host: params.get('site') || '', title: params.get('title') || '' };
+  editor.capture = params.get('capture') === '1';
+  // Opened from the capture viewer (Crop or Annotate there): a way back to it, in this tab.
+  if (params.get('from') === 'view') {
+    const back = $('btn-back');
+    back.hidden = false;
+    back.addEventListener('click', async () => {
+      if (annotating()) return;
+      await editor.stored; // the annotated image is in place before the viewer reads it
+      if (history.length > 1 && document.referrer.includes('/view.html')) { history.back(); return; }
+      const viewParams = new URLSearchParams(params);
+      viewParams.delete('annotate');
+      viewParams.delete('from');
+      location.replace(`view.html?${viewParams}`);
+    });
+  }
+  // From the capture viewer's Annotate button: straight into the annotate layer once ready.
+  if (params.get('annotate') === '1') {
+    $('cropper-img').addEventListener('ready', () => annotate(), { once: true });
+    // Once: a reload later shows the image as it is now, not the annotate layer again.
+    const once = new URLSearchParams(params);
+    once.delete('annotate');
+    history.replaceState(history.state, '', `?${once}`);
+  }
   const source = await handoff.get(key).catch(() => null);
   if (!source) { showStatus(t('errorNoImage'), true); return; }
   editor.source = typeof source === 'string' ? source : '';
@@ -50,7 +82,8 @@ function showStatus(message, isError = false) {
 // ---------- Loading ----------
 // Remote images are fetched through the service worker so the canvas is never tainted.
 async function resolveSource(source) {
-  if (source instanceof Blob) return blobToDataUrl(source);
+  // A Blob (full-page capture) is shown through a blob: URL: no base64 copy of a tall page.
+  if (source instanceof Blob) return URL.createObjectURL(source);
   if (source.startsWith('data:')) return source;
   const res = await send({ action: 'fetchAsDataUrl', imageUrl: source });
   if (res?.dataUrl) return res.dataUrl;
@@ -58,11 +91,12 @@ async function resolveSource(source) {
 }
 
 // Give Cropper a box with the image's own proportions, so no empty bands surround it.
-function fitStage(img) {
+// `w`/`h`: the size of an image about to replace the current one.
+function fitStage(img, w = img.naturalWidth, h = img.naturalHeight) {
   const area = $('crop-area');
   const maxW = area.clientWidth - 56, maxH = area.clientHeight - 120;
-  if (!img.naturalWidth || !img.naturalHeight || maxW <= 0 || maxH <= 0) return;
-  const { width, height } = ITK.stageSize(img.naturalWidth, img.naturalHeight, maxW, maxH);
+  if (!w || !h || maxW <= 0 || maxH <= 0) return;
+  const { width, height } = ITK.stageSize(w, h, maxW, maxH);
   const inner = area.querySelector('.crop-inner');
   inner.style.width = `${width}px`;
   inner.style.height = `${height}px`;
@@ -78,7 +112,8 @@ async function loadImage(source) {
   }, { once: true });
   img.addEventListener('error', () => showStatus(t('errorNoImage'), true), { once: true });
   const src = await resolveSource(source);
-  if (!src.startsWith('data:')) img.crossOrigin = 'anonymous';
+  if (src.startsWith('blob:')) editor.previousUrl = src; // released when an annotated image replaces it
+  if (!/^(data|blob):/.test(src)) img.crossOrigin = 'anonymous';
   img.src = src;
 }
 
@@ -91,7 +126,7 @@ function initCropper(img) {
   editor.cropper = new Cropper(img, {
     viewMode: 1,
     dragMode: 'crop',
-    autoCropArea: 0.86,
+    autoCropArea: 1, // the whole image: saving right away never trims a capture's edges
     background: false,
     responsive: true,
     restore: true,
@@ -135,6 +170,81 @@ function followCropRatio(ratio) {
   const w = parseInt($('out-w').value, 10), h = parseInt($('out-h').value, 10);
   if (editor.outputAnchor === 'h' && h > 0) $('out-w').value = Math.max(1, Math.round(h * ratio));
   else if (w > 0) $('out-h').value = Math.max(1, Math.round(w / ratio));
+}
+
+// ---------- Presets ----------
+// Groups switched off in Settings are hidden; the user's own sizes come first. Runs before
+// initControls(), which wires every [data-preset] button, the user's ones included.
+function applyPresetSettings() {
+  const s = editor.settings;
+  document.querySelectorAll('details.panel[data-group]').forEach((panel) => {
+    panel.hidden = !ITK.presetGroupEnabled(s, panel.dataset.group);
+  });
+  const mine = ITK.sanitizeCustomPresets(s.customPresets);
+  $('custom-presets-panel').hidden = !mine.length;
+  $('custom-presets').replaceChildren(...mine.map((p) =>
+    ui.el('button', { class: 'chip-btn', 'data-preset': `${p.w}x${p.h}`, title: `${p.name} · ${p.w}×${p.h}`, text: p.name })));
+}
+
+// ---------- Annotate ----------
+// The image as currently rotated/flipped, at full resolution (the crop is left for later).
+function orientedCanvas() {
+  const img = $('cropper-img');
+  const { rotate = 0, scaleX = 1, scaleY = 1 } = editor.cropper.getData();
+  const turn = ((Math.round(rotate / 90) * 90) % 360 + 360) % 360;
+  const w = img.naturalWidth, h = img.naturalHeight;
+  const swap = turn === 90 || turn === 270;
+  const canvas = makeCanvas(swap ? h : w, swap ? w : h);
+  const ctx = canvas.getContext('2d');
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((turn * Math.PI) / 180);
+  ctx.scale(scaleX, scaleY);
+  ctx.drawImage(img, -w / 2, -h / 2);
+  return canvas;
+}
+
+// Marks are baked into a new image that replaces the one being edited; the crop box and
+// output size start again from it (rotation and flips are already part of it).
+async function annotate() {
+  let base;
+  try {
+    base = orientedCanvas();
+    base.getContext('2d').getImageData(0, 0, 1, 1); // a host that refused CORS taints the canvas
+  } catch {
+    toast(t('errorSaveFailed'), 'error');
+    return;
+  }
+  $('btn-annotate').blur();
+  // Everything behind the layer is inert while it is open: no Tab, click or screen reader can
+  // reach Save or Copy, which would export the image without the marks not yet applied.
+  const behind = [document.querySelector('.topbar'), $('crop-area'), document.querySelector('.stage > .floating-tools'), document.querySelector('.sidebar')].filter(Boolean);
+  $('app').classList.add('annotating');
+  behind.forEach((node) => { node.inert = true; });
+  let blob = null;
+  try {
+    blob = await ITK.annotate.open({ host: document.querySelector('.stage'), base });
+  } finally {
+    behind.forEach((node) => { node.inert = false; });
+    $('app').classList.remove('annotating');
+  }
+  const { width, height } = base;
+  base.width = base.height = 0; // a full-resolution copy: free it now
+  if (!blob) return;
+  // The marks belong to this tab's image from now on: a reload, and the capture viewer this
+  // editor came from, show them too.
+  editor.stored = handoff.update(editor.key, blob).catch(() => {});
+  const url = URL.createObjectURL(blob);
+  const img = $('cropper-img');
+  // A rotated image changes shape: size the stage for it before Cropper measures it.
+  fitStage(img, width, height);
+  img.addEventListener('ready', () => {
+    editor.outputManual = false;
+    clearPresetActive();
+    if (editor.previousUrl) URL.revokeObjectURL(editor.previousUrl);
+    editor.previousUrl = url;
+    $('info-text').textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+  }, { once: true });
+  editor.cropper.replace(url);
 }
 
 // ---------- Controls ----------
@@ -253,6 +363,7 @@ function initControls() {
   })));
 
   $('btn-rotate-left').addEventListener('click', need(() => editor.cropper.rotate(-90)));
+  $('btn-annotate').addEventListener('click', need(annotate));
   $('btn-flip-h').addEventListener('click', need(() => editor.cropper.scaleX(-(editor.cropper.getData().scaleX || 1))));
   $('btn-flip-v').addEventListener('click', need(() => editor.cropper.scaleY(-(editor.cropper.getData().scaleY || 1))));
   $('btn-reset').addEventListener('click', need(() => {
@@ -276,16 +387,18 @@ function currentFormat() {
 
 function initFooter() {
   const group = $('resize-format');
-  const showQuality = (value) => { $('quality-row').hidden = value === 'png'; };
-  ui.setRadio(group, editor.settings.defaultFormat || 'webp');
-  ui.initRadioGroup(group, showQuality);
-  showQuality(currentFormat());
-
   const range = $('resize-quality');
+  // PNG is lossless: the quality row stays in place (nothing below jumps), disabled, shown full
+  // (it is the best quality there is) and labelled why. The chosen value is kept for JPG/WebP.
   const paint = () => {
-    $('resize-quality-value').textContent = `${range.value}%`;
-    range.style.setProperty('--pct', `${((range.value - range.min) / (range.max - range.min)) * 100}%`);
+    const lossless = currentFormat() === 'png';
+    range.disabled = lossless;
+    $('quality-row').classList.toggle('is-off', lossless);
+    $('resize-quality-value').textContent = lossless ? t('qualityLossless') : `${range.value}%`;
+    range.style.setProperty('--pct', lossless ? '100%' : `${((range.value - range.min) / (range.max - range.min)) * 100}%`);
   };
+  ui.setRadio(group, editor.settings.defaultFormat || 'webp');
+  ui.initRadioGroup(group, paint);
   range.value = editor.settings.defaultQuality ?? 85;
   paint();
   range.addEventListener('input', paint);
@@ -335,14 +448,20 @@ async function encode(format) {
   return { blob, width: canvas.width, height: canvas.height, format: ITK.formatFromMime(blob.type) || format };
 }
 
+// Neither runs while the annotate layer is open: Apply or Cancel decides about the marks first.
+const annotating = () => $('app').classList.contains('annotating');
+
 async function save() {
-  if (!editor.cropper) return;
+  if (!editor.cropper || annotating()) return;
   try {
     const { blob, width, height, format } = await encode(currentFormat());
     const s = editor.settings;
-    const filename = ITK.buildFilename(/^https?:/i.test(editor.source) ? editor.source : 'https://local/imagetoolkit', {
-      format, cropWidth: width, cropHeight: height,
-      subfolder: s.subfolder, filenamePattern: s.filenamePattern, filenamePrefix: s.filenamePrefix,
+    const remote = /^https?:/i.test(editor.source);
+    const filename = ITK.buildFilename(remote ? editor.source : 'data:,', {
+      format, cropWidth: width, cropHeight: height, sourceName: remote ? '' : editor.capture ? 'screenshot' : 'imagetoolkit',
+      pageHost: editor.page?.host || '', pageTitle: editor.page?.title || '',
+      subfolder: s.subfolder, filenamePattern: s.filenamePattern, filenamePrefix: s.filenamePrefix, filenameTemplate: s.filenameTemplate,
+      knownWidth: width, knownHeight: height,
     });
     const res = await ui.saveBlob(blob, filename, s.saveAs !== false);
     if (res.cancelled) return;
@@ -353,7 +472,7 @@ async function save() {
 }
 
 async function copy() {
-  if (!editor.cropper) return;
+  if (!editor.cropper || annotating()) return;
   try {
     const png = encode('png').then((r) => r.blob);
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
@@ -367,6 +486,7 @@ function initKeyboard() {
   document.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
     const mod = e.ctrlKey || e.metaKey;
+    if (annotating()) return; // the annotate layer owns the keyboard
     if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); $('btn-save').click(); return; }
     if (mod && e.key.toLowerCase() === 'c' && !typing && !getSelection().toString()) { e.preventDefault(); $('btn-copy').click(); }
   });

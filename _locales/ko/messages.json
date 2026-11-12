@@ -54,10 +54,10 @@
     "message": "이미지 분석 중..."
   },
   "advisorAlpha": {
-    "message": "🔍 투명도가 있는 이미지 → PNG 또는 WebP 권장"
+    "message": "투명도가 있는 이미지 → PNG 또는 WebP 권장"
   },
   "advisorSmallest": {
-    "message": "🔍 최소: {format} ({size})"
+    "message": "최소: {format} ({size})"
   },
   "scanning": {
     "message": "검색 중..."
@@ -233,9 +233,6 @@
   "titleDownloadAs": {
     "message": "다른 형식으로 저장..."
   },
-  "donate": {
-    "message": "기부"
-  },
   "labelType": {
     "message": "유형:"
   },
@@ -283,9 +280,6 @@
   },
   "titleCapture": {
     "message": "영역 캡처"
-  },
-  "titleKofi": {
-    "message": "Ko-fi에서 후원"
   },
   "bgWhite": {
     "message": "흰색"
@@ -634,5 +628,312 @@
   },
   "downloadZip": {
     "message": "ZIP으로 다운로드"
+  },
+  "editorPresets": {
+    "message": "편집기 프리셋"
+  },
+  "editorPresetsHint": {
+    "message": "편집기에 표시할 그룹을 선택하고 나만의 크기를 추가하세요."
+  },
+  "presetMine": {
+    "message": "내 프리셋"
+  },
+  "presetsEmpty": {
+    "message": "아직 직접 만든 프리셋이 없습니다."
+  },
+  "presetName": {
+    "message": "이름"
+  },
+  "presetWidth": {
+    "message": "너비"
+  },
+  "presetHeight": {
+    "message": "높이"
+  },
+  "presetAdd": {
+    "message": "프리셋 추가"
+  },
+  "presetRemove": {
+    "message": "$NAME$ 삭제",
+    "description": "Button label to delete a user preset; $NAME$ is its name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Banner"
+      }
+    }
+  },
+  "presetLimit": {
+    "message": "프리셋은 최대 $COUNT$개까지 저장할 수 있습니다.",
+    "description": "Shown when the user tries to add more presets than allowed",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "fnTemplate": {
+    "message": "템플릿"
+  },
+  "settingTemplate": {
+    "message": "이름 템플릿"
+  },
+  "settingTemplateHint": {
+    "message": "변수를 클릭하면 삽입됩니다. /로 폴더를 만들 수 있습니다."
+  },
+  "templatePreview": {
+    "message": "예: $NAME$",
+    "description": "Live example of the file name produced by the template; $NAME$ is that name",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "example.com/sunset.webp"
+      }
+    }
+  },
+  "tokName": {
+    "message": "원래 파일 이름"
+  },
+  "tokSite": {
+    "message": "페이지 사이트"
+  },
+  "tokDomain": {
+    "message": "이미지 서버"
+  },
+  "tokTitle": {
+    "message": "페이지 제목"
+  },
+  "tokIndex": {
+    "message": "일괄 처리 번호(001, 002…)"
+  },
+  "tokWidth": {
+    "message": "너비(픽셀)"
+  },
+  "tokHeight": {
+    "message": "높이(픽셀)"
+  },
+  "tokFormat": {
+    "message": "형식(jpg, webp…)"
+  },
+  "tokDate": {
+    "message": "오늘 날짜(2026-10-20)"
+  },
+  "tokTime": {
+    "message": "현재 시간(14-05-07)"
+  },
+  "autoScroll": {
+    "message": "모든 이미지 불러오기"
+  },
+  "autoScrollHint": {
+    "message": "지연 로딩 이미지가 나타나도록 페이지 끝까지 스크롤한 뒤 다시 검색합니다"
+  },
+  "autoScrollRunning": {
+    "message": "이미지 불러오는 중… $PCT$%",
+    "description": "Progress while the page is scrolled to load images; $PCT$ is a number from 0 to 100",
+    "placeholders": {
+      "pct": {
+        "content": "$1",
+        "example": "45"
+      }
+    }
+  },
+  "autoScrollStop": {
+    "message": "중지"
+  },
+  "autoScrollNothing": {
+    "message": "이 페이지에서 더 불러올 이미지가 없습니다"
+  },
+  "scopeLabel": {
+    "message": "검색 범위"
+  },
+  "scopeTab": {
+    "message": "이 탭"
+  },
+  "scopeWindow": {
+    "message": "모든 탭"
+  },
+  "labelTab": {
+    "message": "탭:"
+  },
+  "tabsOne": {
+    "message": "탭 $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "tabsOther": {
+    "message": "탭 $COUNT$개",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "tabsSkipped": {
+    "message": "읽지 못한 탭: $COUNT$개(브라우저 페이지 또는 절전 중인 탭)",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "captureFullPage": {
+    "message": "전체 페이지 캡처"
+  },
+  "cmdCaptureFullPage": {
+    "message": "전체 페이지 캡처"
+  },
+  "captureFullRunning": {
+    "message": "전체 페이지 캡처 중… 이 탭을 열어 두세요(Esc로 취소)"
+  },
+  "fullPageCut": {
+    "message": "페이지가 너무 길어 $PX$px에서 캡처가 끝납니다.",
+    "placeholders": {
+      "px": {
+        "content": "$1",
+        "example": "16384"
+      }
+    }
+  },
+  "annotate": {
+    "message": "주석"
+  },
+  "annotateHint": {
+    "message": "주석: 흐림, 모자이크, 상자, 화살표, 텍스트"
+  },
+  "toolPixelate": {
+    "message": "모자이크"
+  },
+  "toolBlur": {
+    "message": "흐림"
+  },
+  "toolBox": {
+    "message": "상자"
+  },
+  "toolArrow": {
+    "message": "화살표"
+  },
+  "toolText": {
+    "message": "텍스트"
+  },
+  "toolHighlight": {
+    "message": "강조"
+  },
+  "annotColor": {
+    "message": "색상"
+  },
+  "annotSize": {
+    "message": "두께"
+  },
+  "sizeFine": {
+    "message": "얇게"
+  },
+  "sizeMedium": {
+    "message": "보통"
+  },
+  "sizeThick": {
+    "message": "굵게"
+  },
+  "undo": {
+    "message": "실행 취소"
+  },
+  "redo": {
+    "message": "다시 실행"
+  },
+  "cancel": {
+    "message": "취소"
+  },
+  "textPlaceholder": {
+    "message": "입력 후 Enter"
+  },
+  "captureTabChanged": {
+    "message": "캡처 중단: 탭이 바뀌었습니다. 캡처하는 동안 탭을 앞에 두세요.",
+    "description": "Capture stopped because another tab came to the front or the page changed"
+  },
+  "fullPageIncomplete": {
+    "message": "페이지가 끝까지 스크롤되지 않았습니다. 캡처가 불완전할 수 있습니다.",
+    "description": "Full-page capture ended before the bottom of the page (it stopped scrolling or took too long)"
+  },
+  "toolRedact": {
+    "message": "단색으로 가리기",
+    "description": "Annotate tool that covers an area with solid opaque colour, to really hide information (unlike blur/pixelate)"
+  },
+  "bgChecker": {
+    "message": "체크무늬",
+    "description": "Background behind transparent images: checkerboard that follows the theme"
+  },
+  "copyLink": {
+    "message": "이미지 링크 복사",
+    "description": "Button: copy the web address (URL) of one image"
+  },
+  "linkCopied": {
+    "message": "링크를 복사했습니다",
+    "description": "Toast after copying one image link"
+  },
+  "qualityLossless": {
+    "message": "무손실",
+    "description": "Shown instead of the quality percentage when PNG (lossless, no quality setting) is chosen"
+  },
+  "viewerTitle": {
+    "message": "스크린샷",
+    "description": "Title of the page that shows a screenshot after capturing (save, copy, crop, annotate)"
+  },
+  "zoomFit": {
+    "message": "창에 맞추기",
+    "description": "Button: show the whole screenshot in the window (an overview)"
+  },
+  "zoomActual": {
+    "message": "실제 크기",
+    "description": "Button: show the screenshot at its actual size (one pixel per screen pixel)"
+  },
+  "backToCapture": {
+    "message": "캡처로 돌아가기",
+    "description": "Editor button: go back to the screenshot viewer it was opened from"
+  },
+  "cropAction": {
+    "message": "자르기",
+    "description": "Short button: open the screenshot in the crop & resize editor"
+  },
+  "supportTitle": {
+    "message": "ImageToolkit 후원하기",
+    "description": "Title of the dialog with donations and free ways to help (and the heart button)"
+  },
+  "supportShort": {
+    "message": "후원",
+    "description": "Short button in Settings > About that opens the support dialog"
+  },
+  "supportIntro": {
+    "message": "ImageToolkit은 광고와 추적이 없는 무료 오픈 소스입니다. 시간을 아껴 준다면 이렇게 도울 수 있어요.",
+    "description": "Support dialog: introduction"
+  },
+  "supportDonations": {
+    "message": "기부하기",
+    "description": "Support dialog: heading above the donation platforms"
+  },
+  "supportFree": {
+    "message": "무료로 돕기",
+    "description": "Support dialog: heading above the free ways to help"
+  },
+  "supportStar": {
+    "message": "GitHub에서 별 주기",
+    "description": "Support dialog: link to star the GitHub repository"
+  },
+  "supportIssue": {
+    "message": "버그 신고 또는 아이디어 제안",
+    "description": "Support dialog: link to open a GitHub issue"
+  },
+  "supportTranslate": {
+    "message": "번역 돕기",
+    "description": "Support dialog: link to the translation files"
+  },
+  "supportRate": {
+    "message": "Chrome 웹 스토어에서 평가하기",
+    "description": "Support dialog: link to rate the extension (only for Web Store installs)"
   }
 }
